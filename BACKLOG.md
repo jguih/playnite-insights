@@ -5,12 +5,11 @@
 - Sync Playnite library metadata
 - Sync Playnite library media files
 - Home page and main application layout
-
-## 🛠️ In Progress
-
 - Automatically create and update manifest.json that contains data about what the server currently have
 - Serve the manifest.json through the API
 - Include a content hash in the manifest for media files
+
+## 🛠️ In Progress
 
 ## 📌 To Do
 
