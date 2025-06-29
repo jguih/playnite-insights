@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { CURRENT_LOG_LEVEL, logDebug, logInfo } from '$lib/services/log';
+import { CURRENT_LOG_LEVEL, logInfo } from '$lib/services/log';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -16,8 +16,6 @@ logInfo(`LOG_LEVEL: ${CURRENT_LOG_LEVEL}`);
 logInfo(`DATA_DIR: ${process.env.DATA_DIR || '/app/data'}`);
 
 export const handle: Handle = async ({ event, resolve }) => {
-	logDebug(`Request: ${event.request.method} ${event.request.url}`);
-
 	// Apply CORS header for API routes
 	if (event.url.pathname.startsWith('/api')) {
 		// Required for CORS to work
