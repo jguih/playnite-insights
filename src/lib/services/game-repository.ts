@@ -8,7 +8,8 @@ const PLAYNITE_GAMES_FILE_DIR = playniteInsightsConfig.path.playniteGamesFile;
 const WATCH_FILE_INTERVAL = 1000; // Interval in milliseconds to check for changes
 let gamesList: Array<PlayniteGameMetadata> | null = null;
 
-const loadGamesList = async (): Promise<void> => {
+export const loadGamesList = async (): Promise<void> => {
+	logDebug('Reloading Playnite games list into memory...');
 	try {
 		const content = await readFile(PLAYNITE_GAMES_FILE_DIR, 'utf-8');
 		gamesList = (JSON.parse(content.toString()) as Array<PlayniteGameMetadata>) ?? [];
@@ -19,11 +20,9 @@ const loadGamesList = async (): Promise<void> => {
 	}
 };
 
-await loadGamesList();
-
 watchFile(PLAYNITE_GAMES_FILE_DIR, { interval: WATCH_FILE_INTERVAL }, async (curr, prev) => {
 	if (curr.mtime !== prev.mtime) {
-		logDebug('Playnite games file changed, reloading game list...');
+		logDebug('Detected change in Playnite games file');
 		await loadGamesList();
 	}
 });

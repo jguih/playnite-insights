@@ -1,6 +1,8 @@
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { CURRENT_LOG_LEVEL, logInfo } from '$lib/services/log';
+import { loadGamesList } from '$lib/services/game-repository';
+import { loadLibraryManifest } from '$lib/services/library-manifest';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -11,9 +13,12 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 		});
 	});
 
+logInfo(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 logInfo(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
 logInfo(`LOG_LEVEL: ${CURRENT_LOG_LEVEL}`);
 logInfo(`DATA_DIR: ${process.env.DATA_DIR || '/app/data'}`);
+await loadGamesList();
+await loadLibraryManifest();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Apply CORS header for API routes
