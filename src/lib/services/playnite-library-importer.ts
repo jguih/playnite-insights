@@ -11,6 +11,7 @@ import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
+import { writeLibraryManifest } from './library-manifest';
 
 const path = playniteInsightsConfig.path;
 
@@ -74,6 +75,10 @@ export const importGameListFromJsonBody = async (
 		};
 	}
 	logSuccess('Game list imported successfully');
+	const result = await writeLibraryManifest();
+	if (!result.isValid) {
+		return result;
+	}
 	return {
 		isValid: true,
 		message: 'Game list imported successfully',
@@ -123,6 +128,10 @@ export const importLibraryFiles = async (body: unknown | null): Promise<Validati
 		logDebug(`Temporary zip file removed: ${destPath}`);
 	} catch (error) {
 		logError(`Failed to remove temporary zip file: ${destPath}`, error as Error);
+	}
+	const result = await writeLibraryManifest();
+	if (!result.isValid) {
+		return result;
 	}
 	return {
 		isValid: true,
