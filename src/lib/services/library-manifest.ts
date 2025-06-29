@@ -20,8 +20,8 @@ const FILES_DIR = playniteInsightsConfig.path.filesDir;
 const WATCH_FILE_INTERVAL = 1000; // Interval in milliseconds to check for changes
 let manifest: PlayniteLibraryManifest | null = null;
 
-const loadLibraryManifest = async () => {
-	logDebug('Loading manifest.json file to memory...');
+export const loadLibraryManifest = async () => {
+	logDebug('Loading manifest.json file into memory...');
 	try {
 		const content = await readFile(MANIFEST_FILE, 'utf-8');
 		manifest = (JSON.parse(content.toString()) as PlayniteLibraryManifest) ?? null;
@@ -32,11 +32,9 @@ const loadLibraryManifest = async () => {
 	}
 };
 
-// Load on server startup
-loadLibraryManifest();
-
 watchFile(MANIFEST_FILE, { interval: WATCH_FILE_INTERVAL }, async (curr, prev) => {
 	if (curr.mtime !== prev.mtime) {
+		logDebug('Dected change in manifest.json file');
 		await loadLibraryManifest();
 	}
 });
