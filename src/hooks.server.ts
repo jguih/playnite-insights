@@ -13,6 +13,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 		});
 	});
 
+logInfo(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 logInfo(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
 logInfo(`LOG_LEVEL: ${CURRENT_LOG_LEVEL}`);
 logInfo(`DATA_DIR: ${process.env.DATA_DIR || '/app/data'}`);
