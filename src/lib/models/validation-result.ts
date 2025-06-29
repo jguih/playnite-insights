@@ -4,7 +4,7 @@ export type ValidationResult<T> =
 			message: string;
 			httpCode: number;
 			warnings?: string[];
-			data?: undefined;
+			data?: undefined | T;
 	  }
 	| {
 			isValid: true;
