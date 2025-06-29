@@ -27,7 +27,7 @@ const getDateTimeString = (): string => {
 };
 
 export const logError = (message: string, error?: Error): void => {
-	if (CURRENT_LOG_LEVEL < LOG_LEVELS.error) {
+	if (CURRENT_LOG_LEVEL > LOG_LEVELS.error) {
 		return;
 	}
 	console.error(`[${getDateTimeString()}][ERROR] ${message}`);
@@ -37,21 +37,21 @@ export const logError = (message: string, error?: Error): void => {
 };
 
 export const logDebug = (message: string): void => {
-	if (CURRENT_LOG_LEVEL < LOG_LEVELS.debug) {
+	if (CURRENT_LOG_LEVEL > LOG_LEVELS.debug) {
 		return;
 	}
 	console.debug(`[${getDateTimeString()}][DEBUG] ${message}`);
 };
 
 export const logSuccess = (message: string): void => {
-	if (CURRENT_LOG_LEVEL < LOG_LEVELS.success) {
+	if (CURRENT_LOG_LEVEL > LOG_LEVELS.success) {
 		return;
 	}
 	console.log(`[${getDateTimeString()}][SUCCESS] ${message}`);
 };
 
 export const logInfo = (message: string): void => {
-	if (CURRENT_LOG_LEVEL < LOG_LEVELS.info) {
+	if (CURRENT_LOG_LEVEL > LOG_LEVELS.info) {
 		return;
 	}
 	console.info(`[${getDateTimeString()}][INFO] ${message}`);
