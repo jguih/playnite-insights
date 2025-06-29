@@ -1,0 +1,19 @@
+FROM node:alpine
+
+# Install dependencies
+RUN apk add --no-cache su-exec
+
+ENV NODE_ENV=development
+ENV BODY_SIZE_LIMIT=256M
+ENV WORK_DIR=/app
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copy source files into application directory
+COPY . /app
+
+EXPOSE 3000
+
+ENTRYPOINT ["sh", "docker/init.sh", "npx", "vite", "dev", "--host"]

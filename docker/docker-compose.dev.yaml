@@ -1,0 +1,49 @@
+name: playnite-insights
+
+services:
+  app-dev:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.dev
+    container_name: playnite-insights-dev
+    environment:
+      PUID: 1000
+      PGID: 1000
+      LOG_LEVEL: 3 # debug
+      ORIGIN: https://app-dev.jguihomeserver.com.br/
+    develop:
+      watch:
+        - path: ../src
+          action: sync
+          target: /app/src
+          ignore:
+            - ../node_modules/
+        - path: ../
+          include:
+            - package.json
+          target: /app/package.json
+          action: rebuild
+        - path: ../
+          include:
+            - vite.config.ts
+          target: /app/vite.config.ts
+          action: rebuild
+        - path: ../
+          include:
+            - svelte.config.js
+          target: /app/svelte.config.js
+          action: rebuild
+        - path: ./
+          target: /app/docker
+          action: rebuild
+    volumes:
+      - playnite-insights-data:/app/data
+    networks:
+      - services-ipv6
+
+networks:
+  services-ipv6:
+    external: true
+
+volumes:
+  playnite-insights-data:

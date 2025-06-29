@@ -1,0 +1,24 @@
+name: playnite-insights
+
+services:
+  playnite-insights:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    container_name: playnite-insights
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      ORIGIN: https://playnite-insights.jguihomeserver.com.br
+    networks:
+      - services-ipv6
+    volumes:
+      - playnite-insights-data-prd:/app/data
+
+networks:
+  services-ipv6:
+    external: true
+
+volumes:
+  playnite-insights-data-prd:
