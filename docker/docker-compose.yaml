@@ -4,7 +4,7 @@ services:
   playnite-insights:
     build:
       context: ../
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./Dockerfile
     container_name: playnite-insights
     restart: unless-stopped
     environment:
