@@ -1,5 +1,5 @@
 export const LOG_LEVELS = {
-	none: -1,
+	none: 1000,
 	debug: 0,
 	info: 1,
 	success: 2,

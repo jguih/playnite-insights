@@ -20,7 +20,10 @@ describe('Game Importer', () => {
 		// Arrange
 		const mockParseGameListFromJsonBody = vi
 			.fn()
-			.mockReturnValue({ success: true, data: ['item1'] });
+			.mockReturnValue({
+				success: true,
+				data: { GameList: ['item1'], AddedItems: [], RemovedItems: [] }
+			});
 		const mockWriteGameListToFile = vi.fn().mockResolvedValue(false);
 		// Act
 		const result = await importGameListFromJsonBody(
