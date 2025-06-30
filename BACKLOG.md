@@ -11,10 +11,11 @@
 
 ## 🛠️ In Progress
 
+- Display basic game info in game page
+
 ## 📌 To Do
 
 - Save scroll prosition when navigating away from home page
-- Display basic game info in game page
 - Display game trailer in game page
 - Display related owned games in game page
 - Game filtering

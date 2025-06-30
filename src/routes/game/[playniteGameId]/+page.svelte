@@ -7,7 +7,7 @@
 
 	let { data } = $props();
 
-  const getImageUrl = (imagePath?: string | null) => {
+	const getImageUrl = (imagePath?: string | null) => {
 		if (!imagePath) return '';
 		const [gameId, imageFileName] = imagePath.split('\\');
 		return `/api/assets/image/${gameId}/${imageFileName}`;
@@ -15,25 +15,57 @@
 </script>
 
 {#snippet action()}
-  <MenuAnchor>
-    <ArrowLeft />
-  </MenuAnchor>
+	<MenuAnchor>
+		<ArrowLeft />
+	</MenuAnchor>
+{/snippet}
+
+{#snippet divider(className?: string)}
+	<hr class="border-background-2 {className}" />
+{/snippet}
+
+{#snippet infoSection(label: string, value: string)}
+	<div class="flex flex-row justify-between gap-4">
+		<p class="text-nowrap">{label}</p>
+		<p class="break-all">{value}</p>
+	</div>
+	{@render divider()}
 {/snippet}
 
 <AppLayoutWithoutBottomNav>
-  <Header action={action}>
-    <h1 class="text-lg font-semibold">{data.game?.Name}</h1>
-  </Header>
-  <Main>
-    {#if data.game}
-      <img
-            src={getImageUrl(data.game.BackgroundImage)}
-            alt={`${data.game.Name} Background`}
-            loading="lazy"
-            class="aspect-square h-8/9 w-full object-cover"
-          />
-    {:else}
-      <p class="text-red-500">Game not found.</p>
-    {/if}
-  </Main>
+	<Header {action} />
+	<Main>
+		{#if !data.game}
+			<p class="text-red-500">Game not found.</p>
+		{:else}
+			<h2 class="mb-4 text-2xl font-semibold">{data.game.Name}</h2>
+			<img
+				src={getImageUrl(data.game.BackgroundImage)}
+				alt={`${data.game.Name} icon`}
+				class="aspect-3/2 w-full"
+			/>
+			<div class="mt-4 mb-4 flex flex-col gap-1">
+				{#if data.game.ReleaseDate?.ReleaseDate}
+					{@render infoSection(
+						'Release date',
+						new Date(data.game.ReleaseDate?.ReleaseDate).toLocaleDateString() ?? ''
+					)}
+				{/if}
+				{@render infoSection('Install directory', data.game.InstallDirectory ?? '')}
+				{#if data.game.Added}
+					{@render infoSection('Added', new Date(data.game.Added).toLocaleDateString() ?? '')}
+				{/if}
+			</div>
+			<div>
+				{#if data.game.Description}
+					{@html data.game.Description}
+				{/if}
+			</div>
+			<img
+				src={getImageUrl(data.game.Icon)}
+				alt={`${data.game.Name} icon`}
+				class="aspect-square h-fit w-12 grow-0 mt-4"
+			/>
+		{/if}
+	</Main>
 </AppLayoutWithoutBottomNav>
