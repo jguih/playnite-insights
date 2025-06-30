@@ -9,15 +9,16 @@ services:
     environment:
       PUID: 1000
       PGID: 1000
-      LOG_LEVEL: 3 # debug
+      LOG_LEVEL: 0 # debug
       ORIGIN: https://app-dev.jguihomeserver.com.br/
     develop:
       watch:
-        - path: ../src
+        - path: ../
           action: sync
-          target: /app/src
+          target: /app
           ignore:
-            - ../node_modules/
+            - node_modules/
+            - data/
         - path: ../
           include:
             - package.json
