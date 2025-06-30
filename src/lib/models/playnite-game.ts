@@ -21,6 +21,7 @@ const publisherSchema = developerSchema;
 export const playniteGameSchema = z.object({
 	Id: z.string(),
 	Name: z.string().optional().nullable(),
+	Description: z.string().optional().nullable(),
 	Platforms: z.array(platformSchema).optional().nullable(),
 	Genres: z.array(genreSchema).optional().nullable(),
 	Developers: z.array(developerSchema).optional().nullable(),
@@ -37,7 +38,8 @@ export const playniteGameSchema = z.object({
 	InstallDirectory: z.string().optional().nullable(),
 	IsInstalled: z.boolean(),
 	BackgroundImage: z.string().optional().nullable(),
-	CoverImage: z.string().optional().nullable()
+	CoverImage: z.string().optional().nullable(),
+	Icon: z.string().optional().nullable()
 });
 
 export const playniteGameListSchema = z.array(playniteGameSchema);

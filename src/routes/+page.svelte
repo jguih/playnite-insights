@@ -38,7 +38,7 @@
     </div>
     <div class="mb-6 flex flex-row flex-wrap gap-4 justify-center">
       {#each gameList as game}
-        <a class="m-0 p-0 h-58 w-34 sm:h-66 sm:w-42 border-4 border-solid border-transparent hover:border-primary-500 active:border-primary-500 focus:border-primary-500 outline-0" href={`/game/${game.Id}`}>
+        <a class="m-0 p-0 aspect-[1/1.6] max-w-40 sm:max-w-52 border-4 border-solid border-transparent hover:border-primary-500 active:border-primary-500 focus:border-primary-500 outline-0 shadow-md" href={`/game/${game.Id}`}>
           <img
             src={getCoverImageUrl(game)}
             alt={`${game.Name} cover image`}

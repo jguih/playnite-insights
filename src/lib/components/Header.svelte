@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { ArrowLeft, Menu } from "@lucide/svelte";
 	import type { Snippet } from "svelte";
-	import MenuAnchor from "./MenuAnchor.svelte";
 
-  let { children, action } : {children?: Snippet, action?: Snippet} = $props();
+  let { children, action, title } : {children?: Snippet, action?: Snippet, title?: Snippet} = $props();
 </script>
 
 <div class="bg-background-1 shadow-lg z-1000 p-4 flex flex-row items-center justify-between">
@@ -11,9 +9,15 @@
     {#if action}
       {@render action()}
     {/if}
+    {#if title}
+      {@render title()}
+    {:else}
+      <h1 class="text-md">Playnite Insights</h1>
+    {/if}
+  </div>
+  <div>
     {#if children}
       {@render children()}
     {/if}
   </div>
-  <div></div>
 </div>
