@@ -1,15 +1,7 @@
-export type ValidationResult<T> =
-	| {
-			isValid: false;
-			message: string;
-			httpCode: number;
-			warnings?: string[];
-			data?: undefined | T;
-	  }
-	| {
-			isValid: true;
-			message?: string;
-			httpCode?: number;
-			warnings?: string[];
-			data: T;
-	  };
+export type ValidationResult<T = undefined> = {
+	isValid: boolean;
+	message: string;
+	httpCode: number;
+	warnings?: string[];
+	data?: null | T;
+};
