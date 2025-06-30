@@ -17,17 +17,17 @@ type PlayniteLibraryManifest = {
 const MANIFEST_FILE = playniteInsightsConfig.path.libraryManifestFile;
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
 const CONTENT_HASH_FILE_NAME = 'contentHash.txt';
-let manifest: PlayniteLibraryManifest | null = null;
 
-export const loadLibraryManifest = async () => {
-	logDebug('Loading manifest.json file into memory...');
+const getLibraryManifestFromFile = async () => {
 	try {
+		logDebug(`Reading library manifest JSON file at ${MANIFEST_FILE}`);
 		const content = await readFile(MANIFEST_FILE, 'utf-8');
-		manifest = (JSON.parse(content.toString()) as PlayniteLibraryManifest) ?? null;
-		logSuccess('Loaded manifest.json to memory sucessfully.');
+		const asJson = JSON.parse(content.toString()) as PlayniteLibraryManifest;
+		logDebug(`Read manifest JSON file succesfully, returning manifest`);
+		return asJson ?? null;
 	} catch (error) {
 		logError('Failed to load manifest.json or it doesnt exist', error as Error);
-		manifest = null;
+		return null;
 	}
 };
 
@@ -59,7 +59,6 @@ export const writeLibraryManifest = async (
 		};
 		await fsWritefile(MANIFEST_FILE, JSON.stringify(manifest, null, 2));
 		logSuccess('manifest.json written sucessfully');
-		await loadLibraryManifest();
 		return {
 			isValid: true,
 			message: 'manifest.json written sucessfully',
@@ -76,6 +75,6 @@ export const writeLibraryManifest = async (
 	}
 };
 
-export const getPlayniteLibraryManifest = () => {
-	return manifest;
+export const getPlayniteLibraryManifest = async () => {
+	return await getLibraryManifestFromFile();
 };

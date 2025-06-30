@@ -12,7 +12,6 @@ import { Readable } from 'stream';
 import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import { writeLibraryManifest } from './library-manifest';
-import { loadGamesList } from './game-repository';
 import { z } from 'zod';
 
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
@@ -43,7 +42,6 @@ const _writeGameListToFile = async (
 		logDebug(`Moving ${tmpFile} to ${PLAYNITE_GAMES_FILE}`);
 		await fs.rename(tmpFile, PLAYNITE_GAMES_FILE);
 		logSuccess(`Game list written to ${PLAYNITE_GAMES_FILE} successfully`);
-		await loadGamesList();
 	} catch (error) {
 		logError('Error writing game list to file', error as Error);
 		return false;
