@@ -6,11 +6,23 @@
 	import { Home, LayoutDashboard, Menu, Settings } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import MenuAnchor from '$lib/components/MenuAnchor.svelte';
+	import { onMount } from 'svelte';
+	import { gameListStore } from '$lib/stores/home-game-store.svelte';
 
 	let { data }: PageProps = $props();
-	const gameList = data.games.sort((a, b) =>
+
+	const sortedGameList = $derived(data.games.sort((a, b) =>
 		a.IsInstalled === b.IsInstalled ? 0 : a.IsInstalled ? -1 : 1
-	);
+	));
+
+  onMount(() => {
+    if (gameListStore.games.length === 0) {
+      gameListStore.games = sortedGameList;
+    }
+  });
+
+  const gameList = $derived(gameListStore.games);
+
 	const getCoverImageUrl = (game: typeof data.games[number]) => {
 		if (!game.CoverImage) return '';
 		const [gameId, imageFileName] = game.CoverImage.split('\\');
