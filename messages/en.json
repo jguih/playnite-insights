@@ -7,5 +7,11 @@
   "home_label_items_per_page": "Items per page",
   "game_info_release_date": "Release date",
   "game_info_install_directory": "Install directory",
-  "game_info_added": "Added"
+  "game_info_added": "Added",
+  "game_info_playtime": "Playtime",
+  "game_playtime_in_hour": "{hours} hours",
+  "game_info_developers": "Developers",
+  "game_info_installed": "Installed",
+  "yes": "Yes",
+  "no": "No"
 }
