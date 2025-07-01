@@ -3,6 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Main from '$lib/components/Main.svelte';
 	import MenuButton from '$lib/components/MenuButton.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 	import { ArrowLeft } from '@lucide/svelte';
 
 	let { data } = $props();
@@ -47,13 +48,13 @@
 			<div class="mt-4 mb-4 flex flex-col gap-1">
 				{#if data.game.ReleaseDate?.ReleaseDate}
 					{@render infoSection(
-						'Release date',
+						m.game_info_release_date(),
 						new Date(data.game.ReleaseDate?.ReleaseDate).toLocaleDateString() ?? ''
 					)}
 				{/if}
-				{@render infoSection('Install directory', data.game.InstallDirectory ?? '')}
+				{@render infoSection(m.game_info_install_directory(), data.game.InstallDirectory ?? '')}
 				{#if data.game.Added}
-					{@render infoSection('Added', new Date(data.game.Added).toLocaleDateString() ?? '')}
+					{@render infoSection(m.game_info_added(), new Date(data.game.Added).toLocaleDateString() ?? '')}
 				{/if}
 			</div>
 			<div>

@@ -1,4 +1,11 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from en!"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hello, {name} from en!",
+  "home_title": "My Games",
+  "home_showing_games_counter": "Showing {currentCount} games of {totalCount}",
+  "home_no_games_found": "No games found",
+  "home_label_items_per_page": "Items per page",
+  "game_info_release_date": "Release date",
+  "game_info_install_directory": "Install directory",
+  "game_info_added": "Added"
 }

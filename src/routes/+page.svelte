@@ -11,6 +11,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MenuButton from '$lib/components/MenuButton.svelte';
+  import { m } from '$lib/paraglide/messages.js';
+	import { onMount } from 'svelte';
+	import { setLocale } from '$lib/paraglide/runtime';
 
 	let { data }: PageProps = $props();
 	let currentPage = $derived(data.page);
@@ -62,19 +65,19 @@
 <AppLayout>
 	<Header {action} />
 	<Main bind:main={main}>
-		<h1 class="text-lg">My Games</h1>
+		<h1 class="text-lg">{m.home_title()}</h1>
 		<div class="mb-2">
 			{#if gameList.length === 0}
-				<p class="text-sm text-neutral-300/60">No games found.</p>
+				<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
 			{/if}
 			{#if gameList.length > 0}
 				<p class="text-sm text-neutral-300/60">
-					Showing {gameList.length} games of {totalGamesCount}
+					{m.home_showing_games_counter({currentCount: gameList.length, totalCount: totalGamesCount})}
 				</p>
 			{/if}
 		</div>
 		<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-			Items per page
+			{m.home_label_items_per_page()}
 			<Select onchange={handleOnPageSizeChange} bind:value={pageSize} id="page_size">
 				{#each [4, 25, 50, 75, 100] as option}
 					<option value={option}>{option}</option>

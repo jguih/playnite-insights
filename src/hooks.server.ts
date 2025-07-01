@@ -32,8 +32,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	const response = await handleParaglide({ event, resolve });
+
 	if (event.url.pathname.startsWith('/api')) {
 		response.headers.append('Access-Control-Allow-Origin', `*`);
 	}
+
 	return response;
 };
