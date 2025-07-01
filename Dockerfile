@@ -23,10 +23,12 @@ WORKDIR /app
 COPY --chown=playnite-insights:playnite-insights --from=build /app/build ./build
 COPY --chown=playnite-insights:playnite-insights --from=build /app/package.json ./package.json
 COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules ./node_modules
-COPY --chown=playnite-insights:playnite-insights --from=build /app/docker/init.sh ./docker/init.sh 
+
+RUN mkdir -p ./data/files ./data/tmp ./data/logs
+RUN chown playnite-insights:playnite-insights ./data ./data/files ./data/tmp ./data/logs
 
 EXPOSE 3000
 
 USER playnite-insights
 
-ENTRYPOINT ["sh", "docker/init.sh", "node", "build"]
+ENTRYPOINT ["node", "build"]
