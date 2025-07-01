@@ -2,7 +2,7 @@
 	import AppLayoutWithoutBottomNav from '$lib/components/AppLayoutWithoutBottomNav.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Main from '$lib/components/Main.svelte';
-	import MenuAnchor from '$lib/components/MenuAnchor.svelte';
+	import MenuButton from '$lib/components/MenuButton.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
 
 	let { data } = $props();
@@ -15,9 +15,9 @@
 </script>
 
 {#snippet action()}
-	<MenuAnchor>
+	<MenuButton onclick={() => history.back()}>
 		<ArrowLeft />
-	</MenuAnchor>
+	</MenuButton>
 {/snippet}
 
 {#snippet divider(className?: string)}
@@ -64,7 +64,7 @@
 			<img
 				src={getImageUrl(data.game.Icon)}
 				alt={`${data.game.Name} icon`}
-				class="aspect-square h-fit w-12 grow-0 mt-4"
+				class="mt-4 aspect-square h-fit w-12 grow-0"
 			/>
 		{/if}
 	</Main>
