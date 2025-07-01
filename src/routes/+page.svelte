@@ -79,7 +79,7 @@
 		<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 			{m.home_label_items_per_page()}
 			<Select onchange={handleOnPageSizeChange} bind:value={pageSize} id="page_size">
-				{#each [4, 25, 50, 75, 100] as option}
+				{#each [25, 50, 75, 100] as option}
 					<option value={option}>{option}</option>
 				{/each}
 			</Select>
@@ -94,9 +94,9 @@
 							src={getCoverImageUrl(game)}
 							alt={`${game.Name} cover image`}
 							loading="lazy"
-							class="aspect-square h-8/9 w-full object-cover"
+							class="h-7/8 w-full object-cover"
 						/>
-						<div class="bg-background-1 bottom-0 h-1/9 w-full p-1">
+						<div class="bg-background-1 bottom-0 h-1/8 w-full p-1">
 							<p class="truncate text-center text-sm text-white">{game.Name}</p>
 						</div>
 					</a>
