@@ -14,10 +14,11 @@ FROM node:alpine AS run
 # Create user and group
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 
+WORKDIR /app
+ENV WORK_DIR=/app
 ENV NODE_ENV=production
 ENV BODY_SIZE_LIMIT=5G
-ENV WORK_DIR=/app
-WORKDIR /app
+ENV APP_NAME='Playnite Insights'
 
 WORKDIR /app
 COPY --chown=playnite-insights:playnite-insights --from=build /app/build ./build

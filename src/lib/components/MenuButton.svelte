@@ -7,7 +7,7 @@
 	let classes = $derived(
 		buildClassNames(
 			{ ['bg-primary-500 hover:bg-primary-700 hover:border-primary-800']: props.selected },
-			`hover:text-primary-500 disabled:hover:border-primary-950 disabled:hover:text-primary-950 hover:border-primary-500 active:border-primary-500 focus:border-primary-500 cursor-pointer border-2 border-solid border-transparent p-2 outline-0 disabled:text-neutral-500 ${props?.class}`
+			`hover:text-primary-500 disabled:hover:border-primary-950 disabled:hover:text-primary-950 hover:border-primary-500 active:border-primary-500 focus:border-primary-500 cursor-pointer border-2 border-solid border-transparent p-2 outline-0 disabled:text-neutral-500 ${props?.class ?? ''}`
 		)
 	);
 </script>

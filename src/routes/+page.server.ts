@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	}
 
 	if (!params.has('page_size')) {
-		params.set('page_size', '100');
+		params.set('page_size', '50');
 		changed = true;
 	}
 
