@@ -11,9 +11,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MenuButton from '$lib/components/MenuButton.svelte';
-  import { m } from '$lib/paraglide/messages.js';
-	import { onMount } from 'svelte';
-	import { setLocale } from '$lib/paraglide/runtime';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { data }: PageProps = $props();
 	let currentPage = $derived(data.page);
@@ -21,7 +19,7 @@
 	let totalGamesCount = $derived(data.totalGamesCount);
 	let pageSize = $derived(Number(page.url.searchParams.get('page_size')));
 	let gameList = $derived(data.games);
-  let main: HTMLElement | undefined = $state();
+	let main: HTMLElement | undefined = $state();
 
 	const getCoverImageUrl = (game: (typeof data.games)[number]) => {
 		if (!game.CoverImage) return '';
@@ -42,16 +40,16 @@
 		params.set('page_size', value);
 		params.set('page', '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
-    if(main) {
-      main.scrollTop = 0;
-    }
+		if (main) {
+			main.scrollTop = 0;
+		}
 		goto(newUrl, { replaceState: true });
 	};
 
 	const handleOnPageChange = (page: number) => {
-    if(main) {
-      main.scrollTop = 0;
-    }
+		if (main) {
+			main.scrollTop = 0;
+		}
 		setSearchParams(`page`, String(page));
 	};
 </script>
@@ -64,7 +62,7 @@
 
 <AppLayout>
 	<Header {action} />
-	<Main bind:main={main}>
+	<Main bind:main>
 		<h1 class="text-lg">{m.home_title()}</h1>
 		<div class="mb-2">
 			{#if gameList.length === 0}
@@ -72,7 +70,10 @@
 			{/if}
 			{#if gameList.length > 0}
 				<p class="text-sm text-neutral-300/60">
-					{m.home_showing_games_counter({currentCount: gameList.length, totalCount: totalGamesCount})}
+					{m.home_showing_games_counter({
+						currentCount: gameList.length,
+						totalCount: totalGamesCount
+					})}
 				</p>
 			{/if}
 		</div>

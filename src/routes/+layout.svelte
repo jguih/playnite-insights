@@ -1,11 +1,17 @@
 <script lang="ts">
-	import AppLayout from '$lib/components/AppLayout.svelte';
-	import Header from '$lib/components/Header.svelte';
 	import type { Snippet } from 'svelte';
 	import '../app.css';
-	import BottomNav from '$lib/components/BottomNav.svelte';
+	import type { LayoutProps } from './$types';
 
-	let { children } : { children: Snippet }= $props();
+	let { children, data }: { children: Snippet } & LayoutProps = $props();
+	$inspect(data);
+	let appName = $derived(data.appName);
 </script>
+
+<svelte:head>
+	<title>{appName}</title>
+	<meta name="application-name" content={appName} />
+	<meta name="apple-mobile-web-app-title" content={appName} />
+</svelte:head>
 
 {@render children()}

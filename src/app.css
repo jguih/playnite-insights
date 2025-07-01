@@ -2,16 +2,6 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  --color-playnite-blue: #1976d2;
-  --color-playnite-light: #2196f3;
-  --color-playnite-dark: #263238;
-  --color-playnite-gray: #37474f;
-  --color-playnite-black: #1a2327;
-  --color-playnite-white: #eceff1;
-  --color-playnite-orange: #ff9800;
-  --color-playnite-green: #43a047;
-  --color-playnite-red: #e53935;
-
   --color-primary-50: hsl(198, 100%, 97%);
   --color-primary-100: hsl(198, 100%, 94%);
   --color-primary-200: hsl(198, 100%, 87%);
