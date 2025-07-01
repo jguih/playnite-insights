@@ -11,7 +11,7 @@
 			{
 				['cursor-not-allowed text-neutral-500 hover:border-primary-950 hover:text-primary-950']:
 					disabled,
-				['bg-primary-900']: selected
+				['text-primary-500']: selected
 			},
 			`hover:text-primary-500 hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-2 border-solid border-transparent p-2 outline-0 cursor-pointer ${props.class}`
 		)

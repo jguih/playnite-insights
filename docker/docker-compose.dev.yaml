@@ -7,8 +7,6 @@ services:
       dockerfile: ./docker/Dockerfile.dev
     container_name: playnite-insights-dev
     environment:
-      PUID: 1000
-      PGID: 1000
       LOG_LEVEL: 0 # debug
       ORIGIN: https://app-dev.jguihomeserver.com.br/
     develop:

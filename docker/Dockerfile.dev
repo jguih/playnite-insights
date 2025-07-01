@@ -1,19 +1,26 @@
-FROM node:alpine
+FROM node:alpine AS build
 
-# Install dependencies
-RUN apk add --no-cache su-exec
-
-ENV NODE_ENV=development
-ENV BODY_SIZE_LIMIT=256M
-ENV WORK_DIR=/app
 WORKDIR /app
-
 COPY package.json package-lock.json ./
 RUN npm install
 
+FROM node:alpine AS run
+
+# Create user and group
+RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
+
+WORKDIR /app
+ENV WORK_DIR=/app
+ENV NODE_ENV=development
+ENV BODY_SIZE_LIMIT=256M
+
+COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules .
+
 # Copy source files into application directory
-COPY . /app
+COPY --chown=playnite-insights:playnite-insights . /app
 
 EXPOSE 3000
+
+USER playnite-insights
 
 ENTRYPOINT ["sh", "docker/init.sh", "npx", "vite", "dev", "--host"]
