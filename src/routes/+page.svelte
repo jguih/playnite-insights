@@ -17,10 +17,8 @@
 	let totalPages = $derived(data.totalPages);
 	let totalGamesCount = $derived(data.totalGamesCount);
 	let pageSize = $derived(Number(page.url.searchParams.get('page_size')));
-	let gameList = $derived(
-		data.games.sort((a, b) => (a.IsInstalled === b.IsInstalled ? 0 : a.IsInstalled ? -1 : 1))
-	);
-	$inspect(pageSize);
+	let gameList = $derived(data.games);
+  let main: HTMLElement | undefined = $state();
 
 	const getCoverImageUrl = (game: (typeof data.games)[number]) => {
 		if (!game.CoverImage) return '';
@@ -41,10 +39,16 @@
 		params.set('page_size', value);
 		params.set('page', '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
+    if(main) {
+      main.scrollTop = 0;
+    }
 		goto(newUrl, { replaceState: true });
 	};
 
 	const handleOnPageChange = (page: number) => {
+    if(main) {
+      main.scrollTop = 0;
+    }
 		setSearchParams(`page`, String(page));
 	};
 </script>
@@ -57,7 +61,7 @@
 
 <AppLayout>
 	<Header {action} />
-	<Main>
+	<Main bind:main={main}>
 		<h1 class="text-lg">My Games</h1>
 		<div class="mb-2">
 			{#if gameList.length === 0}
@@ -72,7 +76,7 @@
 		<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 			Items per page
 			<Select onchange={handleOnPageSizeChange} bind:value={pageSize} id="page_size">
-				{#each [25, 50, 75, 100] as option}
+				{#each [4, 25, 50, 75, 100] as option}
 					<option value={option}>{option}</option>
 				{/each}
 			</Select>
