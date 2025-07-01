@@ -3,15 +3,49 @@
 	import Header from '$lib/components/Header.svelte';
 	import Main from '$lib/components/Main.svelte';
 	import MenuButton from '$lib/components/MenuButton.svelte';
-	import { ArrowLeft } from '@lucide/svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import { ArrowLeft, Check } from '@lucide/svelte';
 
 	let { data } = $props();
+	const game = $derived(data.game);
 
-	const getImageUrl = (imagePath?: string | null) => {
+	const getImageUrl = $derived((imagePath?: string | null) => {
 		if (!imagePath) return '';
 		const [gameId, imageFileName] = imagePath.split('\\');
 		return `/api/assets/image/${gameId}/${imageFileName}`;
-	};
+	});
+
+	const getDevelopers = $derived((): string => {
+		return game?.Developers?.map((dev) => dev.Name).join(', ') ?? '';
+	});
+
+	const getPlaytime = $derived((): string => {
+		if (game?.Playtime) {
+			return (game.Playtime / 3600).toFixed(1);
+		}
+		return '0';
+	});
+
+	const getAdded = $derived((): string => {
+		if (game?.Added) {
+			return new Date(game.Added).toLocaleDateString();
+		}
+		return '';
+	});
+
+	const getReleaseDate = $derived((): string => {
+		if (game?.ReleaseDate?.ReleaseDate) {
+			return new Date(game.ReleaseDate.ReleaseDate).toLocaleDateString();
+		}
+		return '';
+	});
+
+	const getInstalled = $derived((): string => {
+		if (game?.IsInstalled) {
+			return m.yes();
+		}
+		return m.no();
+	});
 </script>
 
 {#snippet action()}
@@ -24,7 +58,7 @@
 	<hr class="border-background-2 {className}" />
 {/snippet}
 
-{#snippet infoSection(label: string, value: string)}
+{#snippet infoSection(label: string, value: string | number)}
 	<div class="flex flex-row justify-between gap-4">
 		<p class="text-nowrap">{label}</p>
 		<p class="break-all">{value}</p>
@@ -45,16 +79,15 @@
 				class="aspect-3/2 w-full"
 			/>
 			<div class="mt-4 mb-4 flex flex-col gap-1">
-				{#if data.game.ReleaseDate?.ReleaseDate}
-					{@render infoSection(
-						'Release date',
-						new Date(data.game.ReleaseDate?.ReleaseDate).toLocaleDateString() ?? ''
-					)}
-				{/if}
-				{@render infoSection('Install directory', data.game.InstallDirectory ?? '')}
-				{#if data.game.Added}
-					{@render infoSection('Added', new Date(data.game.Added).toLocaleDateString() ?? '')}
-				{/if}
+				{@render infoSection(m.game_info_release_date(), getReleaseDate())}
+				{@render infoSection(m.game_info_added(), getAdded())}
+				{@render infoSection(
+					m.game_info_playtime(),
+					m.game_playtime_in_hour({ hours: getPlaytime() })
+				)}
+				{@render infoSection(m.game_info_developers(), getDevelopers())}
+				{@render infoSection(m.game_info_install_directory(), data.game.InstallDirectory ?? '')}
+				{@render infoSection(m.game_info_installed(), getInstalled())}
 			</div>
 			<div>
 				{#if data.game.Description}

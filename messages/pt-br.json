@@ -1,4 +1,17 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from pt-br!"
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello_world": "Hello, {name} from pt-br!",
+  "home_title": "Meus jogos",
+  "home_showing_games_counter": "Mostrando {currentCount} jogos de {totalCount}",
+  "home_no_games_found": "Nenhum jogo encontrado",
+  "home_label_items_per_page": "Itens por página",
+  "game_info_release_date": "Lançamento",
+  "game_info_install_directory": "Diretório de instalação",
+  "game_info_added": "Adicionado",
+  "game_info_playtime": "Horas Jogadas",
+  "game_playtime_in_hour": "{hours} horas",
+  "game_info_developers": "Desenvolvedores",
+  "game_info_installed": "Instalado",
+  "yes": "Sim",
+  "no": "Não"
 }

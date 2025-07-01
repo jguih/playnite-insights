@@ -11,16 +11,17 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import MenuButton from '$lib/components/MenuButton.svelte';
+  import { m } from '$lib/paraglide/messages.js';
+	import { onMount } from 'svelte';
+	import { setLocale } from '$lib/paraglide/runtime';
 
 	let { data }: PageProps = $props();
 	let currentPage = $derived(data.page);
 	let totalPages = $derived(data.totalPages);
 	let totalGamesCount = $derived(data.totalGamesCount);
 	let pageSize = $derived(Number(page.url.searchParams.get('page_size')));
-	let gameList = $derived(
-		data.games.sort((a, b) => (a.IsInstalled === b.IsInstalled ? 0 : a.IsInstalled ? -1 : 1))
-	);
-	$inspect(pageSize);
+	let gameList = $derived(data.games);
+  let main: HTMLElement | undefined = $state();
 
 	const getCoverImageUrl = (game: (typeof data.games)[number]) => {
 		if (!game.CoverImage) return '';
@@ -41,10 +42,16 @@
 		params.set('page_size', value);
 		params.set('page', '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
+    if(main) {
+      main.scrollTop = 0;
+    }
 		goto(newUrl, { replaceState: true });
 	};
 
 	const handleOnPageChange = (page: number) => {
+    if(main) {
+      main.scrollTop = 0;
+    }
 		setSearchParams(`page`, String(page));
 	};
 </script>
@@ -57,20 +64,20 @@
 
 <AppLayout>
 	<Header {action} />
-	<Main>
-		<h1 class="text-lg">My Games</h1>
+	<Main bind:main={main}>
+		<h1 class="text-lg">{m.home_title()}</h1>
 		<div class="mb-2">
 			{#if gameList.length === 0}
-				<p class="text-sm text-neutral-300/60">No games found.</p>
+				<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
 			{/if}
 			{#if gameList.length > 0}
 				<p class="text-sm text-neutral-300/60">
-					Showing {gameList.length} games of {totalGamesCount}
+					{m.home_showing_games_counter({currentCount: gameList.length, totalCount: totalGamesCount})}
 				</p>
 			{/if}
 		</div>
 		<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-			Items per page
+			{m.home_label_items_per_page()}
 			<Select onchange={handleOnPageSizeChange} bind:value={pageSize} id="page_size">
 				{#each [25, 50, 75, 100] as option}
 					<option value={option}>{option}</option>
@@ -87,9 +94,9 @@
 							src={getCoverImageUrl(game)}
 							alt={`${game.Name} cover image`}
 							loading="lazy"
-							class="aspect-square h-8/9 w-full object-cover"
+							class="h-7/8 w-full object-cover"
 						/>
-						<div class="bg-background-1 bottom-0 h-1/9 w-full p-1">
+						<div class="bg-background-1 bottom-0 h-1/8 w-full p-1">
 							<p class="truncate text-center text-sm text-white">{game.Name}</p>
 						</div>
 					</a>

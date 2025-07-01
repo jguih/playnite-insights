@@ -26,7 +26,10 @@ export const load: PageServerLoad = async ({ url }) => {
 	const start = (page - 1) * page_size;
 	const end = start + page_size;
 	const paginated = games.slice(start, end);
+	const sorted = paginated.sort((a, b) =>
+		a.IsInstalled === b.IsInstalled ? 0 : a.IsInstalled ? -1 : 1
+	);
 	const totalPages = Math.ceil(games.length / page_size);
 
-	return { games: paginated, page, totalPages, totalGamesCount: games.length };
+	return { games: sorted, page, totalPages, totalGamesCount: games.length };
 };

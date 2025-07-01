@@ -2,14 +2,12 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { mainScrollPosition } from '$lib/stores/main-scroll-position.svelte';
-	import { onDestroy, onMount, type Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
-	let { children }: { children?: Snippet } = $props();
-	let main: HTMLElement;
+	let { children, main = $bindable<HTMLElement>() }: { children?: Snippet, main?: ReturnType<typeof $bindable<HTMLElement>> } = $props();
 	const pathname = $derived(page.url.pathname);
 
 	onMount(() => {
-		$inspect(mainScrollPosition);
 		// Restore previous scroll position
 		if (main && mainScrollPosition[pathname]) {
 			requestAnimationFrame(() => {
