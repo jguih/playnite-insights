@@ -5,6 +5,7 @@
 	import Home from '$lib/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/components/BottomNav.svelte';
+	import GamesOwnedOverTime from '$lib/components/charts/GamesOwnedOverTime.svelte';
 	import Divider from '$lib/components/Divider.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Main from '$lib/components/Main.svelte';
@@ -60,6 +61,9 @@
 		<div class="bg-background-1 h-3 w-full rounded-sm">
 			<div class="bg-primary-500 h-3 rounded-sm" style="width: {totalPlayedPercent}%"></div>
 		</div>
+		<Divider class="my-4" />
+		<GamesOwnedOverTime />
+		<Divider class="my-4" />
 	</Main>
 	<BottomNav>
 		<Home />

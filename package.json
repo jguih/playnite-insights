@@ -52,6 +52,7 @@
     "@inlang/paraglide-js": "^2.0.0",
     "@lucide/svelte": "^0.525.0",
     "adm-zip": "^0.5.16",
+    "echarts": "^5.6.0",
     "svelte-tiny-virtual-list": "^2.1.2"
   }
 }

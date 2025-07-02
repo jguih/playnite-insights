@@ -19,6 +19,18 @@
   "dash_total_playtime_value": "{time} hour",
   "dash_playtime_summary_out_of": "out of",
   "dash_playtime_summary_games_played": "games played",
+  "month_january": "January",
+  "month_february": "February",
+  "month_march": "March",
+  "month_april": "April",
+  "month_may": "May",
+  "month_june": "June",
+  "month_july": "July",
+  "month_august": "August",
+  "month_september": "September",
+  "month_october": "October",
+  "month_november": "November",
+  "month_december": "December",
   "yes": "Yes",
   "no": "No"
 }

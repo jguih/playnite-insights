@@ -4,7 +4,10 @@
 	import { mainScrollPosition } from '$lib/stores/main-scroll-position.svelte';
 	import { onMount, type Snippet } from 'svelte';
 
-	let { children, main = $bindable<HTMLElement>() }: { children?: Snippet, main?: ReturnType<typeof $bindable<HTMLElement>> } = $props();
+	let {
+		children,
+		main = $bindable<HTMLElement>()
+	}: { children?: Snippet; main?: ReturnType<typeof $bindable<HTMLElement>> } = $props();
 	const pathname = $derived(page.url.pathname);
 
 	onMount(() => {
@@ -25,7 +28,7 @@
 	});
 </script>
 
-<main class="h-full overflow-auto p-4 pb-12" bind:this={main}>
+<main class="h-full overflow-x-hidden overflow-y-scroll p-4 pb-12" bind:this={main}>
 	{#if children}
 		{@render children()}
 	{/if}
