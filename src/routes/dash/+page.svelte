@@ -8,6 +8,7 @@
 	import Divider from '$lib/components/Divider.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Main from '$lib/components/Main.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const { data } = $props();
 	let gamesList = $derived(data.games);
@@ -38,10 +39,13 @@
 	<Main>
 		<h1 class="text-2xl">Overview</h1>
 		<Divider class="mb-4 border-2" />
-		{@render infoSection('Games in library', gamesList.length)}
-		{@render infoSection('Installed', installed)}
-		{@render infoSection('Not Installed', notInstalled)}
-		{@render infoSection('Total Playtime', `${totalPlayTime} hrs`)}
+		{@render infoSection(m.dash_games_in_library(), gamesList.length)}
+		{@render infoSection(m.dash_intalled(), installed)}
+		{@render infoSection(m.dash_not_installed(), notInstalled)}
+		{@render infoSection(
+			m.dash_total_playtime(),
+			m.dash_total_playtime_value({ time: totalPlayTime })
+		)}
 	</Main>
 	<BottomNav>
 		<Home />

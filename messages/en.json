@@ -12,6 +12,11 @@
   "game_playtime_in_hour": "{hours} hours",
   "game_info_developers": "Developers",
   "game_info_installed": "Installed",
+  "dash_games_in_library": "Games in library",
+  "dash_intalled": "Installed",
+  "dash_not_installed": "Not installed",
+  "dash_total_playtime": "Total playtime",
+  "dash_total_playtime_value": "{time} hour",
   "yes": "Yes",
   "no": "No"
 }

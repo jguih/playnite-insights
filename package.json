@@ -4,7 +4,9 @@
   "version": "1.0.1",
   "type": "module",
   "scripts": {
-    "dev": "docker compose -f docker/docker-compose.dev.yaml up --watch --force-recreate --build",
+    "dev": "npm run dev:down && docker compose -f docker/docker-compose.dev.yaml up --watch --force-recreate --build",
+    "dev:up": "docker compose -f docker/docker-compose.dev.yaml up -d --force-recreate --build",
+    "dev:down": "docker compose -f docker/docker-compose.dev.yaml down",
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
