@@ -27,6 +27,8 @@ COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules 
 
 RUN mkdir -p ./data/files ./data/tmp ./data/logs
 RUN chown playnite-insights:playnite-insights ./data ./data/files ./data/tmp ./data/logs
+RUN echo '[]' > ./data/games.json && chown playnite-insights:playnite-insights ./data/games.json
+RUN echo '{}' > ./data/manifest.json && chown playnite-insights:playnite-insights ./data/manifest.json
 
 EXPOSE 3000
 

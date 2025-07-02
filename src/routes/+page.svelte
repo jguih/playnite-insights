@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/components/BottomNav.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Main from '$lib/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, Home, LayoutDashboard, Menu, Settings } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, Menu } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import MenuAnchor from '$lib/components/MenuAnchor.svelte';
 	import Select from '$lib/components/Select.svelte';
@@ -12,6 +12,9 @@
 	import { page } from '$app/state';
 	import MenuButton from '$lib/components/MenuButton.svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import Home from '$lib/components/bottom-nav/Home.svelte';
+	import Dashboard from '$lib/components/bottom-nav/Dashboard.svelte';
+	import Settings from '$lib/components/bottom-nav/Settings.svelte';
 
 	let { data }: PageProps = $props();
 	let currentPage = $derived(data.page);
@@ -139,15 +142,9 @@
 		</Main>
 
 		<BottomNav>
-			<MenuAnchor selected>
-				<Home />
-			</MenuAnchor>
-			<MenuAnchor disabled>
-				<LayoutDashboard />
-			</MenuAnchor>
-			<MenuAnchor disabled>
-				<Settings />
-			</MenuAnchor>
+			<Home selected={true} />
+			<Dashboard />
+			<Settings />
 		</BottomNav>
 	</AppLayout>
 {/key}

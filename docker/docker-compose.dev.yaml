@@ -1,4 +1,4 @@
-name: playnite-insights
+name: playnite-insights-dev
 
 services:
   app-dev:

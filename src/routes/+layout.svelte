@@ -4,7 +4,6 @@
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: { children: Snippet } & LayoutProps = $props();
-	$inspect(data);
 	let appName = $derived(data.appName);
 </script>
 

@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
 		ifNoneMatch,
 		ifModifiedSince
 	);
-	if (!result.isValid) {
+	if (!result.isValid || !result.data) {
 		return json({ error: result.message }, { status: result.httpCode });
 	}
 	return result.data; // Assuming result.data is a Response object
