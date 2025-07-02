@@ -8,7 +8,7 @@ services:
     container_name: playnite-insights-dev
     environment:
       LOG_LEVEL: 0 # debug
-      ORIGIN: https://app-dev.jguihomeserver.com.br/
+      ORIGIN: ${ORIGIN}
     develop:
       watch:
         - path: ../

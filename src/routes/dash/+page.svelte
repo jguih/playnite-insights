@@ -12,11 +12,13 @@
 
 	const { data } = $props();
 	let gamesList = $derived(data.games);
-	let installed = $derived(gamesList.filter((g) => g.IsInstalled).length);
-	let notInstalled = $derived(gamesList.length - installed);
-	let totalPlayTime = $derived(
-		(gamesList.map((g) => g.Playtime).reduce((prev, acc) => prev + acc) / 3600).toFixed(2)
-	);
+	let total = $derived(data.total);
+	let installed = $derived(data.installed);
+	let notInstalled = $derived(data.notInstalled);
+	let totalPlayTime = $derived(data.totalPlayTime);
+	let notPlayed = $derived(data.notPlayed);
+	let played = $derived(data.played);
+	let totalPlayedPercent = $derived(Math.floor((played * 100) / total));
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -39,13 +41,25 @@
 	<Main>
 		<h1 class="text-2xl">Overview</h1>
 		<Divider class="mb-4 border-2" />
-		{@render infoSection(m.dash_games_in_library(), gamesList.length)}
+		{@render infoSection(m.dash_games_in_library(), total)}
 		{@render infoSection(m.dash_intalled(), installed)}
 		{@render infoSection(m.dash_not_installed(), notInstalled)}
 		{@render infoSection(
 			m.dash_total_playtime(),
 			m.dash_total_playtime_value({ time: totalPlayTime })
 		)}
+		<div class="flex flex-row justify-between">
+			<small class="text-sm">
+				<span class="text-primary-500">{played}</span>
+				<span class="opacity-80">{m.dash_playtime_summary_out_of()}</span>
+				<span class="text-primary-500 font-semibold">{total}</span>
+				<span class="opacity-80">{m.dash_playtime_summary_games_played()}</span>
+			</small>
+			<small class="text-sm">{totalPlayedPercent}%</small>
+		</div>
+		<div class="bg-background-1 h-3 w-full rounded-sm">
+			<div class="bg-primary-500 h-3 rounded-sm" style="width: {totalPlayedPercent}%"></div>
+		</div>
 	</Main>
 	<BottomNav>
 		<Home />

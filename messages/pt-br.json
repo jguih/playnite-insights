@@ -17,6 +17,8 @@
   "dash_not_installed": "Não instalados",
   "dash_total_playtime": "Total jogado",
   "dash_total_playtime_value": "{time} horas",
+  "dash_playtime_summary_out_of": "de",
+  "dash_playtime_summary_games_played": "jogos jogados",
   "yes": "Sim",
   "no": "Não"
 }
