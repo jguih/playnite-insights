@@ -13,6 +13,7 @@ import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import { writeLibraryManifest } from './library-manifest';
 import { z } from 'zod';
+import { getDb, getLastInsertId } from '$lib/infrastructure/database';
 
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
 const PLAYNITE_GAMES_FILE = playniteInsightsConfig.path.playniteGamesFile;
@@ -87,6 +88,28 @@ const _removeItems = async (gameIdList: string[]): Promise<ValidationResult> => 
 	}
 };
 
+const _addPlayniteLibrarySync = (totalPlaytimeHours: number, totalGames: number) => {
+	const db = getDb();
+	const now = new Date().toISOString();
+	const query = `
+    INSERT INTO playnite_library_sync
+      (timestamp, totalPlaytimeHours, totalGames)
+    VALUES
+      (?, ?, ?);
+  `;
+	try {
+		const stmt = db.prepare(query);
+		logDebug('Creating new entry in playnite_library_sync');
+		stmt.run(now, totalPlaytimeHours, totalGames);
+		const lastInsertId = getLastInsertId();
+		logSuccess(
+			`Inserted playnite_library_sync entry with id: ${lastInsertId ?? 'undefined'}, totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
+		);
+	} catch (error) {
+		logError('Error while inserting new entry for Playnite library sync', error as Error);
+	}
+};
+
 /**
  * Imports a game list from a JSON body.
  */
@@ -94,7 +117,8 @@ export const importGameListFromJsonBody = async (
 	body: unknown,
 	parseGameListFromJsonBody: typeof _parseGameListFromJsonBody = _parseGameListFromJsonBody,
 	writeGameListToFile: typeof _writeGameListToFile = _writeGameListToFile,
-	removeItems: typeof _removeItems = _removeItems
+	removeItems: typeof _removeItems = _removeItems,
+	addPlayniteLibrarySync: typeof _addPlayniteLibrarySync = _addPlayniteLibrarySync
 ): Promise<ValidationResult> => {
 	logDebug('Parsing game list from JSON body');
 	const parseResult = parseGameListFromJsonBody(body);
@@ -108,13 +132,19 @@ export const importGameListFromJsonBody = async (
 		};
 	}
 	logSuccess('Game list parsed successfully');
-	const newGameList = parseResult.data.GameList;
-	const addedItems = parseResult.data.AddedItems;
-	const removedItems = parseResult.data.RemovedItems;
+	const command = parseResult.data;
+	const newGameList = command.GameList;
+	const addedItems = command.AddedItems;
+	const removedItems = command.RemovedItems;
+	const totalPlaytimeSeconds = newGameList
+		.map((g) => g.Playtime)
+		.reduce((prev, current) => prev + current);
+	const totalPlaytimeHours = totalPlaytimeSeconds / 3600;
+	const totalGames = newGameList.length;
 	logInfo(`Importing ${newGameList.length} games`);
 	logInfo(`Games to add ${addedItems.length}`);
 	logInfo(`Games to remove ${removedItems.length}`);
-	const writeResult = await writeGameListToFile(parseResult.data.GameList);
+	const writeResult = await writeGameListToFile(newGameList);
 	if (!writeResult) {
 		return {
 			isValid: false,
@@ -122,14 +152,9 @@ export const importGameListFromJsonBody = async (
 			httpCode: 500
 		};
 	}
-	const removeItemsResult = await removeItems(removedItems);
-	if (!removeItemsResult.isValid) {
-		return removeItemsResult;
-	}
-	const writeManifestResult = await writeLibraryManifest();
-	if (!writeManifestResult.isValid) {
-		return { ...writeManifestResult, data: null };
-	}
+	await removeItems(removedItems);
+	await writeLibraryManifest();
+	addPlayniteLibrarySync(totalPlaytimeHours, totalGames);
 	return {
 		isValid: true,
 		message: 'Game list imported successfully',

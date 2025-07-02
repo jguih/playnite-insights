@@ -37,11 +37,13 @@ export const writeLibraryManifest = async (
 ): Promise<ValidationResult<PlayniteLibraryManifest>> => {
 	logDebug('Writing library manifest...');
 	try {
+		// Get all library folders from files directory (one folder for each game)
 		const entries = await fsReaddir(FILES_DIR, { withFileTypes: true });
 		const libraryFolders = entries
 			.filter((entry) => entry.isDirectory())
 			.map((entry) => entry.name);
 		const mediaExistsFor: PlayniteLibraryManifest['mediaExistsFor'] = [];
+		// Read the contentHash.txt inside every library folder and append it to the manifest's `mediaExistsFor`
 		for (const folder of libraryFolders) {
 			const contentHashFilePath = join(FILES_DIR, folder, CONTENT_HASH_FILE_NAME);
 			await access(contentHashFilePath);

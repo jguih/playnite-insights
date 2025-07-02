@@ -13,5 +13,6 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 	const games = await request.json();
 	const result = await importGameListFromJsonBody(games);
+
 	return json(result, { status: result.httpCode });
 };
