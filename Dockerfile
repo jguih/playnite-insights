@@ -1,4 +1,4 @@
-FROM node:alpine AS build
+FROM node:24.3-alpine AS build
 
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -9,7 +9,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:alpine AS run
+FROM node:24.3-alpine AS run
 
 # Create user and group
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights

@@ -1,10 +1,10 @@
-FROM node:24-alpine AS build
+FROM node:24.3-alpine AS build
 
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-FROM node:24-alpine AS run
+FROM node:24.3-alpine AS run
 
 # Create user and group
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
