@@ -24,6 +24,8 @@ RUN chown playnite-insights:playnite-insights ./data ./data/files ./data/tmp
 RUN echo '[]' > ./data/games.json && chown playnite-insights:playnite-insights ./data/games.json
 RUN echo '{}' > ./data/manifest.json && chown playnite-insights:playnite-insights ./data/manifest.json
 
+COPY --chown=playnite-insights:playnite-insights ./static/placeholder ./data/files/placeholder
+
 EXPOSE 3000
 
 USER playnite-insights

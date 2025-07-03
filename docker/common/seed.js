@@ -2,6 +2,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { exit } from 'process';
 import { logInfo } from './config.js';
+import { faker } from '@faker-js/faker';
 
 
 /**
@@ -148,76 +149,22 @@ export const seedDb = (db) => {
   `;
   const gameStmt = db.prepare(query);
   const gameData = [
-    [
-      'game-1',
-      'The Legend of Zelda: Breath of the Wild',
-      'An open-world adventure game set in Hyrule.',
-      '2017-03-03',
-      120.5,
-      '2024-06-15T14:00:00Z',
-      '2020-01-10T10:00:00Z',
-      '/games/zelda-botw',
-      1,
-      'zelda-bg.jpg',
-      'zelda-cover.jpg',
-      'zelda-icon.png'
-    ],
-    [
-      'game-2',
-      'Half-Life 2',
-      'A first-person shooter developed by Valve.',
-      '2004-11-16',
-      45.0,
-      '2024-05-20T18:30:00Z',
-      '2019-11-05T09:30:00Z',
-      '/games/half-life-2',
-      0,
-      'hl2-bg.jpg',
-      'hl2-cover.jpg',
-      'hl2-icon.png'
-    ],
-    [
-      'game-3',
-      'God of War',
-      'Action-adventure game based on Norse mythology.',
-      '2018-04-20',
-      60.2,
-      '2024-04-10T20:00:00Z',
-      '2021-03-15T12:00:00Z',
-      '/games/god-of-war',
-      1,
-      'gow-bg.jpg',
-      'gow-cover.jpg',
-      'gow-icon.png'
-    ],
-    [
-      'game-4',
-      'Minecraft',
-      'A sandbox game about placing blocks and going on adventures.',
-      '2011-11-18',
-      300.0,
-      '2024-07-01T16:00:00Z',
-      '2018-07-22T08:00:00Z',
-      '/games/minecraft',
-      1,
-      'minecraft-bg.jpg',
-      'minecraft-cover.jpg',
-      'minecraft-icon.png'
-    ],
-    [
-      'game-5',
-      'The Witcher 3: Wild Hunt',
-      'A story-driven open world RPG set in a visually stunning fantasy universe.',
-      '2015-05-19',
-      150.7,
-      '2024-03-12T22:00:00Z',
-      '2022-02-10T15:00:00Z',
-      '/games/witcher-3',
-      0,
-      'witcher3-bg.jpg',
-      'witcher3-cover.jpg',
-      'witcher3-icon.png'
-    ]
+    ...Array(400).fill(null).map((_, i) => {
+      return [
+        `game-${i}`,
+        faker.lorem.words({ min: 2, max: 5 }), // Name
+        faker.lorem.sentence(), // Description
+        faker.date.between({ from: '2000-01-01', to: '2024-01-01' }).toISOString().slice(0, 10), // ReleaseDate
+        Number(faker.number.float({ min: 1, max: 500, precision: 0.1 })), // Playtime
+        faker.date.recent({ days: 365 }).toISOString(), // LastActivity
+        faker.date.past({ years: 10 }).toISOString(), // Added
+        `/games/${faker.word.words({ count: 2 }).replace(/\s/g, '-').toLowerCase()}`, // InstallDirectory
+        faker.datatype.boolean() ? 1 : 0, // IsInstalled
+        'placeholder\\background.png', // BackgroundImage
+        'placeholder\\cover.png', // CoverImage
+        'placeholder\\icon.png', // Icon
+      ]
+    })
   ];
   for (const row of gameData) {
     gameStmt.run(...row);
@@ -231,15 +178,12 @@ export const seedDb = (db) => {
   `;
   const gamePlatformStmt = db.prepare(query);
   const gamePlatformData = [
-    ['game-1', 'nintendo'],
-    ['game-2', 'pc'],
-    ['game-3', 'playstation'],
-    ['game-4', 'pc'],
-    ['game-4', 'xbox'],
-    ['game-4', 'nintendo'],
-    ['game-5', 'pc'],
-    ['game-5', 'playstation'],
-    ['game-5', 'xbox'],
+    ...gameData.map((data) => {
+      return [
+        data[0],
+        platformData[Math.floor(Math.random() * platformData.length)][0]
+      ]
+    })
   ];
   for (const row of gamePlatformData) {
     gamePlatformStmt.run(...row);
@@ -253,16 +197,12 @@ export const seedDb = (db) => {
   `;
   const gameGenreStmt = db.prepare(query);
   const gameGenreData = [
-    ['game-1', 'adventure'],
-    ['game-1', 'action'],
-    ['game-2', 'shooter'],
-    ['game-2', 'action'],
-    ['game-3', 'action'],
-    ['game-3', 'adventure'],
-    ['game-4', 'simulation'],
-    ['game-4', 'adventure'],
-    ['game-5', 'rpg'],
-    ['game-5', 'adventure'],
+    ...gameData.map((data) => {
+      return [
+        data[0],
+        genreData[Math.floor(Math.random() * genreData.length)][0]
+      ]
+    })
   ];
   for (const row of gameGenreData) {
     gameGenreStmt.run(...row);
@@ -276,11 +216,12 @@ export const seedDb = (db) => {
   `;
   const gameDeveloperStmt = db.prepare(query);
   const gameDeveloperData = [
-    ['game-1', 'dev-nintendo'],
-    ['game-2', 'dev-valve'],
-    ['game-3', 'dev-sony'],
-    ['game-4', 'dev-microsoft'],
-    ['game-5', 'dev-microsoft'],
+    ...gameData.map((data) => {
+      return [
+        data[0],
+        developerData[Math.floor(Math.random() * developerData.length)][0]
+      ]
+    })
   ];
   for (const row of gameDeveloperData) {
     gameDeveloperStmt.run(...row);
@@ -294,11 +235,12 @@ export const seedDb = (db) => {
   `;
   const gamePublisherStmt = db.prepare(query);
   const gamePublisherData = [
-    ['game-1', 'pub-nintendo'],
-    ['game-2', 'pub-valve'],
-    ['game-3', 'pub-sony'],
-    ['game-4', 'pub-microsoft'],
-    ['game-5', 'pub-microsoft'],
+    ...gameData.map((data) => {
+      return [
+        data[0],
+        publisherData[Math.floor(Math.random() * publisherData.length)][0]
+      ]
+    })
   ];
   for (const row of gamePublisherData) {
     gamePublisherStmt.run(...row);

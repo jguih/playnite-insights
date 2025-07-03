@@ -17,16 +17,17 @@
 	import Settings from '$lib/components/bottom-nav/Settings.svelte';
 
 	let { data }: PageProps = $props();
-	let currentPage = $derived(data.page);
-	let totalPages = $derived(data.totalPages);
-	let totalGamesCount = $derived(data.totalGamesCount);
-	let pageSize = $derived(Number(page.url.searchParams.get('page_size')));
-	let gameList = $derived(data.games);
+	let pageData = $derived(data.pageData ?? { data: [], totalPages: 1, total: 0, pageSize: 50 });
+	let currentPage = $derived(Number(page.url.searchParams.get('page')));
+	let totalPages = $derived(pageData.totalPages);
+	let totalGamesCount = $derived(pageData.total);
+	let pageSize = $derived(pageData.pageSize);
+	let gameList = $derived(pageData.data);
 	let main: HTMLElement | undefined = $state();
 
-	const getCoverImageUrl = (game: (typeof data.games)[number]) => {
-		if (!game.CoverImage) return '';
-		const [gameId, imageFileName] = game.CoverImage.split('\\');
+	const getCoverImageUrl = (coverImage?: string | null) => {
+		if (!coverImage) return '';
+		const [gameId, imageFileName] = coverImage.split('\\');
 		return `/api/assets/image/${gameId}/${imageFileName}`;
 	};
 
@@ -63,13 +64,13 @@
 	</MenuAnchor>
 {/snippet}
 
-{#snippet gameCard(game: (typeof data)['games'][number])}
+{#snippet gameCard(game: (typeof gameList)[number])}
 	<li
 		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 aspect-[1/1.6] max-w-38 border-4 border-solid border-transparent p-0 shadow-md outline-0 sm:max-w-52"
 	>
 		<a href={`/game/${game.Id}`}>
 			<img
-				src={getCoverImageUrl(game)}
+				src={getCoverImageUrl(game.CoverImage)}
 				alt={`${game.Name} cover image`}
 				loading="lazy"
 				class="h-7/8 w-full object-cover"

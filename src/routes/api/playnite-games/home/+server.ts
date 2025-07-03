@@ -1,7 +1,7 @@
 import { getHomePagePlayniteGames } from '$lib/services/playnite-game-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = ({ url }) => {
+export const GET: RequestHandler = ({ url }) => {
 	const searchParams = url.searchParams;
 
 	const page = Number(searchParams.get('page'));

@@ -1,3 +1,3 @@
 ### Get all games (paginated)
-POST {{protocol}}://{{host}}/api/playnite-games/home?page=1&page_size=50
+GET {{protocol}}://{{host}}/api/playnite-games/home?page=1&page_size=50
 Content-Type: {{contentType}}

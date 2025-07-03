@@ -59,16 +59,18 @@ const homePagePlayniteGamesSchema = z.array(
 		CoverImage: z.string().nullable().optional()
 	})
 );
-export const getHomePagePlayniteGames = (
-	offset: number,
-	pageSize: number
-): {
+export type GetHomePagePlayniteGamesResponse = {
 	data: z.infer<typeof homePagePlayniteGamesSchema>;
 	offset: number;
 	pageSize: number;
 	total: number;
 	hasNextPage: boolean;
-} | null => {
+	totalPages: number;
+} | null;
+export const getHomePagePlayniteGames = (
+	offset: number,
+	pageSize: number
+): GetHomePagePlayniteGamesResponse => {
 	const db = getDb();
 	const query = `
     SELECT 
@@ -85,7 +87,8 @@ export const getHomePagePlayniteGames = (
 		const data = homePagePlayniteGamesSchema.parse(result);
 		const total = getTotalPlayniteGames();
 		const hasNextPage = offset + pageSize < total;
-		return { data, offset, pageSize, total, hasNextPage };
+		const totalPages = Math.ceil(total / pageSize);
+		return { data, offset, pageSize, total, hasNextPage, totalPages };
 	} catch (error) {
 		logError('Failed to get all games from database', error as Error);
 		return null;
