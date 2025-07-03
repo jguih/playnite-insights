@@ -1,7 +1,7 @@
-import { getLastSixMonthsInclusive } from '$lib/services/date';
+import { getLastSixMonthsInclusiveAbreviated } from '$lib/services/date';
 import { getGameList } from '$lib/services/game-repository';
 import { logDebug } from '$lib/services/log';
-import { getTotalPlaytimeOverTime } from '$lib/services/playnite-library-sync-repository';
+import { getTotalPlaytimeOverLast6Months } from '$lib/services/playnite-library-sync-repository';
 import type { PageServerLoad } from '../$types';
 
 export const load: PageServerLoad = async () => {
@@ -14,13 +14,18 @@ export const load: PageServerLoad = async () => {
 	).toFixed(2);
 	const notPlayed = games.filter((g) => g.Playtime === 0).length;
 	const played = games.length - notPlayed;
-	const totalPlaytimeOverTime = getTotalPlaytimeOverTime();
+
+	const totalPlaytimeOverLast6Months = getTotalPlaytimeOverLast6Months();
+	let chartsTotalplaytimeOverLast6Months = null;
+	if (totalPlaytimeOverLast6Months.isValid && totalPlaytimeOverLast6Months.data) {
+		chartsTotalplaytimeOverLast6Months = {
+			xAxis: { data: getLastSixMonthsInclusiveAbreviated() },
+			series: { bar: { data: totalPlaytimeOverLast6Months.data } }
+		};
+	}
 
 	const charts = {
-		gamesOverTime: {
-			xAxis: { data: getLastSixMonthsInclusive() },
-			series: { bar: { data: totalPlaytimeOverTime.data } }
-		}
+		totalPlaytimeOverLast6Months: chartsTotalplaytimeOverLast6Months
 	};
 
 	logDebug(`Charts data: \n${JSON.stringify(charts, null, 2)}`);

@@ -2,41 +2,40 @@
 	import { init, type BarSeriesOption, type ComposeOption } from 'echarts';
 	import { onMount } from 'svelte';
 
-	let { xAxis, series }: { xAxis: { data: string[] }; series: { data: number[] } } = $props();
+	let { xAxis, series }: { xAxis: { data: string[] }; series: { bar: { data: number[] } } } =
+		$props();
 
 	const id = 'chart-games-owned-over-time';
-	var option: ComposeOption<BarSeriesOption> = {
+	var option: ComposeOption<BarSeriesOption> = $derived({
 		title: {
-			text: ''
+			show: false
 		},
 		tooltip: {},
-		// legend: {
-		// 	data: ['sales'],
-		// 	textStyle: {
-		// 		color: 'white'
-		// 	}
-		// },
 		grid: {
-			left: 52
+			top: '8%',
+			left: '15%',
+			bottom: '12%'
 		},
 		xAxis: {
-			data: ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.'],
+			data: xAxis.data,
 			axisLabel: {
 				color: 'white'
 			}
 		},
 		yAxis: {
-			scale: true
+			axisLabel: {
+				color: 'white'
+			}
 		},
 		series: [
 			{
-				name: 'sales',
+				name: 'games owned',
 				type: 'bar',
-				data: [1141, 1142, 1156, 1157, 1158, 1158],
+				data: series.bar.data,
 				color: ['hsl(198, 100%, 67%)']
 			}
 		]
-	};
+	});
 
 	onMount(() => {
 		if (document) {
@@ -46,7 +45,4 @@
 	});
 </script>
 
-<div class="bg-background-1 rounded-md shadow-md">
-	<h1 class="pt-4 pl-3 text-xl">Games owned over time</h1>
-	<div {id} class="h-[350px] w-full"></div>
-</div>
+<div {id} class="h-[350px] w-full"></div>

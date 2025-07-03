@@ -20,6 +20,7 @@
 	let notPlayed = $derived(data.notPlayed);
 	let played = $derived(data.played);
 	let totalPlayedPercent = $derived(Math.floor((played * 100) / total));
+	let charts = $derived(data.charts);
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -62,7 +63,15 @@
 			<div class="bg-primary-500 h-3 rounded-sm" style="width: {totalPlayedPercent}%"></div>
 		</div>
 		<Divider class="my-4" />
-		<GamesOwnedOverTime />
+		<div class="bg-background-1 rounded-md shadow-md">
+			<h1 class="text-md pt-4 pl-3 font-semibold">Games owned over last 6 months</h1>
+			{#if charts.totalPlaytimeOverLast6Months}
+				<GamesOwnedOverTime
+					series={charts.totalPlaytimeOverLast6Months.series}
+					xAxis={charts.totalPlaytimeOverLast6Months.xAxis}
+				/>
+			{/if}
+		</div>
 		<Divider class="my-4" />
 	</Main>
 	<BottomNav>
