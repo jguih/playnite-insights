@@ -15,10 +15,10 @@ ENV NODE_ENV=development
 ENV BODY_SIZE_LIMIT=256M
 ENV APP_NAME='Playnite Insights (Dev)'
 
-COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules ./node_modules
-
 # Copy source files into application directory
 COPY --chown=playnite-insights:playnite-insights . .
+COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules ./node_modules
+
 RUN mkdir -p ./data/files ./data/tmp
 RUN chown playnite-insights:playnite-insights ./data ./data/files ./data/tmp
 RUN echo '[]' > ./data/games.json && chown playnite-insights:playnite-insights ./data/games.json
@@ -28,4 +28,4 @@ EXPOSE 3000
 
 USER playnite-insights
 
-ENTRYPOINT ["npx", "vite", "dev", "--host"]
+ENTRYPOINT ["sh", "docker/dev/entrypoint.sh"]

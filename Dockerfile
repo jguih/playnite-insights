@@ -24,9 +24,11 @@ WORKDIR /app
 COPY --chown=playnite-insights:playnite-insights --from=build /app/build ./build
 COPY --chown=playnite-insights:playnite-insights --from=build /app/package.json ./package.json
 COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules ./node_modules
+COPY --chown=playnite-insights:playnite-insights --from=build /app/docker/common ./docker/common
+COPY --chown=playnite-insights:playnite-insights --from=build /app/docker/prod ./docker/prod
 
-RUN mkdir -p ./data/files ./data/tmp ./data/logs
-RUN chown playnite-insights:playnite-insights ./data ./data/files ./data/tmp ./data/logs
+RUN mkdir -p ./data/files ./data/tmp
+RUN chown playnite-insights:playnite-insights ./data ./data/files ./data/tmp
 RUN echo '[]' > ./data/games.json && chown playnite-insights:playnite-insights ./data/games.json
 RUN echo '{}' > ./data/manifest.json && chown playnite-insights:playnite-insights ./data/manifest.json
 
@@ -34,4 +36,4 @@ EXPOSE 3000
 
 USER playnite-insights
 
-ENTRYPOINT ["node", "build"]
+ENTRYPOINT ["sh", "docker/prod/entrypoint.sh"]

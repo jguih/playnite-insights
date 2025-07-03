@@ -20,7 +20,7 @@
 			left: 52
 		},
 		xAxis: {
-			data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
+			data: ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.'],
 			axisLabel: {
 				color: 'white'
 			}
@@ -32,7 +32,7 @@
 			{
 				name: 'sales',
 				type: 'bar',
-				data: [1141, 20, 36, 10, 10, 20],
+				data: [1141, 1142, 1156, 1157, 1158, 1158],
 				color: ['hsl(198, 100%, 67%)']
 			}
 		]
