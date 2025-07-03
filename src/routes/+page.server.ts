@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getGameList } from '$lib/services/game-repository';
+import { getGameList } from '$lib/services/playnite-game-repository';
 import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ url }) => {

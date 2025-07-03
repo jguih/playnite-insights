@@ -1,6 +1,5 @@
 import { getLastSixMonthsInclusiveAbreviated } from '$lib/services/date';
-import { getGameList } from '$lib/services/game-repository';
-import { logDebug } from '$lib/services/log';
+import { getGameList } from '$lib/services/playnite-game-repository';
 import { getTotalPlaytimeOverLast6Months } from '$lib/services/playnite-library-sync-repository';
 import type { PageServerLoad } from '../$types';
 
@@ -28,7 +27,7 @@ export const load: PageServerLoad = async () => {
 		totalPlaytimeOverLast6Months: chartsTotalplaytimeOverLast6Months
 	};
 
-	logDebug(`Charts data: \n${JSON.stringify(charts, null, 2)}`);
+	// logDebug(`Charts data: \n${JSON.stringify(charts, null, 2)}`);
 
 	return {
 		games,

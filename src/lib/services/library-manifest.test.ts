@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { writeLibraryManifest } from './library-manifest';
 
+vi.mock('$lib/infrastructure/database', () => ({}));
 const mockFsReaddir = vi.fn();
 const mockFsWritefile = vi.fn();
 

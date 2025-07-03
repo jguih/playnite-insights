@@ -1,4 +1,4 @@
-import { getGameById } from '$lib/services/game-repository.js';
+import { getGameById } from '$lib/services/playnite-game-repository.js';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
