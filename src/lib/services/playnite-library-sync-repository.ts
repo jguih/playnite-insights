@@ -19,12 +19,12 @@ export const getTotalPlaytimeOverLast6Months = (): ValidationResult<number[]> =>
         ORDER BY yearMonth
       );
     `;
-	logDebug(`Querying total playtime over time, running: \n${query}`);
+	logDebug(`Querying total playtime over last 6 months, running: \n${query}`);
 	try {
 		const stmt = getDb().prepare(query);
 		const result = stmt.all();
 		const data = totalPlaytimeOverTimeSchema.parse(result);
-		logSuccess('Successfully queried total playtime over time');
+		logSuccess('Successfully queried total playtime over last 6 months');
 		return {
 			isValid: true,
 			message: '',
@@ -32,10 +32,10 @@ export const getTotalPlaytimeOverLast6Months = (): ValidationResult<number[]> =>
 			httpCode: 200
 		};
 	} catch (error) {
-		logError('Failed to get total playtime over time', error as Error);
+		logError('Failed to get total playtime over last 6 months', error as Error);
 		return {
 			isValid: false,
-			message: 'Failed to get total playtime over time',
+			message: 'Failed to get total playtime over last 6 months',
 			httpCode: 500
 		};
 	}
