@@ -19,6 +19,8 @@
   "dash_total_playtime_value": "{time} horas",
   "dash_playtime_summary_out_of": "de",
   "dash_playtime_summary_games_played": "jogos jogados",
+  "dash_games_owned_over_last_n_months": "Jogos adquiridos nos últimos {value} meses",
+  "dash_no_data_to_show": "Sem dados para mostrar",
   "month_january": "Janeiro",
   "month_february": "Fevereiro",
   "month_march": "Março",

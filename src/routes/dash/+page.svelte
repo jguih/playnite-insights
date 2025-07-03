@@ -64,12 +64,18 @@
 		</div>
 		<Divider class="my-4" />
 		<div class="bg-background-1 rounded-md shadow-md">
-			<h1 class="text-md pt-4 pl-3 font-semibold">Games owned over last 6 months</h1>
+			<h1 class="text-md truncate px-3 pt-4 font-semibold">
+				{m.dash_games_owned_over_last_n_months({ value: 6 })}
+			</h1>
 			{#if charts.totalPlaytimeOverLast6Months}
 				<GamesOwnedOverTime
 					series={charts.totalPlaytimeOverLast6Months.series}
 					xAxis={charts.totalPlaytimeOverLast6Months.xAxis}
 				/>
+			{:else}
+				<div>
+					<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
+				</div>
 			{/if}
 		</div>
 		<Divider class="my-4" />
