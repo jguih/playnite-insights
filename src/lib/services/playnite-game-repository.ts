@@ -59,14 +59,16 @@ const homePagePlayniteGamesSchema = z.array(
 		CoverImage: z.string().nullable().optional()
 	})
 );
-export type GetHomePagePlayniteGamesResponse = {
-	data: z.infer<typeof homePagePlayniteGamesSchema>;
-	offset: number;
-	pageSize: number;
-	total: number;
-	hasNextPage: boolean;
-	totalPages: number;
-} | null;
+export type GetHomePagePlayniteGamesResponse =
+	| {
+			data: z.infer<typeof homePagePlayniteGamesSchema>;
+			offset: number;
+			pageSize: number;
+			total: number;
+			hasNextPage: boolean;
+			totalPages: number;
+	  }
+	| undefined;
 export const getHomePagePlayniteGames = (
 	offset: number,
 	pageSize: number
@@ -91,6 +93,66 @@ export const getHomePagePlayniteGames = (
 		return { data, offset, pageSize, total, hasNextPage, totalPages };
 	} catch (error) {
 		logError('Failed to get all games from database', error as Error);
-		return null;
+		return undefined;
+	}
+};
+
+const developerSchema = z.object({
+	Id: z.string(),
+	Name: z.string()
+});
+export const getPlayniteGameDevelopers = (
+	gameId: string
+): Array<z.infer<typeof developerSchema>> | undefined => {
+	const db = getDb();
+	const query = `
+    SELECT dev.Id, dev.Name 
+    FROM playnite_game_developer pgdev
+    JOIN developer dev ON dev.Id = pgdev.DeveloperId
+    WHERE pgdev.GameId = (?)
+  `;
+	try {
+		logDebug(`Fetching developer list for game with id ${gameId}...`);
+		const stmt = db.prepare(query);
+		const result = stmt.all(gameId);
+		const data = z.array(developerSchema).parse(result);
+		logDebug(`Developer list for game with id ${gameId} fetched successfully`);
+		return data;
+	} catch (error) {
+		logError('Failed to get developer list for game with id:' + gameId, error as Error);
+		return undefined;
+	}
+};
+
+const playniteGameSchema = z.object({
+	Id: z.string(),
+	Name: z.string().optional().nullable(),
+	Description: z.string().optional().nullable(),
+	ReleaseDate: z.string().optional().nullable(),
+	Playtime: z.number(),
+	LastActivity: z.string().optional().nullable(),
+	Added: z.string().optional().nullable(),
+	InstallDirectory: z.string().optional().nullable(),
+	IsInstalled: z.number().transform((n) => Boolean(n)),
+	BackgroundImage: z.string().optional().nullable(),
+	CoverImage: z.string().optional().nullable(),
+	Icon: z.string().optional().nullable()
+});
+export type GetPlayniteGameByIdResult = z.infer<typeof playniteGameSchema> & {
+	developers?: Array<z.infer<typeof developerSchema>>;
+};
+export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult | undefined => {
+	const db = getDb();
+	const query = `SELECT * FROM playnite_game WHERE Id = (?)`;
+	try {
+		logDebug(`Fetching game with id ${id}...`);
+		const stmt = db.prepare(query);
+		const result = stmt.get(id);
+		const data = playniteGameSchema.parse(result);
+		logDebug(`Game with id ${id} fetched successfully`);
+		return { ...data, developers: getPlayniteGameDevelopers(id) };
+	} catch (error) {
+		logError('Failed to get Playnite game with id:' + id, error as Error);
+		return undefined;
 	}
 };
