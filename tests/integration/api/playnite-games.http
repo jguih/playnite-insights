@@ -1,7 +1,15 @@
-### Get all games (paginated)
+### Get home page game data (paginated)
 GET {{protocol}}://{{host}}/api/playnite-games/home?page=1&page_size=50
 Content-Type: {{contentType}}
 
 ### Get game by id
 GET {{protocol}}://{{host}}/api/playnite-games/game-200
+Content-Type: {{contentType}}
+
+### Get dashboard page game data
+GET {{protocol}}://{{host}}/api/playnite-games/dash
+Content-Type: {{contentType}}
+
+### Get dashboard page statistics data
+GET {{protocol}}://{{host}}/api/playnite-games/dash/statistics
 Content-Type: {{contentType}}

@@ -1,15 +1,18 @@
 import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
 import { logDebug, logError, logSuccess } from './log';
-import type { ValidationResult } from '$lib/models/validation-result';
 
 const totalPlaytimeOverTimeSchema = z.array(
 	z.object({
 		totalPlaytimeHours: z.number()
 	})
 );
-
-export const getTotalPlaytimeOverLast6Months = (): ValidationResult<number[]> => {
+export type GetTotalPlaytimeOverLast6MonthsResult = ReturnType<
+	typeof getTotalPlaytimeOverLast6Months
+>;
+export const getTotalPlaytimeOverLast6Months = ():
+	| { totalPlaytimeOverLast6Months: number[] }
+	| undefined => {
 	const query = `
       SELECT totalPlaytimeHours FROM (
         SELECT MAX(totalPlaytimeHours) as totalPlaytimeHours, strftime('%Y-%m', timestamp) as yearMonth
@@ -25,18 +28,9 @@ export const getTotalPlaytimeOverLast6Months = (): ValidationResult<number[]> =>
 		const result = stmt.all();
 		const data = totalPlaytimeOverTimeSchema.parse(result);
 		logSuccess('Successfully queried total playtime over last 6 months');
-		return {
-			isValid: true,
-			message: '',
-			data: data.map((e) => e.totalPlaytimeHours),
-			httpCode: 200
-		};
+		return { totalPlaytimeOverLast6Months: data.map((e) => e.totalPlaytimeHours) };
 	} catch (error) {
 		logError('Failed to get total playtime over last 6 months', error as Error);
-		return {
-			isValid: false,
-			message: 'Failed to get total playtime over last 6 months',
-			httpCode: 500
-		};
+		return undefined;
 	}
 };

@@ -59,7 +59,7 @@ const homePagePlayniteGamesSchema = z.array(
 		CoverImage: z.string().nullable().optional()
 	})
 );
-export type GetHomePagePlayniteGamesResponse =
+export type GetHomePagePlayniteGameListResult =
 	| {
 			data: z.infer<typeof homePagePlayniteGamesSchema>;
 			offset: number;
@@ -69,10 +69,10 @@ export type GetHomePagePlayniteGamesResponse =
 			totalPages: number;
 	  }
 	| undefined;
-export const getHomePagePlayniteGames = (
+export const getHomePagePlayniteGameList = (
 	offset: number,
 	pageSize: number
-): GetHomePagePlayniteGamesResponse => {
+): GetHomePagePlayniteGameListResult => {
 	const db = getDb();
 	const query = `
     SELECT 
@@ -142,10 +142,12 @@ const playniteGameSchema = z.object({
 	CoverImage: z.string().optional().nullable(),
 	Icon: z.string().optional().nullable()
 });
-export type GetPlayniteGameByIdResult = z.infer<typeof playniteGameSchema> & {
-	Developers?: Array<z.infer<typeof developerSchema>>;
-};
-export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult | undefined => {
+export type GetPlayniteGameByIdResult =
+	| (z.infer<typeof playniteGameSchema> & {
+			Developers?: Array<z.infer<typeof developerSchema>>;
+	  })
+	| undefined;
+export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult => {
 	const db = getDb();
 	const query = `SELECT * FROM playnite_game WHERE Id = (?)`;
 	try {
@@ -157,6 +159,37 @@ export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult | und
 		return { ...data, Developers: getPlayniteGameDevelopers(id) };
 	} catch (error) {
 		logError('Failed to get Playnite game with id:' + id, error as Error);
+		return undefined;
+	}
+};
+
+const dashPagePlayniteGameListSchema = z.array(
+	z.object({
+		Id: z.string(),
+		IsInstalled: z.number().transform((n) => Boolean(n)),
+		Playtime: z.number()
+	})
+);
+export type GetDashPagePlayniteGameListResult =
+	| z.infer<typeof dashPagePlayniteGameListSchema>
+	| undefined;
+export const getDashPagePlayniteGameList = (): GetDashPagePlayniteGameListResult => {
+	const db = getDb();
+	const query = `
+    SELECT Id, IsInstalled, Playtime
+    FROM playnite_game;
+  `;
+	try {
+		logDebug(`Fetching game list for dashboard page...`);
+		const stmt = db.prepare(query);
+		const result = stmt.all();
+		const data = dashPagePlayniteGameListSchema.parse(result);
+		logDebug(
+			`Game list for dashboard page fetched successfully, returning data for ${data.length} games`
+		);
+		return data;
+	} catch (error) {
+		logError('Failed to get game list for dashboard page', error as Error);
 		return undefined;
 	}
 };

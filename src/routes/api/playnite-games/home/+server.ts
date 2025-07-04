@@ -1,4 +1,4 @@
-import { getHomePagePlayniteGames } from '$lib/services/playnite-game-repository';
+import { getHomePagePlayniteGameList } from '$lib/services/playnite-game-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ url }) => {
@@ -16,6 +16,6 @@ export const GET: RequestHandler = ({ url }) => {
 
 	const offset = (Number(page) - 1) * Number(pageSize);
 
-	const games = getHomePagePlayniteGames(offset, pageSize);
+	const games = getHomePagePlayniteGameList(offset, pageSize);
 	return json({ ...games });
 };
