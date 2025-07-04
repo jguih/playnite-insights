@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `playnite_game_platform` (
   `GameId` TEXT NOT NULL,
   `PlatformId` TEXT NOT NULL,
   PRIMARY KEY (`GameId`, `PlatformId`),
-  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`),
+  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`) ON DELETE CASCADE,
   FOREIGN KEY (`PlatformId`) REFERENCES `platform`(`Id`)
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `playnite_game_genre` (
   `GameId` TEXT NOT NULL,
   `GenreId` TEXT NOT NULL,
   PRIMARY KEY (`GameId`, `GenreId`),
-  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`),
+  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`) ON DELETE CASCADE,
   FOREIGN KEY (`GenreId`) REFERENCES `genre`(`Id`)
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `playnite_game_developer` (
   `GameId` TEXT NOT NULL,
   `DeveloperId` TEXT NOT NULL,
   PRIMARY KEY (`GameId`, `DeveloperId`),
-  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`),
+  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`) ON DELETE CASCADE,
   FOREIGN KEY (`DeveloperId`) REFERENCES `developer`(`Id`)
 );
 
@@ -73,6 +73,6 @@ CREATE TABLE IF NOT EXISTS `playnite_game_publisher` (
   `GameId` TEXT NOT NULL,
   `PublisherId` TEXT NOT NULL,
   PRIMARY KEY (`GameId`, `PublisherId`),
-  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`),
+  FOREIGN KEY (`GameId`) REFERENCES `playnite_game`(`Id`) ON DELETE CASCADE,
   FOREIGN KEY (`PublisherId`) REFERENCES `publisher`(`Id`)
 );

@@ -6,7 +6,7 @@ let db: DatabaseSync | null = null;
 
 export const getDb = (): DatabaseSync => {
 	if (db === null) {
-		db = new DatabaseSync(DB_FILE);
+		db = new DatabaseSync(DB_FILE, { enableForeignKeyConstraints: true });
 	}
 	return db;
 };

@@ -120,7 +120,8 @@ export const syncGameList = async (body: unknown) => {
 					ReleaseDate: game.ReleaseDate?.ReleaseDate,
 					ContentHash: game.ContentHash
 				},
-				game.Developers
+				game.Developers,
+				game.Platforms
 			);
 			// TODO: Sync genres, platforms and publishers
 			if (!result) {
@@ -168,13 +169,7 @@ export const syncGameList = async (body: unknown) => {
 				logError(`Failed to delete media folder ${gameMediaFolderDir}`, error as Error);
 			}
 		}
-		if (totalPlaytimeHours !== undefined && totalGamesInLib !== undefined) {
-			addPlayniteLibrarySync(totalPlaytimeHours, totalGamesInLib);
-		} else {
-			logError(
-				`Failed to add playnite library sync entry, required values are invalid or undefined. \ntotalPlaytimeHours: ${totalPlaytimeHours}, totalGamesInLib: ${totalGamesInLib}`
-			);
-		}
+		addPlayniteLibrarySync(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
 		writeLibraryManifest();
 		return true;
 	} catch (error) {

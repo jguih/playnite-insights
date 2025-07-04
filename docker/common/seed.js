@@ -11,7 +11,7 @@ import { faker } from '@faker-js/faker';
  * @param {DatabaseSync} db - The SQLite database instance to seed.
  */
 export const seedDb = (db) => {
-  logInfo("Loading testing data...");
+  logInfo("Seeding database...");
   let query = `
     INSERT INTO playnite_library_sync
       (timestamp, totalPlaytimeHours, totalGames)
@@ -246,6 +246,6 @@ export const seedDb = (db) => {
     gamePublisherStmt.run(...row);
   }
 
-  logInfo("Test data loaded successfully");
+  logInfo("Database seed loaded successfully");
   exit(0);
 }

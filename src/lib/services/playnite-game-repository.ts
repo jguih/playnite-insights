@@ -5,6 +5,8 @@ import { developerSchema, type Developer } from '$lib/models/developer';
 import { playniteGameSchema, type PlayniteGame } from '$lib/models/playnite-game';
 import type { IncomingPlayniteGameDTO } from '$lib/models/dto/incoming-playnite-game-dto';
 import { addDeveloper, developerExists } from './developer-repository';
+import { addPlatform, platformExists } from './platform-repository';
+import type { Platform } from '$lib/models/platform';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -189,9 +191,32 @@ export const addPlayniteGameDeveloper = (
 	}
 };
 
+export const addPlayniteGamePlatform = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>,
+	platform: Platform
+): boolean => {
+	const db = getDb();
+	const query = `
+    INSERT INTO playnite_game_platform
+      (GameId, PlatformId)
+    VALUES
+      (?, ?)
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(game.Id, platform.Id);
+		logSuccess(`Added platform ${platform.Name} to game ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to add platform ${platform.Name} for game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
 export const addPlayniteGame = (
 	game: PlayniteGame,
-	developers?: IncomingPlayniteGameDTO['Developers']
+	developers?: IncomingPlayniteGameDTO['Developers'],
+	platforms?: IncomingPlayniteGameDTO['Platforms']
 ): boolean => {
 	const db = getDb();
 	const query = `
@@ -216,7 +241,7 @@ export const addPlayniteGame = (
 			game.Icon ?? null,
 			game.ContentHash
 		);
-		logDebug(`Added game ${game.Name}`);
+		logSuccess(`Added game ${game.Name}`);
 		if (developers) {
 			for (const developer of developers) {
 				if (developerExists(developer)) {
@@ -225,6 +250,29 @@ export const addPlayniteGame = (
 				}
 				if (addDeveloper(developer)) {
 					addPlayniteGameDeveloper({ Id: game.Id, Name: game.Name }, developer);
+				}
+			}
+		}
+		if (platforms) {
+			for (const platform of platforms) {
+				const exists = platformExists({
+					Id: platform.Id,
+					Name: platform.Name
+				});
+				const asPlatform: Platform = {
+					Id: platform.Id,
+					Name: platform.Name,
+					SpecificationId: platform.SpecificationId,
+					Background: platform.Background ?? null,
+					Cover: platform.Cover ?? null,
+					Icon: platform.Icon ?? null
+				};
+				if (exists) {
+					addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, asPlatform);
+					continue;
+				}
+				if (addPlatform(asPlatform)) {
+					addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, asPlatform);
 				}
 			}
 		}
