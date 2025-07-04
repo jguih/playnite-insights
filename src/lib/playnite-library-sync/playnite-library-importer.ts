@@ -15,6 +15,7 @@ import { z } from 'zod';
 import {
 	addPlayniteGame,
 	deletePlayniteGame,
+	getTotalPlayniteGames,
 	getTotalPlaytimeHours,
 	playniteGameExists,
 	updatePlayniteGame
@@ -94,9 +95,6 @@ export const syncGameList = async (body: unknown) => {
 		logInfo(`Games to add: ${data.AddedItems.length}`);
 		logInfo(`Games to update: ${data.UpdatedItems.length}`);
 		logInfo(`Games to delete: ${data.RemovedItems.length}`);
-		const totalPlaytimeHours = getTotalPlaytimeHours();
-		// TODO: Get total games in lib
-		const totalGamesInLib = data.AddedItems.length;
 		// Games to add
 		for (const game of data.AddedItems) {
 			const exists = playniteGameExists(game.Id);
@@ -131,7 +129,8 @@ export const syncGameList = async (body: unknown) => {
 						Icon: plat.Icon ?? null
 					};
 				}),
-				game.Genres ?? []
+				game.Genres ?? [],
+				game.Publishers ?? []
 			);
 			// TODO: Sync genres, platforms and publishers
 			if (!result) {
@@ -179,6 +178,8 @@ export const syncGameList = async (body: unknown) => {
 				logError(`Failed to delete media folder ${gameMediaFolderDir}`, error as Error);
 			}
 		}
+		const totalPlaytimeHours = getTotalPlaytimeHours();
+		const totalGamesInLib = getTotalPlayniteGames();
 		addPlayniteLibrarySync(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
 		writeLibraryManifest();
 		return true;

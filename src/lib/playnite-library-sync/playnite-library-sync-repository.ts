@@ -1,4 +1,4 @@
-import { getDb, getLastInsertId } from '$lib/infrastructure/database';
+import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
 import { logError, logSuccess } from '../log/log';
 
@@ -68,9 +68,8 @@ export const addPlayniteLibrarySync = (totalPlaytimeHours: number, totalGames: n
 	try {
 		const stmt = db.prepare(query);
 		stmt.run(now, totalPlaytimeHours, totalGames);
-		const lastInsertId = getLastInsertId();
 		logSuccess(
-			`Inserted playnite_library_sync entry with id: ${lastInsertId ?? 'undefined'}, totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
+			`Inserted playnite_library_sync entry with totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
 		);
 		return true;
 	} catch (error) {

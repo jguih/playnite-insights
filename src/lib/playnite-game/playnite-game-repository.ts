@@ -12,11 +12,13 @@ import { addPlatform, platformExists } from '../platform/platform-repository';
 import type { Platform } from '$lib/platform/schemas';
 import type { Genre } from '$lib/genre/schemas';
 import { addGenre, genreExists } from '../genre/genre-repository';
+import type { Publisher } from '$lib/publisher/schemas';
+import { addPublisher, publisherExists } from '$lib/publisher/publisher-repository';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
 });
-const getTotalPlayniteGames = (): number => {
+export const getTotalPlayniteGames = (): number => {
 	const db = getDb();
 	const query = `SELECT count(*) as total FROM playnite_game;`;
 	try {
@@ -232,11 +234,34 @@ export const addPlayniteGameGenre = (
 	}
 };
 
+export const addPlayniteGamePublisher = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>,
+	publisher: Publisher
+): boolean => {
+	const db = getDb();
+	const query = `
+    INSERT INTO playnite_game_publisher
+      (GameId, PublisherId)
+    VALUES
+      (?, ?)
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(game.Id, publisher.Id);
+		logSuccess(`Added publisher ${publisher.Name} to game ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to add publisher ${publisher.Name} for game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
 export const addPlayniteGame = (
 	game: PlayniteGame,
 	developers?: Array<Developer>,
 	platforms?: Array<Platform>,
-	genres?: Array<Genre>
+	genres?: Array<Genre>,
+	publishers?: Array<Publisher>
 ): boolean => {
 	const db = getDb();
 	const query = `
@@ -292,6 +317,17 @@ export const addPlayniteGame = (
 				}
 				if (addGenre(genre)) {
 					addPlayniteGameGenre({ Id: game.Id, Name: game.Name }, genre);
+				}
+			}
+		}
+		if (publishers) {
+			for (const publisher of publishers) {
+				if (publisherExists(publisher)) {
+					addPlayniteGamePublisher({ Id: game.Id, Name: game.Name }, publisher);
+					continue;
+				}
+				if (addPublisher(publisher)) {
+					addPlayniteGamePublisher({ Id: game.Id, Name: game.Name }, publisher);
 				}
 			}
 		}
