@@ -84,12 +84,16 @@ export const getHomePagePlayniteGames = (
   `;
 
 	try {
+		logDebug(`Fetching game list for home page, offset: ${offset}, pageSize: ${pageSize}`);
 		const stmt = db.prepare(query);
 		const result = stmt.all(pageSize, offset);
 		const data = homePagePlayniteGamesSchema.parse(result);
 		const total = getTotalPlayniteGames();
 		const hasNextPage = offset + pageSize < total;
 		const totalPages = Math.ceil(total / pageSize);
+		logDebug(
+			`Fetched game list for home page successfully, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
+		);
 		return { data, offset, pageSize, total, hasNextPage, totalPages };
 	} catch (error) {
 		logError('Failed to get all games from database', error as Error);
@@ -139,7 +143,7 @@ const playniteGameSchema = z.object({
 	Icon: z.string().optional().nullable()
 });
 export type GetPlayniteGameByIdResult = z.infer<typeof playniteGameSchema> & {
-	developers?: Array<z.infer<typeof developerSchema>>;
+	Developers?: Array<z.infer<typeof developerSchema>>;
 };
 export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult | undefined => {
 	const db = getDb();
@@ -150,7 +154,7 @@ export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult | und
 		const result = stmt.get(id);
 		const data = playniteGameSchema.parse(result);
 		logDebug(`Game with id ${id} fetched successfully`);
-		return { ...data, developers: getPlayniteGameDevelopers(id) };
+		return { ...data, Developers: getPlayniteGameDevelopers(id) };
 	} catch (error) {
 		logError('Failed to get Playnite game with id:' + id, error as Error);
 		return undefined;

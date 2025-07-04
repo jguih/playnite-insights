@@ -34,8 +34,8 @@
 	});
 
 	const getReleaseDate = $derived((): string => {
-		if (game?.ReleaseDate?.ReleaseDate) {
-			return new Date(game.ReleaseDate.ReleaseDate).toLocaleDateString();
+		if (game?.ReleaseDate) {
+			return new Date(game.ReleaseDate).toLocaleDateString();
 		}
 		return '';
 	});
@@ -69,7 +69,7 @@
 			<h2 class="mb-4 text-2xl font-semibold">{data.game.Name}</h2>
 			<img
 				src={getImageUrl(data.game.BackgroundImage)}
-				alt={`${data.game.Name} icon`}
+				alt={`${data.game.Name} background image`}
 				class="aspect-3/2 w-full"
 			/>
 			<div class="mt-4 mb-4 flex flex-col">
