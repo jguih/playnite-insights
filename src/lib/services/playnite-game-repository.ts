@@ -8,6 +8,7 @@ import { addPlatform, platformExists } from './platform-repository';
 import type { Platform } from '$lib/models/platform';
 import type { Genre } from '$lib/models/genre';
 import { addGenre, genreExists } from './genre-repository';
+import { dashPagePlayniteGameListSchema } from '$lib/models/api/playnite-game/schemas';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -119,17 +120,9 @@ export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult => {
 	}
 };
 
-const dashPagePlayniteGameListSchema = z.array(
-	z.object({
-		Id: z.string(),
-		IsInstalled: z.number().transform((n) => Boolean(n)),
-		Playtime: z.number()
-	})
-);
-export type GetDashPagePlayniteGameListResult =
+export const getDashPagePlayniteGameList = ():
 	| z.infer<typeof dashPagePlayniteGameListSchema>
-	| undefined;
-export const getDashPagePlayniteGameList = (): GetDashPagePlayniteGameListResult => {
+	| undefined => {
 	const db = getDb();
 	const query = `
     SELECT Id, IsInstalled, Playtime

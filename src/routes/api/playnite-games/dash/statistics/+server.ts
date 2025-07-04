@@ -1,15 +1,17 @@
+import type { statisticsResponseSchema } from '$lib/models/api/playnite-game/schemas';
 import {
-	getTotalPlaytimeOverLast6Months,
-	type GetTotalPlaytimeOverLast6MonthsResult
+	getTotalGamesOwnedOverLast6Months,
+	getTotalPlaytimeOverLast6Months
 } from '$lib/services/playnite-library-sync-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
-
-export type GetDashStatisticsResponse = GetTotalPlaytimeOverLast6MonthsResult;
+import { z } from 'zod';
 
 export const GET: RequestHandler = () => {
-	const totalPlaytimeOverLast6Months = getTotalPlaytimeOverLast6Months();
-	if (!totalPlaytimeOverLast6Months) {
-		return json(null, { status: 404 });
-	}
-	return json({ ...totalPlaytimeOverLast6Months });
+	const totalPlaytimeOverLast6Months = getTotalPlaytimeOverLast6Months() ?? [];
+	const totalGamesOwnedOverLast6Months = getTotalGamesOwnedOverLast6Months() ?? [];
+	const responseData: z.infer<typeof statisticsResponseSchema> = {
+		totalPlaytimeOverLast6Months,
+		totalGamesOwnedOverLast6Months
+	};
+	return json(responseData);
 };

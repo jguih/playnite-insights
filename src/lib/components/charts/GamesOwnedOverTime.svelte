@@ -2,8 +2,12 @@
 	import { init, type BarSeriesOption, type ComposeOption } from 'echarts';
 	import { onMount } from 'svelte';
 
-	let { xAxis, series }: { xAxis: { data: string[] }; series: { bar: { data: number[] } } } =
-		$props();
+	type Props = {
+		xAxis: { data: string[] };
+		series: { bar: { data: number[]; label: string } };
+	};
+
+	let { xAxis, series }: Props = $props();
 
 	const id = 'chart-games-owned-over-time';
 	var option: ComposeOption<BarSeriesOption> = $derived({
@@ -29,7 +33,7 @@
 		},
 		series: [
 			{
-				name: 'games owned',
+				name: series.bar.label,
 				type: 'bar',
 				data: series.bar.data,
 				color: ['hsl(198, 100%, 67%)']

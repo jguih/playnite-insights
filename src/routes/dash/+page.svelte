@@ -67,10 +67,15 @@
 			<h1 class="text-md truncate px-3 pt-4 font-semibold">
 				{m.dash_games_owned_over_last_n_months({ value: 6 })}
 			</h1>
-			{#if charts.totalPlaytimeOverLast6Months}
+			{#if charts?.totalGamesOwnedOverLast6Months}
 				<GamesOwnedOverTime
-					series={charts.totalPlaytimeOverLast6Months.series}
-					xAxis={charts.totalPlaytimeOverLast6Months.xAxis}
+					series={{
+						bar: {
+							data: charts.totalGamesOwnedOverLast6Months.series.bar.data,
+							label: m.dash_chart_label_games_owned()
+						}
+					}}
+					xAxis={charts.totalGamesOwnedOverLast6Months.xAxis}
 				/>
 			{:else}
 				<div>

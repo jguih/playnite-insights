@@ -7,12 +7,7 @@ const totalPlaytimeOverTimeSchema = z.array(
 		totalPlaytimeHours: z.number()
 	})
 );
-export type GetTotalPlaytimeOverLast6MonthsResult = ReturnType<
-	typeof getTotalPlaytimeOverLast6Months
->;
-export const getTotalPlaytimeOverLast6Months = ():
-	| { totalPlaytimeOverLast6Months: number[] }
-	| undefined => {
+export const getTotalPlaytimeOverLast6Months = (): number[] | undefined => {
 	const query = `
       SELECT totalPlaytimeHours FROM (
         SELECT MAX(TotalPlaytimeHours) as totalPlaytimeHours, strftime('%Y-%m', Timestamp) as yearMonth
@@ -27,9 +22,36 @@ export const getTotalPlaytimeOverLast6Months = ():
 		const result = stmt.all();
 		const data = totalPlaytimeOverTimeSchema.parse(result);
 		logSuccess('Successfully queried total playtime over last 6 months');
-		return { totalPlaytimeOverLast6Months: data.map((e) => e.totalPlaytimeHours) };
+		return data.map((e) => e.totalPlaytimeHours);
 	} catch (error) {
 		logError('Failed to get total playtime over last 6 months', error as Error);
+		return undefined;
+	}
+};
+
+const totalGamesOwnedOverLast6MonthsSchema = z.array(
+	z.object({
+		totalGamesOwned: z.number()
+	})
+);
+export const getTotalGamesOwnedOverLast6Months = (): number[] | undefined => {
+	const query = `
+      SELECT totalGamesOwned FROM (
+        SELECT MAX(TotalGames) as totalGamesOwned, strftime('%Y-%m', Timestamp) as yearMonth
+        FROM playnite_library_sync
+        WHERE Timestamp >= datetime('now', '-6 months')
+        GROUP BY yearMonth
+        ORDER BY yearMonth
+      );
+    `;
+	try {
+		const stmt = getDb().prepare(query);
+		const result = stmt.all();
+		const data = totalGamesOwnedOverLast6MonthsSchema.parse(result);
+		logSuccess('Successfully queried total games owned over last 6 months');
+		return data.map((e) => e.totalGamesOwned);
+	} catch (error) {
+		logError('Failed to get total games owned over last 6 months', error as Error);
 		return undefined;
 	}
 };
