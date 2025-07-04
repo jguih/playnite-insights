@@ -10,9 +10,6 @@ const getLogLevel = () => {
 	if (process.env.LOG_LEVEL) {
 		return Number(process.env.LOG_LEVEL);
 	}
-	if (process.env.NODE_ENV == 'testing') {
-		return LOG_LEVELS.none;
-	}
 	if (process.env.NODE_ENV == 'production') {
 		return LOG_LEVELS.info;
 	}

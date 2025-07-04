@@ -36,12 +36,13 @@ const getLibraryManifestFromFile = async () => {
 
 export const writeLibraryManifest = async (
 	fsReaddir: typeof readdir = readdir,
-	fsWritefile: typeof writeFile = writeFile
+	fsWritefile: typeof writeFile = writeFile,
+	fnGetAllPlayniteGameManifestData: typeof getAllPlayniteGameManifestData = getAllPlayniteGameManifestData
 ): Promise<ValidationResult<PlayniteLibraryManifest>> => {
 	logDebug('Writing library manifest...');
 	try {
 		const gamesInLibrary: PlayniteLibraryManifest['gamesInLibrary'] = [];
-		const gamesManifestData = getAllPlayniteGameManifestData();
+		const gamesManifestData = fnGetAllPlayniteGameManifestData();
 		if (!gamesManifestData) {
 			throw new Error('Failed to fetch all game Ids');
 		}
