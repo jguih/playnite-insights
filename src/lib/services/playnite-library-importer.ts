@@ -120,8 +120,18 @@ export const syncGameList = async (body: unknown) => {
 					ReleaseDate: game.ReleaseDate?.ReleaseDate,
 					ContentHash: game.ContentHash
 				},
-				game.Developers,
-				game.Platforms
+				game.Developers ?? [],
+				game.Platforms?.map((plat) => {
+					return {
+						Id: plat.Id,
+						Name: plat.Name,
+						SpecificationId: plat.SpecificationId,
+						Background: plat.Background ?? null,
+						Cover: plat.Cover ?? null,
+						Icon: plat.Icon ?? null
+					};
+				}),
+				game.Genres ?? []
 			);
 			// TODO: Sync genres, platforms and publishers
 			if (!result) {

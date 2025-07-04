@@ -3,10 +3,11 @@ import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
 import { developerSchema, type Developer } from '$lib/models/developer';
 import { playniteGameSchema, type PlayniteGame } from '$lib/models/playnite-game';
-import type { IncomingPlayniteGameDTO } from '$lib/models/dto/incoming-playnite-game-dto';
 import { addDeveloper, developerExists } from './developer-repository';
 import { addPlatform, platformExists } from './platform-repository';
 import type { Platform } from '$lib/models/platform';
+import type { Genre } from '$lib/models/genre';
+import { addGenre, genreExists } from './genre-repository';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -213,10 +214,33 @@ export const addPlayniteGamePlatform = (
 	}
 };
 
+export const addPlayniteGameGenre = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>,
+	genre: Genre
+): boolean => {
+	const db = getDb();
+	const query = `
+    INSERT INTO playnite_game_genre
+      (GameId, GenreId)
+    VALUES
+      (?, ?)
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(game.Id, genre.Id);
+		logSuccess(`Added genre ${genre.Name} to game ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to add genre ${genre.Name} for game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
 export const addPlayniteGame = (
 	game: PlayniteGame,
-	developers?: IncomingPlayniteGameDTO['Developers'],
-	platforms?: IncomingPlayniteGameDTO['Platforms']
+	developers?: Array<Developer>,
+	platforms?: Array<Platform>,
+	genres?: Array<Genre>
 ): boolean => {
 	const db = getDb();
 	const query = `
@@ -255,24 +279,23 @@ export const addPlayniteGame = (
 		}
 		if (platforms) {
 			for (const platform of platforms) {
-				const exists = platformExists({
-					Id: platform.Id,
-					Name: platform.Name
-				});
-				const asPlatform: Platform = {
-					Id: platform.Id,
-					Name: platform.Name,
-					SpecificationId: platform.SpecificationId,
-					Background: platform.Background ?? null,
-					Cover: platform.Cover ?? null,
-					Icon: platform.Icon ?? null
-				};
-				if (exists) {
-					addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, asPlatform);
+				if (platformExists(platform)) {
+					addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, platform);
 					continue;
 				}
-				if (addPlatform(asPlatform)) {
-					addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, asPlatform);
+				if (addPlatform(platform)) {
+					addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, platform);
+				}
+			}
+		}
+		if (genres) {
+			for (const genre of genres) {
+				if (genreExists(genre)) {
+					addPlayniteGameGenre({ Id: game.Id, Name: game.Name }, genre);
+					continue;
+				}
+				if (addGenre(genre)) {
+					addPlayniteGameGenre({ Id: game.Id, Name: game.Name }, genre);
 				}
 			}
 		}

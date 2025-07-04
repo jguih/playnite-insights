@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite"
-import { DB_FILE, FILES_DIR, logInfo, logSuccess } from "./config.js";
+import { DB_FILE, FILES_DIR, logInfo, logSuccess, MANIFEST_FILE } from "./config.js";
 import { exit } from "process";
-import { readdir, rm } from "fs/promises";
+import { readdir, rm, unlink } from "fs/promises";
 import { join } from "path";
 
 /**
@@ -28,6 +28,8 @@ const purge = async (db) => {
     await rm(folderPath, { recursive:true, force:true });
     logInfo(`Folder ${folderPath} deleted`);
   }
+  // Remove manifest file
+  await unlink(MANIFEST_FILE);
   logSuccess(`Cleaned all media files`);
 };
 

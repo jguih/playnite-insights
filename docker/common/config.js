@@ -15,6 +15,7 @@ await access(DATA_DIR);
 export const DB_FILE = join(DATA_DIR, 'db');
 export const INIT_DB_SQL_FILE = join(__dirname, 'init.sql');
 export const FILES_DIR = join(DATA_DIR, '/files');
+export const MANIFEST_FILE = join(DATA_DIR, '/manifest.json');
 
 // --- Logging
 
