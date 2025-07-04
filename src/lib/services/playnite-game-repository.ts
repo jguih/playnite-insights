@@ -2,7 +2,7 @@ import type { PlayniteGameMetadata } from '$lib/models/playnite-game';
 import { readFile } from 'fs/promises';
 import { logDebug, logError } from './log';
 import { playniteInsightsConfig } from '$lib/config/config';
-import { getDb } from '$lib/infrastructure/database';
+import { getDb, getLastInsertId } from '$lib/infrastructure/database';
 import { z } from 'zod';
 
 const PLAYNITE_GAMES_FILE = playniteInsightsConfig.path.playniteGamesFile;
@@ -191,5 +191,37 @@ export const getDashPagePlayniteGameList = (): GetDashPagePlayniteGameListResult
 	} catch (error) {
 		logError('Failed to get game list for dashboard page', error as Error);
 		return undefined;
+	}
+};
+
+export const addPlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
+	const db = getDb();
+	const query = `
+    INSERT INTO playnite_game
+     (Id, Name, Description, ReleaseDate, Playtime, LastActivity, Added, InstallDirectory, IsInstalled, BackgroundImage, CoverImage, Icon)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(
+			game.Id,
+			game.Name ?? null,
+			game.Description ?? null,
+			game.ReleaseDate ?? null,
+			game.Playtime ?? null,
+			game.LastActivity ?? null,
+			game.Added ?? null,
+			game.InstallDirectory ?? null,
+			+game.IsInstalled,
+			game.BackgroundImage ?? null,
+			game.CoverImage ?? null,
+			game.Icon ?? null
+		);
+		const id = getLastInsertId();
+		logDebug(`Added a new game with id ${id}`);
+		return true;
+	} catch (error) {
+		logError('Failed to get game list for dashboard page', error as Error);
+		return false;
 	}
 };

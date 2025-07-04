@@ -1,4 +1,4 @@
-import { importGameListFromJsonBody } from '$lib/services/playnite-library-importer';
+import { syncGameList } from '$lib/services/playnite-library-importer';
 import { logDebug, logInfo } from '$lib/services/log';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
@@ -11,8 +11,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	} else {
 		logInfo('Request body size: unknown');
 	}
-	const games = await request.json();
-	const result = await importGameListFromJsonBody(games);
-
-	return json(result, { status: result.httpCode });
+	const data = await request.json();
+	const result = syncGameList(data);
+	if (result) {
+		return json(null, { status: 200 });
+	}
+	return json(null, { status: 500 });
 };

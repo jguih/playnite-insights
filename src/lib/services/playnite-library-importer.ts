@@ -14,6 +14,7 @@ import { unlink } from 'fs/promises';
 import { writeLibraryManifest } from './library-manifest';
 import { z } from 'zod';
 import { getDb, getLastInsertId } from '$lib/infrastructure/database';
+import { addPlayniteGame } from './playnite-game-repository';
 
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
 const PLAYNITE_GAMES_FILE = playniteInsightsConfig.path.playniteGamesFile;
@@ -215,4 +216,37 @@ export const importLibraryFiles = async (body: unknown | null): Promise<Validati
 		httpCode: 200,
 		data: null
 	};
+};
+
+export const syncGameList = (body: unknown) => {
+	try {
+		const data = syncGameListSchema.parse(body);
+		const games = data.GameList;
+		for (const game of games) {
+			const result = addPlayniteGame({
+				Id: game.Id,
+				IsInstalled: game.IsInstalled,
+				Playtime: game.Playtime,
+				Added: game.Added,
+				BackgroundImage: game.BackgroundImage,
+				CoverImage: game.CoverImage,
+				Description: game.Description,
+				Icon: game.Icon,
+				InstallDirectory: game.InstallDirectory,
+				LastActivity: game.LastActivity,
+				Name: game.Name,
+				ReleaseDate: game.ReleaseDate?.ReleaseDate
+			});
+			// TODO: Sync devs, genres, platforms and publishers
+			// TODO: Register sync
+			if (!result) {
+				logError(`Failed to add game: \n${JSON.stringify(game, null, 2)}`);
+			}
+		}
+		writeLibraryManifest();
+		return true;
+	} catch (error) {
+		logError(`Failed to import game list`, error as Error);
+		return false;
+	}
 };

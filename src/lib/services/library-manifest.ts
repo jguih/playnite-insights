@@ -45,6 +45,7 @@ export const writeLibraryManifest = async (
 		const mediaExistsFor: PlayniteLibraryManifest['mediaExistsFor'] = [];
 		// Read the contentHash.txt inside every library folder and append it to the manifest's `mediaExistsFor`
 		for (const folder of libraryFolders) {
+			if (folder == 'placeholder') continue;
 			const contentHashFilePath = join(FILES_DIR, folder, CONTENT_HASH_FILE_NAME);
 			await access(contentHashFilePath);
 			const contentHash = await readFile(contentHashFilePath, 'utf-8');
