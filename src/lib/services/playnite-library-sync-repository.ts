@@ -1,6 +1,6 @@
 import { getDb, getLastInsertId } from '$lib/infrastructure/database';
 import { z } from 'zod';
-import { logDebug, logError, logSuccess } from './log';
+import { logError, logSuccess } from './log';
 
 const totalPlaytimeOverTimeSchema = z.array(
 	z.object({
@@ -22,7 +22,6 @@ export const getTotalPlaytimeOverLast6Months = ():
         ORDER BY yearMonth
       );
     `;
-	logDebug(`Querying total playtime over last 6 months, running: \n${query}`);
 	try {
 		const stmt = getDb().prepare(query);
 		const result = stmt.all();

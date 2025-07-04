@@ -1,4 +1,3 @@
-import { incomingPlayniteGameDtoSchema } from '$lib/models/dto/incoming-playnite-game-dto';
 import { randomUUID } from 'crypto';
 import { rm } from 'fs/promises';
 import { join } from 'path';
@@ -21,6 +20,7 @@ import {
 	updatePlayniteGame
 } from './playnite-game-repository';
 import { addPlayniteLibrarySync } from './playnite-library-sync-repository';
+import { incomingPlayniteGameDtoSchema } from '$lib/models/dto/incoming-playnite-game-dto';
 
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
 const TMP_DIR = playniteInsightsConfig.path.tmpDir;
@@ -85,15 +85,17 @@ export const importLibraryFiles = async (body: unknown | null): Promise<Validati
 	};
 };
 
+/**
+ * Synchronizes game metadata from Playnite Insights Exporter with the database
+ */
 export const syncGameList = async (body: unknown) => {
 	try {
 		const data = syncGameListSchema.parse(body);
 		logInfo(`Games to add: ${data.AddedItems.length}`);
 		logInfo(`Games to update: ${data.UpdatedItems.length}`);
 		logInfo(`Games to delete: ${data.RemovedItems.length}`);
-		// TODO: Fix this, addedItems doesn't contain the entire library
 		const totalPlaytimeHours = getTotalPlaytimeHours();
-		// data.AddedItems.map((g) => g.Playtime).reduce((prev, current) => prev + current) / 3600;
+		// TODO: Get total games in lib
 		const totalGamesInLib = data.AddedItems.length;
 		// Games to add
 		for (const game of data.AddedItems) {
