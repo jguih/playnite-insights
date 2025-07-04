@@ -15,9 +15,9 @@ export const getTotalPlaytimeOverLast6Months = ():
 	| undefined => {
 	const query = `
       SELECT totalPlaytimeHours FROM (
-        SELECT MAX(totalPlaytimeHours) as totalPlaytimeHours, strftime('%Y-%m', timestamp) as yearMonth
+        SELECT MAX(TotalPlaytimeHours) as totalPlaytimeHours, strftime('%Y-%m', Timestamp) as yearMonth
         FROM playnite_library_sync
-        WHERE timestamp >= datetime('now', '-6 months')
+        WHERE Timestamp >= datetime('now', '-6 months')
         GROUP BY yearMonth
         ORDER BY yearMonth
       );
@@ -39,7 +39,7 @@ export const addPlayniteLibrarySync = (totalPlaytimeHours: number, totalGames: n
 	const now = new Date().toISOString();
 	const query = `
     INSERT INTO playnite_library_sync
-      (timestamp, totalPlaytimeHours, totalGames)
+      (Timestamp, TotalPlaytimeHours, TotalGames)
     VALUES
       (?, ?, ?);
   `;

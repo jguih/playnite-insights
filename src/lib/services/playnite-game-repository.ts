@@ -1,6 +1,10 @@
 import { logDebug, logError, logSuccess } from './log';
 import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
+import { developerSchema, type Developer } from '$lib/models/developer';
+import { playniteGameSchema, type PlayniteGame } from '$lib/models/playnite-game';
+import type { IncomingPlayniteGameDTO } from '$lib/models/dto/incoming-playnite-game-dto';
+import { addDeveloper, developerExists } from './developer-repository';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -68,13 +72,9 @@ export const getHomePagePlayniteGameList = (
 	}
 };
 
-const developerSchema = z.object({
-	Id: z.string(),
-	Name: z.string()
-});
 export const getPlayniteGameDevelopers = (
-	gameId: string
-): Array<z.infer<typeof developerSchema>> | undefined => {
+	game: Pick<PlayniteGame, 'Id' | 'Name'>
+): Array<Developer> | undefined => {
 	const db = getDb();
 	const query = `
     SELECT dev.Id, dev.Name 
@@ -83,35 +83,20 @@ export const getPlayniteGameDevelopers = (
     WHERE pgdev.GameId = (?)
   `;
 	try {
-		logDebug(`Fetching developer list for game with id ${gameId}...`);
+		logDebug(`Fetching developer list for game with id ${game.Id}...`);
 		const stmt = db.prepare(query);
-		const result = stmt.all(gameId);
+		const result = stmt.all(game.Id);
 		const data = z.array(developerSchema).parse(result);
-		logDebug(`Developer list for game with id ${gameId} fetched successfully`);
+		logSuccess(`Developer list for ${game.Name} fetched: ${data.map((d) => d.Name).join(', ')}`);
 		return data;
 	} catch (error) {
-		logError('Failed to get developer list for game with id:' + gameId, error as Error);
+		logError(`Failed to get developer list for ${game.Name}:`, error as Error);
 		return undefined;
 	}
 };
 
-const playniteGameSchema = z.object({
-	Id: z.string(),
-	Name: z.string().optional().nullable(),
-	Description: z.string().optional().nullable(),
-	ReleaseDate: z.string().optional().nullable(),
-	Playtime: z.number(),
-	LastActivity: z.string().optional().nullable(),
-	Added: z.string().optional().nullable(),
-	InstallDirectory: z.string().optional().nullable(),
-	IsInstalled: z.number().transform((n) => Boolean(n)),
-	BackgroundImage: z.string().optional().nullable(),
-	CoverImage: z.string().optional().nullable(),
-	Icon: z.string().optional().nullable(),
-	ContentHash: z.string()
-});
 export type GetPlayniteGameByIdResult =
-	| (z.infer<typeof playniteGameSchema> & {
+	| (PlayniteGame & {
 			Developers?: Array<z.infer<typeof developerSchema>>;
 	  })
 	| undefined;
@@ -122,9 +107,9 @@ export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult => {
 		logDebug(`Fetching game with id ${id}...`);
 		const stmt = db.prepare(query);
 		const result = stmt.get(id);
-		const data = playniteGameSchema.parse(result);
+		const game = playniteGameSchema.parse(result);
 		logDebug(`Game with id ${id} fetched successfully`);
-		return { ...data, Developers: getPlayniteGameDevelopers(id) };
+		return { ...game, Developers: getPlayniteGameDevelopers({ Id: game.Id, Name: game.Name }) };
 	} catch (error) {
 		logError('Failed to get Playnite game with id:' + id, error as Error);
 		return undefined;
@@ -182,7 +167,32 @@ export const playniteGameExists = (gameId: string) => {
 	}
 };
 
-export const addPlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
+export const addPlayniteGameDeveloper = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>,
+	developer: Developer
+): boolean => {
+	const db = getDb();
+	const query = `
+    INSERT INTO playnite_game_developer
+      (GameId, DeveloperId)
+    VALUES
+      (?, ?)
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(game.Id, developer.Id);
+		logSuccess(`Added developer ${developer.Name} to game ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to add developer ${developer.Name} for game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
+export const addPlayniteGame = (
+	game: PlayniteGame,
+	developers?: IncomingPlayniteGameDTO['Developers']
+): boolean => {
 	const db = getDb();
 	const query = `
     INSERT INTO playnite_game
@@ -207,6 +217,17 @@ export const addPlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
 			game.ContentHash
 		);
 		logDebug(`Added game ${game.Name}`);
+		if (developers) {
+			for (const developer of developers) {
+				if (developerExists(developer)) {
+					addPlayniteGameDeveloper({ Id: game.Id, Name: game.Name }, developer);
+					continue;
+				}
+				if (addDeveloper(developer)) {
+					addPlayniteGameDeveloper({ Id: game.Id, Name: game.Name }, developer);
+				}
+			}
+		}
 		return true;
 	} catch (error) {
 		logError(`Failed to add game ${game.Name}`, error as Error);
@@ -214,7 +235,7 @@ export const addPlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
 	}
 };
 
-export const updatePlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
+export const updatePlayniteGame = (game: PlayniteGame) => {
 	const db = getDb();
 	const query = `
     UPDATE playnite_game
@@ -294,7 +315,7 @@ export const getAllPlayniteGameManifestData = ():
 	}
 };
 
-const totalPlaytimeSecondsSchema = z.object({ totalPlaytimeSeconds: z.number() });
+const totalPlaytimeSecondsSchema = z.object({ totalPlaytimeSeconds: z.number().nullable() });
 export const getTotalPlaytimeHours = (): number | undefined => {
 	const db = getDb();
 	const query = `
@@ -304,7 +325,7 @@ export const getTotalPlaytimeHours = (): number | undefined => {
 		const stmt = db.prepare(query);
 		const result = stmt.get();
 		const data = totalPlaytimeSecondsSchema.parse(result);
-		return data.totalPlaytimeSeconds / 3600;
+		return data.totalPlaytimeSeconds ? data.totalPlaytimeSeconds / 3600 : undefined;
 	} catch (error) {
 		logError(`Failed to get total playtime`, error as Error);
 		return;

@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS `playnite_library_sync` (
-  `id` INTEGER NOT NULL PRIMARY KEY, 
-  `timestamp` DATETIME NOT NULL,
-  `totalPlaytimeHours` REAL NOT NULL,
-  `totalGames` INTEGER NOT NULL
+  `Id` INTEGER NOT NULL PRIMARY KEY, 
+  `Timestamp` DATETIME NOT NULL,
+  `TotalPlaytimeHours` REAL NOT NULL,
+  `TotalGames` INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `platform` (

@@ -104,22 +104,25 @@ export const syncGameList = async (body: unknown) => {
 				logInfo(`Skipping existing game ${game.Name}`);
 				continue;
 			}
-			const result = addPlayniteGame({
-				Id: game.Id,
-				IsInstalled: game.IsInstalled,
-				Playtime: game.Playtime,
-				Added: game.Added,
-				BackgroundImage: game.BackgroundImage,
-				CoverImage: game.CoverImage,
-				Description: game.Description,
-				Icon: game.Icon,
-				InstallDirectory: game.InstallDirectory,
-				LastActivity: game.LastActivity,
-				Name: game.Name,
-				ReleaseDate: game.ReleaseDate?.ReleaseDate,
-				ContentHash: game.ContentHash
-			});
-			// TODO: Sync devs, genres, platforms and publishers
+			const result = addPlayniteGame(
+				{
+					Id: game.Id,
+					IsInstalled: game.IsInstalled,
+					Playtime: game.Playtime,
+					Added: game.Added,
+					BackgroundImage: game.BackgroundImage,
+					CoverImage: game.CoverImage,
+					Description: game.Description,
+					Icon: game.Icon,
+					InstallDirectory: game.InstallDirectory,
+					LastActivity: game.LastActivity,
+					Name: game.Name,
+					ReleaseDate: game.ReleaseDate?.ReleaseDate,
+					ContentHash: game.ContentHash
+				},
+				game.Developers
+			);
+			// TODO: Sync genres, platforms and publishers
 			if (!result) {
 				logError(`Failed to add game ${game.Name}`);
 			}

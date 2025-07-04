@@ -3,7 +3,8 @@ export const LOG_LEVELS = {
 	debug: 0,
 	info: 1,
 	success: 2,
-	error: 3
+	warning: 3,
+	error: 4
 };
 
 const getLogLevel = () => {
@@ -20,7 +21,7 @@ export const CURRENT_LOG_LEVEL = getLogLevel();
 
 const getDateTimeString = (): string => {
 	const now = new Date();
-	return now.toISOString().replace('T', ' ').replace('Z', '');
+	return now.toISOString().replace('T', ' ').replace('Z', '').trim();
 };
 
 export const logError = (message: string, error?: Error): void => {
@@ -31,6 +32,13 @@ export const logError = (message: string, error?: Error): void => {
 	if (error) {
 		console.error(error);
 	}
+};
+
+export const logWarning = (message: string): void => {
+	if (CURRENT_LOG_LEVEL > LOG_LEVELS.warning) {
+		return;
+	}
+	console.warn(`[${getDateTimeString()}][WARNING] ${message}`);
 };
 
 export const logDebug = (message: string): void => {
