@@ -18,7 +18,7 @@ const developerSchema = genreSchema;
 
 const publisherSchema = developerSchema;
 
-export const playniteGameSchema = z.object({
+export const incomingPlayniteGameDtoSchema = z.object({
 	Id: z.string(),
 	Name: z.string().optional().nullable(),
 	Description: z.string().optional().nullable(),
@@ -39,9 +39,8 @@ export const playniteGameSchema = z.object({
 	IsInstalled: z.boolean(),
 	BackgroundImage: z.string().optional().nullable(),
 	CoverImage: z.string().optional().nullable(),
-	Icon: z.string().optional().nullable()
+	Icon: z.string().optional().nullable(),
+	ContentHash: z.string()
 });
 
-export const playniteGameListSchema = z.array(playniteGameSchema);
-
-export type PlayniteGameMetadata = z.infer<typeof playniteGameSchema>;
+export type IncomingPlayniteGameDTO = z.infer<typeof incomingPlayniteGameDtoSchema>;

@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS `playnite_game` (
   `IsInstalled` BOOLEAN NOT NULL,
   `BackgroundImage` TEXT,
   `CoverImage` TEXT,
-  `Icon` TEXT
+  `Icon` TEXT,
+  `ContentHash` TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `playnite_game_platform` (

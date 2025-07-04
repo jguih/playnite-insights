@@ -1,6 +1,6 @@
-import { playniteGameListSchema, type PlayniteGameMetadata } from '$lib/models/playnite-game';
+import { incomingPlayniteGameDtoSchema } from '$lib/models/dto/incoming-playnite-game-dto';
 import { randomUUID } from 'crypto';
-import { writeFile, rename, rm } from 'fs/promises';
+import { rm } from 'fs/promises';
 import { join } from 'path';
 import { logDebug, logError, logInfo, logSuccess } from './log';
 import { playniteInsightsConfig } from '$lib/config/config';
@@ -13,156 +13,23 @@ import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import { writeLibraryManifest } from './library-manifest';
 import { z } from 'zod';
-import { getDb, getLastInsertId } from '$lib/infrastructure/database';
-import { addPlayniteGame } from './playnite-game-repository';
+import {
+	addPlayniteGame,
+	deletePlayniteGame,
+	getTotalPlaytimeHours,
+	playniteGameExists,
+	updatePlayniteGame
+} from './playnite-game-repository';
+import { addPlayniteLibrarySync } from './playnite-library-sync-repository';
 
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
-const PLAYNITE_GAMES_FILE = playniteInsightsConfig.path.playniteGamesFile;
 const TMP_DIR = playniteInsightsConfig.path.tmpDir;
 
 const syncGameListSchema = z.object({
-	AddedItems: z.array(z.string()),
+	AddedItems: z.array(incomingPlayniteGameDtoSchema),
 	RemovedItems: z.array(z.string()),
-	GameList: playniteGameListSchema
+	UpdatedItems: z.array(incomingPlayniteGameDtoSchema)
 });
-
-const _writeGameListToFile = async (
-	games: Array<PlayniteGameMetadata>,
-	fs: {
-		writeFile: typeof writeFile;
-		rename: typeof rename;
-	} = {
-		writeFile,
-		rename
-	}
-): Promise<boolean> => {
-	const tmpFile = join(TMP_DIR, `games-${randomUUID()}.json`);
-	try {
-		logDebug(`Writing game list to temporary file: ${tmpFile}`);
-		await fs.writeFile(tmpFile, JSON.stringify(games, null, 2));
-		logDebug(`Temporary file ${tmpFile} written successfully`);
-		logDebug(`Moving ${tmpFile} to ${PLAYNITE_GAMES_FILE}`);
-		await fs.rename(tmpFile, PLAYNITE_GAMES_FILE);
-		logSuccess(`Game list written to ${PLAYNITE_GAMES_FILE} successfully`);
-	} catch (error) {
-		logError('Error writing game list to file', error as Error);
-		return false;
-	}
-	return true;
-};
-
-const _parseGameListFromJsonBody = (
-	body: unknown
-): ReturnType<typeof syncGameListSchema.safeParse> => {
-	return syncGameListSchema.safeParse(body);
-};
-
-const _removeItems = async (gameIdList: string[]): Promise<ValidationResult> => {
-	if (gameIdList.length === 0) {
-		logInfo('No game media files to remove');
-		return {
-			isValid: true,
-			message: 'No game media files to remove',
-			httpCode: 200
-		};
-	}
-	logDebug(`Removing media files for ${gameIdList}`);
-	try {
-		for (const gameId of gameIdList) {
-			const gameMediaFolderDir = join(FILES_DIR, gameId);
-			await rm(gameMediaFolderDir, { recursive: true, force: true });
-			logInfo(`Deleted media folder ${gameMediaFolderDir}`);
-		}
-		logSuccess(`Media folder for ${gameIdList.length} games deleted successfully`);
-		return {
-			isValid: true,
-			message: `Media folder for ${gameIdList.length} games deleted successfully`,
-			httpCode: 200
-		};
-	} catch (error) {
-		logError(`Failed to delete media folder a game`, error as Error);
-		return {
-			isValid: false,
-			message: 'Failed to delete media folder for a game',
-			httpCode: 500
-		};
-	}
-};
-
-const _addPlayniteLibrarySync = (totalPlaytimeHours: number, totalGames: number) => {
-	const db = getDb();
-	const now = new Date().toISOString();
-	const query = `
-    INSERT INTO playnite_library_sync
-      (timestamp, totalPlaytimeHours, totalGames)
-    VALUES
-      (?, ?, ?);
-  `;
-	try {
-		const stmt = db.prepare(query);
-		logDebug('Creating new entry in playnite_library_sync');
-		stmt.run(now, totalPlaytimeHours, totalGames);
-		const lastInsertId = getLastInsertId();
-		logSuccess(
-			`Inserted playnite_library_sync entry with id: ${lastInsertId ?? 'undefined'}, totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
-		);
-	} catch (error) {
-		logError('Error while inserting new entry for Playnite library sync', error as Error);
-	}
-};
-
-/**
- * Imports a game list from a JSON body.
- */
-export const importGameListFromJsonBody = async (
-	body: unknown,
-	parseGameListFromJsonBody: typeof _parseGameListFromJsonBody = _parseGameListFromJsonBody,
-	writeGameListToFile: typeof _writeGameListToFile = _writeGameListToFile,
-	removeItems: typeof _removeItems = _removeItems,
-	addPlayniteLibrarySync: typeof _addPlayniteLibrarySync = _addPlayniteLibrarySync
-): Promise<ValidationResult> => {
-	logDebug('Parsing game list from JSON body');
-	const parseResult = parseGameListFromJsonBody(body);
-	if (parseResult.success === false) {
-		logError('Invalid game data received', parseResult.error);
-		return {
-			isValid: false,
-			message: 'Invalid game data',
-			httpCode: 400,
-			warnings: parseResult.error.issues.map((issue) => issue.message)
-		};
-	}
-	logSuccess('Game list parsed successfully');
-	const command = parseResult.data;
-	const newGameList = command.GameList;
-	const addedItems = command.AddedItems;
-	const removedItems = command.RemovedItems;
-	const totalPlaytimeSeconds = newGameList
-		.map((g) => g.Playtime)
-		.reduce((prev, current) => prev + current);
-	const totalPlaytimeHours = totalPlaytimeSeconds / 3600;
-	const totalGames = newGameList.length;
-	logInfo(`Importing ${newGameList.length} games`);
-	logInfo(`Games to add ${addedItems.length}`);
-	logInfo(`Games to remove ${removedItems.length}`);
-	const writeResult = await writeGameListToFile(newGameList);
-	if (!writeResult) {
-		return {
-			isValid: false,
-			message: 'Failed to write game list to file',
-			httpCode: 500
-		};
-	}
-	await removeItems(removedItems);
-	await writeLibraryManifest();
-	addPlayniteLibrarySync(totalPlaytimeHours, totalGames);
-	return {
-		isValid: true,
-		message: 'Game list imported successfully',
-		httpCode: 200,
-		data: null
-	};
-};
 
 /**
  * Imports library files (Playnite media files) from a FormData object.
@@ -218,11 +85,23 @@ export const importLibraryFiles = async (body: unknown | null): Promise<Validati
 	};
 };
 
-export const syncGameList = (body: unknown) => {
+export const syncGameList = async (body: unknown) => {
 	try {
 		const data = syncGameListSchema.parse(body);
-		const games = data.GameList;
-		for (const game of games) {
+		logInfo(`Games to add: ${data.AddedItems.length}`);
+		logInfo(`Games to update: ${data.UpdatedItems.length}`);
+		logInfo(`Games to delete: ${data.RemovedItems.length}`);
+		// TODO: Fix this, addedItems doesn't contain the entire library
+		const totalPlaytimeHours = getTotalPlaytimeHours();
+		// data.AddedItems.map((g) => g.Playtime).reduce((prev, current) => prev + current) / 3600;
+		const totalGamesInLib = data.AddedItems.length;
+		// Games to add
+		for (const game of data.AddedItems) {
+			const exists = playniteGameExists(game.Id);
+			if (exists) {
+				logInfo(`Skipping existing game ${game.Name}`);
+				continue;
+			}
 			const result = addPlayniteGame({
 				Id: game.Id,
 				IsInstalled: game.IsInstalled,
@@ -235,13 +114,61 @@ export const syncGameList = (body: unknown) => {
 				InstallDirectory: game.InstallDirectory,
 				LastActivity: game.LastActivity,
 				Name: game.Name,
-				ReleaseDate: game.ReleaseDate?.ReleaseDate
+				ReleaseDate: game.ReleaseDate?.ReleaseDate,
+				ContentHash: game.ContentHash
 			});
 			// TODO: Sync devs, genres, platforms and publishers
-			// TODO: Register sync
 			if (!result) {
-				logError(`Failed to add game: \n${JSON.stringify(game, null, 2)}`);
+				logError(`Failed to add game ${game.Name}`);
 			}
+		}
+		// Games to update
+		for (const game of data.UpdatedItems) {
+			const exists = playniteGameExists(game.Id);
+			if (!exists) {
+				logInfo(`Skipping game to update ${game.Name}, as it doesn't exist`);
+				continue;
+			}
+			const result = updatePlayniteGame({
+				Id: game.Id,
+				IsInstalled: game.IsInstalled,
+				Playtime: game.Playtime,
+				Added: game.Added,
+				BackgroundImage: game.BackgroundImage,
+				CoverImage: game.CoverImage,
+				Description: game.Description,
+				Icon: game.Icon,
+				InstallDirectory: game.InstallDirectory,
+				LastActivity: game.LastActivity,
+				Name: game.Name,
+				ReleaseDate: game.ReleaseDate?.ReleaseDate,
+				ContentHash: game.ContentHash
+			});
+			// TODO: Sync devs, genres, platforms and publishers
+			if (!result) {
+				logError(`Failed to update game ${game.Name}`);
+			}
+		}
+		// Games to delete
+		for (const gameId of data.RemovedItems) {
+			const result = deletePlayniteGame(gameId);
+			if (!result) {
+				logError(`Failed to delete game with id ${gameId}`);
+			}
+			const gameMediaFolderDir = join(FILES_DIR, gameId);
+			try {
+				await rm(gameMediaFolderDir, { recursive: true, force: true });
+				logInfo(`Deleted media folder ${gameMediaFolderDir}`);
+			} catch (error) {
+				logError(`Failed to delete media folder ${gameMediaFolderDir}`, error as Error);
+			}
+		}
+		if (totalPlaytimeHours !== undefined && totalGamesInLib !== undefined) {
+			addPlayniteLibrarySync(totalPlaytimeHours, totalGamesInLib);
+		} else {
+			logError(
+				`Failed to add playnite library sync entry, required values are invalid or undefined. \ntotalPlaytimeHours: ${totalPlaytimeHours}, totalGamesInLib: ${totalGamesInLib}`
+			);
 		}
 		writeLibraryManifest();
 		return true;

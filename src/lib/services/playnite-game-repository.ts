@@ -1,39 +1,6 @@
-import type { PlayniteGameMetadata } from '$lib/models/playnite-game';
-import { readFile } from 'fs/promises';
-import { logDebug, logError } from './log';
-import { playniteInsightsConfig } from '$lib/config/config';
-import { getDb, getLastInsertId } from '$lib/infrastructure/database';
+import { logDebug, logError, logSuccess } from './log';
+import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
-
-const PLAYNITE_GAMES_FILE = playniteInsightsConfig.path.playniteGamesFile;
-
-const getGameListFromFile = async (): Promise<PlayniteGameMetadata[]> => {
-	try {
-		logDebug(`Reading game list JSON file at ${PLAYNITE_GAMES_FILE}`);
-		const content = await readFile(PLAYNITE_GAMES_FILE, 'utf-8');
-		const asJson = JSON.parse(content.toString()) as Array<PlayniteGameMetadata>;
-		logDebug(`Read game list JSON file succesfully, returning ${asJson.length} games`);
-		return asJson ?? [];
-	} catch (error) {
-		logError('Error reading game list file', error as Error);
-		return [];
-	}
-};
-
-export const getGameList = async (): Promise<Array<PlayniteGameMetadata>> => {
-	return await getGameListFromFile();
-};
-
-export const getGameById = async (playniteGameId: string): Promise<PlayniteGameMetadata | null> => {
-	const gameList = await getGameListFromFile();
-	if (gameList.length === 0) {
-		return null;
-	}
-	const game = gameList.find((game) => game.Id === playniteGameId);
-	return game ?? null;
-};
-
-// ---- Database Functions
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -140,7 +107,8 @@ const playniteGameSchema = z.object({
 	IsInstalled: z.number().transform((n) => Boolean(n)),
 	BackgroundImage: z.string().optional().nullable(),
 	CoverImage: z.string().optional().nullable(),
-	Icon: z.string().optional().nullable()
+	Icon: z.string().optional().nullable(),
+	ContentHash: z.string()
 });
 export type GetPlayniteGameByIdResult =
 	| (z.infer<typeof playniteGameSchema> & {
@@ -194,12 +162,32 @@ export const getDashPagePlayniteGameList = (): GetDashPagePlayniteGameListResult
 	}
 };
 
+export const playniteGameExists = (gameId: string) => {
+	const db = getDb();
+	const query = `
+    SELECT EXISTS (
+      SELECT 1 FROM playnite_game WHERE Id = (?)
+    );
+  `;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.get(gameId) as object;
+		if (result) {
+			return Object.values(result)[0] === 1;
+		}
+		return false;
+	} catch (error) {
+		logError(`Failed to check if game with id ${gameId} exists`, error as Error);
+		return false;
+	}
+};
+
 export const addPlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
 	const db = getDb();
 	const query = `
     INSERT INTO playnite_game
-     (Id, Name, Description, ReleaseDate, Playtime, LastActivity, Added, InstallDirectory, IsInstalled, BackgroundImage, CoverImage, Icon)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+     (Id, Name, Description, ReleaseDate, Playtime, LastActivity, Added, InstallDirectory, IsInstalled, BackgroundImage, CoverImage, Icon, ContentHash)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
 	try {
 		const stmt = db.prepare(query);
@@ -215,13 +203,110 @@ export const addPlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
 			+game.IsInstalled,
 			game.BackgroundImage ?? null,
 			game.CoverImage ?? null,
-			game.Icon ?? null
+			game.Icon ?? null,
+			game.ContentHash
 		);
-		const id = getLastInsertId();
-		logDebug(`Added a new game with id ${id}`);
+		logDebug(`Added game ${game.Name}`);
 		return true;
 	} catch (error) {
-		logError('Failed to get game list for dashboard page', error as Error);
+		logError(`Failed to add game ${game.Name}`, error as Error);
 		return false;
+	}
+};
+
+export const updatePlayniteGame = (game: z.infer<typeof playniteGameSchema>) => {
+	const db = getDb();
+	const query = `
+    UPDATE playnite_game
+    SET
+      Name = ?,
+      Description = ?,
+      ReleaseDate = ?,
+      Playtime = ?,
+      LastActivity = ?,
+      Added = ?,
+      InstallDirectory = ?,
+      IsInstalled = ?,
+      BackgroundImage = ?,
+      CoverImage = ?,
+      Icon = ?,
+      ContentHash = ?
+    WHERE Id = ?;
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(
+			game.Name ?? null,
+			game.Description ?? null,
+			game.ReleaseDate ?? null,
+			game.Playtime ?? null,
+			game.LastActivity ?? null,
+			game.Added ?? null,
+			game.InstallDirectory ?? null,
+			+game.IsInstalled,
+			game.BackgroundImage ?? null,
+			game.CoverImage ?? null,
+			game.Icon ?? null,
+			game.ContentHash,
+			game.Id // WHERE Id
+		);
+		logDebug(`Updated game ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed update game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
+export const deletePlayniteGame = (gameId: string): boolean => {
+	const db = getDb();
+	const query = `DELETE FROM playnite_game WHERE Id = (?)`;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.run(gameId);
+		logSuccess(`Game with id ${gameId} deleted successfully`);
+		return result.changes == 1; // Number of rows affected
+	} catch (error) {
+		logError(`Failed to delete game with id ${gameId}`, error as Error);
+		return false;
+	}
+};
+
+const gameManifestDataSchema = z.array(
+	z.object({
+		Id: z.string(),
+		ContentHash: z.string()
+	})
+);
+export const getAllPlayniteGameManifestData = ():
+	| z.infer<typeof gameManifestDataSchema>
+	| undefined => {
+	const db = getDb();
+	const query = `SELECT Id, ContentHash FROM playnite_game`;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.all();
+		const data = gameManifestDataSchema.parse(result);
+		return data;
+	} catch (error) {
+		logError(`Failed to get all game Ids from database`, error as Error);
+		return;
+	}
+};
+
+const totalPlaytimeSecondsSchema = z.object({ totalPlaytimeSeconds: z.number() });
+export const getTotalPlaytimeHours = (): number | undefined => {
+	const db = getDb();
+	const query = `
+    SELECT SUM(Playtime) as totalPlaytimeSeconds FROM playnite_game;
+  `;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.get();
+		const data = totalPlaytimeSecondsSchema.parse(result);
+		return data.totalPlaytimeSeconds / 3600;
+	} catch (error) {
+		logError(`Failed to get total playtime`, error as Error);
+		return;
 	}
 };

@@ -1,13 +1,16 @@
 import { playniteInsightsConfig } from '$lib/config/config';
 import { access, readdir, readFile, writeFile } from 'fs/promises';
 import { logDebug, logError, logSuccess } from './log';
-import { getGameList } from './playnite-game-repository';
+import { getAllPlayniteGameManifestData } from './playnite-game-repository';
 import type { ValidationResult } from '$lib/models/validation-result';
 import { join } from 'path';
 
 type PlayniteLibraryManifest = {
 	totalGamesInLibrary: number;
-	gamesInLibrary: string[];
+	gamesInLibrary: Array<{
+		gameId: string;
+		contentHash: string;
+	}>;
 	mediaExistsFor: Array<{
 		gameId: string;
 		contentHash: string;
@@ -37,6 +40,14 @@ export const writeLibraryManifest = async (
 ): Promise<ValidationResult<PlayniteLibraryManifest>> => {
 	logDebug('Writing library manifest...');
 	try {
+		const gamesInLibrary: PlayniteLibraryManifest['gamesInLibrary'] = [];
+		const gamesManifestData = getAllPlayniteGameManifestData();
+		if (!gamesManifestData) {
+			throw new Error('Failed to fetch all game Ids');
+		}
+		for (const data of gamesManifestData) {
+			gamesInLibrary.push({ gameId: data.Id, contentHash: data.ContentHash });
+		}
 		// Get all library folders from files directory (one folder for each game)
 		const entries = await fsReaddir(FILES_DIR, { withFileTypes: true });
 		const libraryFolders = entries
@@ -54,10 +65,9 @@ export const writeLibraryManifest = async (
 				contentHash: contentHash
 			});
 		}
-		const gameList = await getGameList();
 		const manifest: PlayniteLibraryManifest = {
-			totalGamesInLibrary: gameList.length,
-			gamesInLibrary: gameList.map((g) => g.Id),
+			totalGamesInLibrary: gamesInLibrary.length,
+			gamesInLibrary: gamesInLibrary,
 			mediaExistsFor: mediaExistsFor
 		};
 		await fsWritefile(MANIFEST_FILE, JSON.stringify(manifest, null, 2));

@@ -1,4 +1,4 @@
-import { getDb } from '$lib/infrastructure/database';
+import { getDb, getLastInsertId } from '$lib/infrastructure/database';
 import { z } from 'zod';
 import { logDebug, logError, logSuccess } from './log';
 
@@ -32,5 +32,28 @@ export const getTotalPlaytimeOverLast6Months = ():
 	} catch (error) {
 		logError('Failed to get total playtime over last 6 months', error as Error);
 		return undefined;
+	}
+};
+
+export const addPlayniteLibrarySync = (totalPlaytimeHours: number, totalGames: number) => {
+	const db = getDb();
+	const now = new Date().toISOString();
+	const query = `
+    INSERT INTO playnite_library_sync
+      (timestamp, totalPlaytimeHours, totalGames)
+    VALUES
+      (?, ?, ?);
+  `;
+	try {
+		const stmt = db.prepare(query);
+		stmt.run(now, totalPlaytimeHours, totalGames);
+		const lastInsertId = getLastInsertId();
+		logSuccess(
+			`Inserted playnite_library_sync entry with id: ${lastInsertId ?? 'undefined'}, totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
+		);
+		return true;
+	} catch (error) {
+		logError('Error while inserting new entry for Playnite library sync', error as Error);
+		return false;
 	}
 };
