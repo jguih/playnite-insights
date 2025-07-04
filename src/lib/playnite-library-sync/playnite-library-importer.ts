@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { rm } from 'fs/promises';
 import { join } from 'path';
-import { logDebug, logError, logInfo, logSuccess } from './log';
+import { logDebug, logError, logInfo, logSuccess } from '../log/log';
 import { playniteInsightsConfig } from '$lib/config/config';
 import type { ValidationResult } from '$lib/models/validation-result';
 import AdmZip from 'adm-zip';
@@ -10,7 +10,7 @@ import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
-import { writeLibraryManifest } from './library-manifest';
+import { writeLibraryManifest } from '../library-manifest/library-manifest';
 import { z } from 'zod';
 import {
 	addPlayniteGame,
@@ -18,9 +18,9 @@ import {
 	getTotalPlaytimeHours,
 	playniteGameExists,
 	updatePlayniteGame
-} from './playnite-game-repository';
+} from '../playnite-game/playnite-game-repository';
 import { addPlayniteLibrarySync } from './playnite-library-sync-repository';
-import { incomingPlayniteGameDtoSchema } from '$lib/models/dto/incoming-playnite-game-dto';
+import { incomingPlayniteGameDtoSchema } from '$lib/playnite-library-sync/schemas';
 
 const FILES_DIR = playniteInsightsConfig.path.filesDir;
 const TMP_DIR = playniteInsightsConfig.path.tmpDir;

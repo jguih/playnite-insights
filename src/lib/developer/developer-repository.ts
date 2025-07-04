@@ -1,6 +1,6 @@
 import { getDb } from '$lib/infrastructure/database';
-import type { Developer } from '$lib/models/developer';
-import { logError, logSuccess } from './log';
+import type { Developer } from '$lib/developer/schemas';
+import { logError, logSuccess } from '../log/log';
 
 export const addDeveloper = (developer: Developer): boolean => {
 	const db = getDb();

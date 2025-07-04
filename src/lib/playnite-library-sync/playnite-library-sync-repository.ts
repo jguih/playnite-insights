@@ -1,6 +1,6 @@
 import { getDb, getLastInsertId } from '$lib/infrastructure/database';
 import { z } from 'zod';
-import { logError, logSuccess } from './log';
+import { logError, logSuccess } from '../log/log';
 
 const totalPlaytimeOverTimeSchema = z.array(
 	z.object({

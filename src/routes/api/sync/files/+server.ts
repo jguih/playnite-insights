@@ -1,5 +1,5 @@
-import { logDebug, logInfo } from '$lib/services/log';
-import { importLibraryFiles } from '$lib/services/playnite-library-importer';
+import { logDebug, logInfo } from '$lib/log/log';
+import { importLibraryFiles } from '$lib/playnite-library-sync/playnite-library-importer';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {

@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { GetPlayniteGameByIdResult } from '$lib/services/playnite-game-repository';
+import type { GetPlayniteGameByIdResult } from '$lib/playnite-game/playnite-game-repository';
 
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { playniteGameId } = params;

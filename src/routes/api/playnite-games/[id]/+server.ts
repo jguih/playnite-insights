@@ -1,4 +1,4 @@
-import { getPlayniteGameById } from '$lib/services/playnite-game-repository';
+import { getPlayniteGameById } from '$lib/playnite-game/playnite-game-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ params }) => {

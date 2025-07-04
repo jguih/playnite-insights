@@ -1,8 +1,8 @@
-import type { statisticsResponseSchema } from '$lib/models/api/playnite-game/schemas';
+import type { statisticsResponseSchema } from '$lib/playnite-game/schemas';
 import {
 	getTotalGamesOwnedOverLast6Months,
 	getTotalPlaytimeOverLast6Months
-} from '$lib/services/playnite-library-sync-repository';
+} from '$lib/playnite-library-sync/playnite-library-sync-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 

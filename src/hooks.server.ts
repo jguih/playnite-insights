@@ -1,7 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { CURRENT_LOG_LEVEL, logInfo } from '$lib/services/log';
-import { writeLibraryManifest } from '$lib/services/library-manifest';
+import { CURRENT_LOG_LEVEL, logInfo } from '$lib/log/log';
+import { writeLibraryManifest } from '$lib/library-manifest/library-manifest';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {

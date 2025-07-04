@@ -1,10 +1,10 @@
-import { getLastSixMonthsInclusiveAbreviated } from '$lib/services/date';
+import { getLastSixMonthsInclusiveAbreviated } from '$lib/utils/date';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import {
 	dashPagePlayniteGameListSchema,
 	statisticsResponseSchema
-} from '$lib/models/api/playnite-game/schemas';
+} from '$lib/playnite-game/schemas';
 
 export const load: PageLoad = async ({ fetch }) => {
 	try {

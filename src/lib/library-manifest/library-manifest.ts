@@ -1,7 +1,7 @@
 import { playniteInsightsConfig } from '$lib/config/config';
 import { access, readdir, readFile, writeFile } from 'fs/promises';
-import { logDebug, logError, logSuccess } from './log';
-import { getAllPlayniteGameManifestData } from './playnite-game-repository';
+import { logDebug, logError, logSuccess } from '../log/log';
+import { getAllPlayniteGameManifestData } from '../playnite-game/playnite-game-repository';
 import type { ValidationResult } from '$lib/models/validation-result';
 import { join } from 'path';
 

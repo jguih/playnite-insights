@@ -1,4 +1,4 @@
-import { getGameImage } from '$lib/services/game-images';
+import { getGameImage } from '$lib/playnite-game/game-images';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ params, request }) => {

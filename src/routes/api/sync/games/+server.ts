@@ -1,5 +1,5 @@
-import { syncGameList } from '$lib/services/playnite-library-importer';
-import { logDebug } from '$lib/services/log';
+import { logDebug } from '$lib/log/log';
+import { syncGameList } from '$lib/playnite-library-sync/playnite-library-importer';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {

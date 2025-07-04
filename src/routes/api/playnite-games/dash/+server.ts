@@ -1,5 +1,5 @@
-import { dashPagePlayniteGameListSchema } from '$lib/models/api/playnite-game/schemas';
-import { getDashPagePlayniteGameList } from '$lib/services/playnite-game-repository';
+import { getDashPagePlayniteGameList } from '$lib/playnite-game/playnite-game-repository';
+import type { dashPagePlayniteGameListSchema } from '$lib/playnite-game/schemas';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import type z from 'zod';
 

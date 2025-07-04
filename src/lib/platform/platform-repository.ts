@@ -1,6 +1,6 @@
 import { getDb } from '$lib/infrastructure/database';
-import type { Platform } from '$lib/models/platform';
-import { logError, logSuccess } from './log';
+import type { Platform } from '$lib/platform/schemas';
+import { logError, logSuccess } from '../log/log';
 
 export const addPlatform = (platform: Platform): boolean => {
 	const db = getDb();

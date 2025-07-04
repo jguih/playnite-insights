@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { logError } from './log';
+import { logError } from '../log/log';
 import { access, constants, readFile, stat } from 'fs/promises';
 import { playniteInsightsConfig } from '$lib/config/config';
 import type { ValidationResult } from '$lib/models/validation-result';

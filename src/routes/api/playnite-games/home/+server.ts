@@ -1,4 +1,4 @@
-import { getHomePagePlayniteGameList } from '$lib/services/playnite-game-repository';
+import { getHomePagePlayniteGameList } from '$lib/playnite-game/playnite-game-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ url }) => {

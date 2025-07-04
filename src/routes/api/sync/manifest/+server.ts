@@ -1,4 +1,4 @@
-import { getPlayniteLibraryManifest } from '$lib/services/library-manifest';
+import { getPlayniteLibraryManifest } from '$lib/library-manifest/library-manifest';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async () => {

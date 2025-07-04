@@ -1,6 +1,6 @@
 import { getDb } from '$lib/infrastructure/database';
-import type { Genre } from '$lib/models/genre';
-import { logError, logSuccess } from './log';
+import type { Genre } from '$lib/genre/schemas';
+import { logError, logSuccess } from '../log/log';
 
 export const addGenre = (genre: Genre): boolean => {
 	const db = getDb();

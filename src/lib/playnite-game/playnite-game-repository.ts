@@ -1,14 +1,17 @@
-import { logDebug, logError, logSuccess } from './log';
+import { logDebug, logError, logSuccess } from '../log/log';
 import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
-import { developerSchema, type Developer } from '$lib/models/developer';
-import { playniteGameSchema, type PlayniteGame } from '$lib/models/playnite-game';
-import { addDeveloper, developerExists } from './developer-repository';
-import { addPlatform, platformExists } from './platform-repository';
-import type { Platform } from '$lib/models/platform';
-import type { Genre } from '$lib/models/genre';
-import { addGenre, genreExists } from './genre-repository';
-import { dashPagePlayniteGameListSchema } from '$lib/models/api/playnite-game/schemas';
+import { developerSchema, type Developer } from '$lib/developer/schemas';
+import {
+	dashPagePlayniteGameListSchema,
+	playniteGameSchema,
+	type PlayniteGame
+} from '$lib/playnite-game/schemas';
+import { addDeveloper, developerExists } from '../developer/developer-repository';
+import { addPlatform, platformExists } from '../platform/platform-repository';
+import type { Platform } from '$lib/platform/schemas';
+import type { Genre } from '$lib/genre/schemas';
+import { addGenre, genreExists } from '../genre/genre-repository';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -133,7 +136,7 @@ export const getDashPagePlayniteGameList = ():
 		const stmt = db.prepare(query);
 		const result = stmt.all();
 		const data = dashPagePlayniteGameListSchema.parse(result);
-		logDebug(
+		logSuccess(
 			`Game list for dashboard page fetched successfully, returning data for ${data.length} games`
 		);
 		return data;
