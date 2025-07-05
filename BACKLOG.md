@@ -10,6 +10,8 @@
 - Include a content hash in the manifest for media files
 - Display basic game info in game page
 - Save scroll prosition when navigating away from home page
+- Pagination
+- Save games in SQLite database
 
 ## 🛠️ In Progress
 
