@@ -36,13 +36,19 @@ const totalGamesOwnedOverLast6MonthsSchema = z.array(
 );
 export const getTotalGamesOwnedOverLast6Months = (): number[] | undefined => {
 	const query = `
-      SELECT totalGamesOwned FROM (
-        SELECT MAX(TotalGames) as totalGamesOwned, strftime('%Y-%m', Timestamp) as yearMonth
-        FROM playnite_library_sync
-        WHERE Timestamp >= datetime('now', '-6 months')
-        GROUP BY yearMonth
-        ORDER BY yearMonth
-      );
+      WITH latest_per_month AS (
+        SELECT *
+        FROM playnite_library_sync AS pls
+        WHERE Timestamp = (
+          SELECT MAX(Timestamp)
+          FROM playnite_library_sync
+          WHERE strftime('%Y-%m', Timestamp) = strftime('%Y-%m', pls.Timestamp)
+        )
+      )
+      SELECT TotalGames AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
+      FROM latest_per_month
+      WHERE Timestamp >= datetime('now', '-6 months')
+      ORDER BY yearMonth;
     `;
 	try {
 		const stmt = getDb().prepare(query);
