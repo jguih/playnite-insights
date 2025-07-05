@@ -105,7 +105,7 @@ export const syncGameList = async (body: unknown) => {
 			const result = addPlayniteGame(
 				{
 					Id: game.Id,
-					IsInstalled: game.IsInstalled,
+					IsInstalled: Number(game.IsInstalled),
 					Playtime: game.Playtime,
 					Added: game.Added,
 					BackgroundImage: game.BackgroundImage,
@@ -144,21 +144,36 @@ export const syncGameList = async (body: unknown) => {
 				logInfo(`Skipping game to update ${game.Name}, as it doesn't exist`);
 				continue;
 			}
-			const result = updatePlayniteGame({
-				Id: game.Id,
-				IsInstalled: game.IsInstalled,
-				Playtime: game.Playtime,
-				Added: game.Added,
-				BackgroundImage: game.BackgroundImage,
-				CoverImage: game.CoverImage,
-				Description: game.Description,
-				Icon: game.Icon,
-				InstallDirectory: game.InstallDirectory,
-				LastActivity: game.LastActivity,
-				Name: game.Name,
-				ReleaseDate: game.ReleaseDate?.ReleaseDate,
-				ContentHash: game.ContentHash
-			});
+			const result = updatePlayniteGame(
+				{
+					Id: game.Id,
+					IsInstalled: Number(game.IsInstalled),
+					Playtime: game.Playtime,
+					Added: game.Added,
+					BackgroundImage: game.BackgroundImage,
+					CoverImage: game.CoverImage,
+					Description: game.Description,
+					Icon: game.Icon,
+					InstallDirectory: game.InstallDirectory,
+					LastActivity: game.LastActivity,
+					Name: game.Name,
+					ReleaseDate: game.ReleaseDate?.ReleaseDate,
+					ContentHash: game.ContentHash
+				},
+				game.Developers ?? [],
+				game.Platforms?.map((plat) => {
+					return {
+						Id: plat.Id,
+						Name: plat.Name,
+						SpecificationId: plat.SpecificationId,
+						Background: plat.Background ?? null,
+						Cover: plat.Cover ?? null,
+						Icon: plat.Icon ?? null
+					};
+				}),
+				game.Genres ?? [],
+				game.Publishers ?? []
+			);
 			// TODO: Sync devs, genres, platforms and publishers
 			if (!result) {
 				logError(`Failed to update game ${game.Name}`);

@@ -1,3 +1,4 @@
+import { developerSchema } from '$lib/developer/schemas';
 import { z } from 'zod';
 
 export const playniteGameSchema = z.object({
@@ -9,7 +10,7 @@ export const playniteGameSchema = z.object({
 	LastActivity: z.string().optional().nullable(),
 	Added: z.string().optional().nullable(),
 	InstallDirectory: z.string().optional().nullable(),
-	IsInstalled: z.number().transform((n) => Boolean(n)),
+	IsInstalled: z.number(),
 	BackgroundImage: z.string().optional().nullable(),
 	CoverImage: z.string().optional().nullable(),
 	Icon: z.string().optional().nullable(),
@@ -29,3 +30,8 @@ export const dashPagePlayniteGameListSchema = z.array(
 		Playtime: z.number()
 	})
 );
+
+export const gameByIdSchema = z.object({
+	game: z.optional(playniteGameSchema),
+	developers: z.array(developerSchema).optional()
+});

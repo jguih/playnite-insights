@@ -1,4 +1,4 @@
-import { logDebug, logError, logSuccess } from '../log/log';
+import { logError, logSuccess } from '../log/log';
 import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
 import { developerSchema, type Developer } from '$lib/developer/schemas';
@@ -7,11 +7,29 @@ import {
 	playniteGameSchema,
 	type PlayniteGame
 } from '$lib/playnite-game/schemas';
-import { addDeveloper, developerExists } from '../developer/developer-repository';
-import { addPlatform, platformExists } from '../platform/platform-repository';
+import {
+	addDeveloper,
+	developerExists,
+	developerHasChanges,
+	getDeveloperById,
+	updateDeveloper
+} from '../developer/developer-repository';
+import {
+	addPlatform,
+	getPlatformById,
+	platformExists,
+	platformHasChanges,
+	updatePlatform
+} from '../platform/platform-repository';
 import type { Platform } from '$lib/platform/schemas';
 import type { Genre } from '$lib/genre/schemas';
-import { addGenre, genreExists } from '../genre/genre-repository';
+import {
+	addGenre,
+	genreExists,
+	genreHasChanges,
+	getGenreById,
+	updateGenre
+} from '../genre/genre-repository';
 import type { Publisher } from '$lib/publisher/schemas';
 import { addPublisher, publisherExists } from '$lib/publisher/publisher-repository';
 
@@ -64,15 +82,14 @@ export const getHomePagePlayniteGameList = (
   `;
 
 	try {
-		logDebug(`Fetching game list for home page, offset: ${offset}, pageSize: ${pageSize}`);
 		const stmt = db.prepare(query);
 		const result = stmt.all(pageSize, offset);
 		const data = homePagePlayniteGamesSchema.parse(result);
 		const total = getTotalPlayniteGames();
 		const hasNextPage = offset + pageSize < total;
 		const totalPages = Math.ceil(total / pageSize);
-		logDebug(
-			`Fetched game list for home page successfully, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
+		logSuccess(
+			`Fetched game list for home page, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
 		);
 		return { data, offset, pageSize, total, hasNextPage, totalPages };
 	} catch (error) {
@@ -92,7 +109,6 @@ export const getPlayniteGameDevelopers = (
     WHERE pgdev.GameId = (?)
   `;
 	try {
-		logDebug(`Fetching developer list for game with id ${game.Id}...`);
 		const stmt = db.prepare(query);
 		const result = stmt.all(game.Id);
 		const data = z.array(developerSchema).parse(result);
@@ -104,23 +120,17 @@ export const getPlayniteGameDevelopers = (
 	}
 };
 
-export type GetPlayniteGameByIdResult =
-	| (PlayniteGame & {
-			Developers?: Array<z.infer<typeof developerSchema>>;
-	  })
-	| undefined;
-export const getPlayniteGameById = (id: string): GetPlayniteGameByIdResult => {
+export const getPlayniteGameById = (id: string): PlayniteGame | undefined => {
 	const db = getDb();
 	const query = `SELECT * FROM playnite_game WHERE Id = (?)`;
 	try {
-		logDebug(`Fetching game with id ${id}...`);
 		const stmt = db.prepare(query);
 		const result = stmt.get(id);
-		const game = playniteGameSchema.parse(result);
-		logDebug(`Game with id ${id} fetched successfully`);
-		return { ...game, Developers: getPlayniteGameDevelopers({ Id: game.Id, Name: game.Name }) };
+		const game = z.optional(playniteGameSchema).parse(result);
+		logSuccess(`Found game ${game?.Name}`);
+		return game;
 	} catch (error) {
-		logError('Failed to get Playnite game with id:' + id, error as Error);
+		logError('Failed to get Playnite game with id: ' + id, error as Error);
 		return undefined;
 	}
 };
@@ -134,13 +144,10 @@ export const getDashPagePlayniteGameList = ():
     FROM playnite_game;
   `;
 	try {
-		logDebug(`Fetching game list for dashboard page...`);
 		const stmt = db.prepare(query);
 		const result = stmt.all();
 		const data = dashPagePlayniteGameListSchema.parse(result);
-		logSuccess(
-			`Game list for dashboard page fetched successfully, returning data for ${data.length} games`
-		);
+		logSuccess(`Game list for dashboard page fetched, returning data for ${data.length} games`);
 		return data;
 	} catch (error) {
 		logError('Failed to get game list for dashboard page', error as Error);
@@ -190,6 +197,22 @@ export const addPlayniteGameDeveloper = (
 	}
 };
 
+export const deleteDevelopersForPlayniteGame = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>
+): boolean => {
+	const db = getDb();
+	const query = `DELETE FROM playnite_game_developer WHERE GameId = (?)`;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.run(game.Id);
+		logSuccess(`Deleted ${result.changes} developer relationships for ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to delete developer relationships for ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
 export const addPlayniteGamePlatform = (
 	game: Pick<PlayniteGame, 'Id' | 'Name'>,
 	platform: Platform
@@ -208,6 +231,22 @@ export const addPlayniteGamePlatform = (
 		return true;
 	} catch (error) {
 		logError(`Failed to add platform ${platform.Name} for game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
+export const deletePlatformsForPlayniteGame = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>
+): boolean => {
+	const db = getDb();
+	const query = `DELETE FROM playnite_game_platform WHERE GameId = (?)`;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.run(game.Id);
+		logSuccess(`Deleted ${result.changes} platform relationships for ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to delete platform relationships for ${game.Name}`, error as Error);
 		return false;
 	}
 };
@@ -234,6 +273,20 @@ export const addPlayniteGameGenre = (
 	}
 };
 
+export const deleteGenresForPlayniteGame = (game: Pick<PlayniteGame, 'Id' | 'Name'>): boolean => {
+	const db = getDb();
+	const query = `DELETE FROM playnite_game_genre WHERE GameId = (?)`;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.run(game.Id);
+		logSuccess(`Deleted ${result.changes} genre relationships for ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to delete genre relationships for ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
 export const addPlayniteGamePublisher = (
 	game: Pick<PlayniteGame, 'Id' | 'Name'>,
 	publisher: Publisher
@@ -252,6 +305,22 @@ export const addPlayniteGamePublisher = (
 		return true;
 	} catch (error) {
 		logError(`Failed to add publisher ${publisher.Name} for game ${game.Name}`, error as Error);
+		return false;
+	}
+};
+
+export const deletePublishersForPlayniteGame = (
+	game: Pick<PlayniteGame, 'Id' | 'Name'>
+): boolean => {
+	const db = getDb();
+	const query = `DELETE FROM playnite_game_publisher WHERE GameId = (?)`;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.run(game.Id);
+		logSuccess(`Deleted ${result.changes} publisher relationships for ${game.Name}`);
+		return true;
+	} catch (error) {
+		logError(`Failed to delete publisher relationships for ${game.Name}`, error as Error);
 		return false;
 	}
 };
@@ -338,7 +407,13 @@ export const addPlayniteGame = (
 	}
 };
 
-export const updatePlayniteGame = (game: PlayniteGame) => {
+export const updatePlayniteGame = (
+	game: PlayniteGame,
+	developers?: Array<Developer>,
+	platforms?: Array<Platform>,
+	genres?: Array<Genre>,
+	publishers?: Array<Publisher>
+) => {
 	const db = getDb();
 	const query = `
     UPDATE playnite_game
@@ -374,7 +449,52 @@ export const updatePlayniteGame = (game: PlayniteGame) => {
 			game.ContentHash,
 			game.Id // WHERE Id
 		);
-		logDebug(`Updated game ${game.Name}`);
+		logSuccess(`Updated game ${game.Name}`);
+		if (developers) {
+			deleteDevelopersForPlayniteGame({ Id: game.Id, Name: game.Name });
+			for (const developer of developers) {
+				const existing = getDeveloperById(developer.Id);
+				if (existing) {
+					if (developerHasChanges(existing, developer)) {
+						updateDeveloper(developer);
+					}
+				} else {
+					addDeveloper(developer);
+				}
+				addPlayniteGameDeveloper({ Id: game.Id, Name: game.Name }, developer);
+			}
+		}
+		if (platforms) {
+			deletePlatformsForPlayniteGame({ Id: game.Id, Name: game.Name });
+			for (const platform of platforms) {
+				const existing = getPlatformById(platform.Id);
+				if (existing) {
+					if (platformHasChanges(existing, platform)) {
+						updatePlatform(platform);
+					}
+				} else {
+					addPlatform(platform);
+				}
+				addPlayniteGamePlatform({ Id: game.Id, Name: game.Name }, platform);
+			}
+		}
+		if (genres) {
+			deleteGenresForPlayniteGame({ Id: game.Id, Name: game.Name });
+			for (const genre of genres) {
+				const existing = getGenreById(genre.Id);
+				if (existing) {
+					if (genreHasChanges(existing, genre)) {
+						updateGenre(genre);
+					}
+				} else {
+					addGenre(genre);
+				}
+				addPlayniteGameGenre({ Id: game.Id, Name: game.Name }, genre);
+			}
+		}
+		if (publishers) {
+			// TODO
+		}
 		return true;
 	} catch (error) {
 		logError(`Failed update game ${game.Name}`, error as Error);
@@ -428,7 +548,11 @@ export const getTotalPlaytimeHours = (): number | undefined => {
 		const stmt = db.prepare(query);
 		const result = stmt.get();
 		const data = totalPlaytimeSecondsSchema.parse(result);
-		return data.totalPlaytimeSeconds ? data.totalPlaytimeSeconds / 3600 : undefined;
+		const totalPlaytimeHours = data.totalPlaytimeSeconds
+			? data.totalPlaytimeSeconds / 3600
+			: undefined;
+		logSuccess(`Fetched total playtime hours: ${totalPlaytimeHours}`);
+		return totalPlaytimeHours;
 	} catch (error) {
 		logError(`Failed to get total playtime`, error as Error);
 		return;

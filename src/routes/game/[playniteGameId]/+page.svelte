@@ -41,7 +41,7 @@
 	});
 
 	const getInstalled = $derived((): string => {
-		if (game?.IsInstalled) {
+		if (Boolean(game?.IsInstalled)) {
 			return m.yes();
 		}
 		return m.no();
