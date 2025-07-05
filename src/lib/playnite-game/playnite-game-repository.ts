@@ -46,12 +46,21 @@ import {
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
 });
-export const getTotalPlayniteGames = (): number => {
+export const getTotalPlayniteGames = (query?: string | null): number => {
 	const db = getDb();
-	const query = `SELECT count(*) as total FROM playnite_game;`;
+	let sqlQuery = `
+    SELECT count(*) as total 
+    FROM playnite_game pg
+    WHERE 1=1
+  `;
+	const params = [];
+	if (query) {
+		sqlQuery += ` AND LOWER(pg.Name) LIKE ?`;
+		params.push(`%${query.toLowerCase()}%`);
+	}
 	try {
-		const stmt = db.prepare(query);
-		const result = stmt.get();
+		const stmt = db.prepare(sqlQuery);
+		const result = stmt.get(...params);
 		const data = totalPlayniteGamesSchema.parse(result);
 		return data.total;
 	} catch (error) {
@@ -86,7 +95,7 @@ export const getHomePagePlayniteGameList = (
 		const stmt = db.prepare(sqlQuery);
 		const result = stmt.all(...params);
 		const games = z.optional(homePagePlayniteGameMetadataSchema).parse(result) ?? [];
-		const total = getTotalPlayniteGames();
+		const total = getTotalPlayniteGames(query);
 		const hasNextPage = offset + pageSize < total;
 		const totalPages = Math.ceil(total / pageSize);
 		logSuccess(

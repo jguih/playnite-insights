@@ -15,20 +15,17 @@
 	let input: HTMLInputElement;
 	let timeout: NodeJS.Timeout | null = $state(null);
 
-	const setSearchParams = $derived((key: string, value: string) => {
-		const params = new URLSearchParams(page.url.searchParams);
-		params.set(key, value);
-		const newUrl = `${page.url.pathname}?${params.toString()}`;
-		goto(newUrl, { replaceState: true, keepFocus: true });
-	});
-
 	const handleOnChange: ChangeEventHandler<HTMLInputElement> = (e) => {
 		const value = e.currentTarget.value;
 		if (timeout) {
 			clearTimeout(timeout);
 		}
 		timeout = setTimeout(() => {
-			setSearchParams('query', value);
+			const params = new URLSearchParams(page.url.searchParams);
+			params.set('page', '1');
+			params.set('query', value);
+			const newUrl = `${page.url.pathname}?${params.toString()}`;
+			goto(newUrl, { replaceState: true, keepFocus: true });
 		}, 1000);
 	};
 
