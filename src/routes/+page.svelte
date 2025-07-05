@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, Menu } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, Menu, Search } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import MenuAnchor from '$lib/client/components/MenuAnchor.svelte';
 	import Select from '$lib/client/components/Select.svelte';
@@ -59,14 +59,14 @@
 </script>
 
 {#snippet action()}
-	<MenuAnchor>
-		<Menu strokeWidth={1.75} />
-	</MenuAnchor>
+	<a class="" href="/">
+		<img src="/favicon-96x96.png" class="aspect-square h-9 w-9 rounded-md" alt="app icon" />
+	</a>
 {/snippet}
 
 {#snippet gameCard(game: (typeof gameList)[number])}
 	<li
-		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 aspect-[1/1.6] max-w-38 border-4 border-solid border-transparent p-0 shadow-md outline-0 sm:max-w-52"
+		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-background-1 m-0 aspect-[1/1.6] border-4 border-solid p-0 shadow-md outline-0"
 	>
 		<a href={`/game/${game.Id}`}>
 			<img
@@ -75,8 +75,8 @@
 				loading="lazy"
 				class="h-7/8 w-full object-cover"
 			/>
-			<div class="bg-background-1 bottom-0 h-1/8 w-full p-1">
-				<p class="truncate text-center text-sm text-white">{game.Name}</p>
+			<div class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row justify-center p-1">
+				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
 		</a>
 	</li>
@@ -84,7 +84,9 @@
 
 {#key currentPage}
 	<AppLayout>
-		<Header {action} />
+		<Header {action}>
+			<a><Search /></a>
+		</Header>
 		<Main bind:main>
 			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
@@ -108,7 +110,7 @@
 					{/each}
 				</Select>
 			</label>
-			<ul class="mb-6 flex list-none flex-row flex-wrap justify-center gap-4 p-0">
+			<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
 				{#each gameList as game}
 					{@render gameCard(game)}
 				{/each}
