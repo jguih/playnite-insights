@@ -31,7 +31,13 @@ import {
 	updateGenre
 } from '../genre/genre-repository';
 import type { Publisher } from '$lib/publisher/schemas';
-import { addPublisher, publisherExists } from '$lib/publisher/publisher-repository';
+import {
+	addPublisher,
+	getPublisherById,
+	publisherExists,
+	publisherHasChanges,
+	updatePublisher
+} from '$lib/publisher/publisher-repository';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -493,7 +499,18 @@ export const updatePlayniteGame = (
 			}
 		}
 		if (publishers) {
-			// TODO
+			deletePublishersForPlayniteGame({ Id: game.Id, Name: game.Name });
+			for (const publisher of publishers) {
+				const existing = getPublisherById(publisher.Id);
+				if (existing) {
+					if (publisherHasChanges(existing, publisher)) {
+						updatePublisher(publisher);
+					}
+				} else {
+					addPublisher(publisher);
+				}
+				addPlayniteGamePublisher({ Id: game.Id, Name: game.Name }, publisher);
+			}
 		}
 		return true;
 	} catch (error) {
