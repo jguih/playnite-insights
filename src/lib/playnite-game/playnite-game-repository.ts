@@ -575,3 +575,22 @@ export const getTotalPlaytimeHours = (): number | undefined => {
 		return;
 	}
 };
+
+export const getTopMostPlayedGames = (total: number): Array<PlayniteGame> | undefined => {
+	const db = getDb();
+	const query = `
+    SELECT *
+    FROM playnite_game
+    ORDER BY Playtime DESC
+    LIMIT ?;
+  `;
+	try {
+		const stmt = db.prepare(query);
+		const result = stmt.all(total);
+		const data = z.optional(z.array(playniteGameSchema)).parse(result);
+		logSuccess(`Found top ${total} most played games, returning ${data?.length} games`);
+		return data;
+	} catch (error) {
+		logError(`Failed to get top most played games`, error as Error);
+	}
+};

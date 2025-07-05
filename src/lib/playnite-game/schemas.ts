@@ -20,7 +20,8 @@ export type PlayniteGame = z.infer<typeof playniteGameSchema>;
 
 export const statisticsResponseSchema = z.object({
 	totalPlaytimeOverLast6Months: z.array(z.number()),
-	totalGamesOwnedOverLast6Months: z.array(z.number())
+	totalGamesOwnedOverLast6Months: z.array(z.number()),
+	top10MostPlayedGames: z.array(playniteGameSchema)
 });
 
 export const dashPagePlayniteGameListSchema = z.array(

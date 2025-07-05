@@ -3,11 +3,12 @@
 	import { page } from '$app/state';
 	import { mainScrollPosition } from '$lib/stores/main-scroll-position.svelte';
 	import { onMount, type Snippet } from 'svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
-		children,
-		main = $bindable<HTMLElement>()
-	}: { children?: Snippet; main?: ReturnType<typeof $bindable<HTMLElement>> } = $props();
+		main = $bindable<HTMLElement>(),
+		...props
+	}: HTMLAttributes<HTMLElement> & { main?: ReturnType<typeof $bindable<HTMLElement>> } = $props();
 	const pathname = $derived(page.url.pathname);
 
 	onMount(() => {
@@ -28,8 +29,12 @@
 	});
 </script>
 
-<main class="h-full overflow-x-hidden overflow-y-scroll p-4 pb-12" bind:this={main}>
-	{#if children}
-		{@render children()}
+<main
+	{...props}
+	class="h-full overflow-x-hidden overflow-y-scroll p-4 pb-12 {props?.class ?? ''}"
+	bind:this={main}
+>
+	{#if props.children}
+		{@render props.children()}
 	{/if}
 </main>

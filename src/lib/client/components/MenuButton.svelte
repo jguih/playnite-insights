@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { buildClassNames } from '$lib/utils/build-class-names';
+	import { buildClassNames } from '$lib/client/utils/build-class-names';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 
 	let props: HTMLButtonAttributes & { selected?: boolean } = $props();

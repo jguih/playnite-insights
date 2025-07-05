@@ -1,9 +1,9 @@
 <script lang="ts">
-	import ActionBack from '$lib/components/ActionBack.svelte';
-	import AppLayoutWithoutBottomNav from '$lib/components/AppLayoutWithoutBottomNav.svelte';
-	import Divider from '$lib/components/Divider.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import Main from '$lib/components/Main.svelte';
+	import ActionBack from '$lib/client/components/ActionBack.svelte';
+	import AppLayoutWithoutBottomNav from '$lib/client/components/AppLayoutWithoutBottomNav.svelte';
+	import Divider from '$lib/client/components/Divider.svelte';
+	import Header from '$lib/client/components/Header.svelte';
+	import Main from '$lib/client/components/Main.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 
 	let { data } = $props();

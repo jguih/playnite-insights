@@ -1,20 +1,20 @@
 <script lang="ts">
-	import AppLayout from '$lib/components/AppLayout.svelte';
-	import BottomNav from '$lib/components/BottomNav.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import Main from '$lib/components/Main.svelte';
+	import AppLayout from '$lib/client/components/AppLayout.svelte';
+	import BottomNav from '$lib/client/components/BottomNav.svelte';
+	import Header from '$lib/client/components/Header.svelte';
+	import Main from '$lib/client/components/Main.svelte';
 	import { ChevronLeft, ChevronRight, Menu } from '@lucide/svelte';
 	import type { PageProps } from './$types';
-	import MenuAnchor from '$lib/components/MenuAnchor.svelte';
-	import Select from '$lib/components/Select.svelte';
+	import MenuAnchor from '$lib/client/components/MenuAnchor.svelte';
+	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import MenuButton from '$lib/components/MenuButton.svelte';
+	import MenuButton from '$lib/client/components/MenuButton.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import Home from '$lib/components/bottom-nav/Home.svelte';
-	import Dashboard from '$lib/components/bottom-nav/Dashboard.svelte';
-	import Settings from '$lib/components/bottom-nav/Settings.svelte';
+	import Home from '$lib/client/components/bottom-nav/Home.svelte';
+	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
+	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 
 	let { data }: PageProps = $props();
 	let pageData = $derived(data.pageData ?? { data: [], totalPages: 1, total: 0, pageSize: 50 });

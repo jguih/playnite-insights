@@ -18,11 +18,12 @@ export const load: PageLoad = async ({ fetch }) => {
 		const notInstalled = games.length - installed;
 		const totalPlayTime = (
 			games.map((g) => g.Playtime).reduce((prev, acc) => prev + acc) / 3600
-		).toFixed(2);
+		).toFixed(1);
 		const notPlayed = games.filter((g) => g.Playtime === 0).length;
 		const played = games.length - notPlayed;
 
 		let charts = undefined;
+		let top10MostPlayedGames = undefined;
 		if (statistics.success) {
 			charts = {
 				totalPlaytimeOverLast6Months: {
@@ -34,6 +35,7 @@ export const load: PageLoad = async ({ fetch }) => {
 					series: { bar: { data: statistics.data.totalGamesOwnedOverLast6Months } }
 				}
 			};
+			top10MostPlayedGames = statistics.data?.top10MostPlayedGames;
 		}
 
 		return {
@@ -44,7 +46,8 @@ export const load: PageLoad = async ({ fetch }) => {
 			totalPlayTime,
 			notPlayed,
 			played,
-			charts
+			charts,
+			top10MostPlayedGames
 		};
 	} catch (e) {
 		console.error(e);

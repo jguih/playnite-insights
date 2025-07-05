@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { buildClassNames } from '$lib/utils/build-class-names';
+	import { buildClassNames } from '$lib/client/utils/build-class-names';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
 
 	let props: HTMLAnchorAttributes & { disabled?: boolean; selected?: boolean } = $props();
