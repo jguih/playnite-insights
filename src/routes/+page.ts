@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import { homePagePlayniteGameListSchema } from '../page/home/schemas';
+import { homePagePlayniteGameListSchema } from '../lib/page/home/schemas';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ url, fetch }) => {

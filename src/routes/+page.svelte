@@ -16,6 +16,7 @@
 	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
 	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
+	import { searchBarVisible } from '$lib/page/home/stores.svelte';
 
 	let { data }: PageProps = $props();
 	let currentPage = $derived(data.page);
@@ -27,7 +28,6 @@
 	let totalPages = $derived(data.totalPages ?? 1);
 	let gameList = $derived(data.games ?? []);
 	let main: HTMLElement | undefined = $state();
-	let searchToggle = $state(false);
 
 	const getCoverImageUrl = (coverImage?: string | null) => {
 		if (!coverImage) return '';
@@ -82,7 +82,7 @@
 
 {#key currentPage}
 	<BaseAppLayout>
-		{#if !searchToggle}
+		{#if !searchBarVisible.isVisible}
 			<Header>
 				{#snippet action()}
 					<a class="" href={`/?${page.url.searchParams.toString()}`}>
@@ -93,7 +93,10 @@
 						/>
 					</a>
 				{/snippet}
-				<BaseButton onclick={() => (searchToggle = !searchToggle)} class="ml-auto w-fit">
+				<BaseButton
+					onclick={() => (searchBarVisible.isVisible = !searchBarVisible.isVisible)}
+					class="ml-auto w-fit"
+				>
 					<Search />
 					{#if currentQuery}
 						<span class="truncate opacity-70">{currentQuery}</span>
@@ -103,7 +106,7 @@
 		{:else}
 			<Header>
 				{#snippet action()}
-					<BaseButton onclick={() => (searchToggle = !searchToggle)}>
+					<BaseButton onclick={() => (searchBarVisible.isVisible = !searchBarVisible.isVisible)}>
 						<ArrowLeft />
 					</BaseButton>
 				{/snippet}

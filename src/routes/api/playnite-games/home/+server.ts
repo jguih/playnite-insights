@@ -1,7 +1,7 @@
 import { getHomePagePlayniteGameList } from '$lib/playnite-game/playnite-game-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import type z from 'zod';
-import type { homePagePlayniteGameListSchema } from '../../../../page/home/schemas';
+import type { homePagePlayniteGameListSchema } from '../../../../lib/page/home/schemas';
 
 export const GET: RequestHandler = ({ url }) => {
 	const searchParams = url.searchParams;

@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { searchBarVisible } from '$lib/page/home/stores.svelte';
 	import { Search } from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	import type { ChangeEventHandler, EventHandler, HTMLInputAttributes } from 'svelte/elements';
+	import type {
+		ChangeEventHandler,
+		EventHandler,
+		FocusEventHandler,
+		HTMLInputAttributes
+	} from 'svelte/elements';
 
 	let { ...props }: HTMLInputAttributes = $props();
 	let input: HTMLInputElement;
@@ -31,6 +37,10 @@
 		input.blur();
 	};
 
+	const handleOnFocusOut: FocusEventHandler<HTMLInputElement> = (e) => {
+		searchBarVisible.isVisible = false;
+	};
+
 	onMount(() => {
 		const query = page.url.searchParams.get('query');
 		if (query) {
@@ -50,5 +60,6 @@
 		class={`bg-background-2 m-0 w-full p-0 outline-0 ${props.class ?? ''}`}
 		bind:this={input}
 		oninput={handleOnChange}
+		onfocusout={handleOnFocusOut}
 	/>
 </form>

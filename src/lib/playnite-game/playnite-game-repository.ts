@@ -41,7 +41,7 @@ import {
 import {
 	homePagePlayniteGameMetadataSchema,
 	homePagePlayniteGameListSchema
-} from '../../page/home/schemas';
+} from '../page/home/schemas';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
