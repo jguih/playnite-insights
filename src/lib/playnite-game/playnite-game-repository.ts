@@ -75,21 +75,29 @@ export type GetHomePagePlayniteGameListResult =
 	| undefined;
 export const getHomePagePlayniteGameList = (
 	offset: number,
-	pageSize: number
+	pageSize: number,
+	query?: string
 ): GetHomePagePlayniteGameListResult => {
 	const db = getDb();
-	const query = `
+	let sqlQuery = `
     SELECT 
       pg.Id,
       pg.Name,
       pg.CoverImage
     FROM playnite_game pg
-    LIMIT (?) OFFSET (?);
+    WHERE 1=1
   `;
+	const params = [];
+	if (query) {
+		sqlQuery += ` AND LOWER(pg.Name) LIKE ?`;
+		params.push(`%${query.toLowerCase()}%`);
+	}
+	sqlQuery += ` LIMIT ? OFFSET ?;`;
+	params.push(pageSize, offset);
 
 	try {
-		const stmt = db.prepare(query);
-		const result = stmt.all(pageSize, offset);
+		const stmt = db.prepare(sqlQuery);
+		const result = stmt.all(...params);
 		const data = homePagePlayniteGamesSchema.parse(result);
 		const total = getTotalPlayniteGames();
 		const hasNextPage = offset + pageSize < total;
