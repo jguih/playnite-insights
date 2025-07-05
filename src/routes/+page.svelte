@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ArrowLeft, ChevronLeft, ChevronRight, Menu, Search } from '@lucide/svelte';
+	import { ArrowLeft, ChevronLeft, ChevronRight, Search } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -18,13 +18,14 @@
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 
 	let { data }: PageProps = $props();
-	let pageData = $derived(data.pageData ?? { data: [], totalPages: 1, total: 0, pageSize: 50 });
-	let currentPage = $derived(Number(page.url.searchParams.get('page')));
-	let currentQuery = $derived(page.url.searchParams.get('query'));
-	let totalPages = $derived(pageData.totalPages);
-	let totalGamesCount = $derived(pageData.total);
-	let pageSize = $derived(pageData.pageSize);
-	let gameList = $derived(pageData.data);
+	let currentPage = $derived(data.page);
+	let currentQuery = $derived(data.query);
+	let currentPageSize = $derived(data.pageSize);
+	let currentOffset = $derived((currentPage - 1) * currentPageSize);
+	let totalGamesCount = $derived(data.total ?? 0);
+	let lastGameCountShown = $derived(Math.min(currentPageSize + currentOffset, totalGamesCount));
+	let totalPages = $derived(data.totalPages ?? 1);
+	let gameList = $derived(data.games ?? []);
 	let main: HTMLElement | undefined = $state();
 	let searchToggle = $state(false);
 
@@ -118,7 +119,8 @@
 				{#if gameList.length > 0}
 					<p class="text-sm text-neutral-300/60">
 						{m.home_showing_games_counter({
-							currentCount: gameList.length,
+							count1: currentOffset,
+							count2: lastGameCountShown,
 							totalCount: totalGamesCount
 						})}
 					</p>
@@ -126,7 +128,7 @@
 			</div>
 			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} bind:value={pageSize} id="page_size">
+				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
 					{#each [25, 50, 75, 100] as option}
 						<option value={option}>{option}</option>
 					{/each}

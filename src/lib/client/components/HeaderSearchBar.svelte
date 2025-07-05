@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { Search } from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	import type { ChangeEventHandler, HTMLInputAttributes } from 'svelte/elements';
+	import type { ChangeEventHandler, EventHandler, HTMLInputAttributes } from 'svelte/elements';
 
 	let { ...props }: HTMLInputAttributes = $props();
 	let input: HTMLInputElement;
@@ -26,6 +26,11 @@
 		}, 1000);
 	};
 
+	const handleSubmit: EventHandler<SubmitEvent> = (e) => {
+		e.preventDefault();
+		input.blur();
+	};
+
 	onMount(() => {
 		const query = page.url.searchParams.get('query');
 		if (query) {
@@ -35,8 +40,9 @@
 	});
 </script>
 
-<div
+<form
 	class={`bg-background-2 hover:border-primary-500 focus-within:border-primary-700 active-within:border-primary-700 flex flex-row justify-center gap-2 border-2 border-solid border-transparent p-1`}
+	onsubmit={handleSubmit}
 >
 	<Search class="aspect-square shrink-0" />
 	<input
@@ -45,4 +51,4 @@
 		bind:this={input}
 		oninput={handleOnChange}
 	/>
-</div>
+</form>

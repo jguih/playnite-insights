@@ -38,6 +38,10 @@ import {
 	publisherHasChanges,
 	updatePublisher
 } from '$lib/publisher/publisher-repository';
+import {
+	homePagePlayniteGameMetadataSchema,
+	homePagePlayniteGameListSchema
+} from '../../page/home/schemas';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -56,28 +60,11 @@ export const getTotalPlayniteGames = (): number => {
 	}
 };
 
-const homePagePlayniteGamesSchema = z.array(
-	z.object({
-		Id: z.string(),
-		Name: z.string().nullable().optional(),
-		CoverImage: z.string().nullable().optional()
-	})
-);
-export type GetHomePagePlayniteGameListResult =
-	| {
-			data: z.infer<typeof homePagePlayniteGamesSchema>;
-			offset: number;
-			pageSize: number;
-			total: number;
-			hasNextPage: boolean;
-			totalPages: number;
-	  }
-	| undefined;
 export const getHomePagePlayniteGameList = (
 	offset: number,
 	pageSize: number,
-	query?: string
-): GetHomePagePlayniteGameListResult => {
+	query?: string | null
+): z.infer<typeof homePagePlayniteGameListSchema> => {
 	const db = getDb();
 	let sqlQuery = `
     SELECT 
@@ -98,14 +85,14 @@ export const getHomePagePlayniteGameList = (
 	try {
 		const stmt = db.prepare(sqlQuery);
 		const result = stmt.all(...params);
-		const data = homePagePlayniteGamesSchema.parse(result);
+		const games = z.optional(homePagePlayniteGameMetadataSchema).parse(result) ?? [];
 		const total = getTotalPlayniteGames();
 		const hasNextPage = offset + pageSize < total;
 		const totalPages = Math.ceil(total / pageSize);
 		logSuccess(
 			`Fetched game list for home page, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
 		);
-		return { data, offset, pageSize, total, hasNextPage, totalPages };
+		return { games, total, hasNextPage, totalPages };
 	} catch (error) {
 		logError('Failed to get all games from database', error as Error);
 		return undefined;
