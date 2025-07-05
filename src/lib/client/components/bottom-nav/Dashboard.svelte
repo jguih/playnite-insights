@@ -1,10 +1,18 @@
 <script lang="ts">
 	import { LayoutDashboard } from '@lucide/svelte';
-	import MenuAnchor from '../MenuAnchor.svelte';
+	import BaseAnchor from '../anchors/BaseAnchor.svelte';
+	import SelectedAnchor from '../anchors/SelectedAnchor.svelte';
+	import type { HTMLAnchorAttributes } from 'svelte/elements';
 
-	let { selected }: { selected?: boolean } = $props();
+	let { selected, ...props }: HTMLAnchorAttributes & { selected?: boolean } = $props();
 </script>
 
-<MenuAnchor {selected} href="/dash">
-	<LayoutDashboard />
-</MenuAnchor>
+{#if selected}
+	<SelectedAnchor href="/dash" {...props}>
+		<LayoutDashboard />
+	</SelectedAnchor>
+{:else}
+	<BaseAnchor href="/dash" {...props}>
+		<LayoutDashboard />
+	</BaseAnchor>
+{/if}

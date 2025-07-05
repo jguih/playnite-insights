@@ -1,6 +1,4 @@
 <script lang="ts">
-	import ActionBack from '$lib/client/components/ActionBack.svelte';
-	import AppLayout from '$lib/client/components/AppLayout.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -12,7 +10,8 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { getPlayniteGameImageUrl, getPlaytimeInHours } from '$lib/client/utils/playnite-game.js';
 	import { ArrowLeft, Search } from '@lucide/svelte';
-	import MenuButton from '$lib/client/components/MenuButton.svelte';
+	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
+	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 
 	const { data } = $props();
 	let gamesList = $derived(data.games);
@@ -35,16 +34,16 @@
 	<Divider />
 {/snippet}
 
-<AppLayout>
+<BaseAppLayout>
 	<Header>
 		{#snippet action()}
-			<MenuButton onclick={() => history.back()}>
+			<BaseButton onclick={() => history.back()}>
 				<ArrowLeft />
-			</MenuButton>
+			</BaseButton>
 		{/snippet}
-		<MenuButton class="ml-auto w-fit">
+		<BaseButton class="ml-auto w-fit">
 			<Search />
-		</MenuButton>
+		</BaseButton>
 	</Header>
 	<Main class="flex flex-col gap-6">
 		<div>
@@ -94,10 +93,10 @@
 			<h1 class="text-2xl">Top 10</h1>
 			<Divider class="mb-4 border-1" />
 			{#if top10MostPlayed}
-				<ul class="mb-6 flex list-none flex-col flex-wrap gap-2 p-0">
+				<ul class="mb-6 grid list-none grid-cols-1 gap-2 p-0">
 					{#each top10MostPlayed as game}
 						<li
-							class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 w-full border-4 border-solid border-transparent p-0 shadow-md outline-0"
+							class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 border-4 border-solid border-transparent p-0 shadow-md outline-0"
 						>
 							<a href={`/game/${game.Id}`}>
 								<div class="bg-background-1 flex flex-row gap-3 px-3 py-3">
@@ -117,10 +116,12 @@
 												{m.game_playtime_in_hour_whithout_value()}
 											</p>
 										</div>
-										<p class="">
-											Jogado pela última vez em {game.LastActivity
-												? new Date(game.LastActivity).toLocaleDateString()
-												: '-'}
+										<p>
+											{m.dash_last_time_played({
+												value: game.LastActivity
+													? new Date(game.LastActivity).toLocaleDateString()
+													: '-'
+											})}
 										</p>
 									</div>
 								</div>
@@ -140,4 +141,4 @@
 		<Dashboard selected={true} />
 		<Settings />
 	</BottomNav>
-</AppLayout>
+</BaseAppLayout>

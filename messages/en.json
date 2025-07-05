@@ -22,6 +22,7 @@
   "dash_games_owned_over_last_n_months": "Games owned over last {value} months",
   "dash_no_data_to_show": "No data to show",
   "dash_chart_label_games_owned": "Games owned",
+  "dash_last_time_played": "Last played in {value}",
   "month_january": "January",
   "month_february": "February",
   "month_march": "March",

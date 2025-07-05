@@ -1,22 +1,21 @@
 <script lang="ts">
-	import AppLayout from '$lib/client/components/AppLayout.svelte';
+	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { ArrowLeft, ChevronLeft, ChevronRight, Menu, Search } from '@lucide/svelte';
 	import type { PageProps } from './$types';
-	import MenuAnchor from '$lib/client/components/MenuAnchor.svelte';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import MenuButton from '$lib/client/components/MenuButton.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
-	import SearchBar from '$lib/client/components/SearchBar.svelte';
-	import { onMount } from 'svelte';
+	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
+	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
+	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 
 	let { data }: PageProps = $props();
 	let pageData = $derived(data.pageData ?? { data: [], totalPages: 1, total: 0, pageSize: 50 });
@@ -81,7 +80,7 @@
 {/snippet}
 
 {#key currentPage}
-	<AppLayout>
+	<BaseAppLayout>
 		{#if !searchToggle}
 			<Header>
 				{#snippet action()}
@@ -93,18 +92,21 @@
 						/>
 					</a>
 				{/snippet}
-				<MenuButton onclick={() => (searchToggle = !searchToggle)} class="ml-auto w-fit">
-					<Search /><span class="truncate opacity-70">{currentQuery}</span>
-				</MenuButton>
+				<BaseButton onclick={() => (searchToggle = !searchToggle)} class="ml-auto w-fit">
+					<Search />
+					{#if currentQuery}
+						<span class="truncate opacity-70">{currentQuery}</span>
+					{/if}
+				</BaseButton>
 			</Header>
 		{:else}
 			<Header>
 				{#snippet action()}
-					<MenuButton onclick={() => (searchToggle = !searchToggle)}>
+					<BaseButton onclick={() => (searchToggle = !searchToggle)}>
 						<ArrowLeft />
-					</MenuButton>
+					</BaseButton>
 				{/snippet}
-				<SearchBar />
+				<HeaderSearchBar />
 			</Header>
 		{/if}
 		<Main bind:main>
@@ -137,30 +139,30 @@
 			</ul>
 
 			<nav class="mt-4 flex flex-row justify-center gap-2">
-				<MenuButton disabled={currentPage <= 1} onclick={() => handleOnPageChange(currentPage - 1)}>
+				<BaseButton disabled={currentPage <= 1} onclick={() => handleOnPageChange(currentPage - 1)}>
 					<ChevronLeft />
-				</MenuButton>
+				</BaseButton>
 
 				{#if currentPage > 1}
-					<MenuButton onclick={() => handleOnPageChange(currentPage - 1)}>
+					<BaseButton onclick={() => handleOnPageChange(currentPage - 1)}>
 						{currentPage - 1}
-					</MenuButton>
+					</BaseButton>
 				{/if}
-				<MenuButton onclick={() => handleOnPageChange(currentPage)} selected>
+				<SelectedButton onclick={() => handleOnPageChange(currentPage)}>
 					{currentPage}
-				</MenuButton>
+				</SelectedButton>
 				{#if currentPage < totalPages}
-					<MenuButton onclick={() => handleOnPageChange(currentPage + 1)}>
+					<BaseButton onclick={() => handleOnPageChange(currentPage + 1)}>
 						{currentPage + 1}
-					</MenuButton>
+					</BaseButton>
 				{/if}
 
-				<MenuButton
+				<BaseButton
 					onclick={() => handleOnPageChange(currentPage + 1)}
 					disabled={currentPage >= totalPages}
 				>
 					<ChevronRight />
-				</MenuButton>
+				</BaseButton>
 			</nav>
 		</Main>
 
@@ -169,5 +171,5 @@
 			<Dashboard />
 			<Settings />
 		</BottomNav>
-	</AppLayout>
+	</BaseAppLayout>
 {/key}

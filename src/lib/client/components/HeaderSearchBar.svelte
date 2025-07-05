@@ -9,15 +9,6 @@
 	let input: HTMLInputElement;
 	let timeout: NodeJS.Timeout | null = $state(null);
 
-	const baseClass = 'bg-background-1 m-0 p-0 outline-0 w-full';
-	let fullClass = $derived(`${baseClass} ${props.class ?? ''}`);
-
-	const divBaseClass =
-		'bg-background-1 flex flex-row justify-center gap-2 border-2 border-solid border-transparent p-1';
-	const divHoverClass = 'hover:border-primary-500';
-	const divFocusClass = 'focus-within:border-primary-700 active-within:border-primary-700';
-	let divFullClass = $derived(`${divBaseClass} ${divHoverClass} ${divFocusClass}`);
-
 	const setSearchParams = $derived((key: string, value: string) => {
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set(key, value);
@@ -44,7 +35,14 @@
 	});
 </script>
 
-<div class={divFullClass}>
+<div
+	class={`bg-background-2 hover:border-primary-500 focus-within:border-primary-700 active-within:border-primary-700 flex flex-row justify-center gap-2 border-2 border-solid border-transparent p-1`}
+>
 	<Search class="aspect-square shrink-0" />
-	<input {...props} class={fullClass} bind:this={input} oninput={handleOnChange} />
+	<input
+		{...props}
+		class={`bg-background-2 m-0 w-full p-0 outline-0 ${props.class ?? ''}`}
+		bind:this={input}
+		oninput={handleOnChange}
+	/>
 </div>
