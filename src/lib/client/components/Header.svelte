@@ -5,7 +5,9 @@
 		$props();
 </script>
 
-<div class="bg-background-1 z-1000 flex flex-row items-center justify-between px-4 py-2 shadow-lg">
+<div
+	class="bg-background-1 z-1000 flex flex-row items-center justify-between gap-2 px-4 py-2 shadow-lg"
+>
 	<div class="flex flex-row items-center gap-2">
 		{#if action}
 			{@render action()}
@@ -14,7 +16,7 @@
 			{@render title()}
 		{/if}
 	</div>
-	<div>
+	<div class="grow">
 		{#if children}
 			{@render children()}
 		{/if}

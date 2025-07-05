@@ -11,6 +11,8 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { getPlayniteGameImageUrl, getPlaytimeInHours } from '$lib/client/utils/playnite-game.js';
+	import { ArrowLeft, Search } from '@lucide/svelte';
+	import MenuButton from '$lib/client/components/MenuButton.svelte';
 
 	const { data } = $props();
 	let gamesList = $derived(data.games);
@@ -36,11 +38,13 @@
 <AppLayout>
 	<Header>
 		{#snippet action()}
-			<ActionBack />
+			<MenuButton onclick={() => history.back()}>
+				<ArrowLeft />
+			</MenuButton>
 		{/snippet}
-		{#snippet title()}
-			Dashboard
-		{/snippet}
+		<MenuButton class="ml-auto w-fit">
+			<Search />
+		</MenuButton>
 	</Header>
 	<Main class="flex flex-col gap-6">
 		<div>

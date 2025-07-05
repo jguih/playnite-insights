@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, Menu, Search } from '@lucide/svelte';
+	import { ArrowLeft, ChevronLeft, ChevronRight, Menu, Search } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import MenuAnchor from '$lib/client/components/MenuAnchor.svelte';
 	import Select from '$lib/client/components/Select.svelte';
@@ -15,15 +15,19 @@
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
+	import SearchBar from '$lib/client/components/SearchBar.svelte';
+	import { onMount } from 'svelte';
 
 	let { data }: PageProps = $props();
 	let pageData = $derived(data.pageData ?? { data: [], totalPages: 1, total: 0, pageSize: 50 });
 	let currentPage = $derived(Number(page.url.searchParams.get('page')));
+	let currentQuery = $derived(page.url.searchParams.get('query'));
 	let totalPages = $derived(pageData.totalPages);
 	let totalGamesCount = $derived(pageData.total);
 	let pageSize = $derived(pageData.pageSize);
 	let gameList = $derived(pageData.data);
 	let main: HTMLElement | undefined = $state();
+	let searchToggle = $state(false);
 
 	const getCoverImageUrl = (coverImage?: string | null) => {
 		if (!coverImage) return '';
@@ -58,12 +62,6 @@
 	};
 </script>
 
-{#snippet action()}
-	<a class="" href="/">
-		<img src="/favicon-96x96.png" class="aspect-square h-9 w-9 rounded-md" alt="app icon" />
-	</a>
-{/snippet}
-
 {#snippet gameCard(game: (typeof gameList)[number])}
 	<li
 		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-background-1 m-0 aspect-[1/1.6] border-4 border-solid p-0 shadow-md outline-0"
@@ -84,9 +82,31 @@
 
 {#key currentPage}
 	<AppLayout>
-		<Header {action}>
-			<a><Search /></a>
-		</Header>
+		{#if !searchToggle}
+			<Header>
+				{#snippet action()}
+					<a class="" href={`/?${page.url.searchParams.toString()}`}>
+						<img
+							src="/app-icon.png"
+							class="aspect-auto h-8 w-10 rounded-md object-contain"
+							alt="app icon"
+						/>
+					</a>
+				{/snippet}
+				<MenuButton onclick={() => (searchToggle = !searchToggle)} class="ml-auto w-fit">
+					<Search /><span class="truncate opacity-70">{currentQuery}</span>
+				</MenuButton>
+			</Header>
+		{:else}
+			<Header>
+				{#snippet action()}
+					<MenuButton onclick={() => (searchToggle = !searchToggle)}>
+						<ArrowLeft />
+					</MenuButton>
+				{/snippet}
+				<SearchBar />
+			</Header>
+		{/if}
 		<Main bind:main>
 			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
@@ -117,22 +137,22 @@
 			</ul>
 
 			<nav class="mt-4 flex flex-row justify-center gap-2">
-				<MenuButton disabled={currentPage <= 1} onclick={() => handleOnPageChange(currentPage - 1)}
-					><ChevronLeft />
+				<MenuButton disabled={currentPage <= 1} onclick={() => handleOnPageChange(currentPage - 1)}>
+					<ChevronLeft />
 				</MenuButton>
 
 				{#if currentPage > 1}
-					<MenuButton onclick={() => handleOnPageChange(currentPage - 1)}
-						>{currentPage - 1}
+					<MenuButton onclick={() => handleOnPageChange(currentPage - 1)}>
+						{currentPage - 1}
 					</MenuButton>
 				{/if}
 				<MenuButton onclick={() => handleOnPageChange(currentPage)} selected>
 					{currentPage}
 				</MenuButton>
 				{#if currentPage < totalPages}
-					<MenuButton onclick={() => handleOnPageChange(currentPage + 1)}
-						>{currentPage + 1}</MenuButton
-					>
+					<MenuButton onclick={() => handleOnPageChange(currentPage + 1)}>
+						{currentPage + 1}
+					</MenuButton>
 				{/if}
 
 				<MenuButton

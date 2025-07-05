@@ -4,7 +4,9 @@
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
+	import MenuButton from '$lib/client/components/MenuButton.svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import { ArrowLeft, Search } from '@lucide/svelte';
 
 	let { data } = $props();
 	const game = $derived(data.game);
@@ -59,8 +61,13 @@
 <AppLayoutWithoutBottomNav>
 	<Header>
 		{#snippet action()}
-			<ActionBack />
+			<MenuButton onclick={() => history.back()}>
+				<ArrowLeft />
+			</MenuButton>
 		{/snippet}
+		<MenuButton class="ml-auto w-fit">
+			<Search />
+		</MenuButton>
 	</Header>
 	<Main>
 		{#if !data.game}
