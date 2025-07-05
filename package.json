@@ -1,7 +1,7 @@
 {
   "name": "playnite-insights-dev",
   "private": true,
-  "version": "1.0.1",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "npm run dev:down && docker compose -f docker/dev/docker-compose.yaml up --watch --force-recreate --build",
