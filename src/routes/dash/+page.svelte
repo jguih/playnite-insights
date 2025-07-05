@@ -1,0 +1,139 @@
+<script lang="ts">
+	import ActionBack from '$lib/client/components/ActionBack.svelte';
+	import AppLayout from '$lib/client/components/AppLayout.svelte';
+	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
+	import Home from '$lib/client/components/bottom-nav/Home.svelte';
+	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
+	import BottomNav from '$lib/client/components/BottomNav.svelte';
+	import GamesOwnedOverTime from '$lib/client/components/charts/GamesOwnedOverTime.svelte';
+	import Divider from '$lib/client/components/Divider.svelte';
+	import Header from '$lib/client/components/Header.svelte';
+	import Main from '$lib/client/components/Main.svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getPlayniteGameImageUrl, getPlaytimeInHours } from '$lib/client/utils/playnite-game.js';
+
+	const { data } = $props();
+	let gamesList = $derived(data.games);
+	let total = $derived(data.total);
+	let installed = $derived(data.installed);
+	let notInstalled = $derived(data.notInstalled);
+	let totalPlayTime = $derived(data.totalPlayTime);
+	let notPlayed = $derived(data.notPlayed);
+	let played = $derived(data.played);
+	let totalPlayedPercent = $derived(Math.floor((played * 100) / total));
+	let charts = $derived(data.charts);
+	let top10MostPlayed = $derived(data.top10MostPlayedGames);
+</script>
+
+{#snippet infoSection(label: string, value: string | number)}
+	<div class="flex flex-row justify-between gap-4">
+		<p class="text-md text-nowrap">{label}</p>
+		<p class="text-md break-all">{value}</p>
+	</div>
+	<Divider />
+{/snippet}
+
+<AppLayout>
+	<Header>
+		{#snippet action()}
+			<ActionBack />
+		{/snippet}
+		{#snippet title()}
+			Dashboard
+		{/snippet}
+	</Header>
+	<Main class="flex flex-col gap-6">
+		<div>
+			<h1 class="text-2xl">Overview</h1>
+			<Divider class="mb-4 border-1" />
+			{@render infoSection(m.dash_games_in_library(), total)}
+			{@render infoSection(m.dash_intalled(), installed)}
+			{@render infoSection(m.dash_not_installed(), notInstalled)}
+			{@render infoSection(
+				m.dash_total_playtime(),
+				m.game_playtime_in_hour({ hours: totalPlayTime })
+			)}
+			<div class="flex flex-row justify-between">
+				<small class="text-sm">
+					<span class="text-primary-500">{played}</span>
+					<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
+					<span class="text-primary-500 font-semibold">{total}</span>
+					<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
+				</small>
+				<p class="text-md">{totalPlayedPercent}%</p>
+			</div>
+			<div class="bg-background-1 mt-1 h-3 w-full rounded-sm">
+				<div class="bg-primary-500 h-3 rounded-sm" style="width: {totalPlayedPercent}%"></div>
+			</div>
+		</div>
+		<div class="bg-background-1 shadow-md">
+			<h1 class="text-md truncate px-3 pt-4 font-semibold">
+				{m.dash_games_owned_over_last_n_months({ value: 6 })}
+			</h1>
+			{#if charts?.totalGamesOwnedOverLast6Months}
+				<GamesOwnedOverTime
+					series={{
+						bar: {
+							data: charts.totalGamesOwnedOverLast6Months.series.bar.data,
+							label: m.dash_chart_label_games_owned()
+						}
+					}}
+					xAxis={charts.totalGamesOwnedOverLast6Months.xAxis}
+				/>
+			{:else}
+				<div>
+					<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
+				</div>
+			{/if}
+		</div>
+		<div>
+			<h1 class="text-2xl">Top 10</h1>
+			<Divider class="mb-4 border-1" />
+			{#if top10MostPlayed}
+				<ul class="mb-6 flex list-none flex-col flex-wrap gap-2 p-0">
+					{#each top10MostPlayed as game}
+						<li
+							class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 w-full border-4 border-solid border-transparent p-0 shadow-md outline-0"
+						>
+							<a href={`/game/${game.Id}`}>
+								<div class="bg-background-1 flex flex-row gap-3 px-3 py-3">
+									<img
+										src={getPlayniteGameImageUrl(game.CoverImage)}
+										alt={`${game.Name} cover image`}
+										loading="lazy"
+										class="aspect-[1/1.6] w-24 object-cover"
+									/>
+									<div class="flex flex-col justify-between">
+										<div>
+											<h2 class="text-xl font-semibold">{game.Name}</h2>
+											<p class=" mt-1 text-lg">
+												<span class="text-primary-500 font-semibold"
+													>{getPlaytimeInHours(game.Playtime)}</span
+												>{' '}
+												{m.game_playtime_in_hour_whithout_value()}
+											</p>
+										</div>
+										<p class="">
+											Jogado pela última vez em {game.LastActivity
+												? new Date(game.LastActivity).toLocaleDateString()
+												: '-'}
+										</p>
+									</div>
+								</div>
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<div>
+					<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
+				</div>
+			{/if}
+		</div>
+	</Main>
+	<BottomNav>
+		<Home />
+		<Dashboard selected={true} />
+		<Settings />
+	</BottomNav>
+</AppLayout>

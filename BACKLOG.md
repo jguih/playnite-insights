@@ -8,18 +8,22 @@
 - Automatically create and update manifest.json that contains data about what the server currently have
 - Serve the manifest.json through the API
 - Include a content hash in the manifest for media files
+- Display basic game info in game page
+- Save scroll prosition when navigating away from home page
+- Pagination
+- Save games in SQLite database
 
 ## 🛠️ In Progress
 
-- Display basic game info in game page
+- Dashboard page
 
 ## 📌 To Do
 
-- Save scroll prosition when navigating away from home page
 - Display game trailer in game page
 - Display related owned games in game page
 - Game filtering
 - Game sorting
+- Settings page (change language)
 
 ## 💡 Ideas
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import AppLayoutWithoutBottomNav from '$lib/components/AppLayoutWithoutBottomNav.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import Main from '$lib/components/Main.svelte';
-	import MenuButton from '$lib/components/MenuButton.svelte';
+	import ActionBack from '$lib/client/components/ActionBack.svelte';
+	import AppLayoutWithoutBottomNav from '$lib/client/components/AppLayoutWithoutBottomNav.svelte';
+	import Divider from '$lib/client/components/Divider.svelte';
+	import Header from '$lib/client/components/Header.svelte';
+	import Main from '$lib/client/components/Main.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import { ArrowLeft, Check } from '@lucide/svelte';
 
 	let { data } = $props();
 	const game = $derived(data.game);
@@ -34,40 +34,34 @@
 	});
 
 	const getReleaseDate = $derived((): string => {
-		if (game?.ReleaseDate?.ReleaseDate) {
-			return new Date(game.ReleaseDate.ReleaseDate).toLocaleDateString();
+		if (game?.ReleaseDate) {
+			return new Date(game.ReleaseDate).toLocaleDateString();
 		}
 		return '';
 	});
 
 	const getInstalled = $derived((): string => {
-		if (game?.IsInstalled) {
+		if (Boolean(game?.IsInstalled)) {
 			return m.yes();
 		}
 		return m.no();
 	});
 </script>
 
-{#snippet action()}
-	<MenuButton onclick={() => history.back()}>
-		<ArrowLeft />
-	</MenuButton>
-{/snippet}
-
-{#snippet divider(className?: string)}
-	<hr class="border-background-2 {className}" />
-{/snippet}
-
 {#snippet infoSection(label: string, value: string | number)}
 	<div class="flex flex-row justify-between gap-4">
 		<p class="text-nowrap">{label}</p>
 		<p class="break-all">{value}</p>
 	</div>
-	{@render divider()}
+	<Divider />
 {/snippet}
 
 <AppLayoutWithoutBottomNav>
-	<Header {action} />
+	<Header>
+		{#snippet action()}
+			<ActionBack />
+		{/snippet}
+	</Header>
 	<Main>
 		{#if !data.game}
 			<p class="text-red-500">Game not found.</p>
@@ -75,10 +69,10 @@
 			<h2 class="mb-4 text-2xl font-semibold">{data.game.Name}</h2>
 			<img
 				src={getImageUrl(data.game.BackgroundImage)}
-				alt={`${data.game.Name} icon`}
+				alt={`${data.game.Name} background image`}
 				class="aspect-3/2 w-full"
 			/>
-			<div class="mt-4 mb-4 flex flex-col gap-1">
+			<div class="mt-4 mb-4 flex flex-col">
 				{@render infoSection(m.game_info_release_date(), getReleaseDate())}
 				{@render infoSection(m.game_info_added(), getAdded())}
 				{@render infoSection(
