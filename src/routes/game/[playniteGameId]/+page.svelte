@@ -1,10 +1,11 @@
 <script lang="ts">
-	import ActionBack from '$lib/client/components/ActionBack.svelte';
-	import AppLayoutWithoutBottomNav from '$lib/client/components/AppLayoutWithoutBottomNav.svelte';
+	import MenuButton from '$lib/client/components/buttons/MenuButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
+	import AppLayoutWithoutBottomNav from '$lib/client/components/layout/AppLayoutWithoutBottomNav.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import { ArrowLeft, Search } from '@lucide/svelte';
 
 	let { data } = $props();
 	const game = $derived(data.game);
@@ -59,8 +60,13 @@
 <AppLayoutWithoutBottomNav>
 	<Header>
 		{#snippet action()}
-			<ActionBack />
+			<MenuButton onclick={() => history.back()}>
+				<ArrowLeft />
+			</MenuButton>
 		{/snippet}
+		<MenuButton class="ml-auto w-fit">
+			<Search />
+		</MenuButton>
 	</Header>
 	<Main>
 		{#if !data.game}

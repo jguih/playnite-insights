@@ -38,6 +38,10 @@ import {
 	publisherHasChanges,
 	updatePublisher
 } from '$lib/publisher/publisher-repository';
+import {
+	homePagePlayniteGameMetadataSchema,
+	homePagePlayniteGameListSchema
+} from '../page/home/schemas';
 
 const totalPlayniteGamesSchema = z.object({
 	total: z.number()
@@ -56,48 +60,39 @@ export const getTotalPlayniteGames = (): number => {
 	}
 };
 
-const homePagePlayniteGamesSchema = z.array(
-	z.object({
-		Id: z.string(),
-		Name: z.string().nullable().optional(),
-		CoverImage: z.string().nullable().optional()
-	})
-);
-export type GetHomePagePlayniteGameListResult =
-	| {
-			data: z.infer<typeof homePagePlayniteGamesSchema>;
-			offset: number;
-			pageSize: number;
-			total: number;
-			hasNextPage: boolean;
-			totalPages: number;
-	  }
-	| undefined;
 export const getHomePagePlayniteGameList = (
 	offset: number,
-	pageSize: number
-): GetHomePagePlayniteGameListResult => {
+	pageSize: number,
+	query?: string | null
+): z.infer<typeof homePagePlayniteGameListSchema> => {
 	const db = getDb();
-	const query = `
+	let sqlQuery = `
     SELECT 
       pg.Id,
       pg.Name,
       pg.CoverImage
     FROM playnite_game pg
-    LIMIT (?) OFFSET (?);
+    WHERE 1=1
   `;
+	const params = [];
+	if (query) {
+		sqlQuery += ` AND LOWER(pg.Name) LIKE ?`;
+		params.push(`%${query.toLowerCase()}%`);
+	}
+	sqlQuery += ` LIMIT ? OFFSET ?;`;
+	params.push(pageSize, offset);
 
 	try {
-		const stmt = db.prepare(query);
-		const result = stmt.all(pageSize, offset);
-		const data = homePagePlayniteGamesSchema.parse(result);
+		const stmt = db.prepare(sqlQuery);
+		const result = stmt.all(...params);
+		const games = z.optional(homePagePlayniteGameMetadataSchema).parse(result) ?? [];
 		const total = getTotalPlayniteGames();
 		const hasNextPage = offset + pageSize < total;
 		const totalPages = Math.ceil(total / pageSize);
 		logSuccess(
 			`Fetched game list for home page, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
 		);
-		return { data, offset, pageSize, total, hasNextPage, totalPages };
+		return { games, total, hasNextPage, totalPages };
 	} catch (error) {
 		logError('Failed to get all games from database', error as Error);
 		return undefined;

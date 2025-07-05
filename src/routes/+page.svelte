@@ -1,28 +1,32 @@
 <script lang="ts">
-	import AppLayout from '$lib/client/components/AppLayout.svelte';
+	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, Menu } from '@lucide/svelte';
+	import { ArrowLeft, ChevronLeft, ChevronRight, Search } from '@lucide/svelte';
 	import type { PageProps } from './$types';
-	import MenuAnchor from '$lib/client/components/MenuAnchor.svelte';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import MenuButton from '$lib/client/components/MenuButton.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
+	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
+	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
+	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
+	import { searchBarVisible } from '$lib/page/home/stores.svelte';
 
 	let { data }: PageProps = $props();
-	let pageData = $derived(data.pageData ?? { data: [], totalPages: 1, total: 0, pageSize: 50 });
-	let currentPage = $derived(Number(page.url.searchParams.get('page')));
-	let totalPages = $derived(pageData.totalPages);
-	let totalGamesCount = $derived(pageData.total);
-	let pageSize = $derived(pageData.pageSize);
-	let gameList = $derived(pageData.data);
+	let currentPage = $derived(data.page);
+	let currentQuery = $derived(data.query);
+	let currentPageSize = $derived(data.pageSize);
+	let currentOffset = $derived((currentPage - 1) * currentPageSize);
+	let totalGamesCount = $derived(data.total ?? 0);
+	let lastGameCountShown = $derived(Math.min(currentPageSize + currentOffset, totalGamesCount));
+	let totalPages = $derived(data.totalPages ?? 1);
+	let gameList = $derived(data.games ?? []);
 	let main: HTMLElement | undefined = $state();
 
 	const getCoverImageUrl = (coverImage?: string | null) => {
@@ -58,15 +62,9 @@
 	};
 </script>
 
-{#snippet action()}
-	<MenuAnchor>
-		<Menu strokeWidth={1.75} />
-	</MenuAnchor>
-{/snippet}
-
 {#snippet gameCard(game: (typeof gameList)[number])}
 	<li
-		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 aspect-[1/1.6] max-w-38 border-4 border-solid border-transparent p-0 shadow-md outline-0 sm:max-w-52"
+		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-background-1 m-0 aspect-[1/1.6] border-4 border-solid p-0 shadow-md outline-0"
 	>
 		<a href={`/game/${game.Id}`}>
 			<img
@@ -75,16 +73,46 @@
 				loading="lazy"
 				class="h-7/8 w-full object-cover"
 			/>
-			<div class="bg-background-1 bottom-0 h-1/8 w-full p-1">
-				<p class="truncate text-center text-sm text-white">{game.Name}</p>
+			<div class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row justify-center p-1">
+				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
 		</a>
 	</li>
 {/snippet}
 
 {#key currentPage}
-	<AppLayout>
-		<Header {action} />
+	<BaseAppLayout>
+		{#if !searchBarVisible.isVisible}
+			<Header>
+				{#snippet action()}
+					<a class="" href={`/?${page.url.searchParams.toString()}`}>
+						<img
+							src="/app-icon.png"
+							class="aspect-auto h-8 w-10 rounded-md object-contain"
+							alt="app icon"
+						/>
+					</a>
+				{/snippet}
+				<BaseButton
+					onclick={() => (searchBarVisible.isVisible = !searchBarVisible.isVisible)}
+					class="ml-auto w-fit"
+				>
+					<Search />
+					{#if currentQuery}
+						<span class="truncate opacity-70">{currentQuery}</span>
+					{/if}
+				</BaseButton>
+			</Header>
+		{:else}
+			<Header>
+				{#snippet action()}
+					<BaseButton onclick={() => (searchBarVisible.isVisible = !searchBarVisible.isVisible)}>
+						<ArrowLeft />
+					</BaseButton>
+				{/snippet}
+				<HeaderSearchBar />
+			</Header>
+		{/if}
 		<Main bind:main>
 			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
@@ -94,7 +122,8 @@
 				{#if gameList.length > 0}
 					<p class="text-sm text-neutral-300/60">
 						{m.home_showing_games_counter({
-							currentCount: gameList.length,
+							count1: currentOffset,
+							count2: lastGameCountShown,
 							totalCount: totalGamesCount
 						})}
 					</p>
@@ -102,43 +131,43 @@
 			</div>
 			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} bind:value={pageSize} id="page_size">
+				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
 					{#each [25, 50, 75, 100] as option}
 						<option value={option}>{option}</option>
 					{/each}
 				</Select>
 			</label>
-			<ul class="mb-6 flex list-none flex-row flex-wrap justify-center gap-4 p-0">
+			<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
 				{#each gameList as game}
 					{@render gameCard(game)}
 				{/each}
 			</ul>
 
 			<nav class="mt-4 flex flex-row justify-center gap-2">
-				<MenuButton disabled={currentPage <= 1} onclick={() => handleOnPageChange(currentPage - 1)}
-					><ChevronLeft />
-				</MenuButton>
+				<BaseButton disabled={currentPage <= 1} onclick={() => handleOnPageChange(currentPage - 1)}>
+					<ChevronLeft />
+				</BaseButton>
 
 				{#if currentPage > 1}
-					<MenuButton onclick={() => handleOnPageChange(currentPage - 1)}
-						>{currentPage - 1}
-					</MenuButton>
+					<BaseButton onclick={() => handleOnPageChange(currentPage - 1)}>
+						{currentPage - 1}
+					</BaseButton>
 				{/if}
-				<MenuButton onclick={() => handleOnPageChange(currentPage)} selected>
+				<SelectedButton onclick={() => handleOnPageChange(currentPage)}>
 					{currentPage}
-				</MenuButton>
+				</SelectedButton>
 				{#if currentPage < totalPages}
-					<MenuButton onclick={() => handleOnPageChange(currentPage + 1)}
-						>{currentPage + 1}</MenuButton
-					>
+					<BaseButton onclick={() => handleOnPageChange(currentPage + 1)}>
+						{currentPage + 1}
+					</BaseButton>
 				{/if}
 
-				<MenuButton
+				<BaseButton
 					onclick={() => handleOnPageChange(currentPage + 1)}
 					disabled={currentPage >= totalPages}
 				>
 					<ChevronRight />
-				</MenuButton>
+				</BaseButton>
 			</nav>
 		</Main>
 
@@ -147,5 +176,5 @@
 			<Dashboard />
 			<Settings />
 		</BottomNav>
-	</AppLayout>
+	</BaseAppLayout>
 {/key}
