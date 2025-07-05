@@ -1,7 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { CURRENT_LOG_LEVEL, logInfo } from '$lib/log/log';
-import { writeLibraryManifest } from '$lib/library-manifest/library-manifest';
+import { CURRENT_LOG_LEVEL, logInfo } from '$lib/services/log';
+import { services } from '$lib';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -19,7 +19,7 @@ logInfo(`DATA_DIR: ${process.env.DATA_DIR || '/app/data'}`);
 logInfo(`APP_NAME: ${process.env.APP_NAME}`);
 logInfo(`NODE VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
 
-await writeLibraryManifest();
+await services.libraryManifest.write();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Apply CORS header for API routes

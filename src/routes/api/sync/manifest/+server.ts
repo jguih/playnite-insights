@@ -1,8 +1,8 @@
-import { getPlayniteLibraryManifest } from '$lib/library-manifest/library-manifest';
+import { services } from '$lib';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async () => {
-	const manifest = await getPlayniteLibraryManifest();
+	const manifest = await services.libraryManifest.get();
 	if (manifest) {
 		return json(manifest);
 	}

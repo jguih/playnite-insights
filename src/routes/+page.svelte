@@ -132,7 +132,7 @@
 			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 				{m.home_label_items_per_page()}
 				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
-					{#each [2, 25, 50, 75, 100] as option}
+					{#each [25, 50, 75, 100] as option}
 						<option value={option}>{option}</option>
 					{/each}
 				</Select>

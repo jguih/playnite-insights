@@ -1,10 +1,10 @@
 import { join } from 'path';
-import { logError } from '../log/log';
+import { logError } from '../services/log';
 import { access, constants, readFile, stat } from 'fs/promises';
-import { playniteInsightsConfig } from '$lib/config/config';
 import type { ValidationResult } from '$lib/models/validation-result';
+import { config } from '$lib';
 
-const IMAGE_DIR = playniteInsightsConfig.path.filesDir;
+const IMAGE_DIR = config.FILES_DIR;
 
 const _checkIfImageExists = async (imagePath: string): Promise<boolean> => {
 	try {

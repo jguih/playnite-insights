@@ -1,4 +1,4 @@
-import { logError, logSuccess } from '../log/log';
+import { logError, logSuccess } from '../services/log';
 import { getDb } from '$lib/infrastructure/database';
 import { z } from 'zod';
 import { developerSchema, type Developer } from '$lib/developer/schemas';
@@ -543,9 +543,8 @@ const gameManifestDataSchema = z.array(
 		ContentHash: z.string()
 	})
 );
-export const getAllPlayniteGameManifestData = ():
-	| z.infer<typeof gameManifestDataSchema>
-	| undefined => {
+export type GetManifestDataResult = z.infer<typeof gameManifestDataSchema> | undefined;
+export const getManifestData = (): GetManifestDataResult => {
 	const db = getDb();
 	const query = `SELECT Id, ContentHash FROM playnite_game`;
 	try {

@@ -1,6 +1,6 @@
 import { getDb } from '$lib/infrastructure/database';
 import z from 'zod';
-import { logError, logSuccess } from '../log/log';
+import { logError, logSuccess } from '../services/log';
 import { publisherSchema, type Publisher } from './schemas';
 
 export const addPublisher = (publisher: Publisher): boolean => {

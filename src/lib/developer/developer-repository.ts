@@ -1,6 +1,6 @@
 import { getDb } from '$lib/infrastructure/database';
 import { developerSchema, type Developer } from '$lib/developer/schemas';
-import { logError, logSuccess } from '../log/log';
+import { logError, logSuccess } from '../services/log';
 import z from 'zod';
 
 export const addDeveloper = (developer: Developer): boolean => {

@@ -1,12 +1,11 @@
-import { playniteInsightsConfig } from '$lib/config/config';
+import { config } from '$lib';
 import { DatabaseSync } from 'node:sqlite';
 
-const DB_FILE = playniteInsightsConfig.path.dbFile;
 let db: DatabaseSync | null = null;
 
 export const getDb = (): DatabaseSync => {
 	if (db === null) {
-		db = new DatabaseSync(DB_FILE, { enableForeignKeyConstraints: true });
+		db = new DatabaseSync(config.DB_FILE, { enableForeignKeyConstraints: true });
 	}
 	return db;
 };
