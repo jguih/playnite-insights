@@ -61,3 +61,13 @@ export const logInfo = (message: string): void => {
 	}
 	console.info(`[${getDateTimeString()}][INFO] ${message}`);
 };
+
+export const makeLogService = () => {
+	return {
+		error: logError,
+		warning: logWarning,
+		info: logInfo,
+		success: logSuccess,
+		debug: logDebug
+	};
+};

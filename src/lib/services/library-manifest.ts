@@ -3,7 +3,7 @@ import { type GetManifestDataResult } from '../playnite-game/playnite-game-repos
 import { join } from 'path';
 import type { FileSystemAsyncDeps } from './types';
 
-type PlayniteLibraryManifest = {
+export type PlayniteLibraryManifest = {
 	totalGamesInLibrary: number;
 	gamesInLibrary: Array<{
 		gameId: string;

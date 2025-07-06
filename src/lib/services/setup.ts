@@ -8,6 +8,7 @@ import * as streamAsync from 'stream/promises';
 import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { repositories } from '$lib/repositories';
+import { makeLogService } from './log';
 
 const FsAsyncDeps: FileSystemAsyncDeps = {
 	readdir: fsAsync.readdir,
@@ -41,3 +42,5 @@ export const playniteLibraryImporterService = makePlayniteLibraryImporterService
 	TMP_DIR: config.TMP_DIR,
 	createZip: (path) => new AdmZip(path)
 });
+
+export const logService = makeLogService();
