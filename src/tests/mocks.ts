@@ -12,7 +12,6 @@ export const createMocks = () => {
 		unlink: vi.fn(),
 		writeFile: vi.fn()
 	};
-
 	const streamUtilsAsyncDeps = {
 		readableFromWeb: vi.fn(),
 		pipeline: vi.fn(),
@@ -23,10 +22,16 @@ export const createMocks = () => {
 	const playniteLibrarySyncRepository = {
 		getTotalPlaytimeOverLast6Months: vi.fn(),
 		getTotalGamesOwnedOverLast6Months: vi.fn(),
-		addPlayniteLibrarySync: vi.fn()
+		add: vi.fn()
 	};
+	const db = {
+		prepare: () => {
+			return { all: vi.fn(), get: vi.fn(), run: vi.fn() };
+		}
+	};
+	const getDb = vi.fn().mockReturnValue(db);
 	const playniteGameRepository = makePlayniteGameRepository({
-		getDb: vi.fn(),
+		getDb: getDb,
 		logService: logService
 	});
 	// Services
@@ -46,6 +51,7 @@ export const createMocks = () => {
 			playniteLibrarySync: playniteLibrarySyncRepository,
 			playniteGame: playniteGameRepository
 		},
-		services: { log: logService, libraryManifest: libraryManifestService }
+		services: { log: logService, libraryManifest: libraryManifestService },
+		getDb
 	};
 };

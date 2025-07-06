@@ -6,16 +6,15 @@ import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import { z } from 'zod';
 import { incomingPlayniteGameDtoSchema } from '$lib/playnite-library-sync/schemas';
-import { repositories } from '$lib/repositories';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import type { libraryManifestService, logService, playniteGameRepository } from './setup';
+import type { services, repositories } from './setup';
 
 type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	StreamUtilsAsyncDeps & {
-		playniteGameRepository: typeof playniteGameRepository;
-		libraryManifestService: typeof libraryManifestService;
+		playniteGameRepository: typeof repositories.playniteGame;
+		libraryManifestService: typeof services.libraryManifest;
 		playniteLibrarySyncRepository: typeof repositories.playniteLibrarySync;
-		logService: typeof logService;
+		logService: typeof services.log;
 		FILES_DIR: string;
 		TMP_DIR: string;
 		createZip: (path: string) => AdmZip;
@@ -136,10 +135,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			}
 			const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
 			const totalGamesInLib = deps.playniteGameRepository.getTotal();
-			deps.playniteLibrarySyncRepository.addPlayniteLibrarySync(
-				totalPlaytimeHours ?? 0,
-				totalGamesInLib ?? 0
-			);
+			deps.playniteLibrarySyncRepository.add(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
 			deps.libraryManifestService.write();
 			return true;
 		} catch (error) {

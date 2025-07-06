@@ -1,16 +1,16 @@
 import * as fsAsync from 'fs/promises';
 import * as fs from 'fs';
 import { makeLibraryManifestService } from './library-manifest';
-import { config } from '$lib/config';
+import { config } from '$lib';
 import { makePlayniteLibraryImporterService } from './playnite-library-importer';
 import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import { repositories } from '$lib/repositories';
 import { makeLogService } from './log';
 import { makePlayniteGameRepository } from '$lib/playnite-game/playnite-game-repository';
 import { getDb } from '$lib/infrastructure/database';
+import { makePlayniteLibrarySyncRepository } from '$lib/playnite-library-sync/playnite-library-sync-repository';
 
 const FsAsyncDeps: FileSystemAsyncDeps = {
 	readdir: fsAsync.readdir,
@@ -20,16 +20,20 @@ const FsAsyncDeps: FileSystemAsyncDeps = {
 	rm: fsAsync.rm,
 	unlink: fsAsync.unlink
 };
-
 const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
 	readableFromWeb: stream.Readable.fromWeb,
 	createWriteStream: fs.createWriteStream,
 	pipeline: streamAsync.pipeline
 };
-
-export const logService = makeLogService();
-export const playniteGameRepository = makePlayniteGameRepository({ getDb, logService });
-export const libraryManifestService = makeLibraryManifestService({
+const logService = makeLogService();
+// Repositories
+const commonRepositoryDeps = { getDb, logService };
+const playniteGameRepository = makePlayniteGameRepository({ ...commonRepositoryDeps });
+const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
+	...commonRepositoryDeps
+});
+// Services
+const libraryManifestService = makeLibraryManifestService({
 	...FsAsyncDeps,
 	getManifestData: playniteGameRepository.getManifestData,
 	logService: logService,
@@ -37,14 +41,25 @@ export const libraryManifestService = makeLibraryManifestService({
 	FILES_DIR: config.FILES_DIR,
 	MANIFEST_FILE: config.LIBRARY_MANIFEST_FILE
 });
-export const playniteLibraryImporterService = makePlayniteLibraryImporterService({
+const playniteLibraryImporterService = makePlayniteLibraryImporterService({
 	...FsAsyncDeps,
 	...streamUtilsAsyncDeps,
 	playniteGameRepository: playniteGameRepository,
 	libraryManifestService: libraryManifestService,
-	playniteLibrarySyncRepository: repositories.playniteLibrarySync,
+	playniteLibrarySyncRepository: playniteLibrarySyncRepository,
 	logService: logService,
 	FILES_DIR: config.FILES_DIR,
 	TMP_DIR: config.TMP_DIR,
 	createZip: (path) => new AdmZip(path)
 });
+
+export const services = {
+	log: logService,
+	libraryManifest: libraryManifestService,
+	playniteLibraryImporter: playniteLibraryImporterService
+};
+
+export const repositories = {
+	playniteGame: playniteGameRepository,
+	playniteLibrarySync: playniteLibrarySyncRepository
+};
