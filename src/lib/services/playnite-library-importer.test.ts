@@ -55,11 +55,11 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: []
 		};
-		deps.playniteGameRepository.playniteGameExists.mockReturnValueOnce(true);
+		deps.playniteGameRepository.exists.mockReturnValueOnce(true);
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.addPlayniteGame).not.toHaveBeenCalled();
+		expect(deps.playniteGameRepository.add).not.toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -70,11 +70,11 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: []
 		};
-		deps.playniteGameRepository.playniteGameExists.mockReturnValueOnce(false);
+		deps.playniteGameRepository.exists.mockReturnValueOnce(false);
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.addPlayniteGame).toHaveBeenCalled();
+		expect(deps.playniteGameRepository.add).toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -85,11 +85,11 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }]
 		};
-		deps.playniteGameRepository.playniteGameExists.mockReturnValueOnce(false);
+		deps.playniteGameRepository.exists.mockReturnValueOnce(false);
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.updatePlayniteGame).not.toHaveBeenCalled();
+		expect(deps.playniteGameRepository.update).not.toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -100,11 +100,11 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }]
 		};
-		deps.playniteGameRepository.playniteGameExists.mockReturnValueOnce(true);
+		deps.playniteGameRepository.exists.mockReturnValueOnce(true);
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.updatePlayniteGame).toHaveBeenCalled();
+		expect(deps.playniteGameRepository.update).toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -115,7 +115,7 @@ describe('Game Importer', () => {
 			RemovedItems: ['id1'],
 			UpdatedItems: []
 		};
-		deps.playniteGameRepository.deletePlayniteGame.mockReturnValueOnce(true);
+		deps.playniteGameRepository.remove.mockReturnValueOnce(true);
 		// Act
 		const result = await service.sync(data);
 		// Assert

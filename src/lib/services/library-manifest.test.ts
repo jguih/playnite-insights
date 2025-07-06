@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeLibraryManifestService, type PlayniteLibraryManifest } from './library-manifest';
 import { createMock } from '../../tests/mocks';
 import { join } from 'path';
-import type { GetManifestDataResult } from '$lib/playnite-game/playnite-game-repository';
 import { makeLogService } from './log';
 
 vi.mock('$lib/infrastructure/database', () => ({}));
@@ -76,7 +75,7 @@ describe('Library manifest', () => {
 
 	it('should write manifest file', async () => {
 		// Arrange
-		const manifestData: GetManifestDataResult = [{ Id: 'id1', ContentHash: 'hash1' }];
+		const manifestData = [{ Id: 'id1', ContentHash: 'hash1' }];
 		const dirs = [
 			{
 				isDirectory: () => true,

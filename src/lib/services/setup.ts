@@ -9,6 +9,8 @@ import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { repositories } from '$lib/repositories';
 import { makeLogService } from './log';
+import { makePlayniteGameRepository } from '$lib/playnite-game/playnite-game-repository';
+import { getDb } from '$lib/infrastructure/database';
 
 const FsAsyncDeps: FileSystemAsyncDeps = {
 	readdir: fsAsync.readdir,
@@ -26,20 +28,19 @@ const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
 };
 
 export const logService = makeLogService();
-
+export const playniteGameRepository = makePlayniteGameRepository({ getDb, logService });
 export const libraryManifestService = makeLibraryManifestService({
 	...FsAsyncDeps,
-	getManifestData: repositories.playniteGame.getManifestData,
+	getManifestData: playniteGameRepository.getManifestData,
 	logService: logService,
 	CONTENT_HASH_FILE_NAME: config.CONTENT_HASH_FILE_NAME,
 	FILES_DIR: config.FILES_DIR,
 	MANIFEST_FILE: config.LIBRARY_MANIFEST_FILE
 });
-
 export const playniteLibraryImporterService = makePlayniteLibraryImporterService({
 	...FsAsyncDeps,
 	...streamUtilsAsyncDeps,
-	playniteGameRepository: repositories.playniteGame,
+	playniteGameRepository: playniteGameRepository,
 	libraryManifestService: libraryManifestService,
 	playniteLibrarySyncRepository: repositories.playniteLibrarySync,
 	logService: logService,

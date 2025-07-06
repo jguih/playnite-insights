@@ -8,11 +8,11 @@ import { z } from 'zod';
 import { incomingPlayniteGameDtoSchema } from '$lib/playnite-library-sync/schemas';
 import { repositories } from '$lib/repositories';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import type { libraryManifestService, logService } from './setup';
+import type { libraryManifestService, logService, playniteGameRepository } from './setup';
 
 type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	StreamUtilsAsyncDeps & {
-		playniteGameRepository: typeof repositories.playniteGame;
+		playniteGameRepository: typeof playniteGameRepository;
 		libraryManifestService: typeof libraryManifestService;
 		playniteLibrarySyncRepository: typeof repositories.playniteLibrarySync;
 		logService: typeof logService;
@@ -37,12 +37,12 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			deps.logService.info(`Games to delete: ${data.RemovedItems.length}`);
 			// Games to add
 			for (const game of data.AddedItems) {
-				const exists = deps.playniteGameRepository.playniteGameExists(game.Id);
+				const exists = deps.playniteGameRepository.exists(game.Id);
 				if (exists) {
 					deps.logService.info(`Skipping existing game ${game.Name}`);
 					continue;
 				}
-				const result = deps.playniteGameRepository.addPlayniteGame(
+				const result = deps.playniteGameRepository.add(
 					{
 						Id: game.Id,
 						IsInstalled: Number(game.IsInstalled),
@@ -78,12 +78,12 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			}
 			// Games to update
 			for (const game of data.UpdatedItems) {
-				const exists = deps.playniteGameRepository.playniteGameExists(game.Id);
+				const exists = deps.playniteGameRepository.exists(game.Id);
 				if (!exists) {
 					deps.logService.info(`Skipping game to update ${game.Name}, as it doesn't exist`);
 					continue;
 				}
-				const result = deps.playniteGameRepository.updatePlayniteGame(
+				const result = deps.playniteGameRepository.update(
 					{
 						Id: game.Id,
 						IsInstalled: Number(game.IsInstalled),
@@ -119,7 +119,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			}
 			// Games to delete
 			for (const gameId of data.RemovedItems) {
-				const result = deps.playniteGameRepository.deletePlayniteGame(gameId);
+				const result = deps.playniteGameRepository.remove(gameId);
 				if (!result) {
 					deps.logService.error(`Failed to delete game with id ${gameId}`);
 				}
@@ -135,7 +135,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 				}
 			}
 			const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
-			const totalGamesInLib = deps.playniteGameRepository.getTotalPlayniteGames();
+			const totalGamesInLib = deps.playniteGameRepository.getTotal();
 			deps.playniteLibrarySyncRepository.addPlayniteLibrarySync(
 				totalPlaytimeHours ?? 0,
 				totalGamesInLib ?? 0

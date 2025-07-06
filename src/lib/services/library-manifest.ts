@@ -1,7 +1,6 @@
-import { type GetManifestDataResult } from '../playnite-game/playnite-game-repository';
 import { join } from 'path';
 import type { FileSystemAsyncDeps } from './types';
-import type { logService } from './setup';
+import type { logService, playniteGameRepository } from './setup';
 
 export type PlayniteLibraryManifest = {
 	totalGamesInLibrary: number;
@@ -16,7 +15,7 @@ export type PlayniteLibraryManifest = {
 };
 
 type LibraryManifestServiceDeps = FileSystemAsyncDeps & {
-	getManifestData: () => GetManifestDataResult;
+	getManifestData: typeof playniteGameRepository.getManifestData;
 	logService: typeof logService;
 	MANIFEST_FILE: string;
 	FILES_DIR: string;
