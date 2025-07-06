@@ -30,22 +30,16 @@ import {
 } from '../genre/genre-repository';
 import type { Publisher } from '$lib/publisher/schemas';
 import {
-	addPublisher,
-	getPublisherById,
-	publisherExists,
-	publisherHasChanges,
-	updatePublisher
-} from '$lib/publisher/publisher-repository';
-import {
 	homePagePlayniteGameMetadataSchema,
 	homePagePlayniteGameListSchema
 } from '../page/home/schemas';
 import type { DatabaseSync } from 'node:sqlite';
-import type { logService } from '$lib/services/setup';
+import type { repositories, services } from '$lib/services/setup';
 
 type PlayniteGameRepositoryDeps = {
 	getDb: () => DatabaseSync;
-	logService: typeof logService;
+	logService: typeof services.log;
+	publisherRepository: typeof repositories.publisher;
 };
 
 export const makePlayniteGameRepository = (deps: PlayniteGameRepositoryDeps) => {
@@ -419,11 +413,11 @@ export const makePlayniteGameRepository = (deps: PlayniteGameRepositoryDeps) => 
 			}
 			if (publishers) {
 				for (const publisher of publishers) {
-					if (publisherExists(publisher)) {
+					if (deps.publisherRepository.exists(publisher)) {
 						addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
 						continue;
 					}
-					if (addPublisher(publisher)) {
+					if (deps.publisherRepository.add(publisher)) {
 						addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
 					}
 				}
@@ -523,13 +517,13 @@ export const makePlayniteGameRepository = (deps: PlayniteGameRepositoryDeps) => 
 			if (publishers) {
 				deletePublishersFor({ Id: game.Id, Name: game.Name });
 				for (const publisher of publishers) {
-					const existing = getPublisherById(publisher.Id);
+					const existing = deps.publisherRepository.getById(publisher.Id);
 					if (existing) {
-						if (publisherHasChanges(existing, publisher)) {
-							updatePublisher(publisher);
+						if (deps.publisherRepository.hasChanges(existing, publisher)) {
+							deps.publisherRepository.update(publisher);
 						}
 					} else {
-						addPublisher(publisher);
+						deps.publisherRepository.add(publisher);
 					}
 					addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
 				}

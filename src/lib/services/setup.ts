@@ -11,6 +11,7 @@ import { makeLogService } from './log';
 import { makePlayniteGameRepository } from '$lib/playnite-game/playnite-game-repository';
 import { getDb } from '$lib/infrastructure/database';
 import { makePlayniteLibrarySyncRepository } from '$lib/playnite-library-sync/playnite-library-sync-repository';
+import { makePublisherRepository } from '$lib/publisher/publisher-repository';
 
 const FsAsyncDeps: FileSystemAsyncDeps = {
 	readdir: fsAsync.readdir,
@@ -28,7 +29,11 @@ const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
 const logService = makeLogService();
 // Repositories
 const commonRepositoryDeps = { getDb, logService };
-const playniteGameRepository = makePlayniteGameRepository({ ...commonRepositoryDeps });
+const publisherRepository = makePublisherRepository({ ...commonRepositoryDeps });
+const playniteGameRepository = makePlayniteGameRepository({
+	...commonRepositoryDeps,
+	publisherRepository
+});
 const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
 	...commonRepositoryDeps
 });
@@ -60,6 +65,7 @@ export const services = {
 };
 
 export const repositories = {
+	publisher: publisherRepository,
 	playniteGame: playniteGameRepository,
 	playniteLibrarySync: playniteLibrarySyncRepository
 };
