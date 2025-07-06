@@ -1,7 +1,7 @@
 import { developerSchema } from '$lib/developer/schemas';
 import { z } from 'zod';
 
-export const playniteGameSchema = z.object({
+const playniteGame = z.object({
 	Id: z.string(),
 	Name: z.string().optional().nullable(),
 	Description: z.string().optional().nullable(),
@@ -16,15 +16,15 @@ export const playniteGameSchema = z.object({
 	Icon: z.string().optional().nullable(),
 	ContentHash: z.string()
 });
-export type PlayniteGame = z.infer<typeof playniteGameSchema>;
+export type PlayniteGame = z.infer<typeof playniteGame>;
 
-export const statisticsResponseSchema = z.object({
+const statisticsResponse = z.object({
 	totalPlaytimeOverLast6Months: z.array(z.number()),
 	totalGamesOwnedOverLast6Months: z.array(z.number()),
-	top10MostPlayedGames: z.array(playniteGameSchema)
+	top10MostPlayedGames: z.array(playniteGame)
 });
 
-export const dashPagePlayniteGameListSchema = z.array(
+const dashPagePlayniteGameList = z.array(
 	z.object({
 		Id: z.string(),
 		IsInstalled: z.number(),
@@ -32,7 +32,22 @@ export const dashPagePlayniteGameListSchema = z.array(
 	})
 );
 
-export const gameByIdSchema = z.object({
-	game: z.optional(playniteGameSchema),
+const gameById = z.object({
+	game: z.optional(playniteGame),
 	developers: z.array(developerSchema).optional()
 });
+
+const gameManifestData = z.array(
+	z.object({
+		Id: z.string(),
+		ContentHash: z.string()
+	})
+);
+
+export const schemas = {
+	playniteGame,
+	statisticsResponse,
+	dashPagePlayniteGameList,
+	gameById,
+	gameManifestData
+};

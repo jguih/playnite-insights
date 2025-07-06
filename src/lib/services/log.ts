@@ -62,6 +62,14 @@ export const logInfo = (message: string): void => {
 	console.info(`[${getDateTimeString()}][INFO] ${message}`);
 };
 
+export type LogService = {
+	error: typeof logError;
+	warning: typeof logWarning;
+	info: typeof logInfo;
+	success: typeof logSuccess;
+	debug: typeof logDebug;
+};
+
 export const makeLogService = () => {
 	return {
 		error: logError,

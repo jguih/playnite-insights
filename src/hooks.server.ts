@@ -1,7 +1,13 @@
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { CURRENT_LOG_LEVEL, logInfo } from '$lib/services/log';
-import { services } from '$lib';
+import { setupServices } from '$lib/services/setup';
+
+export const { services, repositories } = setupServices();
+
+services.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+services.log.info(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
+services.log.info(`APP_NAME: ${process.env.APP_NAME}`);
+services.log.info(`NODE VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -11,15 +17,6 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 			transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
 		});
 	});
-
-logInfo(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
-logInfo(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
-logInfo(`LOG_LEVEL: ${CURRENT_LOG_LEVEL}`);
-logInfo(`DATA_DIR: ${process.env.DATA_DIR || '/app/data'}`);
-logInfo(`APP_NAME: ${process.env.APP_NAME}`);
-logInfo(`NODE VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
-
-await services.libraryManifest.write();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Apply CORS header for API routes

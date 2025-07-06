@@ -1,8 +1,8 @@
 import { join } from 'path';
-import { logError } from '../services/log';
+import { logError } from '../../services/log';
 import { access, constants, readFile, stat } from 'fs/promises';
 import type { ValidationResult } from '$lib/models/validation-result';
-import { config } from '$lib';
+import * as config from '../../config/config';
 
 const IMAGE_DIR = config.FILES_DIR;
 

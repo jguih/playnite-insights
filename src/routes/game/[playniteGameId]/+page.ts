@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { gameByIdSchema } from '$lib/playnite-game/schemas';
+import { schemas } from '$lib/services/playnite-game/schemas';
 
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { playniteGameId } = params;
@@ -9,7 +9,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 	}
 	try {
 		const response = await fetch(`/api/playnite-games/${playniteGameId}`);
-		const data = gameByIdSchema.parse(await response.json());
+		const data = schemas.gameById.parse(await response.json());
 		return { game: { ...data.game, Developers: data.developers } };
 	} catch (e) {
 		console.error(e);

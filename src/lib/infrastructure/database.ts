@@ -1,11 +1,11 @@
-import { config } from '$lib';
+import { DB_FILE } from '$lib/config/config';
 import { DatabaseSync } from 'node:sqlite';
 
 let db: DatabaseSync | null = null;
 
 export const getDb = (): DatabaseSync => {
 	if (db === null) {
-		db = new DatabaseSync(config.DB_FILE, { enableForeignKeyConstraints: true });
+		db = new DatabaseSync(DB_FILE, { enableForeignKeyConstraints: true });
 	}
 	return db;
 };

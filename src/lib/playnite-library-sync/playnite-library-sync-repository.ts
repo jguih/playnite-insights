@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import type { DatabaseSync } from 'node:sqlite';
-import type { services } from '$lib/services/setup';
+import type { LogService } from '$lib/services/log';
 
 type PlayniteLibrarySyncRepositoryDeps = {
 	getDb: () => DatabaseSync;
-	logService: typeof services.log;
+	logService: LogService;
 };
 
 export const makePlayniteLibrarySyncRepository = (deps: PlayniteLibrarySyncRepositoryDeps) => {

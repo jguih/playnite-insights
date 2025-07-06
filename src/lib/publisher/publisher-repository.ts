@@ -1,14 +1,22 @@
 import z from 'zod';
 import { publisherSchema, type Publisher } from './schemas';
 import type { DatabaseSync } from 'node:sqlite';
-import type { services } from '$lib/services/setup';
+import type { LogService } from '$lib/services/log';
 
 type PublisherRepositoryDeps = {
 	getDb: () => DatabaseSync;
-	logService: typeof services.log;
+	logService: LogService;
 };
 
-export const makePublisherRepository = (deps: PublisherRepositoryDeps) => {
+export type PublisherRepository = {
+	add: (publisher: Publisher) => boolean;
+	exists: (publisher: Publisher) => boolean;
+	update: (publisher: Publisher) => boolean;
+	getById: (id: string) => Publisher | undefined;
+	hasChanges: (oldPublisher: Publisher, newPublisher: Publisher) => boolean;
+};
+
+export const makePublisherRepository = (deps: PublisherRepositoryDeps): PublisherRepository => {
 	const add = (publisher: Publisher): boolean => {
 		const db = deps.getDb();
 		const query = `

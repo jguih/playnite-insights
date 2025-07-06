@@ -1,17 +1,14 @@
 import { getLastSixMonthsInclusiveAbreviated } from '$lib/utils/date';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import {
-	dashPagePlayniteGameListSchema,
-	statisticsResponseSchema
-} from '$lib/playnite-game/schemas';
+import { schemas } from '$lib/services/playnite-game/schemas';
 
 export const load: PageLoad = async ({ fetch }) => {
 	try {
 		const gamesResponse = await fetch(`/api/playnite-games/dash`);
-		const games = dashPagePlayniteGameListSchema.parse(await gamesResponse.json());
+		const games = schemas.dashPagePlayniteGameList.parse(await gamesResponse.json());
 		const statisticsResponse = await fetch(`/api/playnite-games/dash/statistics`);
-		const statistics = statisticsResponseSchema.safeParse(await statisticsResponse.json());
+		const statistics = schemas.statisticsResponse.safeParse(await statisticsResponse.json());
 
 		const total = games.length;
 		const installed = games.filter((g) => Boolean(g.IsInstalled)).length;

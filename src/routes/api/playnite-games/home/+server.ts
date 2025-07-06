@@ -1,7 +1,7 @@
-import { getHomePagePlayniteGameList } from '$lib/playnite-game/playnite-game-repository';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import type z from 'zod';
 import type { homePagePlayniteGameListSchema } from '../../../../lib/page/home/schemas';
+import { repositories } from '../../../../hooks.server';
 
 export const GET: RequestHandler = ({ url }) => {
 	const searchParams = url.searchParams;
@@ -15,7 +15,7 @@ export const GET: RequestHandler = ({ url }) => {
 	}
 	const query = searchParams.get('query');
 	const offset = (Number(page) - 1) * Number(pageSize);
-	const data = getHomePagePlayniteGameList(offset, pageSize, query);
+	const data = repositories.playniteGame.getHomePagePlayniteGameList(offset, pageSize, query);
 	if (!data) {
 		return json(null, { status: 400 });
 	}

@@ -7,14 +7,17 @@ import { unlink } from 'fs/promises';
 import { z } from 'zod';
 import { incomingPlayniteGameDtoSchema } from '$lib/playnite-library-sync/schemas';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import type { services, repositories } from './setup';
+import type { makeLibraryManifestService } from './library-manifest';
+import type { makePlayniteLibrarySyncRepository } from '$lib/playnite-library-sync/playnite-library-sync-repository';
+import type { LogService } from './log';
+import type { PlayniteGameRepository } from './playnite-game';
 
 type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	StreamUtilsAsyncDeps & {
-		playniteGameRepository: typeof repositories.playniteGame;
-		libraryManifestService: typeof services.libraryManifest;
-		playniteLibrarySyncRepository: typeof repositories.playniteLibrarySync;
-		logService: typeof services.log;
+		playniteGameRepository: PlayniteGameRepository;
+		libraryManifestService: ReturnType<typeof makeLibraryManifestService>;
+		playniteLibrarySyncRepository: ReturnType<typeof makePlayniteLibrarySyncRepository>;
+		logService: LogService;
 		FILES_DIR: string;
 		TMP_DIR: string;
 		createZip: (path: string) => AdmZip;
