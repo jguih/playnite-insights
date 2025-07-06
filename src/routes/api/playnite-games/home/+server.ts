@@ -1,7 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type z from 'zod';
-import type { homePagePlayniteGameListSchema } from '../../../../lib/page/home/schemas';
-import { repositories } from '../../../../hooks.server';
+import { services } from '$lib';
 
 export const GET: RequestHandler = ({ url }) => {
 	const searchParams = url.searchParams;
@@ -15,12 +13,9 @@ export const GET: RequestHandler = ({ url }) => {
 	}
 	const query = searchParams.get('query');
 	const offset = (Number(page) - 1) * Number(pageSize);
-	const data = repositories.playniteGame.getHomePagePlayniteGameList(offset, pageSize, query);
+	const data = services.homePage.getGames(offset, pageSize, query);
 	if (!data) {
 		return json(null, { status: 400 });
 	}
-	const responseData: z.infer<typeof homePagePlayniteGameListSchema> = {
-		...data
-	};
-	return json(responseData);
+	return json({ ...data });
 };

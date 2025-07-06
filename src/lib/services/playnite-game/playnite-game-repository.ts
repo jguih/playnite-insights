@@ -1,13 +1,6 @@
 import { z } from 'zod';
-import { developerSchema, type Developer } from '$lib/developer/schemas';
-import { schemas, type PlayniteGame } from './schemas';
-import {
-	addDeveloper,
-	developerExists,
-	developerHasChanges,
-	getDeveloperById,
-	updateDeveloper
-} from '../../developer/developer-repository';
+import { developerSchemas, type Developer } from '$lib/services/developer/schemas';
+import { playniteGameSchemas, type PlayniteGame } from './schemas';
 import type { Platform } from '$lib/platform/schemas';
 import type { Genre } from '$lib/genre/schemas';
 import {
@@ -18,20 +11,18 @@ import {
 	updateGenre
 } from '../../genre/genre-repository';
 import type { Publisher } from '$lib/publisher/schemas';
-import {
-	homePagePlayniteGameMetadataSchema,
-	homePagePlayniteGameListSchema
-} from '../../page/home/schemas';
 import type { DatabaseSync } from 'node:sqlite';
 import type { LogService } from '$lib/services/log';
 import type { PublisherRepository } from '$lib/publisher/publisher-repository';
 import type { PlatformRepository } from '$lib/platform/platform-repository';
+import type { DeveloperRepository } from '$lib/services/developer/developer-repository';
 
 type PlayniteGameRepositoryDeps = {
 	getDb: () => DatabaseSync;
 	logService: LogService;
 	publisherRepository: PublisherRepository;
 	platformRepository: PlatformRepository;
+	developerRepository: DeveloperRepository;
 };
 
 export type PlayniteGameRepository = {
@@ -61,13 +52,10 @@ export type PlayniteGameRepository = {
 	addPublisherFor: (game: Pick<PlayniteGame, 'Id' | 'Name'>, publisher: Publisher) => boolean;
 	deletePublishersFor: (game: Pick<PlayniteGame, 'Id' | 'Name'>) => boolean;
 	getById: (id: string) => PlayniteGame | undefined;
-	getHomePagePlayniteGameList: (
-		offset: number,
-		pageSize: number,
-		query?: string | null
-	) => z.infer<typeof homePagePlayniteGameListSchema> | undefined;
-	getDashPageGameList: () => z.infer<typeof schemas.dashPagePlayniteGameList> | undefined;
-	getManifestData: () => z.infer<typeof schemas.gameManifestData> | undefined;
+	getDashPageGameList: () =>
+		| z.infer<typeof playniteGameSchemas.getDashPageGameListResult>
+		| undefined;
+	getManifestData: () => z.infer<typeof playniteGameSchemas.gameManifestDataResult> | undefined;
 	getTotal: (query?: string | null) => number;
 	getTotalPlaytimeHours: () => number | undefined;
 	getTopMostPlayedGames: (total: number) => Array<PlayniteGame> | undefined;
@@ -76,7 +64,7 @@ export type PlayniteGameRepository = {
 export const makePlayniteGameRepository = (
 	deps: PlayniteGameRepositoryDeps
 ): PlayniteGameRepository => {
-	const totalPlayniteGamesSchema = z.object({
+	const getTotalResultSchema = z.object({
 		total: z.number()
 	});
 	const getTotal = (query?: string | null): number => {
@@ -94,50 +82,11 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(sqlQuery);
 			const result = stmt.get(...params);
-			const data = totalPlayniteGamesSchema.parse(result);
+			const data = getTotalResultSchema.parse(result);
 			return data.total;
 		} catch (error) {
 			deps.logService.error('Failed to get total amount of games', error as Error);
 			return 0;
-		}
-	};
-
-	const getHomePagePlayniteGameList = (
-		offset: number,
-		pageSize: number,
-		query?: string | null
-	): z.infer<typeof homePagePlayniteGameListSchema> => {
-		const db = deps.getDb();
-		let sqlQuery = `
-    SELECT 
-      pg.Id,
-      pg.Name,
-      pg.CoverImage
-    FROM playnite_game pg
-    WHERE 1=1
-  `;
-		const params = [];
-		if (query) {
-			sqlQuery += ` AND LOWER(pg.Name) LIKE ?`;
-			params.push(`%${query.toLowerCase()}%`);
-		}
-		sqlQuery += ` LIMIT ? OFFSET ?;`;
-		params.push(pageSize, offset);
-
-		try {
-			const stmt = db.prepare(sqlQuery);
-			const result = stmt.all(...params);
-			const games = z.optional(homePagePlayniteGameMetadataSchema).parse(result) ?? [];
-			const total = getTotal(query);
-			const hasNextPage = offset + pageSize < total;
-			const totalPages = Math.ceil(total / pageSize);
-			deps.logService.success(
-				`Fetched game list for home page, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
-			);
-			return { games, total, hasNextPage, totalPages };
-		} catch (error) {
-			deps.logService.error('Failed to get all games from database', error as Error);
-			return undefined;
 		}
 	};
 
@@ -152,7 +101,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all(game.Id);
-			const data = z.array(developerSchema).parse(result);
+			const data = z.array(developerSchemas.developer).parse(result);
 			deps.logService.success(
 				`Developer list for ${game.Name} fetched: ${data.map((d) => d.Name).join(', ')}`
 			);
@@ -169,7 +118,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.get(id);
-			const game = z.optional(schemas.playniteGame).parse(result);
+			const game = z.optional(playniteGameSchemas.playniteGame).parse(result);
 			deps.logService.success(`Found game ${game?.Name}`);
 			return game;
 		} catch (error) {
@@ -178,7 +127,9 @@ export const makePlayniteGameRepository = (
 		}
 	};
 
-	const getDashPageGameList = (): z.infer<typeof schemas.dashPagePlayniteGameList> | undefined => {
+	const getDashPageGameList = ():
+		| z.infer<typeof playniteGameSchemas.getDashPageGameListResult>
+		| undefined => {
 		const db = deps.getDb();
 		const query = `
     SELECT Id, IsInstalled, Playtime
@@ -187,7 +138,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all();
-			const data = schemas.dashPagePlayniteGameList.parse(result);
+			const data = playniteGameSchemas.getDashPageGameListResult.parse(result);
 			deps.logService.success(
 				`Game list for dashboard page fetched, returning data for ${data.length} games`
 			);
@@ -413,11 +364,11 @@ export const makePlayniteGameRepository = (
 			deps.logService.success(`Added game ${game.Name}`);
 			if (developers) {
 				for (const developer of developers) {
-					if (developerExists(developer)) {
+					if (deps.developerRepository.exists(developer)) {
 						addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
 						continue;
 					}
-					if (addDeveloper(developer)) {
+					if (deps.developerRepository.add(developer)) {
 						addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
 					}
 				}
@@ -508,13 +459,13 @@ export const makePlayniteGameRepository = (
 			if (developers) {
 				deleteDevelopersFor({ Id: game.Id, Name: game.Name });
 				for (const developer of developers) {
-					const existing = getDeveloperById(developer.Id);
+					const existing = deps.developerRepository.getById(developer.Id);
 					if (existing) {
-						if (developerHasChanges(existing, developer)) {
-							updateDeveloper(developer);
+						if (deps.developerRepository.hasChanges(existing, developer)) {
+							deps.developerRepository.update(developer);
 						}
 					} else {
-						addDeveloper(developer);
+						deps.developerRepository.add(developer);
 					}
 					addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
 				}
@@ -582,14 +533,16 @@ export const makePlayniteGameRepository = (
 		}
 	};
 
-	type GetManifestDataResult = z.infer<typeof schemas.gameManifestData> | undefined;
+	type GetManifestDataResult =
+		| z.infer<typeof playniteGameSchemas.gameManifestDataResult>
+		| undefined;
 	const getManifestData = (): GetManifestDataResult => {
 		const db = deps.getDb();
 		const query = `SELECT Id, ContentHash FROM playnite_game`;
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all();
-			const data = schemas.gameManifestData.parse(result);
+			const data = playniteGameSchemas.gameManifestDataResult.parse(result);
 			return data;
 		} catch (error) {
 			deps.logService.error(`Failed to get all game Ids from database`, error as Error);
@@ -629,7 +582,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all(total);
-			const data = z.optional(z.array(schemas.playniteGame)).parse(result);
+			const data = z.optional(z.array(playniteGameSchemas.playniteGame)).parse(result);
 			deps.logService.success(
 				`Found top ${total} most played games, returning ${data?.length} games`
 			);
@@ -658,7 +611,6 @@ export const makePlayniteGameRepository = (
 		getTotalPlaytimeHours,
 		getManifestData,
 		getDevelopers,
-		getHomePagePlayniteGameList,
 		getTotal
 	};
 };

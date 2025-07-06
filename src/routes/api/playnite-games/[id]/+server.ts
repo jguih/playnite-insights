@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import type z from 'zod';
 import { repositories } from '$lib';
-import { schemas } from '$lib/services/playnite-game/schemas';
+import { playniteGameSchemas } from '$lib/services/playnite-game/schemas';
 
 export const GET: RequestHandler = ({ params }) => {
 	const { id } = params;
@@ -12,7 +12,7 @@ export const GET: RequestHandler = ({ params }) => {
 	if (!game) {
 		return json(null, { status: 404 });
 	}
-	const resonseData: z.infer<typeof schemas.gameById> = {
+	const resonseData: z.infer<typeof playniteGameSchemas.gameById> = {
 		game,
 		developers: game && repositories.playniteGame.getDevelopers({ Id: game.Id, Name: game.Name })
 	};

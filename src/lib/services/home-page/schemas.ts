@@ -1,18 +1,20 @@
 import z from 'zod';
 
-export const homePageGameMetadataSchema = z.array(
+export const gameDataSchema = z.array(
 	z.object({
 		Id: z.string(),
 		Name: z.string().nullable().optional(),
 		CoverImage: z.string().nullable().optional()
 	})
 );
+export type HomePageGameData = z.infer<typeof gameDataSchema>;
 
-export const homePagePlayniteGameListSchema = z
+export const gameListSchema = z
 	.object({
-		games: homePageGameMetadataSchema,
+		games: gameDataSchema,
 		total: z.number(),
 		hasNextPage: z.boolean(),
 		totalPages: z.number()
 	})
 	.optional();
+export type HomePageGameList = z.infer<typeof gameListSchema>;

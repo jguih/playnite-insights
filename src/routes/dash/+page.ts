@@ -1,10 +1,10 @@
 import { getLastSixMonthsInclusiveAbreviated } from '$lib/utils/date';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { schemas } from '$lib/services/playnite-game/schemas';
+import { playniteGameSchemas } from '$lib/services/playnite-game/schemas';
 import type z from 'zod';
 
-const getTotalPlaytime = (games: z.infer<typeof schemas.dashPagePlayniteGameList>) => {
+const getTotalPlaytime = (games: z.infer<typeof playniteGameSchemas.getDashPageGameListResult>) => {
 	if (games.length === 0) {
 		return 0;
 	}
@@ -14,9 +14,11 @@ const getTotalPlaytime = (games: z.infer<typeof schemas.dashPagePlayniteGameList
 export const load: PageLoad = async ({ fetch }) => {
 	try {
 		const gamesResponse = await fetch(`/api/playnite-games/dash`);
-		const games = schemas.dashPagePlayniteGameList.parse(await gamesResponse.json());
+		const games = playniteGameSchemas.getDashPageGameListResult.parse(await gamesResponse.json());
 		const statisticsResponse = await fetch(`/api/playnite-games/dash/statistics`);
-		const statistics = schemas.statisticsResponse.safeParse(await statisticsResponse.json());
+		const statistics = playniteGameSchemas.statisticsResponse.safeParse(
+			await statisticsResponse.json()
+		);
 
 		const total = games.length;
 		const installed = games.length > 0 ? games.filter((g) => Boolean(g.IsInstalled)).length : 0;

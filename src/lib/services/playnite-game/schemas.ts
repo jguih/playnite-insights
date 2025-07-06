@@ -1,4 +1,4 @@
-import { developerSchema } from '$lib/developer/schemas';
+import { developerSchemas } from '$lib/services/developer/schemas';
 import { z } from 'zod';
 
 const playniteGame = z.object({
@@ -34,7 +34,7 @@ const dashPagePlayniteGameList = z.array(
 
 const gameById = z.object({
 	game: z.optional(playniteGame),
-	developers: z.array(developerSchema).optional()
+	developers: z.array(developerSchemas.developer).optional()
 });
 
 const gameManifestData = z.array(
@@ -44,10 +44,10 @@ const gameManifestData = z.array(
 	})
 );
 
-export const schemas = {
+export const playniteGameSchemas = {
 	playniteGame,
 	statisticsResponse,
-	dashPagePlayniteGameList,
+	getDashPageGameListResult: dashPagePlayniteGameList,
 	gameById,
-	gameManifestData
+	gameManifestDataResult: gameManifestData
 };

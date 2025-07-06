@@ -13,6 +13,8 @@ import { makePublisherRepository } from '$lib/publisher/publisher-repository';
 import { makePlatformRepository } from '$lib/platform/platform-repository';
 import { makeLogService } from './log';
 import { makePlayniteGameRepository } from './playnite-game';
+import { makeDeveloperRepository } from './developer/developer-repository';
+import { makeHomePageService } from './home-page/service';
 
 export const setupServices = () => {
 	const FsAsyncDeps: FileSystemAsyncDeps = {
@@ -33,10 +35,12 @@ export const setupServices = () => {
 	const commonRepositoryDeps = { getDb, logService };
 	const publisherRepository = makePublisherRepository({ ...commonRepositoryDeps });
 	const platformRepository = makePlatformRepository({ ...commonRepositoryDeps });
+	const developerRepository = makeDeveloperRepository({ ...commonRepositoryDeps });
 	const playniteGameRepository = makePlayniteGameRepository({
 		...commonRepositoryDeps,
 		publisherRepository,
-		platformRepository
+		platformRepository,
+		developerRepository
 	});
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
 		...commonRepositoryDeps
@@ -61,14 +65,17 @@ export const setupServices = () => {
 		TMP_DIR: config.TMP_DIR,
 		createZip: (path) => new AdmZip(path)
 	});
+	const homePageService = makeHomePageService({ ...commonRepositoryDeps, playniteGameRepository });
 	const services = {
 		log: logService,
 		libraryManifest: libraryManifestService,
-		playniteLibraryImporter: playniteLibraryImporterService
+		playniteLibraryImporter: playniteLibraryImporterService,
+		homePage: homePageService
 	};
 	const repositories = {
 		publisher: publisherRepository,
 		platform: platformRepository,
+		developer: developerRepository,
 		playniteGame: playniteGameRepository,
 		playniteLibrarySync: playniteLibrarySyncRepository
 	};
