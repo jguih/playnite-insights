@@ -6,39 +6,40 @@ import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import { z } from 'zod';
 import { incomingPlayniteGameDtoSchema } from '$lib/playnite-library-sync/schemas';
-import { repositories, services } from '$lib';
+import { repositories } from '$lib/repositories';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
+import type { libraryManifestService, logService } from './setup';
 
 type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	StreamUtilsAsyncDeps & {
 		playniteGameRepository: typeof repositories.playniteGame;
-		libraryManifestService: typeof services.libraryManifest;
+		libraryManifestService: typeof libraryManifestService;
+		playniteLibrarySyncRepository: typeof repositories.playniteLibrarySync;
+		logService: typeof logService;
 		FILES_DIR: string;
 		TMP_DIR: string;
 		createZip: (path: string) => AdmZip;
 	};
 
-const syncGameListCommandSchema = z.object({
-	AddedItems: z.array(incomingPlayniteGameDtoSchema),
-	RemovedItems: z.array(z.string()),
-	UpdatedItems: z.array(incomingPlayniteGameDtoSchema)
-});
-export type SyncLibraryCommand = z.infer<typeof syncGameListCommandSchema>;
-
 export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporterServiceDeps) => {
+	const syncGameListCommandSchema = z.object({
+		AddedItems: z.array(incomingPlayniteGameDtoSchema),
+		RemovedItems: z.array(z.string()),
+		UpdatedItems: z.array(incomingPlayniteGameDtoSchema)
+	});
 	/**
 	 * Synchronizes game metadata from Playnite Insights Exporter with the database
 	 */
-	const sync = async (data: SyncLibraryCommand) => {
+	const sync = async (data: z.infer<typeof syncGameListCommandSchema>) => {
 		try {
-			services.log.logInfo(`Games to add: ${data.AddedItems.length}`);
-			services.log.logInfo(`Games to update: ${data.UpdatedItems.length}`);
-			services.log.logInfo(`Games to delete: ${data.RemovedItems.length}`);
+			deps.logService.info(`Games to add: ${data.AddedItems.length}`);
+			deps.logService.info(`Games to update: ${data.UpdatedItems.length}`);
+			deps.logService.info(`Games to delete: ${data.RemovedItems.length}`);
 			// Games to add
 			for (const game of data.AddedItems) {
 				const exists = deps.playniteGameRepository.playniteGameExists(game.Id);
 				if (exists) {
-					services.log.logInfo(`Skipping existing game ${game.Name}`);
+					deps.logService.info(`Skipping existing game ${game.Name}`);
 					continue;
 				}
 				const result = deps.playniteGameRepository.addPlayniteGame(
@@ -71,16 +72,15 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 					game.Genres ?? [],
 					game.Publishers ?? []
 				);
-				// TODO: Sync genres, platforms and publishers
 				if (!result) {
-					services.log.logError(`Failed to add game ${game.Name}`);
+					deps.logService.error(`Failed to add game ${game.Name}`);
 				}
 			}
 			// Games to update
 			for (const game of data.UpdatedItems) {
 				const exists = deps.playniteGameRepository.playniteGameExists(game.Id);
 				if (!exists) {
-					services.log.logInfo(`Skipping game to update ${game.Name}, as it doesn't exist`);
+					deps.logService.info(`Skipping game to update ${game.Name}, as it doesn't exist`);
 					continue;
 				}
 				const result = deps.playniteGameRepository.updatePlayniteGame(
@@ -113,23 +113,22 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 					game.Genres ?? [],
 					game.Publishers ?? []
 				);
-				// TODO: Sync devs, genres, platforms and publishers
 				if (!result) {
-					services.log.logError(`Failed to update game ${game.Name}`);
+					deps.logService.error(`Failed to update game ${game.Name}`);
 				}
 			}
 			// Games to delete
 			for (const gameId of data.RemovedItems) {
 				const result = deps.playniteGameRepository.deletePlayniteGame(gameId);
 				if (!result) {
-					services.log.logError(`Failed to delete game with id ${gameId}`);
+					deps.logService.error(`Failed to delete game with id ${gameId}`);
 				}
 				const gameMediaFolderDir = join(deps.FILES_DIR, gameId);
 				try {
 					await deps.rm(gameMediaFolderDir, { recursive: true, force: true });
-					services.log.logInfo(`Deleted media folder ${gameMediaFolderDir}`);
+					deps.logService.info(`Deleted media folder ${gameMediaFolderDir}`);
 				} catch (error) {
-					services.log.logError(
+					deps.logService.error(
 						`Failed to delete media folder ${gameMediaFolderDir}`,
 						error as Error
 					);
@@ -137,14 +136,14 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			}
 			const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
 			const totalGamesInLib = deps.playniteGameRepository.getTotalPlayniteGames();
-			repositories.playniteLibrarySync.addPlayniteLibrarySync(
+			deps.playniteLibrarySyncRepository.addPlayniteLibrarySync(
 				totalPlaytimeHours ?? 0,
 				totalGamesInLib ?? 0
 			);
 			deps.libraryManifestService.write();
 			return true;
 		} catch (error) {
-			services.log.logError(`Failed to import game list`, error as Error);
+			deps.logService.error(`Failed to import game list`, error as Error);
 			return false;
 		}
 	};
@@ -168,17 +167,17 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 		const destPath = join(deps.TMP_DIR, filename);
 		const fileStream = deps.createWriteStream(destPath);
 		try {
-			services.log.logDebug(`Writing library files to temporary file: ${destPath}...`);
+			deps.logService.debug(`Writing library files to temporary file: ${destPath}...`);
 			await deps.pipeline(nodeStream, fileStream);
-			services.log.logDebug(`Library files written to temporary file: ${destPath}`);
+			deps.logService.debug(`Library files written to temporary file: ${destPath}`);
 			const zip = deps.createZip(destPath);
-			services.log.logDebug('Extracting library files from zip...');
+			deps.logService.debug('Extracting library files from zip...');
 			zip.extractAllTo(deps.FILES_DIR, true);
-			services.log.logSuccess('Library files extracted successfully');
+			deps.logService.success('Library files extracted successfully');
 			const zipEntries = zip.getEntries();
-			services.log.logInfo(`Extracted ${zipEntries.length} files from zip`);
+			deps.logService.info(`Extracted ${zipEntries.length} files from zip`);
 		} catch (error) {
-			services.log.logError('Failed to extract zip file', error as Error);
+			deps.logService.error('Failed to extract zip file', error as Error);
 			return {
 				isValid: false,
 				message: 'Failed to extract library files from zip',
@@ -187,9 +186,9 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 		}
 		try {
 			await unlink(destPath);
-			services.log.logDebug(`Temporary zip file removed: ${destPath}`);
+			deps.logService.debug(`Temporary zip file removed: ${destPath}`);
 		} catch (error) {
-			services.log.logError(`Failed to remove temporary zip file: ${destPath}`, error as Error);
+			deps.logService.error(`Failed to remove temporary zip file: ${destPath}`, error as Error);
 		}
 		const result = await deps.libraryManifestService.write();
 		if (!result.isValid) {

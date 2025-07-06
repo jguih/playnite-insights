@@ -3,14 +3,17 @@ import { makeLibraryManifestService, type PlayniteLibraryManifest } from './libr
 import { createMock } from '../../tests/mocks';
 import { join } from 'path';
 import type { GetManifestDataResult } from '$lib/playnite-game/playnite-game-repository';
+import { makeLogService } from './log';
 
 vi.mock('$lib/infrastructure/database', () => ({}));
 
 const createDeps = () => {
 	const mocks = createMock();
 	const fsMocks = mocks.fsAsyncDeps();
+	const logService = makeLogService();
 	return {
 		...fsMocks,
+		logService,
 		CONTENT_HASH_FILE_NAME: 'contentHash.txt',
 		FILES_DIR: '/files_dir',
 		MANIFEST_FILE: '/app/data/manifest.json',

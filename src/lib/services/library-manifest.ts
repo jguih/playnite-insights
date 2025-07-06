@@ -1,7 +1,7 @@
-import { logDebug, logError, logSuccess } from './log';
 import { type GetManifestDataResult } from '../playnite-game/playnite-game-repository';
 import { join } from 'path';
 import type { FileSystemAsyncDeps } from './types';
+import type { logService } from './setup';
 
 export type PlayniteLibraryManifest = {
 	totalGamesInLibrary: number;
@@ -17,6 +17,7 @@ export type PlayniteLibraryManifest = {
 
 type LibraryManifestServiceDeps = FileSystemAsyncDeps & {
 	getManifestData: () => GetManifestDataResult;
+	logService: typeof logService;
 	MANIFEST_FILE: string;
 	FILES_DIR: string;
 	CONTENT_HASH_FILE_NAME: string;
@@ -24,7 +25,7 @@ type LibraryManifestServiceDeps = FileSystemAsyncDeps & {
 
 export const makeLibraryManifestService = (deps: LibraryManifestServiceDeps) => {
 	const write = async () => {
-		logDebug('Writing library manifest...');
+		deps.logService.debug('Writing library manifest...');
 		try {
 			const gamesInLibrary: PlayniteLibraryManifest['gamesInLibrary'] = [];
 			const gamesManifestData = deps.getManifestData();
@@ -57,7 +58,7 @@ export const makeLibraryManifestService = (deps: LibraryManifestServiceDeps) => 
 				mediaExistsFor: mediaExistsFor
 			};
 			await deps.writeFile(deps.MANIFEST_FILE, JSON.stringify(manifest, null, 2));
-			logSuccess('manifest.json written sucessfully');
+			deps.logService.success('manifest.json written sucessfully');
 			return {
 				isValid: true,
 				message: 'manifest.json written sucessfully',
@@ -65,7 +66,7 @@ export const makeLibraryManifestService = (deps: LibraryManifestServiceDeps) => 
 				data: manifest
 			};
 		} catch (error) {
-			logError('Error while writing manifest.json', error as Error);
+			deps.logService.error('Error while writing manifest.json', error as Error);
 			return {
 				isValid: false,
 				message: 'Failed to write manifest.json',
@@ -76,13 +77,13 @@ export const makeLibraryManifestService = (deps: LibraryManifestServiceDeps) => 
 
 	const get = async () => {
 		try {
-			logDebug(`Reading library manifest JSON file at ${deps.MANIFEST_FILE}`);
+			deps.logService.debug(`Reading library manifest JSON file at ${deps.MANIFEST_FILE}`);
 			const content = await deps.readfile(deps.MANIFEST_FILE, 'utf-8');
 			const asJson = JSON.parse(content.toString()) as PlayniteLibraryManifest;
-			logDebug(`Read manifest JSON file succesfully, returning manifest`);
+			deps.logService.debug(`Read manifest JSON file succesfully, returning manifest`);
 			return asJson ?? null;
 		} catch (error) {
-			logError('Failed to load manifest.json or it doesnt exist', error as Error);
+			deps.logService.error('Failed to load manifest.json or it doesnt exist', error as Error);
 			return null;
 		}
 	};

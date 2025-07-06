@@ -25,9 +25,12 @@ const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
 	pipeline: streamAsync.pipeline
 };
 
+export const logService = makeLogService();
+
 export const libraryManifestService = makeLibraryManifestService({
 	...FsAsyncDeps,
 	getManifestData: repositories.playniteGame.getManifestData,
+	logService: logService,
 	CONTENT_HASH_FILE_NAME: config.CONTENT_HASH_FILE_NAME,
 	FILES_DIR: config.FILES_DIR,
 	MANIFEST_FILE: config.LIBRARY_MANIFEST_FILE
@@ -38,9 +41,9 @@ export const playniteLibraryImporterService = makePlayniteLibraryImporterService
 	...streamUtilsAsyncDeps,
 	playniteGameRepository: repositories.playniteGame,
 	libraryManifestService: libraryManifestService,
+	playniteLibrarySyncRepository: repositories.playniteLibrarySync,
+	logService: logService,
 	FILES_DIR: config.FILES_DIR,
 	TMP_DIR: config.TMP_DIR,
 	createZip: (path) => new AdmZip(path)
 });
-
-export const logService = makeLogService();
