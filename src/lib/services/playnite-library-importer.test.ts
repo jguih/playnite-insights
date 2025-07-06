@@ -1,28 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createMock } from '../../tests/mocks';
+import { createMocks } from '../../tests/mocks';
 import type z from 'zod';
 import { makePlayniteLibraryImporterService } from './playnite-library-importer';
-import { makeLogService } from './log';
 import { join } from 'path';
-import { makePlayniteGameRepository } from '$lib/playnite-game/playnite-game-repository';
 
 vi.mock('$lib/infrastructure/database', () => ({}));
 
 const createDeps = () => {
-	const mocks = createMock();
-	const fsMocks = mocks.fsAsyncDeps();
-	const streamUtilsMocks = mocks.streamUtilsAsyncDeps();
-	const logService = makeLogService();
-	const playniteGameRepository = makePlayniteGameRepository({ getDb: vi.fn(), logService });
-	const playniteLibrarySyncRepository = mocks.repository.playniteLibrarySync();
-	const libraryManifestService = mocks.service.libraryManifest();
+	const mocks = createMocks();
 	return {
-		...fsMocks,
-		...streamUtilsMocks,
-		playniteGameRepository: playniteGameRepository,
-		libraryManifestService: libraryManifestService,
-		logService: logService,
-		playniteLibrarySyncRepository: playniteLibrarySyncRepository,
+		...mocks.fsAsyncDeps,
+		...mocks.streamUtilsAsyncDeps,
+		playniteGameRepository: mocks.repository.playniteGame,
+		libraryManifestService: mocks.services.libraryManifest,
+		logService: mocks.services.log,
+		playniteLibrarySyncRepository: mocks.repository.playniteLibrarySync,
 		FILES_DIR: '/files_dir',
 		TMP_DIR: '/tmp',
 		createZip: vi.fn(),

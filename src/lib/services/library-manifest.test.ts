@@ -1,18 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeLibraryManifestService, type PlayniteLibraryManifest } from './library-manifest';
-import { createMock } from '../../tests/mocks';
+import { createMocks } from '../../tests/mocks';
 import { join } from 'path';
-import { makeLogService } from './log';
 
 vi.mock('$lib/infrastructure/database', () => ({}));
 
 const createDeps = () => {
-	const mocks = createMock();
-	const fsMocks = mocks.fsAsyncDeps();
-	const logService = makeLogService();
+	const mocks = createMocks();
 	return {
-		...fsMocks,
-		logService,
+		...mocks.fsAsyncDeps,
+		logService: mocks.services.log,
 		CONTENT_HASH_FILE_NAME: 'contentHash.txt',
 		FILES_DIR: '/files_dir',
 		MANIFEST_FILE: '/app/data/manifest.json',

@@ -4,7 +4,7 @@
   "version": "2.0.2",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:down && docker compose -f docker/dev/docker-compose.yaml up --watch --force-recreate --build",
+    "dev": "npm run dev:down && docker compose -f docker/dev/docker-compose.yaml up --watch --force-recreate",
     "dev:up": "docker compose -f docker/dev/docker-compose.yaml up -d --force-recreate --build",
     "dev:down": "docker compose -f docker/dev/docker-compose.yaml down",
     "build": "vite build",
