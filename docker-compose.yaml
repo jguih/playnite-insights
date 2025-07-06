@@ -1,0 +1,75 @@
+name: playnite-insights-app
+
+services:
+  app-dev:
+    build:
+      context: .
+      target: dev
+    container_name: app-dev
+    environment:
+      LOG_LEVEL: 0 # debug
+      ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
+      # Careful! When true it will delete current database and insert test data
+      # TEST_DATA: true
+    develop:
+      watch:
+        - path: ./
+          action: sync
+          target: /app
+          ignore:
+            - node_modules/
+            - data/
+        - path: ./
+          include:
+            - package.json
+          target: /app/package.json
+          action: rebuild
+        - path: ./
+          include:
+            - vite.config.ts
+          target: /app/vite.config.ts
+          action: rebuild
+        - path: ./
+          include:
+            - svelte.config.js
+          target: /app/svelte.config.js
+          action: rebuild
+        - path: ./docker
+          target: /app/docker
+          action: rebuild
+    volumes:
+      - playnite-insights-dev-data:/app/data
+    networks:
+      - services-ipv6
+
+  app-test:
+    build:
+      context: .
+      target: test
+    container_name: app-test
+    environment:
+      LOG_LEVEL: 0 # debug
+      ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
+
+  app-prod:
+    build:
+      context: .
+      target: prod
+    container_name: app-prod
+    environment:
+      LOG_LEVEL: 0 # debug
+      ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
+    volumes:
+      - playnite-insights-prod-data:/app/data
+    networks:
+      - services-ipv6
+    ports:
+      - '3001:3000'
+
+networks:
+  services-ipv6:
+    external: true
+
+volumes:
+  playnite-insights-dev-data:
+  playnite-insights-prod-data:

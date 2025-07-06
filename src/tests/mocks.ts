@@ -1,6 +1,6 @@
-import { makePlayniteGameRepository } from '$lib/playnite-game/playnite-game-repository';
 import { makeLibraryManifestService } from '$lib/services/library-manifest';
 import { makeLogService } from '$lib/services/log';
+import { makePlayniteGameRepository } from '$lib/services/playnite-game';
 import { vi } from 'vitest';
 
 export const createMocks = () => {

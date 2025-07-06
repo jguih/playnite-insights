@@ -21,7 +21,7 @@
 	let totalPlayTime = $derived(data.totalPlayTime);
 	let notPlayed = $derived(data.notPlayed);
 	let played = $derived(data.played);
-	let totalPlayedPercent = $derived(Math.floor((played * 100) / total));
+	let totalPlayedPercent = $derived(total > 0 ? Math.floor((played * 100) / total) : 0);
 	let charts = $derived(data.charts);
 	let top10MostPlayed = $derived(data.top10MostPlayedGames);
 </script>

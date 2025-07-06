@@ -28,7 +28,6 @@ export const setupServices = () => {
 		createWriteStream: fs.createWriteStream,
 		pipeline: streamAsync.pipeline
 	};
-	console.log('makeLogService', makeLogService);
 	const logService = makeLogService();
 	// Repositories
 	const commonRepositoryDeps = { getDb, logService };
