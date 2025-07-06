@@ -1,4 +1,4 @@
-import { developerSchemas } from '$lib/services/developer/schemas';
+import { developerSchema } from '$lib/services/developer/schemas';
 import { z } from 'zod';
 
 const playniteGame = z.object({
@@ -24,17 +24,9 @@ const statisticsResponse = z.object({
 	top10MostPlayedGames: z.array(playniteGame)
 });
 
-const dashPagePlayniteGameList = z.array(
-	z.object({
-		Id: z.string(),
-		IsInstalled: z.number(),
-		Playtime: z.number()
-	})
-);
-
 const gameById = z.object({
 	game: z.optional(playniteGame),
-	developers: z.array(developerSchemas.developer).optional()
+	developers: z.array(developerSchema).optional()
 });
 
 const gameManifestData = z.array(
@@ -47,7 +39,6 @@ const gameManifestData = z.array(
 export const playniteGameSchemas = {
 	playniteGame,
 	statisticsResponse,
-	getDashPageGameListResult: dashPagePlayniteGameList,
 	gameById,
 	gameManifestDataResult: gameManifestData
 };

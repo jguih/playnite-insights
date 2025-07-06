@@ -21,7 +21,7 @@ export const load: PageLoad = async ({ url, fetch }) => {
 	}
 
 	try {
-		const response = await fetch(`/api/playnite-games/home?${params.toString()}`);
+		const response = await fetch(`/api/home?${params.toString()}`);
 		const data = homePagePlayniteGameListSchema.parse(await response.json());
 		return {
 			...data,

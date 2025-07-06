@@ -1,13 +1,20 @@
-import { z } from 'zod';
+import z from 'zod';
+import type { LogService } from '../log';
 import type { DatabaseSync } from 'node:sqlite';
-import type { LogService } from '$lib/services/log';
+import { overviewDataSchema, type DashPageOverviewData } from './schemas';
 
-type PlayniteLibrarySyncRepositoryDeps = {
-	getDb: () => DatabaseSync;
+type DashPageServiceDeps = {
 	logService: LogService;
+	getDb: () => DatabaseSync;
 };
 
-export const makePlayniteLibrarySyncRepository = (deps: PlayniteLibrarySyncRepositoryDeps) => {
+export type DashPageService = {
+	getTotalPlaytimeOverLast6Months: () => number[] | undefined;
+	getTotalGamesOwnedOverLast6Months: () => number[] | undefined;
+	getOverviewData: () => DashPageOverviewData | undefined;
+};
+
+export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) => {
 	const totalPlaytimeOverTimeSchema = z.array(
 		z.object({
 			totalPlaytimeHours: z.number()
@@ -24,13 +31,13 @@ export const makePlayniteLibrarySyncRepository = (deps: PlayniteLibrarySyncRepos
         );
       `;
 		try {
-			const stmt = deps.getDb().prepare(query);
+			const stmt = getDb().prepare(query);
 			const result = stmt.all();
 			const data = totalPlaytimeOverTimeSchema.parse(result);
-			deps.logService.success('Successfully queried total playtime over last 6 months');
+			logService.success('Successfully queried total playtime over last 6 months');
 			return data.map((e) => e.totalPlaytimeHours);
 		} catch (error) {
-			deps.logService.error('Failed to get total playtime over last 6 months', error as Error);
+			logService.error('Failed to get total playtime over last 6 months', error as Error);
 			return undefined;
 		}
 	};
@@ -57,45 +64,40 @@ export const makePlayniteLibrarySyncRepository = (deps: PlayniteLibrarySyncRepos
         ORDER BY yearMonth;
       `;
 		try {
-			const stmt = deps.getDb().prepare(query);
+			const stmt = getDb().prepare(query);
 			const result = stmt.all();
 			const data = totalGamesOwnedOverLast6MonthsSchema.parse(result);
-			deps.logService.success('Successfully queried total games owned over last 6 months');
+			logService.success('Successfully queried total games owned over last 6 months');
 			return data.map((e) => e.totalGamesOwned);
 		} catch (error) {
-			deps.logService.error('Failed to get total games owned over last 6 months', error as Error);
+			logService.error('Failed to get total games owned over last 6 months', error as Error);
 			return undefined;
 		}
 	};
 
-	const add = (totalPlaytimeHours: number, totalGames: number) => {
-		const db = deps.getDb();
-		const now = new Date().toISOString();
+	const getOverviewData = (): DashPageOverviewData | undefined => {
+		const db = getDb();
 		const query = `
-      INSERT INTO playnite_library_sync
-        (Timestamp, TotalPlaytimeHours, TotalGames)
-      VALUES
-        (?, ?, ?);
+      SELECT Id, IsInstalled, Playtime
+      FROM playnite_game;
     `;
 		try {
 			const stmt = db.prepare(query);
-			stmt.run(now, totalPlaytimeHours, totalGames);
-			deps.logService.success(
-				`Inserted playnite_library_sync entry with totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
+			const result = stmt.all();
+			const data = overviewDataSchema.parse(result);
+			logService.success(
+				`Game list for dashboard page fetched, returning data for ${data.length} games`
 			);
-			return true;
+			return data;
 		} catch (error) {
-			deps.logService.error(
-				'Error while inserting new entry for Playnite library sync',
-				error as Error
-			);
-			return false;
+			logService.error('Failed to get game list for dashboard page', error as Error);
+			return undefined;
 		}
 	};
 
 	return {
-		getTotalGamesOwnedOverLast6Months,
 		getTotalPlaytimeOverLast6Months,
-		add
+		getTotalGamesOwnedOverLast6Months,
+		getOverviewData
 	};
 };

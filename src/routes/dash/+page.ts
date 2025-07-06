@@ -13,7 +13,7 @@ const getTotalPlaytime = (games: z.infer<typeof playniteGameSchemas.getDashPageG
 
 export const load: PageLoad = async ({ fetch }) => {
 	try {
-		const gamesResponse = await fetch(`/api/playnite-games/dash`);
+		const gamesResponse = await fetch(`/api/dash`);
 		const games = playniteGameSchemas.getDashPageGameListResult.parse(await gamesResponse.json());
 		const statisticsResponse = await fetch(`/api/playnite-games/dash/statistics`);
 		const statistics = playniteGameSchemas.statisticsResponse.safeParse(

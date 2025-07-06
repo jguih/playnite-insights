@@ -2,6 +2,7 @@ import { join } from 'path';
 import type { FileSystemAsyncDeps } from './types';
 import type { makeLogService } from './log';
 import type { PlayniteGameRepository } from './playnite-game';
+import type { ValidationResult } from '$lib/models/validation-result';
 
 export type PlayniteLibraryManifest = {
 	totalGamesInLibrary: number;
@@ -23,7 +24,14 @@ type LibraryManifestServiceDeps = FileSystemAsyncDeps & {
 	CONTENT_HASH_FILE_NAME: string;
 };
 
-export const makeLibraryManifestService = (deps: LibraryManifestServiceDeps) => {
+export type LibraryManifestService = {
+	write: () => Promise<ValidationResult<PlayniteLibraryManifest>>;
+	get: () => Promise<PlayniteLibraryManifest | null>;
+};
+
+export const makeLibraryManifestService = (
+	deps: LibraryManifestServiceDeps
+): LibraryManifestService => {
 	const write = async () => {
 		deps.logService.debug('Writing library manifest...');
 		try {

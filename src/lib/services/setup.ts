@@ -8,12 +8,12 @@ import * as streamAsync from 'stream/promises';
 import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { getDb } from '$lib/infrastructure/database';
-import { makePlayniteLibrarySyncRepository } from '$lib/playnite-library-sync/playnite-library-sync-repository';
+import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
 import { makePublisherRepository } from '$lib/publisher/publisher-repository';
 import { makePlatformRepository } from '$lib/platform/platform-repository';
 import { makeLogService } from './log';
 import { makePlayniteGameRepository } from './playnite-game';
-import { makeDeveloperRepository } from './developer/developer-repository';
+import { makeDeveloperRepository } from './developer/repository';
 import { makeHomePageService } from './home-page/service';
 
 export const setupServices = () => {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { developerSchemas, type Developer } from '$lib/services/developer/schemas';
+import { developerSchema, type Developer } from '$lib/services/developer/schemas';
 import { playniteGameSchemas, type PlayniteGame } from './schemas';
 import type { Platform } from '$lib/platform/schemas';
 import type { Genre } from '$lib/genre/schemas';
@@ -15,7 +15,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import type { LogService } from '$lib/services/log';
 import type { PublisherRepository } from '$lib/publisher/publisher-repository';
 import type { PlatformRepository } from '$lib/platform/platform-repository';
-import type { DeveloperRepository } from '$lib/services/developer/developer-repository';
+import type { DeveloperRepository } from '$lib/services/developer/repository';
 
 type PlayniteGameRepositoryDeps = {
 	getDb: () => DatabaseSync;
@@ -52,9 +52,6 @@ export type PlayniteGameRepository = {
 	addPublisherFor: (game: Pick<PlayniteGame, 'Id' | 'Name'>, publisher: Publisher) => boolean;
 	deletePublishersFor: (game: Pick<PlayniteGame, 'Id' | 'Name'>) => boolean;
 	getById: (id: string) => PlayniteGame | undefined;
-	getDashPageGameList: () =>
-		| z.infer<typeof playniteGameSchemas.getDashPageGameListResult>
-		| undefined;
 	getManifestData: () => z.infer<typeof playniteGameSchemas.gameManifestDataResult> | undefined;
 	getTotal: (query?: string | null) => number;
 	getTotalPlaytimeHours: () => number | undefined;
@@ -101,7 +98,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all(game.Id);
-			const data = z.array(developerSchemas.developer).parse(result);
+			const data = z.array(developerSchema).parse(result);
 			deps.logService.success(
 				`Developer list for ${game.Name} fetched: ${data.map((d) => d.Name).join(', ')}`
 			);
@@ -123,28 +120,6 @@ export const makePlayniteGameRepository = (
 			return game;
 		} catch (error) {
 			deps.logService.error('Failed to get Playnite game with id: ' + id, error as Error);
-			return undefined;
-		}
-	};
-
-	const getDashPageGameList = ():
-		| z.infer<typeof playniteGameSchemas.getDashPageGameListResult>
-		| undefined => {
-		const db = deps.getDb();
-		const query = `
-    SELECT Id, IsInstalled, Playtime
-    FROM playnite_game;
-  `;
-		try {
-			const stmt = db.prepare(query);
-			const result = stmt.all();
-			const data = playniteGameSchemas.getDashPageGameListResult.parse(result);
-			deps.logService.success(
-				`Game list for dashboard page fetched, returning data for ${data.length} games`
-			);
-			return data;
-		} catch (error) {
-			deps.logService.error('Failed to get game list for dashboard page', error as Error);
 			return undefined;
 		}
 	};
@@ -606,7 +581,6 @@ export const makePlayniteGameRepository = (
 		deletePlatformsFor,
 		deletePublishersFor,
 		getTopMostPlayedGames,
-		getDashPageGameList,
 		getById,
 		getTotalPlaytimeHours,
 		getManifestData,
