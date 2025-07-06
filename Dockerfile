@@ -4,8 +4,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 RUN mkdir -p ./data/files ./data/tmp
-RUN echo '[]' > ./data/games.json
-RUN echo '{}' > ./data/manifest.json
 
 FROM node:24.3-alpine AS build
 
@@ -38,7 +36,7 @@ USER playnite-insights
 
 ENTRYPOINT ["sh", "docker/dev/entrypoint.sh"]
 
-FROM node:24.3-alpine AS test
+FROM node:24.3 AS test
 
 WORKDIR /app
 ENV WORK_DIR=/app
@@ -54,7 +52,7 @@ COPY ./static/placeholder ./data/files/placeholder
 
 RUN npx playwright install --with-deps
 
-ENTRYPOINT ["npm", "run", "test:unit"]
+ENTRYPOINT ["sh", "-c", "npm run test:all"]
 
 FROM node:24.3-alpine AS prod
 

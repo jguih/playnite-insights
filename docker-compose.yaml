@@ -50,6 +50,8 @@ services:
     environment:
       LOG_LEVEL: 0 # debug
       ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
+    volumes:
+      - ./test-results:/app/test-results
 
   app-prod:
     build:
@@ -63,8 +65,6 @@ services:
       - playnite-insights-prod-data:/app/data
     networks:
       - services-ipv6
-    ports:
-      - '3001:3000'
 
 networks:
   services-ipv6:
