@@ -21,30 +21,6 @@ export const createMock = () => {
 	};
 
 	const repository = {
-		playniteGame: () => {
-			return {
-				add: vi.fn(),
-				update: vi.fn(),
-				remove: vi.fn(),
-				exists: vi.fn(),
-				addDeveloperFor: vi.fn(),
-				addGenreFor: vi.fn(),
-				addPlatformFor: vi.fn(),
-				addPublisherFor: vi.fn(),
-				deleteDevelopersFor: vi.fn(),
-				deleteGenresFor: vi.fn(),
-				deletePlatformsFor: vi.fn(),
-				deletePublishersFor: vi.fn(),
-				getTopMostPlayedGames: vi.fn(),
-				getDashPageGameList: vi.fn(),
-				getById: vi.fn(),
-				getTotalPlaytimeHours: vi.fn(),
-				getManifestData: vi.fn(),
-				getDevelopers: vi.fn(),
-				getHomePagePlayniteGameList: vi.fn(),
-				getTotal: vi.fn()
-			};
-		},
 		playniteLibrarySync: () => {
 			return {
 				getTotalPlaytimeOverLast6Months: vi.fn(),

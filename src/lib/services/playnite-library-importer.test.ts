@@ -4,6 +4,7 @@ import type z from 'zod';
 import { makePlayniteLibraryImporterService } from './playnite-library-importer';
 import { makeLogService } from './log';
 import { join } from 'path';
+import { makePlayniteGameRepository } from '$lib/playnite-game/playnite-game-repository';
 
 vi.mock('$lib/infrastructure/database', () => ({}));
 
@@ -11,7 +12,8 @@ const createDeps = () => {
 	const mocks = createMock();
 	const fsMocks = mocks.fsAsyncDeps();
 	const streamUtilsMocks = mocks.streamUtilsAsyncDeps();
-	const playniteGameRepository = mocks.repository.playniteGame();
+	const logService = makeLogService();
+	const playniteGameRepository = makePlayniteGameRepository({ getDb: vi.fn(), logService });
 	const playniteLibrarySyncRepository = mocks.repository.playniteLibrarySync();
 	const libraryManifestService = mocks.service.libraryManifest();
 	return {
@@ -19,7 +21,7 @@ const createDeps = () => {
 		...streamUtilsMocks,
 		playniteGameRepository: playniteGameRepository,
 		libraryManifestService: libraryManifestService,
-		logService: makeLogService(),
+		logService: logService,
 		playniteLibrarySyncRepository: playniteLibrarySyncRepository,
 		FILES_DIR: '/files_dir',
 		TMP_DIR: '/tmp',
@@ -55,11 +57,12 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: []
 		};
-		deps.playniteGameRepository.exists.mockReturnValueOnce(true);
+		vi.spyOn(deps.playniteGameRepository, 'exists').mockReturnValueOnce(true);
+		const addSpy = vi.spyOn(deps.playniteGameRepository, 'add');
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.add).not.toHaveBeenCalled();
+		expect(addSpy).not.toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -70,11 +73,12 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: []
 		};
-		deps.playniteGameRepository.exists.mockReturnValueOnce(false);
+		vi.spyOn(deps.playniteGameRepository, 'exists').mockReturnValueOnce(false);
+		const addSpy = vi.spyOn(deps.playniteGameRepository, 'add');
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.add).toHaveBeenCalled();
+		expect(addSpy).toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -85,11 +89,12 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }]
 		};
-		deps.playniteGameRepository.exists.mockReturnValueOnce(false);
+		vi.spyOn(deps.playniteGameRepository, 'exists').mockReturnValueOnce(false);
+		const updateSpy = vi.spyOn(deps.playniteGameRepository, 'update');
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.update).not.toHaveBeenCalled();
+		expect(updateSpy).not.toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -100,11 +105,12 @@ describe('Game Importer', () => {
 			RemovedItems: [],
 			UpdatedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }]
 		};
-		deps.playniteGameRepository.exists.mockReturnValueOnce(true);
+		vi.spyOn(deps.playniteGameRepository, 'exists').mockReturnValueOnce(true);
+		const updateSpy = vi.spyOn(deps.playniteGameRepository, 'update');
 		// Act
 		const result = await service.sync(data);
 		// Assert
-		expect(deps.playniteGameRepository.update).toHaveBeenCalled();
+		expect(updateSpy).toHaveBeenCalled();
 		expect(result).toBeTruthy();
 	});
 
@@ -115,7 +121,7 @@ describe('Game Importer', () => {
 			RemovedItems: ['id1'],
 			UpdatedItems: []
 		};
-		deps.playniteGameRepository.remove.mockReturnValueOnce(true);
+		vi.spyOn(deps.playniteGameRepository, 'remove').mockReturnValueOnce(true);
 		// Act
 		const result = await service.sync(data);
 		// Assert
