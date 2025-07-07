@@ -17,6 +17,8 @@
 
 - Dashboard page
 - API Integration testing
+- Data streaming in home page
+- View model for home page
 
 ## 📌 To Do
 
