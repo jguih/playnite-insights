@@ -35,7 +35,7 @@ export const makePlatformRepository = (deps: PlatformRepositoryDeps): PlatformRe
 				platform.Cover,
 				platform.Background
 			);
-			deps.logService.success(`Added platform ${platform.Name}`);
+			deps.logService.debug(`Added platform ${platform.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(`Failed to add platform ${platform.Name}`, error as Error);
@@ -86,7 +86,7 @@ export const makePlatformRepository = (deps: PlatformRepositoryDeps): PlatformRe
 				platform.Background,
 				platform.Id
 			);
-			deps.logService.success(`Updated data for platform ${platform.Name}`);
+			deps.logService.debug(`Updated data for platform ${platform.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(`Failed to update platform ${platform.Name}`, error as Error);
@@ -104,8 +104,9 @@ export const makePlatformRepository = (deps: PlatformRepositoryDeps): PlatformRe
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.get(id);
-			const dev = z.optional(platformSchema).parse(result);
-			return dev;
+			const platform = z.optional(platformSchema).parse(result);
+			deps.logService.debug(`Found platform ${platform?.Name}`);
+			return platform;
 		} catch (error) {
 			deps.logService.error(`Failed to get platform with if ${id}`, error as Error);
 			return;

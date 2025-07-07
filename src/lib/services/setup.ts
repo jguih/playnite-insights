@@ -9,9 +9,9 @@ import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { getDb } from '$lib/infrastructure/database';
 import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
-import { makePublisherRepository } from '$lib/services/publisher/publisher-repository';
-import { makePlatformRepository } from '$lib/services/platform/platform-repository';
-import { makeLogService } from './log';
+import { makePublisherRepository } from '$lib/services/publisher/repository';
+import { makePlatformRepository } from '$lib/services/platform/repository';
+import { LOG_LEVELS, makeLogService } from './log';
 import { makePlayniteGameRepository } from './playnite-game';
 import { makeDeveloperRepository } from './developer/repository';
 import { makeHomePageService } from './home-page/service';
@@ -36,7 +36,9 @@ export const setupServices = () => {
 		createWriteStream: fs.createWriteStream,
 		pipeline: streamAsync.pipeline
 	};
-	const logService = makeLogService();
+	const logService = makeLogService(
+		process.env.LOG_LEVEL ? Number(process.env.LOG_LEVEL) : LOG_LEVELS.info
+	);
 	const commonDeps = { getDb, logService, ...config };
 	// Repositories
 	const publisherRepository = makePublisherRepository({ ...commonDeps });

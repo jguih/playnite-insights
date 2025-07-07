@@ -25,7 +25,7 @@ export const makePlayniteLibrarySyncRepository = (
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(now, totalPlaytimeHours, totalGames);
-			deps.logService.success(
+			deps.logService.debug(
 				`Inserted playnite_library_sync entry with totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
 			);
 			return true;

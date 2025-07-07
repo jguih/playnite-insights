@@ -31,7 +31,7 @@ export const makeDeveloperRepository = ({
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(developer.Id, developer.Name);
-			logService.success(`Added developer ${developer.Name}`);
+			logService.debug(`Added developer ${developer.Name}`);
 			return true;
 		} catch (error) {
 			logService.error(`Failed to add developer ${developer.Name}`, error as Error);
@@ -71,7 +71,7 @@ export const makeDeveloperRepository = ({
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(developer.Name, developer.Id);
-			logService.success(`Updated data for developer ${developer.Name}`);
+			logService.debug(`Updated data for developer ${developer.Name}`);
 			return true;
 		} catch (error) {
 			logService.error(`Failed to update developer ${developer.Name}`, error as Error);
@@ -90,6 +90,7 @@ export const makeDeveloperRepository = ({
 			const stmt = db.prepare(query);
 			const result = stmt.get(id);
 			const dev = z.optional(developerSchema).parse(result);
+			logService.debug(`Found developer: ${dev?.Name}`);
 			return dev;
 		} catch (error) {
 			logService.error(`Failed to get developer with if ${id}`, error as Error);

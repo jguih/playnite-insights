@@ -31,7 +31,9 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 				const value = entry.totalPlaytimeHours as number;
 				data.push(value);
 			}
-			logService.success('Successfully queried total playtime over last 6 months');
+			logService.debug(
+				`Successfully queried total playtime over last 6 months: \n${JSON.stringify(data, null, 2)}`
+			);
 			return data;
 		} catch (error) {
 			logService.error('Failed to get total playtime over last 6 months', error as Error);
@@ -63,7 +65,9 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 				const value = entry.totalGamesOwned as number;
 				data.push(value);
 			}
-			logService.success('Successfully queried total games owned over last 6 months');
+			logService.debug(
+				`Successfully queried total games owned over last 6 months: \n${JSON.stringify(data, null, 2)}`
+			);
 			return data;
 		} catch (error) {
 			logService.error('Failed to get total games owned over last 6 months', error as Error);
@@ -93,7 +97,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 				};
 				data.push(value);
 			}
-			logService.success(`Found top ${total} most played games, returning ${data?.length} games`);
+			logService.debug(`Found top ${total} most played games, returning ${data?.length} games`);
 			return data;
 		} catch (error) {
 			logService.error(`Failed to get top most played games`, error as Error);
@@ -145,7 +149,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 					}
 				}
 			};
-
+			logService.success(`Fetched all the data for dashboard page without issues`);
 			return {
 				total,
 				isInstalled,

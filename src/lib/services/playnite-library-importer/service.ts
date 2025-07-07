@@ -28,6 +28,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 	 */
 	const sync = async (data: SyncGameListCommand) => {
 		try {
+			deps.logService.info(`Library sync started`);
 			deps.logService.info(`Games to add: ${data.AddedItems.length}`);
 			deps.logService.info(`Games to update: ${data.UpdatedItems.length}`);
 			deps.logService.info(`Games to delete: ${data.RemovedItems.length}`);
@@ -134,6 +135,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			const totalGamesInLib = deps.playniteGameRepository.getTotal();
 			deps.playniteLibrarySyncRepository.add(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
 			deps.libraryManifestService.write();
+			deps.logService.success(`Completed library sync without issues.`);
 			return true;
 		} catch (error) {
 			deps.logService.error(`Failed to import game list`, error as Error);
@@ -154,6 +156,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 				httpCode: 400
 			};
 		}
+		let zipEntries: AdmZip.IZipEntry[];
 		const webStream = body as unknown as ReadableStream<Uint8Array>;
 		const nodeStream = deps.readableFromWeb(webStream);
 		const filename = `playnite-lib-${randomUUID()}.zip`;
@@ -166,8 +169,8 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			const zip = deps.createZip(destPath);
 			deps.logService.debug('Extracting library files from zip...');
 			zip.extractAllTo(deps.FILES_DIR, true);
-			deps.logService.success('Library files extracted successfully');
-			const zipEntries = zip.getEntries();
+			deps.logService.debug('Library files extracted');
+			zipEntries = zip.getEntries();
 			deps.logService.info(`Extracted ${zipEntries.length} files from zip`);
 		} catch (error) {
 			deps.logService.error('Failed to extract zip file', error as Error);
@@ -187,6 +190,9 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 		if (!result.isValid) {
 			return { ...result, data: null };
 		}
+		deps.logService.success(
+			`Importing library media files completed without issues. Imported ${zipEntries.length} media files.`
+		);
 		return {
 			isValid: true,
 			message: 'Library files imported successfully',

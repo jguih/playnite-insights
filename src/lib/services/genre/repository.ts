@@ -31,7 +31,7 @@ export const makeGenreRepository = ({
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(genre.Id, genre.Name);
-			logService.success(`Added genre ${genre.Name}`);
+			logService.debug(`Added genre ${genre.Name}`);
 			return true;
 		} catch (error) {
 			logService.error(`Failed to add genre ${genre.Name}`, error as Error);
@@ -71,7 +71,7 @@ export const makeGenreRepository = ({
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(genre.Name, genre.Id);
-			logService.success(`Updated data for genre ${genre.Name}`);
+			logService.debug(`Updated data for genre ${genre.Name}`);
 			return true;
 		} catch (error) {
 			logService.error(`Failed to update genre ${genre.Name}`, error as Error);
@@ -89,8 +89,9 @@ export const makeGenreRepository = ({
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.get(id);
-			const dev = z.optional(genreSchema).parse(result);
-			return dev;
+			const genre = z.optional(genreSchema).parse(result);
+			logService.debug(`Found genre: ${genre?.Name}`);
+			return genre;
 		} catch (error) {
 			logService.error(`Failed to get genre with if ${id}`, error as Error);
 			return;

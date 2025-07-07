@@ -11,8 +11,8 @@ import type { Genre } from '$lib/services/genre/schemas';
 import type { Publisher } from '$lib/services/publisher/schemas';
 import type { DatabaseSync } from 'node:sqlite';
 import type { LogService } from '$lib/services/log';
-import type { PublisherRepository } from '$lib/services/publisher/publisher-repository';
-import type { PlatformRepository } from '$lib/services/platform/platform-repository';
+import type { PublisherRepository } from '$lib/services/publisher/repository';
+import type { PlatformRepository } from '$lib/services/platform/repository';
 import type { DeveloperRepository } from '$lib/services/developer/repository';
 import type { GenreRepository } from '$lib/services/genre/repository';
 
@@ -98,7 +98,7 @@ export const makePlayniteGameRepository = (
 			const stmt = db.prepare(query);
 			const result = stmt.all(game.Id);
 			const data = z.array(developerSchema).parse(result);
-			deps.logService.success(
+			deps.logService.debug(
 				`Developer list for ${game.Name} fetched: ${data.map((d) => d.Name).join(', ')}`
 			);
 			return data;
@@ -115,7 +115,7 @@ export const makePlayniteGameRepository = (
 			const stmt = db.prepare(query);
 			const result = stmt.get(id);
 			const game = z.optional(playniteGameSchema).parse(result);
-			deps.logService.success(`Found game ${game?.Name}`);
+			deps.logService.debug(`Found game ${game?.Name}`);
 			return game;
 		} catch (error) {
 			deps.logService.error('Failed to get Playnite game with id: ' + id, error as Error);
@@ -157,7 +157,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(game.Id, developer.Id);
-			deps.logService.success(`Added developer ${developer.Name} to game ${game.Name}`);
+			deps.logService.debug(`Added developer ${developer.Name} to game ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -174,7 +174,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.run(game.Id);
-			deps.logService.success(`Deleted ${result.changes} developer relationships for ${game.Name}`);
+			deps.logService.debug(`Deleted ${result.changes} developer relationships for ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -196,7 +196,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(game.Id, platform.Id);
-			deps.logService.success(`Added platform ${platform.Name} to game ${game.Name}`);
+			deps.logService.debug(`Added platform ${platform.Name} to game ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -213,7 +213,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.run(game.Id);
-			deps.logService.success(`Deleted ${result.changes} platform relationships for ${game.Name}`);
+			deps.logService.debug(`Deleted ${result.changes} platform relationships for ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -235,7 +235,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(game.Id, genre.Id);
-			deps.logService.success(`Added genre ${genre.Name} to game ${game.Name}`);
+			deps.logService.debug(`Added genre ${genre.Name} to game ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -252,7 +252,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.run(game.Id);
-			deps.logService.success(`Deleted ${result.changes} genre relationships for ${game.Name}`);
+			deps.logService.debug(`Deleted ${result.changes} genre relationships for ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -277,7 +277,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			stmt.run(game.Id, publisher.Id);
-			deps.logService.success(`Added publisher ${publisher.Name} to game ${game.Name}`);
+			deps.logService.debug(`Added publisher ${publisher.Name} to game ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -294,7 +294,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.run(game.Id);
-			deps.logService.success(`Deleted ${result.changes} publisher relationships for ${game.Name}`);
+			deps.logService.debug(`Deleted ${result.changes} publisher relationships for ${game.Name}`);
 			return true;
 		} catch (error) {
 			deps.logService.error(
@@ -335,7 +335,7 @@ export const makePlayniteGameRepository = (
 				game.Icon ?? null,
 				game.ContentHash
 			);
-			deps.logService.success(`Added game ${game.Name}`);
+			deps.logService.debug(`Added game ${game.Name}`);
 			if (developers) {
 				for (const developer of developers) {
 					if (deps.developerRepository.exists(developer)) {
@@ -429,7 +429,7 @@ export const makePlayniteGameRepository = (
 				game.ContentHash,
 				game.Id // WHERE Id
 			);
-			deps.logService.success(`Updated game ${game.Name}`);
+			deps.logService.debug(`Updated game ${game.Name}`);
 			if (developers) {
 				deleteDevelopersFor({ Id: game.Id, Name: game.Name });
 				for (const developer of developers) {
@@ -499,7 +499,7 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.run(gameId);
-			deps.logService.success(`Game with id ${gameId} deleted successfully`);
+			deps.logService.debug(`Game with id ${gameId} deleted`);
 			return result.changes == 1; // Number of rows affected
 		} catch (error) {
 			deps.logService.error(`Failed to delete game with id ${gameId}`, error as Error);
@@ -521,6 +521,7 @@ export const makePlayniteGameRepository = (
 				};
 				data.push(value);
 			}
+			deps.logService.debug(`Fetched manifest game data, total games in library: ${data.length}`);
 			return data;
 		} catch (error) {
 			deps.logService.error(`Failed to get all game Ids from database`, error as Error);
@@ -539,7 +540,7 @@ export const makePlayniteGameRepository = (
 			if (!result) return;
 			const data = result.totalPlaytimeSeconds as number;
 			const totalPlaytimeHours = data / 3600;
-			deps.logService.success(`Fetched total playtime hours: ${totalPlaytimeHours}`);
+			deps.logService.debug(`Fetched total playtime hours: ${totalPlaytimeHours}`);
 			return totalPlaytimeHours;
 		} catch (error) {
 			deps.logService.error(`Failed to get total playtime`, error as Error);

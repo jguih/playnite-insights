@@ -7,7 +7,8 @@ export const { services } = setupServices();
 services.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 services.log.info(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
 services.log.info(`APP_NAME: ${process.env.APP_NAME}`);
-services.log.info(`NODE VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
+services.log.info(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
+services.log.info(`LOG_LEVEL: ${process.env.LOG_LEVEL || 'undefined'}`);
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
