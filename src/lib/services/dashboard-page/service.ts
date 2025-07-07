@@ -1,7 +1,7 @@
-import z from 'zod';
 import type { LogService } from '../log';
 import type { DatabaseSync } from 'node:sqlite';
-import { overviewDataSchema, type DashPageOverviewData } from './schemas';
+import { type DashPageData } from './schemas';
+import { getLastSixMonthsInclusiveAbreviated } from '$lib/utils/date';
 
 type DashPageServiceDeps = {
 	logService: LogService;
@@ -9,18 +9,11 @@ type DashPageServiceDeps = {
 };
 
 export type DashPageService = {
-	getTotalPlaytimeOverLast6Months: () => number[] | undefined;
-	getTotalGamesOwnedOverLast6Months: () => number[] | undefined;
-	getOverviewData: () => DashPageOverviewData | undefined;
+	getOverviewData: () => DashPageData | undefined;
 };
 
 export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) => {
-	const totalPlaytimeOverTimeSchema = z.array(
-		z.object({
-			totalPlaytimeHours: z.number()
-		})
-	);
-	const getTotalPlaytimeOverLast6Months = (): number[] | undefined => {
+	const getTotalPlaytimeOverLast6Months = (): number[] => {
 		const query = `
         SELECT totalPlaytimeHours FROM (
           SELECT MAX(TotalPlaytimeHours) as totalPlaytimeHours, strftime('%Y-%m', Timestamp) as yearMonth
@@ -33,21 +26,20 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 		try {
 			const stmt = getDb().prepare(query);
 			const result = stmt.all();
-			const data = totalPlaytimeOverTimeSchema.parse(result);
+			const data: number[] = [];
+			for (const entry of result) {
+				const value = entry.totalPlaytimeHours as number;
+				data.push(value);
+			}
 			logService.success('Successfully queried total playtime over last 6 months');
-			return data.map((e) => e.totalPlaytimeHours);
+			return data;
 		} catch (error) {
 			logService.error('Failed to get total playtime over last 6 months', error as Error);
-			return undefined;
+			return [];
 		}
 	};
 
-	const totalGamesOwnedOverLast6MonthsSchema = z.array(
-		z.object({
-			totalGamesOwned: z.number()
-		})
-	);
-	const getTotalGamesOwnedOverLast6Months = (): number[] | undefined => {
+	const getTotalGamesOwnedOverLast6Months = (): number[] => {
 		const query = `
         WITH latest_per_month AS (
           SELECT *
@@ -66,16 +58,48 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 		try {
 			const stmt = getDb().prepare(query);
 			const result = stmt.all();
-			const data = totalGamesOwnedOverLast6MonthsSchema.parse(result);
+			const data: number[] = [];
+			for (const entry of result) {
+				const value = entry.totalGamesOwned as number;
+				data.push(value);
+			}
 			logService.success('Successfully queried total games owned over last 6 months');
-			return data.map((e) => e.totalGamesOwned);
+			return data;
 		} catch (error) {
 			logService.error('Failed to get total games owned over last 6 months', error as Error);
-			return undefined;
+			return [];
 		}
 	};
 
-	const getOverviewData = (): DashPageOverviewData | undefined => {
+	const getTopMostPlayedGames = (total: number): DashPageData['top10MostPlayedGames'] => {
+		const db = getDb();
+		const query = `
+    SELECT Id, Name, Playtime
+    FROM playnite_game
+    ORDER BY Playtime DESC
+    LIMIT ?;
+  `;
+		try {
+			const stmt = db.prepare(query);
+			const result = stmt.all(total);
+			const data: DashPageData['top10MostPlayedGames'] = [];
+			for (const entry of result) {
+				const value = {
+					Id: entry.Id as string,
+					Name: entry.Name as string | null,
+					Playtime: entry.Playtime as number
+				};
+				data.push(value);
+			}
+			logService.success(`Found top ${total} most played games, returning ${data?.length} games`);
+			return data;
+		} catch (error) {
+			logService.error(`Failed to get top most played games`, error as Error);
+			return [];
+		}
+	};
+
+	const getPageData = (): DashPageData | undefined => {
 		const db = getDb();
 		const query = `
       SELECT Id, IsInstalled, Playtime
@@ -84,20 +108,59 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all();
-			const data = overviewDataSchema.parse(result);
+			const data: Array<{ Id: string; IsInstalled: number | null; Playtime: number }> = [];
+			for (const entry of result) {
+				data.push({
+					Id: entry.Id as string,
+					IsInstalled: entry.IsInstalled as number | null,
+					Playtime: entry.Playtime as number
+				});
+			}
 			logService.success(
 				`Game list for dashboard page fetched, returning data for ${data.length} games`
 			);
-			return data;
+
+			const total = data.length;
+			const isInstalled = data.length > 0 ? data.filter((g) => Boolean(g.IsInstalled)).length : 0;
+			const notInstalled = total - isInstalled;
+			const totalPlaytime =
+				data.length > 0 ? data.map((g) => g.Playtime).reduce((prev, current) => prev + current) : 0;
+			const notPlayed = data.length > 0 ? data.filter((g) => g.Playtime === 0).length : 0;
+			const played = total - notPlayed;
+			const top10MostPlayedGames = getTopMostPlayedGames(10);
+
+			const charts: DashPageData['charts'] = {
+				totalPlaytimeOverLast6Months: {
+					xAxis: { data: getLastSixMonthsInclusiveAbreviated() },
+					series: {
+						bar: { data: getTotalPlaytimeOverLast6Months() }
+					}
+				},
+				totalGamesOwnedOverLast6Months: {
+					xAxis: { data: getLastSixMonthsInclusiveAbreviated() },
+					series: {
+						bar: { data: getTotalGamesOwnedOverLast6Months() }
+					}
+				}
+			};
+
+			return {
+				total,
+				isInstalled,
+				notInstalled,
+				totalPlaytime,
+				notPlayed,
+				played,
+				charts,
+				top10MostPlayedGames
+			};
 		} catch (error) {
-			logService.error('Failed to get game list for dashboard page', error as Error);
+			logService.error('Failed to get dashboard page data', error as Error);
 			return undefined;
 		}
 	};
 
 	return {
-		getTotalPlaytimeOverLast6Months,
-		getTotalGamesOwnedOverLast6Months,
-		getOverviewData
+		getPageData
 	};
 };

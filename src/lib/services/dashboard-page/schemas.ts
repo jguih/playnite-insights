@@ -1,10 +1,30 @@
 import z from 'zod';
+import { playniteGameSchema } from '../playnite-game/schemas';
 
-export const overviewDataSchema = z.array(
-	z.object({
-		Id: z.string(),
-		IsInstalled: z.number(),
-		Playtime: z.number()
-	})
-);
-export type DashPageOverviewData = z.infer<typeof overviewDataSchema>;
+export const dashPageDataSchema = z.object({
+	total: z.number(),
+	isInstalled: z.number(),
+	notInstalled: z.number(),
+	totalPlaytime: z.number(),
+	notPlayed: z.number(),
+	played: z.number(),
+	charts: z.object({
+		totalPlaytimeOverLast6Months: z.object({
+			xAxis: z.object({ data: z.array(z.string()) }),
+			series: z.object({ bar: z.object({ data: z.array(z.number()) }) })
+		}),
+		totalGamesOwnedOverLast6Months: z.object({
+			xAxis: z.object({ data: z.array(z.string()) }),
+			series: z.object({ bar: z.object({ data: z.array(z.number()) }) })
+		})
+	}),
+	top10MostPlayedGames: z.array(
+		z.object({
+			Id: playniteGameSchema.shape.Id,
+			Name: playniteGameSchema.shape.Name,
+			Playtime: playniteGameSchema.shape.Playtime
+		})
+	)
+});
+
+export type DashPageData = z.infer<typeof dashPageDataSchema>;

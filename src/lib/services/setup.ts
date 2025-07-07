@@ -15,6 +15,7 @@ import { makeLogService } from './log';
 import { makePlayniteGameRepository } from './playnite-game';
 import { makeDeveloperRepository } from './developer/repository';
 import { makeHomePageService } from './home-page/service';
+import { makeDashPageService } from './dashboard-page/service';
 
 export const setupServices = () => {
 	const FsAsyncDeps: FileSystemAsyncDeps = {
@@ -66,11 +67,14 @@ export const setupServices = () => {
 		createZip: (path) => new AdmZip(path)
 	});
 	const homePageService = makeHomePageService({ ...commonRepositoryDeps, playniteGameRepository });
+	const dashPageService = makeDashPageService({ ...commonRepositoryDeps });
+
 	const services = {
 		log: logService,
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
-		homePage: homePageService
+		homePage: homePageService,
+		dashPage: dashPageService
 	};
 	const repositories = {
 		publisher: publisherRepository,

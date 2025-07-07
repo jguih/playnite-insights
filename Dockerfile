@@ -36,6 +36,7 @@ USER playnite-insights
 
 ENTRYPOINT ["sh", "docker/dev/entrypoint.sh"]
 
+# Playwright not compatible with Alpine!
 FROM node:24.3 AS test
 
 WORKDIR /app

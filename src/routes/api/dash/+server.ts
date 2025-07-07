@@ -1,10 +1,10 @@
-import { repositories } from '$lib';
-import { playniteGameSchemas } from '$lib/services/playnite-game/schemas';
+import { services } from '$lib';
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type z from 'zod';
 
 export const GET: RequestHandler = () => {
-	const games = repositories.playniteGame.getDashPageGameList();
-	const responseData: z.infer<typeof playniteGameSchemas.getDashPageGameListResult> = games ?? [];
-	return json(responseData);
+	const data = services.dashPage.getPageData();
+	if (!data) {
+		return new Response(null, { status: 404 });
+	}
+	return json(data);
 };

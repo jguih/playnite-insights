@@ -1,0 +1,11 @@
+### Get home page game data (paginated)
+GET {{protocol}}://{{host}}/api/home?page=1&page_size=50
+Content-Type: {{contentType}}
+
+### Get game by id
+GET {{protocol}}://{{host}}/api/game/game-200
+Content-Type: {{contentType}}
+
+### Get dashboard page data
+GET {{protocol}}://{{host}}/api/dash
+Content-Type: {{contentType}}
