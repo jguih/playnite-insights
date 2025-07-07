@@ -9,7 +9,7 @@ export const gameDataSchema = z.array(
 );
 export type HomePageGameData = z.infer<typeof gameDataSchema>;
 
-export const gameListSchema = z
+export const homePageDataSchema = z
 	.object({
 		games: gameDataSchema,
 		total: z.number(),
@@ -17,4 +17,4 @@ export const gameListSchema = z
 		totalPages: z.number()
 	})
 	.optional();
-export type HomePageGameList = z.infer<typeof gameListSchema>;
+export type HomePageData = z.infer<typeof homePageDataSchema>;

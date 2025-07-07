@@ -1,5 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
-import { gameDataSchema, type HomePageGameList } from './schemas';
+import { gameDataSchema, type HomePageData } from './schemas';
 import type { LogService } from '../log';
 import type { PlayniteGameRepository } from '../playnite-game';
 import z from 'zod';
@@ -15,7 +15,7 @@ export const makeHomePageService = ({
 	logService,
 	playniteGameRepository
 }: HomePageServiceDeps) => {
-	const getGames = (offset: number, pageSize: number, query?: string | null): HomePageGameList => {
+	const getGames = (offset: number, pageSize: number, query?: string | null): HomePageData => {
 		const db = getDb();
 		let sqlQuery = `
       SELECT 
