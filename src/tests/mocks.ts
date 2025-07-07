@@ -1,6 +1,7 @@
 import { makeLibraryManifestService } from '$lib/services/library-manifest';
 import { makeLogService } from '$lib/services/log';
 import { makePlayniteGameRepository } from '$lib/services/playnite-game';
+import { constants } from 'fs/promises';
 import { vi } from 'vitest';
 
 export const createMocks = () => {
@@ -10,7 +11,9 @@ export const createMocks = () => {
 		readfile: vi.fn(),
 		rm: vi.fn(),
 		unlink: vi.fn(),
-		writeFile: vi.fn()
+		writeFile: vi.fn(),
+		stat: vi.fn(),
+		constants: constants
 	};
 	const streamUtilsAsyncDeps = {
 		readableFromWeb: vi.fn(),

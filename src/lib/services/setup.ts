@@ -2,7 +2,7 @@ import * as fsAsync from 'fs/promises';
 import * as fs from 'fs';
 import { makeLibraryManifestService } from './library-manifest';
 import * as config from '../config/config';
-import { makePlayniteLibraryImporterService } from './playnite-library-importer';
+import { makePlayniteLibraryImporterService } from './playnite-library-importer/service';
 import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import AdmZip from 'adm-zip';
@@ -17,6 +17,7 @@ import { makeDeveloperRepository } from './developer/repository';
 import { makeHomePageService } from './home-page/service';
 import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
+import { makeMediaFilesService } from './media-files/service';
 
 export const setupServices = () => {
 	const FsAsyncDeps: FileSystemAsyncDeps = {
@@ -25,7 +26,9 @@ export const setupServices = () => {
 		readfile: fsAsync.readFile,
 		writeFile: fsAsync.writeFile,
 		rm: fsAsync.rm,
-		unlink: fsAsync.unlink
+		unlink: fsAsync.unlink,
+		stat: fsAsync.stat,
+		constants: fsAsync.constants
 	};
 	const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
 		readableFromWeb: stream.Readable.fromWeb,
@@ -70,6 +73,11 @@ export const setupServices = () => {
 	const homePageService = makeHomePageService({ ...commonRepositoryDeps, playniteGameRepository });
 	const dashPageService = makeDashPageService({ ...commonRepositoryDeps });
 	const gamePageService = makeGamePageService({ ...commonRepositoryDeps, playniteGameRepository });
+	const mediaFilesService = makeMediaFilesService({
+		logService,
+		...FsAsyncDeps,
+		FILES_DIR: config.FILES_DIR
+	});
 
 	const services = {
 		log: logService,
@@ -77,7 +85,8 @@ export const setupServices = () => {
 		playniteLibraryImporter: playniteLibraryImporterService,
 		homePage: homePageService,
 		dashPage: dashPageService,
-		gamePage: gamePageService
+		gamePage: gamePageService,
+		mediaFiles: mediaFilesService
 	};
 	const repositories = {
 		publisher: publisherRepository,

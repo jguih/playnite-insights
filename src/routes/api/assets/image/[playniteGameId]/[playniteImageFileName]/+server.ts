@@ -1,4 +1,4 @@
-import { getGameImage } from '$lib/services/playnite-game/game-images';
+import { services } from '$lib';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ params, request }) => {
@@ -8,14 +8,11 @@ export const GET: RequestHandler = async ({ params, request }) => {
 	if (!playniteGameId || !playniteImageFileName) {
 		return json({ error: 'Missing playniteGameId or playniteImageId' }, { status: 400 });
 	}
-	const result = await getGameImage(
+	const result = await services.mediaFiles.getGameImage(
 		playniteGameId,
 		playniteImageFileName,
 		ifNoneMatch,
 		ifModifiedSince
 	);
-	if (!result.isValid || !result.data) {
-		return json({ error: result.message }, { status: result.httpCode });
-	}
-	return result.data; // Assuming result.data is a Response object
+	return result;
 };

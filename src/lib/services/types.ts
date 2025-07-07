@@ -10,6 +10,8 @@ export type FileSystemAsyncDeps = {
 	access: typeof fsAsync.access;
 	rm: typeof fsAsync.rm;
 	unlink: typeof fsAsync.unlink;
+	stat: typeof fsAsync.stat;
+	constants: typeof fsAsync.constants;
 };
 
 export type StreamUtilsAsyncDeps = {

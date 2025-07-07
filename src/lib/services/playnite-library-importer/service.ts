@@ -4,13 +4,12 @@ import type { ValidationResult } from '$lib/models/validation-result';
 import AdmZip from 'adm-zip';
 import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
-import { z } from 'zod';
-import { incomingPlayniteGameDtoSchema } from '$lib/services/playnite-library-sync/schemas';
-import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import type { LibraryManifestService } from './library-manifest';
+import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from '../types';
+import type { LibraryManifestService } from '../library-manifest';
 import type { PlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
-import type { LogService } from './log';
-import type { PlayniteGameRepository } from './playnite-game';
+import type { LogService } from '../log';
+import type { PlayniteGameRepository } from '../playnite-game';
+import { type SyncGameListCommand } from './schemas';
 
 type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	StreamUtilsAsyncDeps & {
@@ -24,15 +23,10 @@ type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	};
 
 export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporterServiceDeps) => {
-	const syncGameListCommandSchema = z.object({
-		AddedItems: z.array(incomingPlayniteGameDtoSchema),
-		RemovedItems: z.array(z.string()),
-		UpdatedItems: z.array(incomingPlayniteGameDtoSchema)
-	});
 	/**
 	 * Synchronizes game metadata from Playnite Insights Exporter with the database
 	 */
-	const sync = async (data: z.infer<typeof syncGameListCommandSchema>) => {
+	const sync = async (data: SyncGameListCommand) => {
 		try {
 			deps.logService.info(`Games to add: ${data.AddedItems.length}`);
 			deps.logService.info(`Games to update: ${data.UpdatedItems.length}`);
@@ -49,15 +43,15 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 						Id: game.Id,
 						IsInstalled: Number(game.IsInstalled),
 						Playtime: game.Playtime,
-						Added: game.Added,
-						BackgroundImage: game.BackgroundImage,
-						CoverImage: game.CoverImage,
-						Description: game.Description,
-						Icon: game.Icon,
-						InstallDirectory: game.InstallDirectory,
-						LastActivity: game.LastActivity,
-						Name: game.Name,
-						ReleaseDate: game.ReleaseDate?.ReleaseDate,
+						Added: game.Added ?? null,
+						BackgroundImage: game.BackgroundImage ?? null,
+						CoverImage: game.CoverImage ?? null,
+						Description: game.Description ?? null,
+						Icon: game.Icon ?? null,
+						InstallDirectory: game.InstallDirectory ?? null,
+						LastActivity: game.LastActivity ?? null,
+						Name: game.Name ?? null,
+						ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
 						ContentHash: game.ContentHash
 					},
 					game.Developers ?? [],
@@ -90,15 +84,15 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 						Id: game.Id,
 						IsInstalled: Number(game.IsInstalled),
 						Playtime: game.Playtime,
-						Added: game.Added,
-						BackgroundImage: game.BackgroundImage,
-						CoverImage: game.CoverImage,
-						Description: game.Description,
-						Icon: game.Icon,
-						InstallDirectory: game.InstallDirectory,
-						LastActivity: game.LastActivity,
-						Name: game.Name,
-						ReleaseDate: game.ReleaseDate?.ReleaseDate,
+						Added: game.Added ?? null,
+						BackgroundImage: game.BackgroundImage ?? null,
+						CoverImage: game.CoverImage ?? null,
+						Description: game.Description ?? null,
+						Icon: game.Icon ?? null,
+						InstallDirectory: game.InstallDirectory ?? null,
+						LastActivity: game.LastActivity ?? null,
+						Name: game.Name ?? null,
+						ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
 						ContentHash: game.ContentHash
 					},
 					game.Developers ?? [],
@@ -203,7 +197,6 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 
 	return {
 		sync,
-		importMediaFiles,
-		syncGameListCommandSchema
+		importMediaFiles
 	};
 };

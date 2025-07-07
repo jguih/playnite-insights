@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createMocks } from '../../tests/mocks';
-import type z from 'zod';
-import { makePlayniteLibraryImporterService } from './playnite-library-importer';
+import { createMocks } from '../../../tests/mocks';
+import { makePlayniteLibraryImporterService } from './service';
 import { join } from 'path';
+import type { SyncGameListCommand } from './schemas';
 
 vi.mock('$lib/infrastructure/database', () => ({}));
 
@@ -33,9 +33,7 @@ describe('Game Importer', () => {
 
 	it('should return error when importing invalid json body', async () => {
 		// Arrange
-		const invalidJson = { invalid: 'data' } as unknown as z.infer<
-			typeof service.syncGameListCommandSchema
-		>;
+		const invalidJson = { invalid: 'data' } as unknown as SyncGameListCommand;
 		// Act
 		const result = await service.sync(invalidJson);
 		// Assert
@@ -44,7 +42,7 @@ describe('Game Importer', () => {
 
 	it('should check if a game exists before trying to add it', async () => {
 		// Arrange
-		const data: z.infer<typeof service.syncGameListCommandSchema> = {
+		const data: SyncGameListCommand = {
 			AddedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }],
 			RemovedItems: [],
 			UpdatedItems: []
@@ -60,7 +58,7 @@ describe('Game Importer', () => {
 
 	it('should add a game if it doesnt exist', async () => {
 		// Arrange
-		const data: z.infer<typeof service.syncGameListCommandSchema> = {
+		const data: SyncGameListCommand = {
 			AddedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }],
 			RemovedItems: [],
 			UpdatedItems: []
@@ -76,7 +74,7 @@ describe('Game Importer', () => {
 
 	it('should not update game if it doesnt exist', async () => {
 		// Arrange
-		const data: z.infer<typeof service.syncGameListCommandSchema> = {
+		const data: SyncGameListCommand = {
 			AddedItems: [],
 			RemovedItems: [],
 			UpdatedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }]
@@ -92,7 +90,7 @@ describe('Game Importer', () => {
 
 	it('should update a game if it exists', async () => {
 		// Arrange
-		const data: z.infer<typeof service.syncGameListCommandSchema> = {
+		const data: SyncGameListCommand = {
 			AddedItems: [],
 			RemovedItems: [],
 			UpdatedItems: [{ Id: 'id1', Playtime: 12, ContentHash: 'hash', IsInstalled: false }]
@@ -108,7 +106,7 @@ describe('Game Importer', () => {
 
 	it('should delete a game and its media folder', async () => {
 		// Arrange
-		const data: z.infer<typeof service.syncGameListCommandSchema> = {
+		const data: SyncGameListCommand = {
 			AddedItems: [],
 			RemovedItems: ['id1'],
 			UpdatedItems: []
