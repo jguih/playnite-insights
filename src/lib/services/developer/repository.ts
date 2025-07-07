@@ -1,4 +1,4 @@
-import { developerSchemas, type Developer } from '$lib/services/developer/schemas';
+import { developerSchema, type Developer } from '$lib/services/developer/schemas';
 import { type LogService } from '../log';
 import z from 'zod';
 import type { DatabaseSync } from 'node:sqlite';
@@ -89,7 +89,7 @@ export const makeDeveloperRepository = ({
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.get(id);
-			const dev = z.optional(developerSchemas.developer).parse(result);
+			const dev = z.optional(developerSchema).parse(result);
 			return dev;
 		} catch (error) {
 			logService.error(`Failed to get developer with if ${id}`, error as Error);

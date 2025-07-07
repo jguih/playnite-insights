@@ -16,7 +16,7 @@
 	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
 	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
-	import { searchBarVisible } from '$lib/page/home/stores.svelte';
+	import { searchBarVisible } from '$lib/stores/stores.svelte';
 
 	let { data }: PageProps = $props();
 	let currentPage = $derived(data.page);

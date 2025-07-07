@@ -16,6 +16,7 @@
 ## 🛠️ In Progress
 
 - Dashboard page
+- API Integration testing
 
 ## 📌 To Do
 
