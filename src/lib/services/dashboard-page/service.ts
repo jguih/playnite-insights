@@ -74,7 +74,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 	const getTopMostPlayedGames = (total: number): DashPageData['top10MostPlayedGames'] => {
 		const db = getDb();
 		const query = `
-    SELECT Id, Name, Playtime
+    SELECT Id, Name, Playtime, CoverImage, LastActivity
     FROM playnite_game
     ORDER BY Playtime DESC
     LIMIT ?;
@@ -84,10 +84,12 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 			const result = stmt.all(total);
 			const data: DashPageData['top10MostPlayedGames'] = [];
 			for (const entry of result) {
-				const value = {
+				const value: DashPageData['top10MostPlayedGames'][number] = {
 					Id: entry.Id as string,
 					Name: entry.Name as string | null,
-					Playtime: entry.Playtime as number
+					Playtime: entry.Playtime as number,
+					CoverImage: entry.CoverImage as string | null,
+					LastActivity: entry.LastActivity as string | null
 				};
 				data.push(value);
 			}

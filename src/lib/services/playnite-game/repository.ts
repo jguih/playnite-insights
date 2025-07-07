@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { developerSchema, type Developer } from '$lib/services/developer/schemas';
 import { gameManifestDataSchema, playniteGameSchema, type PlayniteGame } from './schemas';
-import type { Platform } from '$lib/platform/schemas';
+import type { Platform } from '$lib/services/platform/schemas';
 import type { Genre } from '$lib/genre/schemas';
 import {
 	addGenre,
@@ -10,11 +10,11 @@ import {
 	getGenreById,
 	updateGenre
 } from '../../genre/genre-repository';
-import type { Publisher } from '$lib/publisher/schemas';
+import type { Publisher } from '$lib/services/publisher/schemas';
 import type { DatabaseSync } from 'node:sqlite';
 import type { LogService } from '$lib/services/log';
-import type { PublisherRepository } from '$lib/publisher/publisher-repository';
-import type { PlatformRepository } from '$lib/platform/platform-repository';
+import type { PublisherRepository } from '$lib/services/publisher/publisher-repository';
+import type { PlatformRepository } from '$lib/services/platform/platform-repository';
 import type { DeveloperRepository } from '$lib/services/developer/repository';
 
 type PlayniteGameRepositoryDeps = {

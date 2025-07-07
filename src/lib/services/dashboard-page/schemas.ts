@@ -22,7 +22,9 @@ export const dashPageDataSchema = z.object({
 		z.object({
 			Id: playniteGameSchema.shape.Id,
 			Name: playniteGameSchema.shape.Name,
-			Playtime: playniteGameSchema.shape.Playtime
+			Playtime: playniteGameSchema.shape.Playtime,
+			CoverImage: playniteGameSchema.shape.CoverImage,
+			LastActivity: playniteGameSchema.shape.LastActivity
 		})
 	)
 });

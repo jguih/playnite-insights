@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
-import { homePagePlayniteGameListSchema } from '../lib/page/home/schemas';
 import type { PageLoad } from './$types';
+import { gameListSchema } from '$lib/services/home-page/schemas';
 
 export const load: PageLoad = async ({ url, fetch }) => {
 	const params = url.searchParams;
@@ -22,7 +22,7 @@ export const load: PageLoad = async ({ url, fetch }) => {
 
 	try {
 		const response = await fetch(`/api/home?${params.toString()}`);
-		const data = homePagePlayniteGameListSchema.parse(await response.json());
+		const data = gameListSchema.parse(await response.json());
 		return {
 			...data,
 			pageSize: Number(params.get('page_size')),

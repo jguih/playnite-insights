@@ -17,7 +17,7 @@
 	let total = $derived(data.total);
 	let installed = $derived(data.isInstalled);
 	let notInstalled = $derived(data.notInstalled);
-	let totalPlayTime = $derived(data.totalPlaytime);
+	let totalPlayTime = $derived(getPlaytimeInHours(data.totalPlaytime));
 	let played = $derived(data.played);
 	let totalPlayedPercent = $derived(total > 0 ? Math.floor((played * 100) / total) : 0);
 	let charts = $derived(data.charts);

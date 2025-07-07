@@ -68,9 +68,10 @@ export const getGameImage = async (
 	// Image cached and not modified
 	if (ifNoneMatch === etag || ifModifiedSince === lastModified) {
 		return {
-			isValid: false,
+			isValid: true,
 			message: `Image not modified: ${imagePath}`,
-			httpCode: 304
+			httpCode: 304,
+			data: new Response(null, { status: 304 })
 		};
 	}
 	const imageExtension = playniteImageFileName.split('.').pop()?.toLowerCase();

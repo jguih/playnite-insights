@@ -1,4 +1,4 @@
-import { platformSchema, type Platform } from '$lib/platform/schemas';
+import { platformSchema, type Platform } from '$lib/services/platform/schemas';
 import z from 'zod';
 import type { DatabaseSync } from 'node:sqlite';
 import type { LogService } from '$lib/services/log';
