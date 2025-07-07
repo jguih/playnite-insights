@@ -18,6 +18,7 @@ import { makeHomePageService } from './home-page/service';
 import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
 import { makeMediaFilesService } from './media-files/service';
+import { makeGenreRepository } from './genre/repository';
 
 export const setupServices = () => {
 	const FsAsyncDeps: FileSystemAsyncDeps = {
@@ -36,50 +37,54 @@ export const setupServices = () => {
 		pipeline: streamAsync.pipeline
 	};
 	const logService = makeLogService();
+	const commonDeps = { getDb, logService, ...config };
 	// Repositories
-	const commonRepositoryDeps = { getDb, logService };
-	const publisherRepository = makePublisherRepository({ ...commonRepositoryDeps });
-	const platformRepository = makePlatformRepository({ ...commonRepositoryDeps });
-	const developerRepository = makeDeveloperRepository({ ...commonRepositoryDeps });
+	const publisherRepository = makePublisherRepository({ ...commonDeps });
+	const platformRepository = makePlatformRepository({ ...commonDeps });
+	const developerRepository = makeDeveloperRepository({ ...commonDeps });
+	const genreRepository = makeGenreRepository({ ...commonDeps });
 	const playniteGameRepository = makePlayniteGameRepository({
-		...commonRepositoryDeps,
+		...commonDeps,
 		publisherRepository,
 		platformRepository,
-		developerRepository
+		developerRepository,
+		genreRepository
 	});
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
-		...commonRepositoryDeps
+		...commonDeps
 	});
+	const repositories = {
+		publisherRepository,
+		platformRepository,
+		developerRepository,
+		playniteGameRepository,
+		playniteLibrarySyncRepository,
+		genreRepository
+	};
 	// Services
 	const libraryManifestService = makeLibraryManifestService({
 		...FsAsyncDeps,
-		getManifestData: playniteGameRepository.getManifestData,
-		logService: logService,
-		CONTENT_HASH_FILE_NAME: config.CONTENT_HASH_FILE_NAME,
-		FILES_DIR: config.FILES_DIR,
-		MANIFEST_FILE: config.LIBRARY_MANIFEST_FILE
+		...commonDeps,
+		getManifestData: playniteGameRepository.getManifestData
 	});
 	const playniteLibraryImporterService = makePlayniteLibraryImporterService({
 		...FsAsyncDeps,
 		...streamUtilsAsyncDeps,
-		playniteGameRepository: playniteGameRepository,
+		...commonDeps,
+		...repositories,
 		libraryManifestService: libraryManifestService,
-		playniteLibrarySyncRepository: playniteLibrarySyncRepository,
-		logService: logService,
-		FILES_DIR: config.FILES_DIR,
-		TMP_DIR: config.TMP_DIR,
 		createZip: (path) => new AdmZip(path)
 	});
-	const homePageService = makeHomePageService({ ...commonRepositoryDeps, playniteGameRepository });
-	const dashPageService = makeDashPageService({ ...commonRepositoryDeps });
-	const gamePageService = makeGamePageService({ ...commonRepositoryDeps, playniteGameRepository });
+	const homePageService = makeHomePageService({ ...commonDeps, ...repositories });
+	const dashPageService = makeDashPageService({ ...commonDeps });
+	const gamePageService = makeGamePageService({ ...commonDeps, ...repositories });
 	const mediaFilesService = makeMediaFilesService({
-		logService,
 		...FsAsyncDeps,
-		FILES_DIR: config.FILES_DIR
+		...commonDeps
 	});
 
 	const services = {
+		...repositories,
 		log: logService,
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
@@ -88,12 +93,6 @@ export const setupServices = () => {
 		gamePage: gamePageService,
 		mediaFiles: mediaFilesService
 	};
-	const repositories = {
-		publisher: publisherRepository,
-		platform: platformRepository,
-		developer: developerRepository,
-		playniteGame: playniteGameRepository,
-		playniteLibrarySync: playniteLibrarySyncRepository
-	};
-	return { services, repositories };
+
+	return { services };
 };

@@ -12,7 +12,7 @@ const createDeps = () => {
 		logService: mocks.services.log,
 		CONTENT_HASH_FILE_NAME: 'contentHash.txt',
 		FILES_DIR: '/files_dir',
-		MANIFEST_FILE: '/app/data/manifest.json',
+		LIBRARY_MANIFEST_FILE: '/app/data/manifest.json',
 		getManifestData: vi.fn()
 	};
 };
@@ -97,7 +97,7 @@ describe('Library manifest', () => {
 		// Assert
 		expect(deps.writeFile).toHaveBeenCalled();
 		const [calledPath, calledContent] = deps.writeFile.mock.calls[0];
-		expect(calledPath).toBe(deps.MANIFEST_FILE);
+		expect(calledPath).toBe(deps.LIBRARY_MANIFEST_FILE);
 		expect(JSON.parse(calledContent)).toEqual(manifest);
 	});
 
@@ -116,7 +116,7 @@ describe('Library manifest', () => {
 		// Assert
 		expect(deps.writeFile).toHaveBeenCalled();
 		const [calledPath, calledContent] = deps.writeFile.mock.calls[0];
-		expect(calledPath).toBe(deps.MANIFEST_FILE);
+		expect(calledPath).toBe(deps.LIBRARY_MANIFEST_FILE);
 		expect(JSON.parse(calledContent)).toEqual(manifest);
 	});
 });

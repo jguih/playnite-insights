@@ -43,7 +43,7 @@ export const createMocks = () => {
 		CONTENT_HASH_FILE_NAME: 'contentHash.txt',
 		getManifestData: vi.fn(),
 		FILES_DIR: '/files',
-		MANIFEST_FILE: '/app/manifest.json',
+		LIBRARY_MANIFEST_FILE: '/app/manifest.json',
 		logService: logService
 	});
 

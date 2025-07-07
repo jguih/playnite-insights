@@ -29,3 +29,4 @@ export const gameManifestDataSchema = z.array(
 		ContentHash: z.string()
 	})
 );
+export type GameManifestData = z.infer<typeof gameManifestDataSchema>;

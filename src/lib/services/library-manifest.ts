@@ -19,7 +19,7 @@ export type PlayniteLibraryManifest = {
 type LibraryManifestServiceDeps = FileSystemAsyncDeps & {
 	getManifestData: PlayniteGameRepository['getManifestData'];
 	logService: ReturnType<typeof makeLogService>;
-	MANIFEST_FILE: string;
+	LIBRARY_MANIFEST_FILE: string;
 	FILES_DIR: string;
 	CONTENT_HASH_FILE_NAME: string;
 };
@@ -38,7 +38,7 @@ export const makeLibraryManifestService = (
 			const gamesInLibrary: PlayniteLibraryManifest['gamesInLibrary'] = [];
 			const gamesManifestData = deps.getManifestData();
 			if (!gamesManifestData) {
-				throw new Error('Failed to fetch all game Ids');
+				throw new Error('Failed to fetch manifest data');
 			}
 			for (const data of gamesManifestData) {
 				gamesInLibrary.push({ gameId: data.Id, contentHash: data.ContentHash });
@@ -65,7 +65,7 @@ export const makeLibraryManifestService = (
 				gamesInLibrary: gamesInLibrary,
 				mediaExistsFor: mediaExistsFor
 			};
-			await deps.writeFile(deps.MANIFEST_FILE, JSON.stringify(manifest, null, 2));
+			await deps.writeFile(deps.LIBRARY_MANIFEST_FILE, JSON.stringify(manifest, null, 2));
 			deps.logService.success('manifest.json written sucessfully');
 			return {
 				isValid: true,
@@ -85,8 +85,8 @@ export const makeLibraryManifestService = (
 
 	const get = async () => {
 		try {
-			deps.logService.debug(`Reading library manifest JSON file at ${deps.MANIFEST_FILE}`);
-			const content = await deps.readfile(deps.MANIFEST_FILE, 'utf-8');
+			deps.logService.debug(`Reading library manifest JSON file at ${deps.LIBRARY_MANIFEST_FILE}`);
+			const content = await deps.readfile(deps.LIBRARY_MANIFEST_FILE, 'utf-8');
 			const asJson = JSON.parse(content.toString()) as PlayniteLibraryManifest;
 			deps.logService.debug(`Read manifest JSON file succesfully, returning manifest`);
 			return asJson ?? null;

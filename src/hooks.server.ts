@@ -2,7 +2,7 @@ import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { setupServices } from '$lib/services/setup';
 
-export const { services, repositories } = setupServices();
+export const { services } = setupServices();
 
 services.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 services.log.info(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);

@@ -1,21 +1,20 @@
 import { z } from 'zod';
 import { developerSchema, type Developer } from '$lib/services/developer/schemas';
-import { gameManifestDataSchema, playniteGameSchema, type PlayniteGame } from './schemas';
-import type { Platform } from '$lib/services/platform/schemas';
-import type { Genre } from '$lib/genre/schemas';
 import {
-	addGenre,
-	genreExists,
-	genreHasChanges,
-	getGenreById,
-	updateGenre
-} from '../../genre/genre-repository';
+	gameManifestDataSchema,
+	playniteGameSchema,
+	type GameManifestData,
+	type PlayniteGame
+} from './schemas';
+import type { Platform } from '$lib/services/platform/schemas';
+import type { Genre } from '$lib/services/genre/schemas';
 import type { Publisher } from '$lib/services/publisher/schemas';
 import type { DatabaseSync } from 'node:sqlite';
 import type { LogService } from '$lib/services/log';
 import type { PublisherRepository } from '$lib/services/publisher/publisher-repository';
 import type { PlatformRepository } from '$lib/services/platform/platform-repository';
 import type { DeveloperRepository } from '$lib/services/developer/repository';
+import type { GenreRepository } from '$lib/services/genre/repository';
 
 type PlayniteGameRepositoryDeps = {
 	getDb: () => DatabaseSync;
@@ -23,6 +22,7 @@ type PlayniteGameRepositoryDeps = {
 	publisherRepository: PublisherRepository;
 	platformRepository: PlatformRepository;
 	developerRepository: DeveloperRepository;
+	genreRepository: GenreRepository;
 };
 
 export type PlayniteGameRepository = {
@@ -360,11 +360,11 @@ export const makePlayniteGameRepository = (
 			}
 			if (genres) {
 				for (const genre of genres) {
-					if (genreExists(genre)) {
+					if (deps.genreRepository.exists(genre)) {
 						addGenreFor({ Id: game.Id, Name: game.Name }, genre);
 						continue;
 					}
-					if (addGenre(genre)) {
+					if (deps.genreRepository.add(genre)) {
 						addGenreFor({ Id: game.Id, Name: game.Name }, genre);
 					}
 				}
@@ -461,13 +461,13 @@ export const makePlayniteGameRepository = (
 			if (genres) {
 				deleteGenresFor({ Id: game.Id, Name: game.Name });
 				for (const genre of genres) {
-					const existing = getGenreById(genre.Id);
+					const existing = deps.genreRepository.getById(genre.Id);
 					if (existing) {
-						if (genreHasChanges(existing, genre)) {
-							updateGenre(genre);
+						if (deps.genreRepository.hasChanges(existing, genre)) {
+							deps.genreRepository.update(genre);
 						}
 					} else {
-						addGenre(genre);
+						deps.genreRepository.add(genre);
 					}
 					addGenreFor({ Id: game.Id, Name: game.Name }, genre);
 				}
@@ -507,14 +507,20 @@ export const makePlayniteGameRepository = (
 		}
 	};
 
-	type GetManifestDataResult = z.infer<typeof gameManifestDataSchema> | undefined;
-	const getManifestData = (): GetManifestDataResult => {
+	const getManifestData = (): GameManifestData | undefined => {
 		const db = deps.getDb();
 		const query = `SELECT Id, ContentHash FROM playnite_game`;
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.all();
-			const data = gameManifestDataSchema.parse(result);
+			const data: GameManifestData = [];
+			for (const entry of result) {
+				const value = {
+					Id: entry.Id as string,
+					ContentHash: entry.ContentHash as string
+				};
+				data.push(value);
+			}
 			return data;
 		} catch (error) {
 			deps.logService.error(`Failed to get all game Ids from database`, error as Error);
@@ -522,7 +528,6 @@ export const makePlayniteGameRepository = (
 		}
 	};
 
-	const totalPlaytimeSecondsSchema = z.object({ totalPlaytimeSeconds: z.number().nullable() });
 	const getTotalPlaytimeHours = (): number | undefined => {
 		const db = deps.getDb();
 		const query = `
@@ -531,10 +536,9 @@ export const makePlayniteGameRepository = (
 		try {
 			const stmt = db.prepare(query);
 			const result = stmt.get();
-			const data = totalPlaytimeSecondsSchema.parse(result);
-			const totalPlaytimeHours = data.totalPlaytimeSeconds
-				? data.totalPlaytimeSeconds / 3600
-				: undefined;
+			if (!result) return;
+			const data = result.totalPlaytimeSeconds as number;
+			const totalPlaytimeHours = data / 3600;
 			deps.logService.success(`Fetched total playtime hours: ${totalPlaytimeHours}`);
 			return totalPlaytimeHours;
 		} catch (error) {
