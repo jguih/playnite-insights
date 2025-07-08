@@ -14,7 +14,7 @@ export const seedDb = (db) => {
   logInfo("Seeding database...");
   let query = `
     INSERT INTO playnite_library_sync
-      (timestamp, totalPlaytimeHours, totalGames)
+      (Timestamp, TotalPlaytimeHours, TotalGames)
     VALUES
       (?, ?, ?);
   `;
@@ -143,13 +143,13 @@ export const seedDb = (db) => {
 
   query = `
     INSERT INTO playnite_game
-      (Id, Name, Description, ReleaseDate, Playtime, LastActivity, Added, InstallDirectory, IsInstalled, BackgroundImage, CoverImage, Icon)
+      (Id, Name, Description, ReleaseDate, Playtime, LastActivity, Added, InstallDirectory, IsInstalled, BackgroundImage, CoverImage, Icon, ContentHash)
     VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
   `;
   const gameStmt = db.prepare(query);
   const gameData = [
-    ...Array(400).fill(null).map((_, i) => {
+    ...Array(200).fill(null).map((_, i) => {
       return [
         `game-${i}`,
         faker.lorem.words({ min: 2, max: 5 }), // Name
@@ -163,6 +163,7 @@ export const seedDb = (db) => {
         'placeholder\\background.png', // BackgroundImage
         'placeholder\\cover.png', // CoverImage
         'placeholder\\icon.png', // Icon
+        faker.lorem.words({ min: 30, max:30 }), // ContentHash
       ]
     })
   ];

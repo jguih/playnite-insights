@@ -66,6 +66,7 @@ export const makeLogService = (CURRENT_LOG_LEVEL: number) => {
 		info: logInfo,
 		success: logSuccess,
 		debug: logDebug,
-		LOG_LEVELS
+		LOG_LEVELS,
+		CURRENT_LOG_LEVEL
 	};
 };
