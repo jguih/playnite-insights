@@ -14,17 +14,27 @@ export default defineConfig({
 	],
 	server: {
 		port: 3000,
-		allowedHosts: ['app-dev.jguihomeserver.com.br']
+		allowedHosts: true
 	},
 	test: {
+		reporters: ['default', ['json', { outputFile: 'test-results/vitest-results.json' }]],
 		projects: [
 			{
 				extends: './vite.config.ts',
 				test: {
-					name: 'server',
+					name: 'unit',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
 					exclude: ['src/e2e/**', 'src/**/*.svelte.{test,spec}.{js,ts}']
+				}
+			},
+			{
+				extends: './vite.config.ts',
+				test: {
+					name: 'api integration',
+					include: ['tests/integration/api/**/*.test.ts'],
+					environment: 'node',
+					setupFiles: ['tests/integration/api/setup.ts'] // optional
 				}
 			}
 		]

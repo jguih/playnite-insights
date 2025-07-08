@@ -1,5 +1,4 @@
-import { error, redirect } from '@sveltejs/kit';
-import { homePagePlayniteGameListSchema } from '../lib/page/home/schemas';
+import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ url, fetch }) => {
@@ -20,16 +19,11 @@ export const load: PageLoad = async ({ url, fetch }) => {
 		throw redirect(302, `${url.pathname}?${params.toString()}`);
 	}
 
-	try {
-		const response = await fetch(`/api/playnite-games/home?${params.toString()}`);
-		const data = homePagePlayniteGameListSchema.parse(await response.json());
-		return {
-			...data,
-			pageSize: Number(params.get('page_size')),
-			query: params.get('query'),
-			page: Number(params.get('page'))
-		};
-	} catch {
-		throw error(500, 'Failed to fetch home page data');
-	}
+	const promise = fetch(`/api/home?${params.toString()}`);
+	return {
+		promise,
+		pageSize: Number(params.get('page_size')),
+		query: params.get('query'),
+		page: Number(params.get('page'))
+	};
 };

@@ -12,18 +12,11 @@
 	import { ArrowLeft, Search } from '@lucide/svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
+	import { makeDashPageViewModel } from '$lib/client/viewmodel/dash.js';
+	import Loading from '$lib/client/components/Loading.svelte';
 
 	const { data } = $props();
-	let gamesList = $derived(data.games);
-	let total = $derived(data.total);
-	let installed = $derived(data.installed);
-	let notInstalled = $derived(data.notInstalled);
-	let totalPlayTime = $derived(data.totalPlayTime);
-	let notPlayed = $derived(data.notPlayed);
-	let played = $derived(data.played);
-	let totalPlayedPercent = $derived(Math.floor((played * 100) / total));
-	let charts = $derived(data.charts);
-	let top10MostPlayed = $derived(data.top10MostPlayedGames);
+	let vm = $derived(makeDashPageViewModel(data.promise));
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -46,95 +39,102 @@
 		</BaseButton>
 	</Header>
 	<Main class="flex flex-col gap-6">
-		<div>
-			<h1 class="text-2xl">Overview</h1>
-			<Divider class="mb-4 border-1" />
-			{@render infoSection(m.dash_games_in_library(), total)}
-			{@render infoSection(m.dash_intalled(), installed)}
-			{@render infoSection(m.dash_not_installed(), notInstalled)}
-			{@render infoSection(
-				m.dash_total_playtime(),
-				m.game_playtime_in_hour({ hours: totalPlayTime })
-			)}
-			<div class="flex flex-row justify-between">
-				<small class="text-sm">
-					<span class="text-primary-500">{played}</span>
-					<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
-					<span class="text-primary-500 font-semibold">{total}</span>
-					<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
-				</small>
-				<p class="text-md">{totalPlayedPercent}%</p>
-			</div>
-			<div class="bg-background-1 mt-1 h-3 w-full rounded-sm">
-				<div class="bg-primary-500 h-3 rounded-sm" style="width: {totalPlayedPercent}%"></div>
-			</div>
-		</div>
-		<div class="bg-background-1 shadow-md">
-			<h1 class="text-md truncate px-3 pt-4 font-semibold">
-				{m.dash_games_owned_over_last_n_months({ value: 6 })}
-			</h1>
-			{#if charts?.totalGamesOwnedOverLast6Months}
-				<GamesOwnedOverTime
-					series={{
-						bar: {
-							data: charts.totalGamesOwnedOverLast6Months.series.bar.data,
-							label: m.dash_chart_label_games_owned()
-						}
-					}}
-					xAxis={charts.totalGamesOwnedOverLast6Months.xAxis}
-				/>
-			{:else}
-				<div>
-					<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
+		{#await vm.load()}
+			<Loading />
+		{:then}
+			<div>
+				<h1 class="text-2xl">Overview</h1>
+				<Divider class="mb-4 border-1" />
+				{@render infoSection(m.dash_games_in_library(), vm.getTotal())}
+				{@render infoSection(m.dash_intalled(), vm.getIsInstalled())}
+				{@render infoSection(m.dash_not_installed(), vm.getNotInstalled())}
+				{@render infoSection(
+					m.dash_total_playtime(),
+					m.game_playtime_in_hour({ hours: vm.getTotalPlaytime() })
+				)}
+				<div class="flex flex-row justify-between">
+					<small class="text-sm">
+						<span class="text-primary-500">{vm.getPlayed()}</span>
+						<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
+						<span class="text-primary-500 font-semibold">{vm.getTotal()}</span>
+						<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
+					</small>
+					<p class="text-md">{vm.getTotalPlayedPercent()}%</p>
 				</div>
-			{/if}
-		</div>
-		<div>
-			<h1 class="text-2xl">Top 10</h1>
-			<Divider class="mb-4 border-1" />
-			{#if top10MostPlayed}
-				<ul class="mb-6 grid list-none grid-cols-1 gap-2 p-0">
-					{#each top10MostPlayed as game}
-						<li
-							class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 border-4 border-solid border-transparent p-0 shadow-md outline-0"
-						>
-							<a href={`/game/${game.Id}`}>
-								<div class="bg-background-1 flex flex-row gap-3 px-3 py-3">
-									<img
-										src={getPlayniteGameImageUrl(game.CoverImage)}
-										alt={`${game.Name} cover image`}
-										loading="lazy"
-										class="aspect-[1/1.6] w-24 object-cover"
-									/>
-									<div class="flex flex-col justify-between">
-										<div>
-											<h2 class="text-xl font-semibold">{game.Name}</h2>
-											<p class=" mt-1 text-lg">
-												<span class="text-primary-500 font-semibold"
-													>{getPlaytimeInHours(game.Playtime)}</span
-												>{' '}
-												{m.game_playtime_in_hour_whithout_value()}
+				<div class="bg-background-1 mt-1 h-3 w-full rounded-sm">
+					<div
+						class="bg-primary-500 h-3 rounded-sm"
+						style="width: {vm.getTotalPlayedPercent()}%"
+					></div>
+				</div>
+			</div>
+			<div class="bg-background-1 shadow-md">
+				<h1 class="text-md truncate px-3 pt-4 font-semibold">
+					{m.dash_games_owned_over_last_n_months({ value: 6 })}
+				</h1>
+				{#if vm.getCharts().totalGamesOwnedOverLast6Months}
+					<GamesOwnedOverTime
+						series={{
+							bar: {
+								data: vm.getCharts().totalGamesOwnedOverLast6Months.series.bar.data,
+								label: m.dash_chart_label_games_owned()
+							}
+						}}
+						xAxis={vm.getCharts().totalGamesOwnedOverLast6Months.xAxis}
+					/>
+				{:else}
+					<div>
+						<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
+					</div>
+				{/if}
+			</div>
+			<div>
+				<h1 class="text-2xl">Top 10</h1>
+				<Divider class="mb-4 border-1" />
+				{#if vm.getTop10MostPlayedGames()}
+					<ul class="mb-6 grid list-none grid-cols-1 gap-2 p-0">
+						{#each vm.getTop10MostPlayedGames() as game}
+							<li
+								class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 border-4 border-solid border-transparent p-0 shadow-md outline-0"
+							>
+								<a href={`/game/${game.Id}`}>
+									<div class="bg-background-1 flex flex-row gap-3 px-3 py-3">
+										<img
+											src={getPlayniteGameImageUrl(game.CoverImage)}
+											alt={`${game.Name} cover image`}
+											loading="lazy"
+											class="aspect-[1/1.6] w-24 object-cover"
+										/>
+										<div class="flex flex-col justify-between">
+											<div>
+												<h2 class="text-xl font-semibold">{game.Name}</h2>
+												<p class=" mt-1 text-lg">
+													<span class="text-primary-500 font-semibold"
+														>{getPlaytimeInHours(game.Playtime)}</span
+													>{' '}
+													{m.game_playtime_in_hour_whithout_value()}
+												</p>
+											</div>
+											<p>
+												{m.dash_last_time_played({
+													value: game.LastActivity
+														? new Date(game.LastActivity).toLocaleDateString()
+														: '-'
+												})}
 											</p>
 										</div>
-										<p>
-											{m.dash_last_time_played({
-												value: game.LastActivity
-													? new Date(game.LastActivity).toLocaleDateString()
-													: '-'
-											})}
-										</p>
 									</div>
-								</div>
-							</a>
-						</li>
-					{/each}
-				</ul>
-			{:else}
-				<div>
-					<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
-				</div>
-			{/if}
-		</div>
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<div>
+						<p class="px-3 py-4 text-sm opacity-70">{m.dash_no_data_to_show()}</p>
+					</div>
+				{/if}
+			</div>
+		{/await}
 	</Main>
 	<BottomNav>
 		<Home />

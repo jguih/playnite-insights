@@ -1,12 +1,14 @@
 {
   "name": "playnite-insights-dev",
   "private": true,
-  "version": "2.0.2",
+  "version": "v2.0.2",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:down && docker compose -f docker/dev/docker-compose.yaml up --watch --force-recreate --build",
-    "dev:up": "docker compose -f docker/dev/docker-compose.yaml up -d --force-recreate --build",
-    "dev:down": "docker compose -f docker/dev/docker-compose.yaml down",
+    "dev": "docker compose up --watch --force-recreate app-dev",
+    "dev:build": "docker compose up --watch --build app-dev",
+    "prod:down": "docker compose down app-prod",
+    "prod:up": "docker compose up -d --build app-prod",
+    "prod": "npm run prod:down ; npm run prod:up",
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
@@ -14,9 +16,9 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "test:unit": "NODE_ENV=testing vitest",
-    "test": "npm run test:unit -- --run && npm run test:e2e",
-    "test:e2e": "playwright test"
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test:unit; UNIT=$?; npm run test:e2e; E2E=$?; exit $((UNIT + E2E))"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
@@ -29,6 +31,7 @@
     "@tailwindcss/vite": "^4.0.0",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.0.4",
+    "@types/supertest": "^6.0.3",
     "@vitest/browser": "^3.2.3",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -38,6 +41,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "supertest": "^7.1.1",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "tailwindcss": "^4.0.0",

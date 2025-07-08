@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { searchBarVisible } from '$lib/page/home/stores.svelte';
+	import { searchBarVisible } from '$lib/stores/stores.svelte';
 	import { Search } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import type {

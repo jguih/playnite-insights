@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { gameByIdSchema } from '$lib/playnite-game/schemas';
+import { gamePageDataSchema } from '$lib/services/game-page/schemas';
 
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { playniteGameId } = params;
@@ -8,11 +8,13 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		throw error(400, 'Invalid game id');
 	}
 	try {
-		const response = await fetch(`/api/playnite-games/${playniteGameId}`);
-		const data = gameByIdSchema.parse(await response.json());
-		return { game: { ...data.game, Developers: data.developers } };
-	} catch (e) {
-		console.error(e);
+		const response = await fetch(`/api/game/${playniteGameId}`);
+		const data = gamePageDataSchema.parse(await response.json());
+		if (!data) {
+			throw error(404, 'Game not found');
+		}
+		return data;
+	} catch {
 		throw error(404, 'Game not found');
 	}
 };

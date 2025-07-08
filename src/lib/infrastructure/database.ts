@@ -1,7 +1,6 @@
-import { playniteInsightsConfig } from '$lib/config/config';
+import { DB_FILE } from '$lib/config/config';
 import { DatabaseSync } from 'node:sqlite';
 
-const DB_FILE = playniteInsightsConfig.path.dbFile;
 let db: DatabaseSync | null = null;
 
 export const getDb = (): DatabaseSync => {
