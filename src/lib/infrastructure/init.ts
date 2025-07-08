@@ -11,7 +11,9 @@ type InitDatabaseDeps = {
 };
 
 export const initDatabase = async ({ DB_FILE, INIT_DB_SQL_FILE, logService }: InitDatabaseDeps) => {
-	const shouldSeedDb = process.env.TEST_DATA === 'true' && process.env.NODE_ENV === 'development';
+	const shouldSeedDb =
+		process.env.TEST_DATA === 'true' &&
+		(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'testing');
 	if (shouldSeedDb && existsSync(DB_FILE)) {
 		await unlink(DB_FILE);
 		logService.info('Detected test data environment, database file was removed');

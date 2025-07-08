@@ -11,17 +11,18 @@ test('restores scroll position when navigating back to home', async ({ page }) =
 
 	// Navigate to a different page
 	await page.click('a[href="/dash"]');
-	await expect(page).toHaveURL('/dash');
+	await expect(page).toHaveURL((url) => new URL(url).pathname === '/dash');
 
 	// Navigate back
 	await page.goBack();
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL((url) => new URL(url).pathname === '/');
 
 	// Wait for <main> to be re-mounted
 	const main = page.locator('main');
 	await main.waitFor();
 
-	// Check scroll position
-	const scrollTop = await main.evaluate((el) => el.scrollTop);
-	expect(scrollTop).toBeGreaterThan(400);
+	await expect(async () => {
+		const scrollTop = await main.evaluate((el) => el.scrollTop);
+		expect(scrollTop).toBeGreaterThan(400);
+	}).toPass();
 });
