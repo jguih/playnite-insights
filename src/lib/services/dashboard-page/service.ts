@@ -32,7 +32,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 				data.push(value);
 			}
 			logService.debug(
-				`Successfully queried total playtime over last 6 months: \n${JSON.stringify(data, null, 2)}`
+				`Successfully queried total playtime over last 6 months: ${JSON.stringify(data)}`
 			);
 			return data;
 		} catch (error) {
@@ -55,6 +55,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
         SELECT TotalGames AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
         FROM latest_per_month
         WHERE Timestamp >= datetime('now', '-6 months')
+        GROUP BY yearMonth
         ORDER BY yearMonth;
       `;
 		try {
@@ -66,7 +67,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 				data.push(value);
 			}
 			logService.debug(
-				`Successfully queried total games owned over last 6 months: \n${JSON.stringify(data, null, 2)}`
+				`Successfully queried total games owned over last 6 months: ${JSON.stringify(data)}`
 			);
 			return data;
 		} catch (error) {
