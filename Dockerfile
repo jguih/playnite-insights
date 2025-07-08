@@ -2,7 +2,7 @@ FROM node:24.3-alpine AS base
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci
 RUN mkdir -p ./data/files ./data/tmp
 
 FROM node:24.3-alpine AS build
@@ -34,7 +34,7 @@ EXPOSE 3000
 
 USER playnite-insights
 
-ENTRYPOINT ["sh", "docker/dev/entrypoint.sh"]
+ENTRYPOINT [ "npx", "vite", "dev", "--host" ]
 
 # Playwright not compatible with Alpine!
 FROM node:24.3 AS test
@@ -70,12 +70,11 @@ COPY --chown=playnite-insights:playnite-insights --from=build /app/build ./build
 COPY --chown=playnite-insights:playnite-insights --from=build /app/package.json ./package.json
 COPY --chown=playnite-insights:playnite-insights --from=build /app/package-lock.json ./package-lock.json
 COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules ./node_modules
-COPY --chown=playnite-insights:playnite-insights --from=build /app/docker/common ./docker/common
-COPY --chown=playnite-insights:playnite-insights --from=build /app/docker/prod ./docker/prod
+COPY --chown=playnite-insights:playnite-insights --from=build /app/docker ./docker
 COPY --chown=playnite-insights:playnite-insights --from=build /app/data ./data
 
 EXPOSE 3000
 
 USER playnite-insights
 
-ENTRYPOINT ["sh", "docker/prod/entrypoint.sh"]
+ENTRYPOINT ["node", "build"]

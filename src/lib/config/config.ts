@@ -12,3 +12,4 @@ export const FILES_DIR = join(dataDir, '/files');
 export const DB_FILE = join(dataDir, '/db');
 export const INIT_SQL_FILE = join(srcDir, '/lib/infrastructure/init.sql');
 export const CONTENT_HASH_FILE_NAME = 'contentHash.txt';
+export const INIT_DB_SQL_FILE = join(workDir, '/docker/init.sql');

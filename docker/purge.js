@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite"
-import { DB_FILE, FILES_DIR, logInfo, logSuccess, MANIFEST_FILE } from "./config.js";
+import { DB_FILE, FILES_DIR, logInfo, logSuccess, MANIFEST_FILE } from "../../src/lib/infrastructure/config.js";
 import { exit } from "process";
 import { readdir, rm, unlink } from "fs/promises";
 import { join } from "path";

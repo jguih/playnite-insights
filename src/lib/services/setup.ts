@@ -93,7 +93,8 @@ export const setupServices = () => {
 		homePage: homePageService,
 		dashPage: dashPageService,
 		gamePage: gamePageService,
-		mediaFiles: mediaFilesService
+		mediaFiles: mediaFilesService,
+		config
 	};
 
 	return { services };
