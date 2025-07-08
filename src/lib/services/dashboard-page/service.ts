@@ -43,17 +43,8 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 
 	const getTotalGamesOwnedOverLast6Months = (): number[] => {
 		const query = `
-        WITH latest_per_month AS (
-          SELECT *
-          FROM playnite_library_sync AS pls
-          WHERE Timestamp = (
-            SELECT MAX(Timestamp)
-            FROM playnite_library_sync
-            WHERE strftime('%Y-%m', Timestamp) = strftime('%Y-%m', pls.Timestamp)
-          )
-        )
-        SELECT TotalGames AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
-        FROM latest_per_month
+        SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
+        FROM playnite_library_sync
         WHERE Timestamp >= datetime('now', '-6 months')
         GROUP BY yearMonth
         ORDER BY yearMonth;

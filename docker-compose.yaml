@@ -10,7 +10,7 @@ services:
       LOG_LEVEL: 0 # debug
       ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
       # Careful! When true it will delete current database and insert test data
-      TEST_DATA: true
+      # TEST_DATA: true
     develop:
       watch:
         - path: ./
