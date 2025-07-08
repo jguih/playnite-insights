@@ -38,10 +38,10 @@
 			<Search />
 		</BaseButton>
 	</Header>
-	<Main class="flex flex-col gap-6">
-		{#await vm.load()}
-			<Loading />
-		{:then}
+	{#await vm.load()}
+		<Loading />
+	{:then}
+		<Main class="flex flex-col gap-6">
 			<div>
 				<h1 class="text-2xl">Overview</h1>
 				<Divider class="mb-4 border-1" />
@@ -134,8 +134,8 @@
 					</div>
 				{/if}
 			</div>
-		{/await}
-	</Main>
+		</Main>
+	{/await}
 	<BottomNav>
 		<Home />
 		<Dashboard selected={true} />
