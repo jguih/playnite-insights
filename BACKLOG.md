@@ -12,16 +12,18 @@
 - Save scroll prosition when navigating away from home page
 - Pagination
 - Save games in SQLite database
+- View model for home page
+- Data streaming in home page
+- Data streaming in dashboard page
 
 ## 🛠️ In Progress
 
 - Dashboard page
 - API Integration testing
-- Data streaming in home page
-- View model for home page
 
 ## 📌 To Do
 
+- Data streaming in game page
 - Display game trailer in game page
 - Display related owned games in game page
 - Game filtering
