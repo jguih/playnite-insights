@@ -9,12 +9,10 @@ export const gameDataSchema = z.array(
 );
 export type HomePageGameData = z.infer<typeof gameDataSchema>;
 
-export const homePageDataSchema = z
-	.object({
-		games: gameDataSchema,
-		total: z.number(),
-		hasNextPage: z.boolean(),
-		totalPages: z.number()
-	})
-	.optional();
+export const homePageDataSchema = z.object({
+	games: gameDataSchema,
+	total: z.number(),
+	hasNextPage: z.boolean(),
+	totalPages: z.number()
+});
 export type HomePageData = z.infer<typeof homePageDataSchema>;

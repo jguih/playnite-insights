@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "docker compose up --watch --force-recreate app-dev",
-    "dev:build": "docker compose up --watch --force-recreate --build app-dev",
+    "dev:build": "docker compose up --watch --build app-dev",
     "prod:down": "docker compose down app-prod",
-    "prod:up": "docker compose up -d app-prod",
+    "prod:up": "docker compose up -d --build app-prod",
     "prod": "npm run prod:down ; npm run prod:up",
-    "prod:rebuild": "docker compose up -d app-prod --build --force-recreate",
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
