@@ -119,9 +119,9 @@
 			<HeaderSearchBar />
 		</Header>
 	{/if}
-	<Main bind:main>
-		<h1 class="text-lg">{m.home_title()}</h1>
-		{#await vm.load()}
+	{#await vm.load()}
+		<Main>
+			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
 				<div class="my-[0.35rem] h-[0.875rem] w-40 animate-pulse bg-neutral-300/60"></div>
 			</div>
@@ -134,7 +134,10 @@
 				</Select>
 			</label>
 			<Loading />
-		{:then}
+		</Main>
+	{:then}
+		<Main bind:main>
+			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
 				{#if vm.getTotalGamesCount() === 0}
 					<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
@@ -195,8 +198,8 @@
 					<ChevronRight />
 				</BaseButton>
 			</nav>
-		{/await}
-	</Main>
+		</Main>
+	{/await}
 
 	<BottomNav>
 		<Home selected={true} />
