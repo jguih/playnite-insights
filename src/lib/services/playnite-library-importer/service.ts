@@ -135,7 +135,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 				}
 			}
 			if (totalGamesToChange > 0) {
-				const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
+				const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeSeconds();
 				const totalGamesInLib = deps.playniteGameRepository.getTotal();
 				deps.playniteLibrarySyncRepository.add(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
 				deps.libraryManifestService.write();

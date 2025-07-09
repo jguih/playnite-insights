@@ -2,6 +2,7 @@ import type { Handle, ServerInit } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { setupServices } from '$lib/services/setup';
 import { initDatabase } from '$lib/infrastructure/init';
+import * as fsAsync from 'fs/promises';
 
 export const { services } = setupServices();
 
@@ -13,8 +14,11 @@ export const init: ServerInit = async () => {
 	services.log.info(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
 	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
 	await initDatabase({
+		readdir: fsAsync.readdir,
+		readfile: fsAsync.readFile,
+		unlink: fsAsync.unlink,
 		DB_FILE: services.config.DB_FILE,
-		INIT_DB_SQL_FILE: services.config.INIT_DB_SQL_FILE,
+		MIGRATIONS_DIR: services.config.MIGRATIONS_DIR,
 		logService: services.log
 	});
 };

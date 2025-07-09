@@ -54,7 +54,7 @@ export type PlayniteGameRepository = {
 	getById: (id: string) => PlayniteGame | undefined;
 	getManifestData: () => z.infer<typeof gameManifestDataSchema> | undefined;
 	getTotal: (query?: string | null) => number;
-	getTotalPlaytimeHours: () => number | undefined;
+	getTotalPlaytimeSeconds: () => number | undefined;
 };
 
 export const makePlayniteGameRepository = (
@@ -529,7 +529,7 @@ export const makePlayniteGameRepository = (
 		}
 	};
 
-	const getTotalPlaytimeHours = (): number | undefined => {
+	const getTotalPlaytimeSeconds = (): number | undefined => {
 		const db = deps.getDb();
 		const query = `
     SELECT SUM(Playtime) as totalPlaytimeSeconds FROM playnite_game;
@@ -539,9 +539,8 @@ export const makePlayniteGameRepository = (
 			const result = stmt.get();
 			if (!result) return;
 			const data = result.totalPlaytimeSeconds as number;
-			const totalPlaytimeHours = data / 3600;
-			deps.logService.debug(`Fetched total playtime hours: ${totalPlaytimeHours}`);
-			return totalPlaytimeHours;
+			deps.logService.debug(`Fetched total playtime: ${data} seconds`);
+			return data;
 		} catch (error) {
 			deps.logService.error(`Failed to get total playtime`, error as Error);
 			return;
@@ -562,7 +561,7 @@ export const makePlayniteGameRepository = (
 		deletePlatformsFor,
 		deletePublishersFor,
 		getById,
-		getTotalPlaytimeHours,
+		getTotalPlaytimeSeconds,
 		getManifestData,
 		getDevelopers,
 		getTotal

@@ -53,7 +53,7 @@ services:
       # Careful! When true it will delete current database and insert test data
       TEST_DATA: true
     volumes:
-      - ./test-results:/app/test-results
+      - playnite-insights-test-results:/app/test-results
 
   app-prod:
     build:
@@ -75,3 +75,4 @@ networks:
 volumes:
   playnite-insights-dev-data:
   playnite-insights-prod-data:
+  playnite-insights-test-results:

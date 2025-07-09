@@ -3,7 +3,7 @@ FROM node:24.3-alpine AS base
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-RUN mkdir -p ./data/files ./data/tmp
+RUN mkdir -p ./data/files
 
 FROM node:24.3-alpine AS build
 
