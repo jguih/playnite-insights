@@ -38,10 +38,10 @@
 			<Search />
 		</BaseButton>
 	</Header>
-	<Main class="flex flex-col gap-6">
-		{#await vm.load()}
-			<Loading />
-		{:then}
+	{#await vm.load()}
+		<Loading />
+	{:then}
+		<Main class="flex flex-col gap-6">
 			<div>
 				<h1 class="text-2xl">Overview</h1>
 				<Divider class="mb-4 border-1" />
@@ -92,7 +92,7 @@
 				<h1 class="text-2xl">Top 10</h1>
 				<Divider class="mb-4 border-1" />
 				{#if vm.getTop10MostPlayedGames()}
-					<ul class="mb-6 grid list-none grid-cols-1 gap-2 p-0">
+					<ul class="mb-6 grid list-none grid-cols-1 gap-1 p-0">
 						{#each vm.getTop10MostPlayedGames() as game}
 							<li
 								class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 border-4 border-solid border-transparent p-0 shadow-md outline-0"
@@ -134,8 +134,8 @@
 					</div>
 				{/if}
 			</div>
-		{/await}
-	</Main>
+		</Main>
+	{/await}
 	<BottomNav>
 		<Home />
 		<Dashboard selected={true} />

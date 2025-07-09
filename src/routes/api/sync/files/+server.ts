@@ -2,13 +2,13 @@ import { services } from '$lib';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {
-	services.log.debug('Received request to sync library files');
+	services.log.info('Received request to sync library files');
 	const contentLength = request.headers.get('content-length');
 	if (contentLength) {
 		const sizeMb = (parseInt(contentLength, 10) / (1024 * 1024)).toFixed(2);
-		services.log.info(`Request body size: ${sizeMb} MB`);
+		services.log.debug(`Request body size: ${sizeMb} MB`);
 	} else {
-		services.log.info('Request body size: unknown');
+		services.log.debug('Request body size: unknown');
 	}
 	const contentType = request.headers.get('content-type');
 	if (!contentType?.startsWith('application/zip')) {

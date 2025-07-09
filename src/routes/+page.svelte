@@ -25,7 +25,6 @@
 	let vm = $derived(makeHomePageViewModel(data.promise, data.page, data.pageSize, data.query));
 	let currentPageSize = $derived(vm.getPageSize());
 	let main: HTMLElement | undefined = $state();
-	$inspect(currentPageSize);
 
 	const setSearchParams = $derived((key: string, value: string) => {
 		const params = new URLSearchParams(page.url.searchParams);

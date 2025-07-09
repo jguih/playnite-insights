@@ -1,14 +1,23 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, ServerInit } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { setupServices } from '$lib/services/setup';
+import { initDatabase } from '$lib/infrastructure/init';
 
 export const { services } = setupServices();
 
-services.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
-services.log.info(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
-services.log.info(`APP_NAME: ${process.env.APP_NAME}`);
-services.log.info(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
-services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
+export const init: ServerInit = async () => {
+	services.log.debug(`Server init function called`);
+	services.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+	services.log.info(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
+	services.log.info(`APP_NAME: ${process.env.APP_NAME}`);
+	services.log.info(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
+	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
+	await initDatabase({
+		DB_FILE: services.config.DB_FILE,
+		INIT_DB_SQL_FILE: services.config.INIT_DB_SQL_FILE,
+		logService: services.log
+	});
+};
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {

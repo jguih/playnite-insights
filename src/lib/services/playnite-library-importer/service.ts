@@ -32,6 +32,8 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 			deps.logService.info(`Games to add: ${data.AddedItems.length}`);
 			deps.logService.info(`Games to update: ${data.UpdatedItems.length}`);
 			deps.logService.info(`Games to delete: ${data.RemovedItems.length}`);
+			const totalGamesToChange =
+				data.AddedItems.length + data.UpdatedItems.length + data.RemovedItems.length;
 			// Games to add
 			for (const game of data.AddedItems) {
 				const exists = deps.playniteGameRepository.exists(game.Id);
@@ -120,6 +122,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 				if (!result) {
 					deps.logService.error(`Failed to delete game with id ${gameId}`);
 				}
+				deps.logService.info(`Delete game with id ${gameId}`);
 				const gameMediaFolderDir = join(deps.FILES_DIR, gameId);
 				try {
 					await deps.rm(gameMediaFolderDir, { recursive: true, force: true });
@@ -131,10 +134,12 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 					);
 				}
 			}
-			const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
-			const totalGamesInLib = deps.playniteGameRepository.getTotal();
-			deps.playniteLibrarySyncRepository.add(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
-			deps.libraryManifestService.write();
+			if (totalGamesToChange > 0) {
+				const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
+				const totalGamesInLib = deps.playniteGameRepository.getTotal();
+				deps.playniteLibrarySyncRepository.add(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
+				deps.libraryManifestService.write();
+			}
 			deps.logService.success(`Completed library sync without issues.`);
 			return true;
 		} catch (error) {
