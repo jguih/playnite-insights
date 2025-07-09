@@ -8,12 +8,11 @@ export default defineConfig({
 	},
 	webServer: {
 		command: 'npm run build && npm run preview',
-		port: 4173
+		port: 4173,
+		stdout: 'pipe',
+		stderr: 'pipe'
 	},
 	testDir: 'tests/playwright',
-	reporter: [
-		['list'],
-		['junit', { outputFile: 'test-results/playwright-results.xml' }],
-		['html', { outputFolder: 'test-results', open: 'never' }]
-	]
+	outputDir: 'playwright-results',
+	reporter: [['list'], ['html', { outputFolder: 'playwright-results', open: 'never' }]]
 });

@@ -19,7 +19,7 @@
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:all": "npm run test:unit; UNIT=$?; npm run test:e2e; E2E=$?; exit $((UNIT + E2E))",
-    "test": "docker compose run --rm --build app-test && sudo chown -R 1000:1000 test-results/"
+    "test": "docker compose run --rm --build app-test"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",

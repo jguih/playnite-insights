@@ -53,7 +53,24 @@ services:
       # Careful! When true it will delete current database and insert test data
       TEST_DATA: true
     volumes:
-      - playnite-insights-test-results:/app/test-results
+      - playnite-insights-vitest-results:/app/test-results
+      - playnite-insights-playwright-results:/app/playwright-results
+    profiles:
+      - test
+    depends_on:
+      - app-test-results
+
+  app-test-results:
+    image: nginx:alpine
+    volumes:
+      - playnite-insights-vitest-results:/usr/share/nginx/html/vitest:ro
+      - playnite-insights-playwright-results:/usr/share/nginx/html/playwright:ro
+      - ./tests/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    profiles:
+      - test
+    networks:
+      - services-ipv6
 
   app-prod:
     build:
@@ -61,7 +78,7 @@ services:
       target: prod
     container_name: app-prod
     environment:
-      LOG_LEVEL: 0 # debug
+      LOG_LEVEL: 1 # info
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
     volumes:
       - playnite-insights-prod-data:/app/data
@@ -75,4 +92,5 @@ networks:
 volumes:
   playnite-insights-dev-data:
   playnite-insights-prod-data:
-  playnite-insights-test-results:
+  playnite-insights-vitest-results:
+  playnite-insights-playwright-results:
