@@ -15,7 +15,6 @@
 	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
 	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
-	import { searchBarVisible } from '$lib/stores/stores.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
 	import { type HomePageData } from '$lib/services/home-page/schemas';
@@ -71,53 +70,19 @@
 	</li>
 {/snippet}
 
-{#snippet subtitle(total: number, from: number, to: number)}
-	{#if total === 0}
-		<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
-	{/if}
-	{#if total > 0}
-		<p class="text-sm text-neutral-300/60">
-			{m.home_showing_games_counter({
-				count1: from,
-				count2: to,
-				totalCount: total
-			})}
-		</p>
-	{/if}
-{/snippet}
-
 <BaseAppLayout>
-	{#if !searchBarVisible.isVisible}
-		<Header>
-			{#snippet action()}
-				<a class="" href={`/?${page.url.searchParams.toString()}`}>
-					<img
-						src="/app-icon.png"
-						class="aspect-auto h-8 w-10 rounded-md object-contain"
-						alt="app icon"
-					/>
-				</a>
-			{/snippet}
-			<BaseButton
-				onclick={() => (searchBarVisible.isVisible = !searchBarVisible.isVisible)}
-				class="ml-auto w-fit"
-			>
-				<Search />
-				{#if vm.getQuery()}
-					<span class="truncate opacity-70">{vm.getQuery()}</span>
-				{/if}
-			</BaseButton>
-		</Header>
-	{:else}
-		<Header>
-			{#snippet action()}
-				<BaseButton onclick={() => (searchBarVisible.isVisible = !searchBarVisible.isVisible)}>
-					<ArrowLeft />
-				</BaseButton>
-			{/snippet}
-			<HeaderSearchBar />
-		</Header>
-	{/if}
+	<Header>
+		{#snippet action()}
+			<a class="" href={`/?${page.url.searchParams.toString()}`}>
+				<img
+					src="/app-icon.png"
+					class="aspect-auto h-8 w-10 rounded-md object-contain"
+					alt="app icon"
+				/>
+			</a>
+		{/snippet}
+		<HeaderSearchBar />
+	</Header>
 	{#await vm.load()}
 		<Main>
 			<h1 class="text-lg">{m.home_title()}</h1>

@@ -5,6 +5,7 @@
   "home_showing_games_counter": "Showing games {count1}-{count2} of {totalCount}",
   "home_no_games_found": "No games found",
   "home_label_items_per_page": "Items per page",
+  "home_search_bar_placeholder": "Search...",
   "game_info_release_date": "Release date",
   "game_info_install_directory": "Install directory",
   "game_info_added": "Added",
