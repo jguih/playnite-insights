@@ -5,6 +5,7 @@
   "home_showing_games_counter": "Mostrando jogos {count1}-{count2} de {totalCount}",
   "home_no_games_found": "Nenhum jogo encontrado",
   "home_label_items_per_page": "Itens por página",
+  "home_search_bar_placeholder": "Pesquisa...",
   "game_info_release_date": "Lançamento",
   "game_info_install_directory": "Diretório de instalação",
   "game_info_added": "Adicionado",

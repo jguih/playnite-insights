@@ -5,7 +5,7 @@ import AdmZip from 'adm-zip';
 import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from '../types';
-import type { LibraryManifestService } from '../library-manifest';
+import type { LibraryManifestService } from '../library-manifest/library-manifest';
 import type { PlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
 import type { LogService } from '../log';
 import type { PlayniteGameRepository } from '../playnite-game';
@@ -135,7 +135,7 @@ export const makePlayniteLibraryImporterService = (deps: PlayniteLibraryImporter
 				}
 			}
 			if (totalGamesToChange > 0) {
-				const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeHours();
+				const totalPlaytimeHours = deps.playniteGameRepository.getTotalPlaytimeSeconds();
 				const totalGamesInLib = deps.playniteGameRepository.getTotal();
 				deps.playniteLibrarySyncRepository.add(totalPlaytimeHours ?? 0, totalGamesInLib ?? 0);
 				deps.libraryManifestService.write();

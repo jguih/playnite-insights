@@ -54,7 +54,7 @@ export type PlayniteGameRepository = {
 	getById: (id: string) => PlayniteGame | undefined;
 	getManifestData: () => z.infer<typeof gameManifestDataSchema> | undefined;
 	getTotal: (query?: string | null) => number;
-	getTotalPlaytimeHours: () => number | undefined;
+	getTotalPlaytimeSeconds: () => number | undefined;
 };
 
 export const makePlayniteGameRepository = (
@@ -337,7 +337,8 @@ export const makePlayniteGameRepository = (
 			);
 			deps.logService.debug(`Added game ${game.Name}`);
 			if (developers) {
-				for (const developer of developers) {
+				const uniqueDevs = Array.from(new Map(developers.map((dev) => [dev.Id, dev])).values());
+				for (const developer of uniqueDevs) {
 					if (deps.developerRepository.exists(developer)) {
 						addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
 						continue;
@@ -348,7 +349,10 @@ export const makePlayniteGameRepository = (
 				}
 			}
 			if (platforms) {
-				for (const platform of platforms) {
+				const uniquePlatforms = Array.from(
+					new Map(platforms.map((plat) => [plat.Id, plat])).values()
+				);
+				for (const platform of uniquePlatforms) {
 					if (deps.platformRepository.exists(platform)) {
 						addPlatformFor({ Id: game.Id, Name: game.Name }, platform);
 						continue;
@@ -359,7 +363,8 @@ export const makePlayniteGameRepository = (
 				}
 			}
 			if (genres) {
-				for (const genre of genres) {
+				const uniqueGenres = Array.from(new Map(genres.map((genre) => [genre.Id, genre])).values());
+				for (const genre of uniqueGenres) {
 					if (deps.genreRepository.exists(genre)) {
 						addGenreFor({ Id: game.Id, Name: game.Name }, genre);
 						continue;
@@ -370,7 +375,10 @@ export const makePlayniteGameRepository = (
 				}
 			}
 			if (publishers) {
-				for (const publisher of publishers) {
+				const uniquePublishers = Array.from(
+					new Map(publishers.map((pub) => [pub.Id, pub])).values()
+				);
+				for (const publisher of uniquePublishers) {
 					if (deps.publisherRepository.exists(publisher)) {
 						addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
 						continue;
@@ -432,7 +440,8 @@ export const makePlayniteGameRepository = (
 			deps.logService.debug(`Updated game ${game.Name}`);
 			if (developers) {
 				deleteDevelopersFor({ Id: game.Id, Name: game.Name });
-				for (const developer of developers) {
+				const uniqueDevs = Array.from(new Map(developers.map((dev) => [dev.Id, dev])).values());
+				for (const developer of uniqueDevs) {
 					const existing = deps.developerRepository.getById(developer.Id);
 					if (existing) {
 						if (deps.developerRepository.hasChanges(existing, developer)) {
@@ -446,7 +455,10 @@ export const makePlayniteGameRepository = (
 			}
 			if (platforms) {
 				deletePlatformsFor({ Id: game.Id, Name: game.Name });
-				for (const platform of platforms) {
+				const uniquePlatforms = Array.from(
+					new Map(platforms.map((plat) => [plat.Id, plat])).values()
+				);
+				for (const platform of uniquePlatforms) {
 					const existing = deps.platformRepository.getById(platform.Id);
 					if (existing) {
 						if (deps.platformRepository.hasChanges(existing, platform)) {
@@ -460,7 +472,8 @@ export const makePlayniteGameRepository = (
 			}
 			if (genres) {
 				deleteGenresFor({ Id: game.Id, Name: game.Name });
-				for (const genre of genres) {
+				const uniqueGenres = Array.from(new Map(genres.map((genre) => [genre.Id, genre])).values());
+				for (const genre of uniqueGenres) {
 					const existing = deps.genreRepository.getById(genre.Id);
 					if (existing) {
 						if (deps.genreRepository.hasChanges(existing, genre)) {
@@ -474,7 +487,10 @@ export const makePlayniteGameRepository = (
 			}
 			if (publishers) {
 				deletePublishersFor({ Id: game.Id, Name: game.Name });
-				for (const publisher of publishers) {
+				const uniquePublishers = Array.from(
+					new Map(publishers.map((pub) => [pub.Id, pub])).values()
+				);
+				for (const publisher of uniquePublishers) {
 					const existing = deps.publisherRepository.getById(publisher.Id);
 					if (existing) {
 						if (deps.publisherRepository.hasChanges(existing, publisher)) {
@@ -529,7 +545,7 @@ export const makePlayniteGameRepository = (
 		}
 	};
 
-	const getTotalPlaytimeHours = (): number | undefined => {
+	const getTotalPlaytimeSeconds = (): number | undefined => {
 		const db = deps.getDb();
 		const query = `
     SELECT SUM(Playtime) as totalPlaytimeSeconds FROM playnite_game;
@@ -539,9 +555,8 @@ export const makePlayniteGameRepository = (
 			const result = stmt.get();
 			if (!result) return;
 			const data = result.totalPlaytimeSeconds as number;
-			const totalPlaytimeHours = data / 3600;
-			deps.logService.debug(`Fetched total playtime hours: ${totalPlaytimeHours}`);
-			return totalPlaytimeHours;
+			deps.logService.debug(`Fetched total playtime: ${data} seconds`);
+			return data;
 		} catch (error) {
 			deps.logService.error(`Failed to get total playtime`, error as Error);
 			return;
@@ -562,7 +577,7 @@ export const makePlayniteGameRepository = (
 		deletePlatformsFor,
 		deletePublishersFor,
 		getById,
-		getTotalPlaytimeHours,
+		getTotalPlaytimeSeconds,
 		getManifestData,
 		getDevelopers,
 		getTotal

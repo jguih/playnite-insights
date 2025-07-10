@@ -7,26 +7,26 @@ type PlayniteLibrarySyncRepositoryDeps = {
 };
 
 export type PlayniteLibrarySyncRepository = {
-	add: (totalPlaytimeHours: number, totalGames: number) => boolean;
+	add: (totalPlaytimeSeconds: number, totalGames: number) => boolean;
 };
 
 export const makePlayniteLibrarySyncRepository = (
 	deps: PlayniteLibrarySyncRepositoryDeps
 ): PlayniteLibrarySyncRepository => {
-	const add = (totalPlaytimeHours: number, totalGames: number) => {
+	const add = (totalPlaytimeSeconds: number, totalGames: number) => {
 		const db = deps.getDb();
 		const now = new Date().toISOString();
 		const query = `
       INSERT INTO playnite_library_sync
-        (Timestamp, TotalPlaytimeHours, TotalGames)
+        (Timestamp, TotalPlaytimeSeconds, TotalGames)
       VALUES
         (?, ?, ?);
     `;
 		try {
 			const stmt = db.prepare(query);
-			stmt.run(now, totalPlaytimeHours, totalGames);
+			stmt.run(now, totalPlaytimeSeconds, totalGames);
 			deps.logService.debug(
-				`Inserted playnite_library_sync entry with totalPlaytime: ${totalPlaytimeHours} hours and totalGames: ${totalGames}`
+				`Inserted playnite_library_sync entry with totalPlaytime: ${totalPlaytimeSeconds} seconds and totalGames: ${totalGames}`
 			);
 			return true;
 		} catch (error) {

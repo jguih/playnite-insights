@@ -46,11 +46,11 @@ ENV BODY_SIZE_LIMIT=5G
 ENV APP_NAME='Playnite Insights (Testing)'
 
 COPY package.json package-lock.json ./
-RUN npx playwright install --with-deps
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/data ./data
 # Include placeholder images for testing
 COPY ./static/placeholder ./data/files/placeholder
+RUN npx -y playwright install --with-deps 
 COPY . .
 
 ENTRYPOINT ["sh", "-c", "npm run test:all"]

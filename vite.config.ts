@@ -17,7 +17,7 @@ export default defineConfig({
 		allowedHosts: true
 	},
 	test: {
-		reporters: ['default', ['json', { outputFile: 'test-results/vitest-results.json' }]],
+		reporters: ['default', ['json', { outputFile: 'test-results/unit-results.json' }]],
 		projects: [
 			{
 				extends: './vite.config.ts',
@@ -26,15 +26,6 @@ export default defineConfig({
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
 					exclude: ['src/e2e/**', 'src/**/*.svelte.{test,spec}.{js,ts}']
-				}
-			},
-			{
-				extends: './vite.config.ts',
-				test: {
-					name: 'api integration',
-					include: ['tests/integration/api/**/*.test.ts'],
-					environment: 'node',
-					setupFiles: ['tests/integration/api/setup.ts'] // optional
 				}
 			}
 		]

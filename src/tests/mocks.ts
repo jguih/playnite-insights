@@ -1,4 +1,4 @@
-import { makeLibraryManifestService } from '$lib/services/library-manifest';
+import { makeLibraryManifestService } from '$lib/services/library-manifest/library-manifest';
 import { makeLogService } from '$lib/services/log';
 import { makePlayniteGameRepository } from '$lib/services/playnite-game';
 import { constants } from 'fs/promises';

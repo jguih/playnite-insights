@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 export const LOG_LEVELS = {
 	none: 1000,
 	debug: 0,
@@ -22,11 +24,18 @@ export const makeLogService = (CURRENT_LOG_LEVEL: number) => {
 		return now.toISOString().replace('T', ' ').replace('Z', '').trim();
 	};
 
-	const logError = (message: string, error?: Error): void => {
+	const logError = (message: string, error?: unknown): void => {
 		if (CURRENT_LOG_LEVEL > LOG_LEVELS.error) {
 			return;
 		}
 		console.error(`[${getDateTimeString()}][ERROR] ${message}`);
+		if (error && error instanceof ZodError) {
+			const formattedIssues = error.issues
+				.map((i) => `- ${i.path.join('.') || '(root)'}: ${i.message}`)
+				.join('\n');
+			console.error(formattedIssues);
+			return;
+		}
 		if (error) {
 			console.error(error);
 		}

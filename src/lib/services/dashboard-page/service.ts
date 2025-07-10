@@ -15,8 +15,8 @@ export type DashPageService = {
 export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) => {
 	const getTotalPlaytimeOverLast6Months = (): number[] => {
 		const query = `
-        SELECT totalPlaytimeHours FROM (
-          SELECT MAX(TotalPlaytimeHours) as totalPlaytimeHours, strftime('%Y-%m', Timestamp) as yearMonth
+        SELECT totalPlaytimeSeconds FROM (
+          SELECT MAX(TotalPlaytimeSeconds) as totalPlaytimeSeconds, strftime('%Y-%m', Timestamp) as yearMonth
           FROM playnite_library_sync
           WHERE Timestamp >= datetime('now', '-6 months')
           GROUP BY yearMonth
@@ -28,7 +28,7 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 			const result = stmt.all();
 			const data: number[] = [];
 			for (const entry of result) {
-				const value = entry.totalPlaytimeHours as number;
+				const value = entry.totalPlaytimeSeconds as number;
 				data.push(value);
 			}
 			logService.debug(
@@ -126,12 +126,16 @@ export const makeDashPageService = ({ logService, getDb }: DashPageServiceDeps) 
 			const notPlayed = data.length > 0 ? data.filter((g) => g.Playtime === 0).length : 0;
 			const played = total - notPlayed;
 			const top10MostPlayedGames = getTopMostPlayedGames(10);
+			// Convert to hours
+			const totalPlaytimeOverLast6Months = getTotalPlaytimeOverLast6Months().map((p) =>
+				Math.ceil(p / 3600)
+			);
 
 			const charts: DashPageData['charts'] = {
 				totalPlaytimeOverLast6Months: {
 					xAxis: { data: getLastSixMonthsInclusiveAbreviated() },
 					series: {
-						bar: { data: getTotalPlaytimeOverLast6Months() }
+						bar: { data: totalPlaytimeOverLast6Months }
 					}
 				},
 				totalGamesOwnedOverLast6Months: {
