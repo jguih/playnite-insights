@@ -1,6 +1,6 @@
 import * as fsAsync from 'fs/promises';
 import * as fs from 'fs';
-import { makeLibraryManifestService } from './library-manifest';
+import { makeLibraryManifestService } from './library-manifest/library-manifest';
 import * as config from '../config/config';
 import { makePlayniteLibraryImporterService } from './playnite-library-importer/service';
 import * as stream from 'stream';

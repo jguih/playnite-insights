@@ -1,20 +1,9 @@
 import { join } from 'path';
-import type { FileSystemAsyncDeps } from './types';
-import type { makeLogService } from './log';
-import type { PlayniteGameRepository } from './playnite-game';
+import type { FileSystemAsyncDeps } from '../types';
+import type { makeLogService } from '../log';
+import type { PlayniteGameRepository } from '../playnite-game';
 import type { ValidationResult } from '$lib/models/validation-result';
-
-export type PlayniteLibraryManifest = {
-	totalGamesInLibrary: number;
-	gamesInLibrary: Array<{
-		gameId: string;
-		contentHash: string;
-	}>;
-	mediaExistsFor: Array<{
-		gameId: string;
-		contentHash: string;
-	}>;
-};
+import type { PlayniteLibraryManifest } from './schemas';
 
 type LibraryManifestServiceDeps = FileSystemAsyncDeps & {
 	getManifestData: PlayniteGameRepository['getManifestData'];

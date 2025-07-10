@@ -5,7 +5,7 @@ import AdmZip from 'adm-zip';
 import { type ReadableStream } from 'stream/web';
 import { unlink } from 'fs/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from '../types';
-import type { LibraryManifestService } from '../library-manifest';
+import type { LibraryManifestService } from '../library-manifest/library-manifest';
 import type { PlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
 import type { LogService } from '../log';
 import type { PlayniteGameRepository } from '../playnite-game';
