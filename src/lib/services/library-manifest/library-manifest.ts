@@ -74,13 +74,19 @@ export const makeLibraryManifestService = (
 
 	const get = async () => {
 		try {
-			deps.logService.debug(`Reading library manifest JSON file at ${deps.LIBRARY_MANIFEST_FILE}`);
+			deps.logService.debug(`Reading library manifest file at ${deps.LIBRARY_MANIFEST_FILE}`);
 			const content = await deps.readfile(deps.LIBRARY_MANIFEST_FILE, 'utf-8');
 			const asJson = JSON.parse(content.toString()) as PlayniteLibraryManifest;
-			deps.logService.debug(`Read manifest JSON file succesfully, returning manifest`);
+			deps.logService.debug(`Read library manifest file succesfully, returning manifest`);
 			return asJson ?? null;
 		} catch (error) {
-			deps.logService.error('Failed to load manifest.json or it doesnt exist', error as Error);
+			if (typeof error === 'object' && error != null && 'code' in error) {
+				if (error.code === 'ENOENT') {
+					deps.logService.warning('Library manifest file does not exist');
+					return null;
+				}
+			}
+			deps.logService.error('Failed to load library manifest', error as Error);
 			return null;
 		}
 	};

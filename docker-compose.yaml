@@ -62,6 +62,7 @@ services:
 
   app-test-results:
     image: nginx:alpine
+    container_name: test-results
     volumes:
       - playnite-insights-vitest-results:/usr/share/nginx/html/vitest:ro
       - playnite-insights-playwright-results:/usr/share/nginx/html/playwright:ro
@@ -78,7 +79,7 @@ services:
       target: prod
     container_name: app-prod
     environment:
-      LOG_LEVEL: 1 # info
+      LOG_LEVEL: 0 # debug
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
     volumes:
       - playnite-insights-prod-data:/app/data
