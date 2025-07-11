@@ -12,6 +12,7 @@ export type FileSystemAsyncDeps = {
 	unlink: typeof fsAsync.unlink;
 	stat: typeof fsAsync.stat;
 	constants: typeof fsAsync.constants;
+	mkdir: typeof fsAsync.mkdir;
 };
 
 export type StreamUtilsAsyncDeps = {

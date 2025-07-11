@@ -55,7 +55,7 @@ export const makeLibraryManifestService = (
 				mediaExistsFor: mediaExistsFor
 			};
 			await deps.writeFile(deps.LIBRARY_MANIFEST_FILE, JSON.stringify(manifest, null, 2));
-			deps.logService.success('manifest.json written sucessfully');
+			deps.logService.success('manifest.json written successfully');
 			return {
 				isValid: true,
 				message: 'manifest.json written sucessfully',
