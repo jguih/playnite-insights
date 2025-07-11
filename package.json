@@ -4,8 +4,7 @@
   "version": "2.1.2",
   "type": "module",
   "scripts": {
-    "dev": "docker compose up --watch --force-recreate app-dev",
-    "dev:build": "docker compose up --watch --build app-dev",
+    "dev": "docker compose up --watch --force-recreate --build app-dev",
     "prod:down": "docker compose down app-prod",
     "prod:up": "docker compose up -d --build app-prod",
     "prod": "npm run prod:down ; npm run prod:up",
@@ -16,10 +15,9 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "test:unit": "vitest run",
-    "test:e2e": "playwright test",
-    "test:all": "npm run test:unit; UNIT=$?; npm run test:e2e; E2E=$?; exit $((UNIT + E2E))",
-    "test": "docker compose run --rm --build app-test",
+    "test:unit": "docker compose run --rm --build app-vitest",
+    "test:e2e": "docker compose run --rm --build app-playwright && docker compose down app-test-run",
+    "test": "npm run test:unit && npm run test:e2e",
     "preversion": "npm run test"
   },
   "devDependencies": {

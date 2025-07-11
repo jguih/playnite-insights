@@ -37,23 +37,37 @@ USER playnite-insights
 ENTRYPOINT [ "npx", "vite", "dev", "--host" ]
 
 # Playwright not compatible with Alpine!
-FROM node:24.3 AS test
+FROM node:24.3 AS playwright
 
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='testing'
 ENV BODY_SIZE_LIMIT=5G
-ENV APP_NAME='Playnite Insights (Testing)'
+ENV APP_NAME='Playnite Insights (Testing - Playwright)'
 
 COPY package.json package-lock.json ./
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/data ./data
-# Include placeholder images for testing
-COPY ./static/placeholder ./data/files/placeholder
 RUN npx -y playwright install --with-deps 
 COPY . .
+COPY ./playwright.config.docker.ts ./playwright.config.ts
 
-ENTRYPOINT ["sh", "-c", "npm run test:all"]
+ENTRYPOINT ["npx", "playwright", "test"]
+
+FROM node:24.3-alpine AS vitest
+
+WORKDIR /app
+ENV WORK_DIR=/app
+ENV NODE_ENV='testing'
+ENV BODY_SIZE_LIMIT=5G
+ENV APP_NAME='Playnite Insights (Testing - Vitest)'
+
+COPY package.json package-lock.json ./
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/data ./data
+COPY . .
+
+ENTRYPOINT ["npx", "vitest", "run"]
 
 FROM node:24.3-alpine AS prod
 
