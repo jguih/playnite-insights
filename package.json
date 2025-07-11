@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "docker compose up --watch --force-recreate --build app-dev",
     "prod:down": "docker compose down app-prod",
-    "prod:up": "docker compose up -d --build app-prod",
+    "prod:up": "COMPOSE_BAKE=true docker compose up -d --build app-prod",
     "prod": "npm run prod:down ; npm run prod:up",
     "build": "vite build",
     "preview": "vite preview",
@@ -15,8 +15,8 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "test:unit": "docker compose run --rm --build app-vitest",
-    "test:e2e": "docker compose run --rm --build app-playwright && docker compose down app-test-run",
+    "test:unit": "COMPOSE_BAKE=true docker compose run --rm --build app-vitest",
+    "test:e2e": "COMPOSE_BAKE=true docker compose run --rm --build app-playwright && docker compose down app-test-run",
     "test": "npm run test:unit && npm run test:e2e",
     "preversion": "npm run test"
   },

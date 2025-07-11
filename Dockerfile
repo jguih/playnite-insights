@@ -5,16 +5,13 @@ COPY package.json package-lock.json ./
 RUN npm ci
 RUN mkdir -p ./data/files ./data/tmp
 
-FROM node:24.3-alpine AS build
+FROM base AS build
 
 WORKDIR /app
-COPY package.json package-lock.json ./
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=base /app/data ./data
 COPY . .
 RUN npm run build
 
-FROM node:24.3-alpine AS dev
+FROM base AS dev
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 
@@ -25,10 +22,9 @@ ENV BODY_SIZE_LIMIT=5G
 ENV APP_NAME='Playnite Insights (Dev)'
 
 COPY --chown=playnite-insights:playnite-insights . .
-COPY --chown=playnite-insights:playnite-insights --from=base /app/node_modules ./node_modules
-COPY --chown=playnite-insights:playnite-insights --from=base /app/data ./data
 # Include placeholder images for testing
 COPY --chown=playnite-insights:playnite-insights ./static/placeholder ./data/files/placeholder
+RUN chown -R playnite-insights:playnite-insights /app
 
 EXPOSE 3000
 
@@ -42,50 +38,38 @@ FROM node:24.3 AS playwright
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='testing'
-ENV BODY_SIZE_LIMIT=5G
 ENV APP_NAME='Playnite Insights (Testing - Playwright)'
 
 COPY package.json package-lock.json ./
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=base /app/data ./data
+RUN npm ci
+RUN mkdir -p ./data/files ./data/tmp
 RUN npx -y playwright install --with-deps 
 COPY . .
 COPY ./playwright.config.docker.ts ./playwright.config.ts
 
 ENTRYPOINT ["npx", "playwright", "test"]
 
-FROM node:24.3-alpine AS vitest
+FROM base AS vitest
 
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='testing'
-ENV BODY_SIZE_LIMIT=5G
 ENV APP_NAME='Playnite Insights (Testing - Vitest)'
 
-COPY package.json package-lock.json ./
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=base /app/data ./data
 COPY . .
 
 ENTRYPOINT ["npx", "vitest", "run"]
 
-FROM node:24.3-alpine AS prod
+FROM build AS prod
 
 WORKDIR /app
-RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-
 ENV WORK_DIR=/app
 ENV NODE_ENV='production'
 ENV BODY_SIZE_LIMIT=5G
 ENV APP_NAME='Playnite Insights'
 
-WORKDIR /app
-COPY --chown=playnite-insights:playnite-insights --from=build /app/build ./build
-COPY --chown=playnite-insights:playnite-insights --from=build /app/package.json ./package.json
-COPY --chown=playnite-insights:playnite-insights --from=build /app/package-lock.json ./package-lock.json
-COPY --chown=playnite-insights:playnite-insights --from=build /app/node_modules ./node_modules
-COPY --chown=playnite-insights:playnite-insights --from=build /app/docker ./docker
-COPY --chown=playnite-insights:playnite-insights --from=build /app/data ./data
+RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
+RUN chown -R playnite-insights:playnite-insights /app
 
 EXPOSE 3000
 
