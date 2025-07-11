@@ -1,7 +1,7 @@
 {
   "name": "playnite-insights-dev",
   "private": true,
-  "version": "2.1.3",
+  "version": "2.1.4",
   "type": "module",
   "scripts": {
     "dev": "docker compose up --watch --force-recreate --build app-dev",
