@@ -29,6 +29,7 @@ export const setupServices = () => {
 		rm: fsAsync.rm,
 		unlink: fsAsync.unlink,
 		stat: fsAsync.stat,
+		mkdir: fsAsync.mkdir,
 		constants: fsAsync.constants
 	};
 	const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
