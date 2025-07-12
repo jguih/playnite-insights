@@ -8,6 +8,7 @@ export const makeHomePageViewModel = (
 	query: string | null
 ) => {
 	let pageData: HomePageData | undefined;
+	let isError: boolean = false;
 
 	const getPage = (): number => page;
 	const getPageSize = (): number => pageSize;
@@ -19,15 +20,18 @@ export const makeHomePageViewModel = (
 	const getTotalPages = (): number => (pageData ? pageData.totalPages : 0);
 	const getGameList = (): HomePageData['games'] => (pageData ? pageData.games : []);
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
-	const getPageSizeList = (): number[] => [2, 25, 50, 75, 100];
+	const getPageSizeList = (): number[] => [25, 50, 75, 100];
+	const getIsError = (): boolean => isError;
 
 	const load = async () => {
 		try {
 			const response = await promise;
 			const data = homePageDataSchema.parse(await response.json());
 			pageData = data;
-		} catch {
-			return;
+			isError = false;
+		} catch (error) {
+			isError = true;
+			console.error(error);
 		}
 	};
 
@@ -43,6 +47,7 @@ export const makeHomePageViewModel = (
 		getGameList,
 		getImageURL,
 		getPageSizeList,
+		getIsError,
 		load
 	};
 };

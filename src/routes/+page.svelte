@@ -19,6 +19,7 @@
 	import { page } from '$app/state';
 	import { type HomePageData } from '$lib/services/home-page/schemas';
 	import Loading from '$lib/client/components/Loading.svelte';
+	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived(makeHomePageViewModel(data.promise, data.page, data.pageSize, data.query));
@@ -101,67 +102,71 @@
 		</Main>
 	{:then}
 		<Main bind:main>
-			<h1 class="text-lg">{m.home_title()}</h1>
-			<div class="mb-2">
-				{#if vm.getTotalGamesCount() === 0}
-					<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
-				{/if}
-				{#if vm.getTotalGamesCount() > 0}
-					<p class="text-sm text-neutral-300/60">
-						{m.home_showing_games_counter({
-							count1: vm.getGameCountFrom(),
-							count2: vm.getGameCountTo(),
-							totalCount: vm.getTotalGamesCount()
-						})}
-					</p>
-				{/if}
-			</div>
-			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
-					{#each vm.getPageSizeList() as option}
-						<option value={option}>{option}</option>
-					{/each}
-				</Select>
-			</label>
+			{#if vm.getIsError()}
+				<SomethingWentWrong />
+			{:else}
+				<h1 class="text-lg">{m.home_title()}</h1>
+				<div class="mb-2">
+					{#if vm.getTotalGamesCount() === 0}
+						<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
+					{/if}
+					{#if vm.getTotalGamesCount() > 0}
+						<p class="text-sm text-neutral-300/60">
+							{m.home_showing_games_counter({
+								count1: vm.getGameCountFrom(),
+								count2: vm.getGameCountTo(),
+								totalCount: vm.getTotalGamesCount()
+							})}
+						</p>
+					{/if}
+				</div>
+				<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
+					{m.home_label_items_per_page()}
+					<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
+						{#each vm.getPageSizeList() as option}
+							<option value={option}>{option}</option>
+						{/each}
+					</Select>
+				</label>
 
-			{#key vm.getPage()}
-				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-					{#each vm.getGameList() as game}
-						{@render gameCard(game)}
-					{/each}
-				</ul>
-			{/key}
+				{#key vm.getPage()}
+					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+						{#each vm.getGameList() as game}
+							{@render gameCard(game)}
+						{/each}
+					</ul>
+				{/key}
 
-			<nav class="mt-4 flex flex-row justify-center gap-2">
-				<BaseButton
-					disabled={vm.getPage() <= 1}
-					onclick={() => handleOnPageChange(vm.getPage() - 1)}
-				>
-					<ChevronLeft />
-				</BaseButton>
-
-				{#if vm.getPage() > 1}
-					<BaseButton onclick={() => handleOnPageChange(vm.getPage() - 1)}>
-						{vm.getPage() - 1}
+				<nav class="mt-4 flex flex-row justify-center gap-2">
+					<BaseButton
+						disabled={vm.getPage() <= 1}
+						onclick={() => handleOnPageChange(vm.getPage() - 1)}
+					>
+						<ChevronLeft />
 					</BaseButton>
-				{/if}
-				<SelectedButton onclick={() => handleOnPageChange(vm.getPage())}>
-					{vm.getPage()}
-				</SelectedButton>
-				{#if vm.getPage() < vm.getTotalPages()}
-					<BaseButton onclick={() => handleOnPageChange(vm.getPage() + 1)}>
-						{vm.getPage() + 1}
-					</BaseButton>
-				{/if}
 
-				<BaseButton
-					onclick={() => handleOnPageChange(vm.getPage() + 1)}
-					disabled={vm.getPage() >= vm.getTotalPages()}
-				>
-					<ChevronRight />
-				</BaseButton>
-			</nav>
+					{#if vm.getPage() > 1}
+						<BaseButton onclick={() => handleOnPageChange(vm.getPage() - 1)}>
+							{vm.getPage() - 1}
+						</BaseButton>
+					{/if}
+					<SelectedButton onclick={() => handleOnPageChange(vm.getPage())}>
+						{vm.getPage()}
+					</SelectedButton>
+					{#if vm.getPage() < vm.getTotalPages()}
+						<BaseButton onclick={() => handleOnPageChange(vm.getPage() + 1)}>
+							{vm.getPage() + 1}
+						</BaseButton>
+					{/if}
+
+					<BaseButton
+						onclick={() => handleOnPageChange(vm.getPage() + 1)}
+						disabled={vm.getPage() >= vm.getTotalPages()}
+					>
+						<ChevronRight />
+					</BaseButton>
+				</nav>
+			{/if}
 		</Main>
 	{/await}
 
