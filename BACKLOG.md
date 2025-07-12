@@ -15,15 +15,15 @@
 - View model for home page
 - Data streaming in home page
 - Data streaming in dashboard page
+- API Integration testing
+- Data streaming in game page
 
 ## 🛠️ In Progress
 
 - Dashboard page
-- API Integration testing
 
 ## 📌 To Do
 
-- Data streaming in game page
 - Display game trailer in game page
 - Display related owned games in game page
 - Game filtering
