@@ -1,13 +1,14 @@
 <script lang="ts">
-	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import BaseButton from './BaseButton.svelte';
+	import type { BaseButtonProps } from './types';
 
-	let props: HTMLButtonAttributes = $props();
+	let props: BaseButtonProps = $props();
 </script>
 
 <BaseButton
 	{...props}
-	class={`bg-primary-500 hover:bg-primary-600 active:border-primary-700 focus:border-primary-700 text-black`}
+	bind:button={props.button}
+	class={`bg-primary-500 hover:bg-primary-600 active:bg-primary-700 active:border-primary-500 focus:border-primary-700 border-2 border-solid border-transparent p-1 text-black ${props.class ?? ''}`}
 >
 	{#if props.children}
 		{@render props.children()}

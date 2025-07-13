@@ -13,7 +13,6 @@
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
-	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
@@ -89,7 +88,7 @@
 		<div class="flex flex-row items-center gap-2">
 			<HeaderSearchBar />
 			<LightButton>
-				<ListFilter size="22" onclick={() => (filtersState.show = !filtersState.show)} />
+				<ListFilter onclick={() => (filtersState.show = !filtersState.show)} />
 			</LightButton>
 		</div>
 	</Header>
@@ -147,33 +146,33 @@
 				{/key}
 
 				<nav class="mt-4 flex flex-row justify-center gap-2">
-					<BaseButton
+					<LightButton
 						disabled={vm.getPage() <= 1}
 						onclick={() => handleOnPageChange(vm.getPage() - 1)}
 					>
 						<ChevronLeft />
-					</BaseButton>
+					</LightButton>
 
 					{#if vm.getPage() > 1}
-						<BaseButton onclick={() => handleOnPageChange(vm.getPage() - 1)}>
+						<LightButton onclick={() => handleOnPageChange(vm.getPage() - 1)}>
 							{vm.getPage() - 1}
-						</BaseButton>
+						</LightButton>
 					{/if}
 					<SelectedButton onclick={() => handleOnPageChange(vm.getPage())}>
 						{vm.getPage()}
 					</SelectedButton>
 					{#if vm.getPage() < vm.getTotalPages()}
-						<BaseButton onclick={() => handleOnPageChange(vm.getPage() + 1)}>
+						<LightButton onclick={() => handleOnPageChange(vm.getPage() + 1)}>
 							{vm.getPage() + 1}
-						</BaseButton>
+						</LightButton>
 					{/if}
 
-					<BaseButton
+					<LightButton
 						onclick={() => handleOnPageChange(vm.getPage() + 1)}
 						disabled={vm.getPage() >= vm.getTotalPages()}
 					>
 						<ChevronRight />
-					</BaseButton>
+					</LightButton>
 				</nav>
 			{/if}
 		</Main>
