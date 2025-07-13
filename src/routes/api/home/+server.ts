@@ -12,11 +12,13 @@ export const GET: RequestHandler = ({ url }) => {
 	if (!Number.isInteger(pageSize) || pageSize <= 0) {
 		return json({ message: 'page_size must an integer greater than 0' }, { status: 400 });
 	}
-	const query = searchParams.get('query');
 	const offset = (Number(page) - 1) * Number(pageSize);
+	const query = searchParams.get('query');
+	const installed = searchParams.get('installed') === '1';
+	const notInstalled = searchParams.get('notInstalled') === '1';
 	const filters: HomePageFilters = {
 		query: query,
-		installed: null
+		installed: installed && !notInstalled ? '1' : notInstalled && !installed ? '0' : null
 	};
 	const data = services.homePage.getGames(offset, pageSize, filters);
 	if (!data) {

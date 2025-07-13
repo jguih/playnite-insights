@@ -77,7 +77,7 @@
 		placeholder={m.home_search_bar_placeholder()}
 		onblur={handleOnBlur}
 	/>
-	<SearchBarButton bind:button={clearBtn} onclick={handleOnClear} type="button" size="sm">
+	<SearchBarButton button={clearBtn} onclick={handleOnClear} type="button" size="sm">
 		<XIcon class="opacity-80" />
 	</SearchBarButton>
 </form>
