@@ -4,7 +4,7 @@
 	let { ...props }: HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div {...props} class={`p-4 ${props.class ?? ''}`}>
+<div {...props} class={`p-3 ${props.class ?? ''}`}>
 	{#if props.children}
 		{@render props.children()}
 	{/if}

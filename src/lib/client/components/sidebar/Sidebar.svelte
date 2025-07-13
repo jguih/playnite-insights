@@ -1,8 +1,15 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { fly } from 'svelte/transition';
 
 	let { width = 80, ...props }: HTMLAttributes<HTMLElement> & { width?: number } = $props();
+	let showChildren = $state(false);
+
+	onMount(async () => {
+		await tick();
+		showChildren = true;
+	});
 </script>
 
 <aside
@@ -12,7 +19,7 @@
 	role="presentation"
 	transition:fly={{ x: `-${width}dvw`, duration: 300 }}
 >
-	{#if props.children}
+	{#if props.children && showChildren}
 		{@render props.children()}
 	{/if}
 </aside>

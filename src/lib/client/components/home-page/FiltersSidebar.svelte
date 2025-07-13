@@ -14,9 +14,11 @@
 		<SidebarHeader>
 			<h1 class="text-2xl">Filters</h1>
 			<LightButton class="opacity-80" size="md">
-				<XIcon class="opacity-80" />
+				<XIcon />
 			</LightButton>
 		</SidebarHeader>
-		<SidebarBody></SidebarBody>
+		<SidebarBody>
+			<h1>hey</h1>
+		</SidebarBody>
 	</Sidebar>
 {/if}

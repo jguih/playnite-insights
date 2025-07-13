@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
-	import Divider from '../Divider.svelte';
 
 	let { ...props }: HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div {...props} class={`fles-row flex justify-between gap-2 px-4 pt-4 pb-2 ${props.class ?? ''}`}>
+<div
+	{...props}
+	class={`fles-row border-background flex justify-between gap-2 border-b-1 p-3 shadow-md ${props.class ?? ''}`}
+>
 	{#if props.children}
 		{@render props.children()}
 	{/if}
