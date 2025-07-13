@@ -2,7 +2,12 @@ import type { DatabaseSync } from 'node:sqlite';
 import { gameDataSchema, type HomePageData } from './schemas';
 import type { LogService } from '../log';
 import z from 'zod';
-import { getWhereClauseAndParamsFromFilters, type HomePageFilters } from './filter';
+import {
+	getOrderByClause,
+	getWhereClauseAndParamsFromFilters,
+	type HomePageFilters,
+	type HomePageSorting
+} from './filter';
 
 type HomePageServiceDeps = {
 	getDb: () => DatabaseSync;
@@ -31,7 +36,8 @@ export const makeHomePageService = ({ getDb, logService }: HomePageServiceDeps) 
 	const getGames = (
 		offset: number,
 		pageSize: number,
-		filters?: HomePageFilters
+		filters?: HomePageFilters,
+		sorting?: HomePageSorting
 	): HomePageData | undefined => {
 		logService.debug(`Getting home page data using filters: ${JSON.stringify(filters)}`);
 		const db = getDb();
@@ -43,8 +49,9 @@ export const makeHomePageService = ({ getDb, logService }: HomePageServiceDeps) 
       FROM playnite_game pg
     `;
 		const { where, params } = getWhereClauseAndParamsFromFilters(filters);
+		const orderBy = getOrderByClause(sorting);
 		query += where;
-		query += ` ORDER BY Added DESC`;
+		query += orderBy;
 		query += ` LIMIT ? OFFSET ?;`;
 		params.push(pageSize.toString());
 		params.push(offset.toString());

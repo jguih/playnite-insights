@@ -1,6 +1,11 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { services } from '$lib';
-import type { HomePageFilters } from '$lib/services/home-page/filter';
+import {
+	isValidSortBy,
+	isValidSortOder,
+	type HomePageFilters,
+	type HomePageSorting
+} from '$lib/services/home-page/filter';
 
 export const GET: RequestHandler = ({ url }) => {
 	const searchParams = url.searchParams;
@@ -13,6 +18,12 @@ export const GET: RequestHandler = ({ url }) => {
 		return json({ message: 'page_size must an integer greater than 0' }, { status: 400 });
 	}
 	const offset = (Number(page) - 1) * Number(pageSize);
+	// Sorting
+	const _sortBy = searchParams.get('sortBy');
+	const _sortOrder = searchParams.get('sortOrder');
+	const sortBy: HomePageSorting['by'] = isValidSortBy(_sortBy) ? _sortBy : null;
+	const sortOrder: HomePageSorting['order'] = isValidSortOder(_sortOrder) ? _sortOrder : 'asc';
+	// Filtering
 	const query = searchParams.get('query');
 	const installed = searchParams.get('installed') === '1';
 	const notInstalled = searchParams.get('notInstalled') === '1';
@@ -20,7 +31,10 @@ export const GET: RequestHandler = ({ url }) => {
 		query: query,
 		installed: installed && !notInstalled ? '1' : notInstalled && !installed ? '0' : null
 	};
-	const data = services.homePage.getGames(offset, pageSize, filters);
+	const data = services.homePage.getGames(offset, pageSize, filters, {
+		by: sortBy,
+		order: sortOrder
+	});
 	if (!data) {
 		return json(null, { status: 400 });
 	}

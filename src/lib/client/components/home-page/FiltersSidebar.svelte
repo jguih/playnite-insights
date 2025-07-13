@@ -27,7 +27,7 @@
 	<Backdrop onclick={() => (filtersState.show = !filtersState.show)} />
 	<Sidebar width={80}>
 		<SidebarHeader>
-			<h1 class="text-2xl">Filters</h1>
+			<h1 class="text-2xl">Filters and Sorting</h1>
 			<LightButton
 				class="opacity-80"
 				size="md"
