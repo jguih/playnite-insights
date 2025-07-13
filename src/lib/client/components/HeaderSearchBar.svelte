@@ -75,7 +75,12 @@
 		placeholder={m.home_search_bar_placeholder()}
 		onblur={handleOnBlur}
 	/>
-	<button bind:this={clearBtn} class="m-0 p-0" onclick={handleOnClear} type="button">
+	<button
+		bind:this={clearBtn}
+		class="hover:text-primary-500 active:text-primary-700 m-0 p-0"
+		onclick={handleOnClear}
+		type="button"
+	>
 		<XIcon class="aspect-square shrink-0 opacity-80" size="20" />
 	</button>
 </form>

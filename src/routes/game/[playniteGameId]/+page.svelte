@@ -1,6 +1,5 @@
 <script lang="ts">
-	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
-	import MenuButton from '$lib/client/components/buttons/MenuButton.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 	import Header from '$lib/client/components/Header.svelte';
@@ -27,9 +26,9 @@
 <AppLayoutWithoutBottomNav>
 	<Header>
 		{#snippet action()}
-			<MenuButton onclick={() => history.back()}>
+			<LightButton onclick={() => history.back()}>
 				<ArrowLeft />
-			</MenuButton>
+			</LightButton>
 		{/snippet}
 	</Header>
 	{#await vm.load()}

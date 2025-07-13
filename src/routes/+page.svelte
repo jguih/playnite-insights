@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ArrowLeft, ChevronLeft, ChevronRight, Search } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, ListFilter } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -20,6 +20,9 @@
 	import { type HomePageData } from '$lib/services/home-page/schemas';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
+	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import { filtersState } from '$lib/client/components/home-page/store.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived(makeHomePageViewModel(data.promise, data.page, data.pageSize, data.query));
@@ -72,6 +75,7 @@
 {/snippet}
 
 <BaseAppLayout>
+	<FiltersSidebar />
 	<Header>
 		{#snippet action()}
 			<a class="" href={`/?${page.url.searchParams.toString()}`}>
@@ -82,7 +86,12 @@
 				/>
 			</a>
 		{/snippet}
-		<HeaderSearchBar />
+		<div class="flex flex-row items-center gap-2">
+			<HeaderSearchBar />
+			<LightButton>
+				<ListFilter size="22" onclick={() => (filtersState.show = !filtersState.show)} />
+			</LightButton>
+		</div>
 	</Header>
 	{#await vm.load()}
 		<Main>
