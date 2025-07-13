@@ -1,22 +1,13 @@
+import type { ValidSortBy, ValidSortOrder } from './validation';
+
 export type HomePageFilters = {
 	query: string | null;
 	installed: string | null;
 };
 
-export const validSortOrder = ['asc', 'desc'] as const;
-export const validSortBy = ['IsInstalled', 'Id', null] as const;
-
 export type HomePageSorting = {
-	order: (typeof validSortOrder)[number];
-	by: (typeof validSortBy)[number];
-};
-
-export const isValidSortBy = (value: string | null): value is HomePageSorting['by'] => {
-	return validSortBy.includes(value as HomePageSorting['by']);
-};
-
-export const isValidSortOder = (value: string | null): value is HomePageSorting['order'] => {
-	return validSortOrder.includes(value as HomePageSorting['order']);
+	order: ValidSortOrder;
+	by: ValidSortBy;
 };
 
 export const getWhereClauseAndParamsFromFilters = (filters?: HomePageFilters) => {

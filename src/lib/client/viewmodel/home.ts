@@ -1,33 +1,31 @@
 import { homePageDataSchema, type HomePageData } from '$lib/services/home-page/schemas';
+import { validPageSizes, type ValidPageSizes } from '$lib/services/home-page/validation';
+import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 
-export const makeHomePageViewModel = (
-	promise: Promise<Response>,
-	page: number,
-	pageSize: number,
-	query: string | null
-) => {
+export const makeHomePageViewModel = ({ data }: PageProps) => {
 	let pageData: HomePageData | undefined;
 	let isError: boolean = false;
 
-	const getPage = (): number => page;
-	const getPageSize = (): number => pageSize;
-	const getQuery = (): string | null => query;
-	const getOffset = (): number => (page - 1) * pageSize;
+	const getPage = (): string => data.page;
+	const getPageSize = (): ValidPageSizes[number] => data.pageSize;
+	const getQuery = (): string | null => data.query;
+	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
 	const getTotalGamesCount = (): number => (pageData ? pageData.total : 0);
 	const getGameCountFrom = (): number => getOffset();
-	const getGameCountTo = (): number => Math.min(pageSize + getOffset(), getTotalGamesCount());
+	const getGameCountTo = (): number =>
+		Math.min(Number(data.pageSize) + getOffset(), getTotalGamesCount());
 	const getTotalPages = (): number => (pageData ? pageData.totalPages : 0);
 	const getGameList = (): HomePageData['games'] => (pageData ? pageData.games : []);
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
-	const getPageSizeList = (): number[] => [25, 50, 75, 100];
+	const getPageSizeList = (): ValidPageSizes => validPageSizes;
 	const getIsError = (): boolean => isError;
 
 	const load = async () => {
 		try {
-			const response = await promise;
-			const data = homePageDataSchema.parse(await response.json());
-			pageData = data;
+			const response = await data.promise;
+			const result = homePageDataSchema.parse(await response.json());
+			pageData = result;
 			isError = false;
 		} catch (error) {
 			isError = true;

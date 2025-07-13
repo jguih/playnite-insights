@@ -1,5 +1,5 @@
 ### Get home page game data (paginated)
-GET {{protocol}}://{{host}}/api/home?page=1&page_size=2
+GET {{protocol}}://{{host}}/api/home?page=3&pageSize=200
 Content-Type: {{contentType}}
 
 ### Get game by id

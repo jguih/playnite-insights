@@ -22,24 +22,20 @@
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
+	import { searchParamsKeys } from '$lib/services/home-page/validation';
 
 	let { data }: PageProps = $props();
-	let vm = $derived(makeHomePageViewModel(data.promise, data.page, data.pageSize, data.query));
-	let currentPageSize = $derived(vm.getPageSize());
+	let vm = $derived.by(() => makeHomePageViewModel({ data }));
+	let currentPageSize = $derived(data.pageSize);
+	let currentPage = $derived(Number(data.page));
 	let main: HTMLElement | undefined = $state();
-
-	const setSearchParams = $derived((key: string, value: string) => {
-		const params = new URLSearchParams(page.url.searchParams);
-		params.set(key, value);
-		const newUrl = `${page.url.pathname}?${params.toString()}`;
-		goto(newUrl, { replaceState: true });
-	});
+	$inspect(currentPageSize);
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
 		const params = new URLSearchParams(page.url.searchParams);
-		params.set('page_size', value);
-		params.set('page', '1');
+		params.set(searchParamsKeys.pageSize, value);
+		params.set(searchParamsKeys.page, '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
@@ -47,11 +43,14 @@
 		goto(newUrl, { replaceState: true });
 	};
 
-	const handleOnPageChange = (page: number) => {
+	const handleOnPageChange = (_page: number) => {
 		if (main) {
 			main.scrollTop = 0;
 		}
-		setSearchParams(`page`, String(page));
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set(searchParamsKeys.page, String(_page));
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		goto(newUrl, { replaceState: true });
 	};
 </script>
 
@@ -66,7 +65,9 @@
 				loading="lazy"
 				class="h-7/8 w-full object-cover"
 			/>
-			<div class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row justify-center p-1">
+			<div
+				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
 		</a>
@@ -100,7 +101,7 @@
 			</div>
 			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
+				<Select onchange={handleOnPageSizeChange} value={currentPageSize} id="page_size">
 					{#each vm.getPageSizeList() as option}
 						<option value={option}>{option}</option>
 					{/each}
@@ -130,14 +131,14 @@
 				</div>
 				<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 					{m.home_label_items_per_page()}
-					<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
+					<Select onchange={handleOnPageSizeChange} value={currentPageSize} id="page_size">
 						{#each vm.getPageSizeList() as option}
 							<option value={option}>{option}</option>
 						{/each}
 					</Select>
 				</label>
 
-				{#key vm.getPage()}
+				{#key currentPage}
 					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
 						{#each vm.getGameList() as game}
 							{@render gameCard(game)}
@@ -147,29 +148,29 @@
 
 				<nav class="mt-4 flex flex-row justify-center gap-2">
 					<LightButton
-						disabled={vm.getPage() <= 1}
-						onclick={() => handleOnPageChange(vm.getPage() - 1)}
+						disabled={currentPage <= 1}
+						onclick={() => handleOnPageChange(currentPage - 1)}
 					>
 						<ChevronLeft />
 					</LightButton>
 
-					{#if vm.getPage() > 1}
-						<LightButton onclick={() => handleOnPageChange(vm.getPage() - 1)}>
-							{vm.getPage() - 1}
+					{#if currentPage > 1}
+						<LightButton onclick={() => handleOnPageChange(currentPage - 1)}>
+							{currentPage - 1}
 						</LightButton>
 					{/if}
-					<SelectedButton onclick={() => handleOnPageChange(vm.getPage())}>
-						{vm.getPage()}
+					<SelectedButton onclick={() => handleOnPageChange(currentPage)}>
+						{currentPage}
 					</SelectedButton>
-					{#if vm.getPage() < vm.getTotalPages()}
-						<LightButton onclick={() => handleOnPageChange(vm.getPage() + 1)}>
-							{vm.getPage() + 1}
+					{#if currentPage < vm.getTotalPages()}
+						<LightButton onclick={() => handleOnPageChange(currentPage + 1)}>
+							{currentPage + 1}
 						</LightButton>
 					{/if}
 
 					<LightButton
-						onclick={() => handleOnPageChange(vm.getPage() + 1)}
-						disabled={vm.getPage() >= vm.getTotalPages()}
+						onclick={() => handleOnPageChange(currentPage + 1)}
+						disabled={currentPage >= vm.getTotalPages()}
 					>
 						<ChevronRight />
 					</LightButton>

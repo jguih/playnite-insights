@@ -39,7 +39,9 @@ export const makeHomePageService = ({ getDb, logService }: HomePageServiceDeps) 
 		filters?: HomePageFilters,
 		sorting?: HomePageSorting
 	): HomePageData | undefined => {
-		logService.debug(`Getting home page data using filters: ${JSON.stringify(filters)}`);
+		logService.debug(
+			`Getting home page data using: ${JSON.stringify({ offset, pageSize, filters, sorting })}`
+		);
 		const db = getDb();
 		let query = `
       SELECT 
@@ -61,12 +63,13 @@ export const makeHomePageService = ({ getDb, logService }: HomePageServiceDeps) 
 			const stmt = db.prepare(query);
 			const result = stmt.all(...params);
 			const games = z.optional(gameDataSchema).parse(result) ?? [];
+			const items = games.length;
 			const hasNextPage = offset + pageSize < total;
 			const totalPages = Math.ceil(total / pageSize);
 			logService.success(
 				`Fetched game list for home page, returning games ${offset} to ${Math.min(pageSize + offset, total)} out of ${total}`
 			);
-			return { games, total, hasNextPage, totalPages };
+			return { games, offset, items, total, hasNextPage, totalPages };
 		} catch (error) {
 			logService.error('Failed to get home page data', error as Error);
 			return undefined;

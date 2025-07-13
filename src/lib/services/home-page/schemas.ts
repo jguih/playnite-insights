@@ -13,6 +13,8 @@ export const homePageDataSchema = z.object({
 	games: gameDataSchema,
 	total: z.number(),
 	hasNextPage: z.boolean(),
-	totalPages: z.number()
+	totalPages: z.number(),
+	offset: z.number(),
+	items: z.number()
 });
 export type HomePageData = z.infer<typeof homePageDataSchema>;
