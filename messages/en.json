@@ -10,8 +10,7 @@
   "game_info_install_directory": "Install directory",
   "game_info_added": "Added",
   "game_info_playtime": "Playtime",
-  "game_playtime_in_hour": "{hours} hours",
-  "game_playtime_in_hour_whithout_value": "hours",
+  "game_playtime_in_hours_and_minutes": "{hours}h {mins}m",
   "game_info_developers": "Developers",
   "game_info_installed": "Installed",
   "dash_games_in_library": "Games in library",
@@ -36,6 +35,7 @@
   "month_october": "October",
   "month_november": "November",
   "month_december": "December",
+  "error_something_went_wrong": "Something went wrong.",
   "yes": "Yes",
   "no": "No"
 }

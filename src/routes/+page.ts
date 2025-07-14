@@ -1,29 +1,40 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
+import {
+	parseSearchParams,
+	searchParamsKeys,
+	validPageSizes,
+	validSortBy,
+	validSortOrder
+} from '$lib/services/home-page/validation';
 
 export const load: PageLoad = async ({ url, fetch }) => {
-	const params = url.searchParams;
+	const params = new URLSearchParams(url.searchParams);
 	let changed = false;
-
-	if (!params.has('page')) {
-		params.set('page', '1');
+	if (!params.has(searchParamsKeys.page)) {
+		params.set(searchParamsKeys.page, '1');
 		changed = true;
 	}
-
-	if (!params.has('page_size')) {
-		params.set('page_size', '100');
+	if (!params.has(searchParamsKeys.pageSize)) {
+		params.set(searchParamsKeys.pageSize, validPageSizes[validPageSizes.length - 1]);
 		changed = true;
 	}
-
+	if (!params.has(searchParamsKeys.sortOrder)) {
+		params.set(searchParamsKeys.sortOrder, validSortOrder[0]);
+		changed = true;
+	}
+	if (!params.has(searchParamsKeys.sortBy)) {
+		params.set(searchParamsKeys.sortBy, validSortBy[0]);
+		changed = true;
+	}
 	if (changed) {
 		throw redirect(302, `${url.pathname}?${params.toString()}`);
 	}
+	const parsedValues = parseSearchParams(params);
 
 	const promise = fetch(`/api/home?${params.toString()}`);
 	return {
 		promise,
-		pageSize: Number(params.get('page_size')),
-		query: params.get('query'),
-		page: Number(params.get('page'))
+		...parsedValues
 	};
 };

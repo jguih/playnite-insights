@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ArrowLeft, ChevronLeft, ChevronRight, Search } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, ListFilter } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -13,30 +13,39 @@
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
-	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
 	import { type HomePageData } from '$lib/services/home-page/schemas';
 	import Loading from '$lib/client/components/Loading.svelte';
+	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
+	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import { filtersState } from '$lib/client/components/home-page/store.svelte';
+	import {
+		getSortByLabel,
+		getSortOrderLabel,
+		searchParamsKeys,
+		validSortBy,
+		validSortOrder,
+		type ValidSearchParamKeys
+	} from '$lib/services/home-page/validation';
 
 	let { data }: PageProps = $props();
-	let vm = $derived(makeHomePageViewModel(data.promise, data.page, data.pageSize, data.query));
-	let currentPageSize = $derived(vm.getPageSize());
+	let vm = $derived.by(() => makeHomePageViewModel({ data }));
+	let pageSizeParam = $derived(data.pageSize);
+	let pageParam = $derived(Number(data.page));
+	let installedParam = $derived(data.installed);
+	let notInstalledParam = $derived(data.notInstalled);
+	let sortByParam = $derived(data.sortBy);
+	let sortOrderParam = $derived(data.sortOrder);
 	let main: HTMLElement | undefined = $state();
-
-	const setSearchParams = $derived((key: string, value: string) => {
-		const params = new URLSearchParams(page.url.searchParams);
-		params.set(key, value);
-		const newUrl = `${page.url.pathname}?${params.toString()}`;
-		goto(newUrl, { replaceState: true });
-	});
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
 		const params = new URLSearchParams(page.url.searchParams);
-		params.set('page_size', value);
-		params.set('page', '1');
+		params.set(searchParamsKeys.pageSize, value);
+		params.set(searchParamsKeys.page, '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
@@ -44,11 +53,30 @@
 		goto(newUrl, { replaceState: true });
 	};
 
-	const handleOnPageChange = (page: number) => {
+	const handleOnPageChange = (value: number) => {
+		const newParams = new URLSearchParams(page.url.searchParams);
+		newParams.set(searchParamsKeys.page, String(value));
+		const newUrl = `${page.url.pathname}?${newParams.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
 		}
-		setSearchParams(`page`, String(page));
+		goto(newUrl, { replaceState: true });
+	};
+
+	const setSearchParam = (key: ValidSearchParamKeys, value: string | boolean) => {
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set('page', '1');
+		if (!value) {
+			params.delete(key);
+		} else if (typeof value === 'string') {
+			if (value === '') params.delete(key);
+			else params.set(key, value);
+		} else if (typeof value === 'boolean') {
+			if (value) params.set(key, '1');
+			else params.delete(key);
+		}
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
 </script>
 
@@ -63,7 +91,9 @@
 				loading="lazy"
 				class="h-7/8 w-full object-cover"
 			/>
-			<div class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row justify-center p-1">
+			<div
+				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
 		</a>
@@ -71,6 +101,24 @@
 {/snippet}
 
 <BaseAppLayout>
+	<FiltersSidebar
+		{setSearchParam}
+		installed={installedParam}
+		notInstalled={notInstalledParam}
+		sortBy={sortByParam}
+		sortOrder={sortOrderParam}
+	>
+		{#snippet renderSortOrderOptions()}
+			{#each validSortOrder as sortOrder}
+				<option value={sortOrder}>{getSortOrderLabel(sortOrder)}</option>
+			{/each}
+		{/snippet}
+		{#snippet renderSortByOptions()}
+			{#each validSortBy as sortBy}
+				<option value={sortBy}>{getSortByLabel(sortBy)}</option>
+			{/each}
+		{/snippet}
+	</FiltersSidebar>
 	<Header>
 		{#snippet action()}
 			<a class="" href={`/?${page.url.searchParams.toString()}`}>
@@ -81,7 +129,12 @@
 				/>
 			</a>
 		{/snippet}
-		<HeaderSearchBar />
+		<div class="flex flex-row items-center gap-2">
+			<HeaderSearchBar />
+			<LightButton>
+				<ListFilter onclick={() => (filtersState.show = !filtersState.show)} />
+			</LightButton>
+		</div>
 	</Header>
 	{#await vm.load()}
 		<Main>
@@ -91,7 +144,7 @@
 			</div>
 			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
+				<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
 					{#each vm.getPageSizeList() as option}
 						<option value={option}>{option}</option>
 					{/each}
@@ -101,67 +154,68 @@
 		</Main>
 	{:then}
 		<Main bind:main>
-			<h1 class="text-lg">{m.home_title()}</h1>
-			<div class="mb-2">
-				{#if vm.getTotalGamesCount() === 0}
-					<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
-				{/if}
-				{#if vm.getTotalGamesCount() > 0}
-					<p class="text-sm text-neutral-300/60">
-						{m.home_showing_games_counter({
-							count1: vm.getGameCountFrom(),
-							count2: vm.getGameCountTo(),
-							totalCount: vm.getTotalGamesCount()
-						})}
-					</p>
-				{/if}
-			</div>
-			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} bind:value={currentPageSize} id="page_size">
-					{#each vm.getPageSizeList() as option}
-						<option value={option}>{option}</option>
-					{/each}
-				</Select>
-			</label>
+			{#if vm.getIsError()}
+				<SomethingWentWrong />
+			{:else}
+				<h1 class="text-lg">{m.home_title()}</h1>
+				<div class="mb-2">
+					{#if vm.getTotalGamesCount() === 0}
+						<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
+					{/if}
+					{#if vm.getTotalGamesCount() > 0}
+						<p class="text-sm text-neutral-300/60">
+							{m.home_showing_games_counter({
+								count1: vm.getGameCountFrom(),
+								count2: vm.getGameCountTo(),
+								totalCount: vm.getTotalGamesCount()
+							})}
+						</p>
+					{/if}
+				</div>
+				<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
+					{m.home_label_items_per_page()}
+					<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
+						{#each vm.getPageSizeList() as option}
+							<option value={option}>{option}</option>
+						{/each}
+					</Select>
+				</label>
 
-			{#key vm.getPage()}
-				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-					{#each vm.getGameList() as game}
-						{@render gameCard(game)}
-					{/each}
-				</ul>
-			{/key}
+				{#key pageParam}
+					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+						{#each vm.getGameList() as game}
+							{@render gameCard(game)}
+						{/each}
+					</ul>
+				{/key}
 
-			<nav class="mt-4 flex flex-row justify-center gap-2">
-				<BaseButton
-					disabled={vm.getPage() <= 1}
-					onclick={() => handleOnPageChange(vm.getPage() - 1)}
-				>
-					<ChevronLeft />
-				</BaseButton>
+				<nav class="mt-4 flex flex-row justify-center gap-2">
+					<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
+						<ChevronLeft />
+					</LightButton>
 
-				{#if vm.getPage() > 1}
-					<BaseButton onclick={() => handleOnPageChange(vm.getPage() - 1)}>
-						{vm.getPage() - 1}
-					</BaseButton>
-				{/if}
-				<SelectedButton onclick={() => handleOnPageChange(vm.getPage())}>
-					{vm.getPage()}
-				</SelectedButton>
-				{#if vm.getPage() < vm.getTotalPages()}
-					<BaseButton onclick={() => handleOnPageChange(vm.getPage() + 1)}>
-						{vm.getPage() + 1}
-					</BaseButton>
-				{/if}
+					{#if pageParam > 1}
+						<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
+							{pageParam - 1}
+						</LightButton>
+					{/if}
+					<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
+						{pageParam}
+					</SelectedButton>
+					{#if pageParam < vm.getTotalPages()}
+						<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
+							{pageParam + 1}
+						</LightButton>
+					{/if}
 
-				<BaseButton
-					onclick={() => handleOnPageChange(vm.getPage() + 1)}
-					disabled={vm.getPage() >= vm.getTotalPages()}
-				>
-					<ChevronRight />
-				</BaseButton>
-			</nav>
+					<LightButton
+						onclick={() => handleOnPageChange(pageParam + 1)}
+						disabled={pageParam >= vm.getTotalPages()}
+					>
+						<ChevronRight />
+					</LightButton>
+				</nav>
+			{/if}
 		</Main>
 	{/await}
 

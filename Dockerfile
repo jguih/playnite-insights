@@ -18,6 +18,7 @@ RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-in
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='development'
+ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights (Dev)'
 
 COPY --chown=playnite-insights:playnite-insights . .
@@ -64,6 +65,7 @@ FROM build AS prod
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='production'
+ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
