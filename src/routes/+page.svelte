@@ -100,25 +100,25 @@
 	</li>
 {/snippet}
 
+<FiltersSidebar
+	{setSearchParam}
+	installed={installedParam}
+	notInstalled={notInstalledParam}
+	sortBy={sortByParam}
+	sortOrder={sortOrderParam}
+>
+	{#snippet renderSortOrderOptions()}
+		{#each validSortOrder as sortOrder}
+			<option value={sortOrder}>{getSortOrderLabel(sortOrder)}</option>
+		{/each}
+	{/snippet}
+	{#snippet renderSortByOptions()}
+		{#each validSortBy as sortBy}
+			<option value={sortBy}>{getSortByLabel(sortBy)}</option>
+		{/each}
+	{/snippet}
+</FiltersSidebar>
 <BaseAppLayout>
-	<FiltersSidebar
-		{setSearchParam}
-		installed={installedParam}
-		notInstalled={notInstalledParam}
-		sortBy={sortByParam}
-		sortOrder={sortOrderParam}
-	>
-		{#snippet renderSortOrderOptions()}
-			{#each validSortOrder as sortOrder}
-				<option value={sortOrder}>{getSortOrderLabel(sortOrder)}</option>
-			{/each}
-		{/snippet}
-		{#snippet renderSortByOptions()}
-			{#each validSortBy as sortBy}
-				<option value={sortBy}>{getSortByLabel(sortBy)}</option>
-			{/each}
-		{/snippet}
-	</FiltersSidebar>
 	<Header>
 		{#snippet action()}
 			<a class="" href={`/?${page.url.searchParams.toString()}`}>

@@ -1,6 +1,5 @@
 import { join } from 'path';
 import type { ValidationResult } from '$lib/models/validation-result';
-import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from '../types';
 import type { LibraryManifestService } from '../library-manifest/library-manifest';
 import type { PlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
@@ -20,7 +19,6 @@ type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 		logService: LogService;
 		FILES_DIR: string;
 		TMP_DIR: string;
-		createZip: (path: string) => AdmZip;
 	};
 
 const readableFromWeb = (webStream: ReadableStream<Uint8Array>): Readable => {

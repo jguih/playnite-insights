@@ -32,29 +32,12 @@ USER playnite-insights
 
 ENTRYPOINT [ "npx", "vite", "dev", "--host" ]
 
-# Playwright not compatible with Alpine!
-FROM node:24.3 AS playwright
-
-WORKDIR /app
-ENV WORK_DIR=/app
-ENV NODE_ENV='testing'
-ENV APP_NAME='Playnite Insights (Testing - Playwright)'
-
-COPY package.json package-lock.json ./
-RUN npm ci
-RUN mkdir -p ./data/files ./data/tmp
-RUN npx -y playwright install --with-deps 
-COPY . .
-COPY ./playwright.config.docker.ts ./playwright.config.ts
-
-ENTRYPOINT ["npx", "playwright", "test"]
-
 FROM base AS vitest
 
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='testing'
-ENV APP_NAME='Playnite Insights (Testing - Vitest)'
+ENV APP_NAME='Playnite Insights (Vitest)'
 
 COPY . .
 
@@ -69,6 +52,24 @@ ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
+RUN chown -R playnite-insights:playnite-insights /app
+
+EXPOSE 3000
+
+USER playnite-insights
+
+ENTRYPOINT ["node", "build"]
+
+FROM build AS stage
+
+WORKDIR /app
+ENV WORK_DIR=/app
+ENV NODE_ENV='testing'
+ENV BODY_SIZE_LIMIT=128M
+ENV APP_NAME='Playnite Insights (Stage)'
+
+RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
+COPY --chown=playnite-insights:playnite-insights ./static/placeholder ./data/files/placeholder
 RUN chown -R playnite-insights:playnite-insights /app
 
 EXPOSE 3000

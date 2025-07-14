@@ -5,7 +5,6 @@ import * as config from '../config/config';
 import { makePlayniteLibraryImporterService } from './playnite-library-importer/service';
 import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
-import AdmZip from 'adm-zip';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { getDb } from '$lib/infrastructure/database';
 import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
@@ -75,8 +74,7 @@ export const setupServices = () => {
 		...streamUtilsAsyncDeps,
 		...commonDeps,
 		...repositories,
-		libraryManifestService: libraryManifestService,
-		createZip: (path) => new AdmZip(path)
+		libraryManifestService: libraryManifestService
 	});
 	const homePageService = makeHomePageService({ ...commonDeps, ...repositories });
 	const dashPageService = makeDashPageService({ ...commonDeps });
