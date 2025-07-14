@@ -9,7 +9,7 @@ import {
 } from '$lib/services/home-page/validation';
 
 export const load: PageLoad = async ({ url, fetch }) => {
-	const params = url.searchParams;
+	const params = new URLSearchParams(url.searchParams);
 	let changed = false;
 	if (!params.has(searchParamsKeys.page)) {
 		params.set(searchParamsKeys.page, '1');
@@ -30,7 +30,6 @@ export const load: PageLoad = async ({ url, fetch }) => {
 	if (changed) {
 		throw redirect(302, `${url.pathname}?${params.toString()}`);
 	}
-
 	const parsedValues = parseSearchParams(params);
 
 	const promise = fetch(`/api/home?${params.toString()}`);

@@ -7,7 +7,7 @@
 
 <BaseButton
 	{...props}
-	class={`hover:border-primary-500 active:border-primary-700 active:text-primary-700 focus:border-primary-500 hover:text-primary-500 border-2 border-solid border-transparent p-1 text-white ${props.class ?? ''}`}
+	class={`active:text-primary-700 focus:ring-primary-500 hover:text-primary-500 border-transparent p-1 text-white focus:ring-2 ${props.class ?? ''}`}
 >
 	{#if props.children}
 		{@render props.children()}

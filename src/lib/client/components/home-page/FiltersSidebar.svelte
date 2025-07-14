@@ -14,6 +14,7 @@
 		ValidSortOrder
 	} from '$lib/services/home-page/validation';
 	import type { Snippet } from 'svelte';
+	import Checkbox from '../forms/Checkbox.svelte';
 
 	let {
 		setSearchParam,
@@ -71,11 +72,10 @@
 				</Select>
 			</label>
 			<Divider class="my-2 border-1" />
-			<fieldset class="flex flex-col justify-center gap-2">
-				<label for="installed">
-					<input
-						bind:checked={installed}
-						type="checkbox"
+			<fieldset class="bg-background-2 flex flex-col justify-center">
+				<label for="installed" class="text-md flex flex-row items-center gap-2 p-3">
+					<Checkbox
+						checked={installed}
 						name="installed"
 						id="installed"
 						onchange={(e) => {
@@ -84,10 +84,10 @@
 					/>
 					Installed
 				</label>
-				<label for="not_installed">
-					<input
-						bind:checked={notInstalled}
-						type="checkbox"
+				<hr class="border-background-1" />
+				<label for="not_installed" class="text-md flex flex-row items-center gap-2 p-3">
+					<Checkbox
+						checked={notInstalled}
 						name="not_installed"
 						id="not_installed"
 						onchange={(e) => {

@@ -33,7 +33,6 @@
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => makeHomePageViewModel({ data }));
-	let searchParams = $derived(page.url.searchParams);
 	let pageSizeParam = $derived(data.pageSize);
 	let pageParam = $derived(Number(data.page));
 	let installedParam = $derived(data.installed);
@@ -44,7 +43,7 @@
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
-		const params = searchParams;
+		const params = new URLSearchParams(page.url.searchParams);
 		params.set(searchParamsKeys.pageSize, value);
 		params.set(searchParamsKeys.page, '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
@@ -55,7 +54,7 @@
 	};
 
 	const handleOnPageChange = (value: number) => {
-		const newParams = searchParams;
+		const newParams = new URLSearchParams(page.url.searchParams);
 		newParams.set(searchParamsKeys.page, String(value));
 		const newUrl = `${page.url.pathname}?${newParams.toString()}`;
 		if (main) {
