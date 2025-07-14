@@ -6,7 +6,7 @@
 
 <div
 	{...props}
-	class={`fles-row border-background flex justify-between gap-2 border-b-1 p-3 shadow-md ${props.class ?? ''}`}
+	class={`border-background-2 flex flex-row items-center justify-between gap-2 border-b-1 p-3 ${props.class ?? ''}`}
 >
 	{#if props.children}
 		{@render props.children()}

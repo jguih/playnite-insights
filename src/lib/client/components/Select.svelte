@@ -4,7 +4,7 @@
 	let {
 		value = $bindable<string | number>(),
 		...props
-	}: { value?: string | number } & Omit<HTMLSelectAttributes, 'value'> = $props();
+	}: { value?: string | number | null } & Omit<HTMLSelectAttributes, 'value'> = $props();
 </script>
 
 <select

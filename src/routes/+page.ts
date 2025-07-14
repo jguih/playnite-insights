@@ -4,6 +4,7 @@ import {
 	parseSearchParams,
 	searchParamsKeys,
 	validPageSizes,
+	validSortBy,
 	validSortOrder
 } from '$lib/services/home-page/validation';
 
@@ -20,6 +21,10 @@ export const load: PageLoad = async ({ url, fetch }) => {
 	}
 	if (!params.has(searchParamsKeys.sortOrder)) {
 		params.set(searchParamsKeys.sortOrder, validSortOrder[0]);
+		changed = true;
+	}
+	if (!params.has(searchParamsKeys.sortBy)) {
+		params.set(searchParamsKeys.sortBy, validSortBy[0]);
 		changed = true;
 	}
 	if (changed) {

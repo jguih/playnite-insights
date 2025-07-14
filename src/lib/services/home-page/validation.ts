@@ -9,16 +9,32 @@ export const searchParamsKeys = {
 } as const;
 export type ValidSearchParamKeys = (typeof searchParamsKeys)[keyof typeof searchParamsKeys];
 
-export const validSortBy = ['IsInstalled', 'Id', null] as const;
+export const validSortBy = ['Id', 'IsInstalled'] as const;
 export type ValidSortBy = (typeof validSortBy)[number];
 export const isValidSortBy = (value: string | null): value is ValidSortBy => {
 	return validSortBy.includes(value as ValidSortBy);
+};
+export const getSortByLabel = (value: ValidSortBy): string => {
+	switch (value) {
+		case 'Id':
+			return 'Id';
+		case 'IsInstalled':
+			return 'Is Installed';
+	}
 };
 
 export const validSortOrder = ['asc', 'desc'] as const;
 export type ValidSortOrder = (typeof validSortOrder)[number];
 export const isValidSortOrder = (value: string | null): value is ValidSortOrder => {
 	return validSortOrder.includes(value as ValidSortOrder);
+};
+export const getSortOrderLabel = (value: ValidSortOrder): string => {
+	switch (value) {
+		case 'asc':
+			return 'Ascending';
+		case 'desc':
+			return 'Descending';
+	}
 };
 
 export const validPageSizes = ['25', '50', '75', '100'] as const;

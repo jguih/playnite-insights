@@ -22,18 +22,29 @@
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
-	import { searchParamsKeys } from '$lib/services/home-page/validation';
+	import {
+		getSortByLabel,
+		getSortOrderLabel,
+		searchParamsKeys,
+		validSortBy,
+		validSortOrder,
+		type ValidSearchParamKeys
+	} from '$lib/services/home-page/validation';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => makeHomePageViewModel({ data }));
-	let currentPageSize = $derived(data.pageSize);
-	let currentPage = $derived(Number(data.page));
+	let searchParams = $derived(page.url.searchParams);
+	let pageSizeParam = $derived(data.pageSize);
+	let pageParam = $derived(Number(data.page));
+	let installedParam = $derived(data.installed);
+	let notInstalledParam = $derived(data.notInstalled);
+	let sortByParam = $derived(data.sortBy);
+	let sortOrderParam = $derived(data.sortOrder);
 	let main: HTMLElement | undefined = $state();
-	$inspect(currentPageSize);
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
-		const params = new URLSearchParams(page.url.searchParams);
+		const params = searchParams;
 		params.set(searchParamsKeys.pageSize, value);
 		params.set(searchParamsKeys.page, '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
@@ -43,14 +54,30 @@
 		goto(newUrl, { replaceState: true });
 	};
 
-	const handleOnPageChange = (_page: number) => {
+	const handleOnPageChange = (value: number) => {
+		const newParams = searchParams;
+		newParams.set(searchParamsKeys.page, String(value));
+		const newUrl = `${page.url.pathname}?${newParams.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
 		}
-		const params = new URLSearchParams(page.url.searchParams);
-		params.set(searchParamsKeys.page, String(_page));
-		const newUrl = `${page.url.pathname}?${params.toString()}`;
 		goto(newUrl, { replaceState: true });
+	};
+
+	const setSearchParam = (key: ValidSearchParamKeys, value: string | boolean) => {
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set('page', '1');
+		if (!value) {
+			params.delete(key);
+		} else if (typeof value === 'string') {
+			if (value === '') params.delete(key);
+			else params.set(key, value);
+		} else if (typeof value === 'boolean') {
+			if (value) params.set(key, '1');
+			else params.delete(key);
+		}
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
 </script>
 
@@ -75,7 +102,24 @@
 {/snippet}
 
 <BaseAppLayout>
-	<FiltersSidebar />
+	<FiltersSidebar
+		{setSearchParam}
+		installed={installedParam}
+		notInstalled={notInstalledParam}
+		sortBy={sortByParam}
+		sortOrder={sortOrderParam}
+	>
+		{#snippet renderSortOrderOptions()}
+			{#each validSortOrder as sortOrder}
+				<option value={sortOrder}>{getSortOrderLabel(sortOrder)}</option>
+			{/each}
+		{/snippet}
+		{#snippet renderSortByOptions()}
+			{#each validSortBy as sortBy}
+				<option value={sortBy}>{getSortByLabel(sortBy)}</option>
+			{/each}
+		{/snippet}
+	</FiltersSidebar>
 	<Header>
 		{#snippet action()}
 			<a class="" href={`/?${page.url.searchParams.toString()}`}>
@@ -101,7 +145,7 @@
 			</div>
 			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} value={currentPageSize} id="page_size">
+				<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
 					{#each vm.getPageSizeList() as option}
 						<option value={option}>{option}</option>
 					{/each}
@@ -131,14 +175,14 @@
 				</div>
 				<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
 					{m.home_label_items_per_page()}
-					<Select onchange={handleOnPageSizeChange} value={currentPageSize} id="page_size">
+					<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
 						{#each vm.getPageSizeList() as option}
 							<option value={option}>{option}</option>
 						{/each}
 					</Select>
 				</label>
 
-				{#key currentPage}
+				{#key pageParam}
 					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
 						{#each vm.getGameList() as game}
 							{@render gameCard(game)}
@@ -147,30 +191,27 @@
 				{/key}
 
 				<nav class="mt-4 flex flex-row justify-center gap-2">
-					<LightButton
-						disabled={currentPage <= 1}
-						onclick={() => handleOnPageChange(currentPage - 1)}
-					>
+					<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
 						<ChevronLeft />
 					</LightButton>
 
-					{#if currentPage > 1}
-						<LightButton onclick={() => handleOnPageChange(currentPage - 1)}>
-							{currentPage - 1}
+					{#if pageParam > 1}
+						<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
+							{pageParam - 1}
 						</LightButton>
 					{/if}
-					<SelectedButton onclick={() => handleOnPageChange(currentPage)}>
-						{currentPage}
+					<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
+						{pageParam}
 					</SelectedButton>
-					{#if currentPage < vm.getTotalPages()}
-						<LightButton onclick={() => handleOnPageChange(currentPage + 1)}>
-							{currentPage + 1}
+					{#if pageParam < vm.getTotalPages()}
+						<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
+							{pageParam + 1}
 						</LightButton>
 					{/if}
 
 					<LightButton
-						onclick={() => handleOnPageChange(currentPage + 1)}
-						disabled={currentPage >= vm.getTotalPages()}
+						onclick={() => handleOnPageChange(pageParam + 1)}
+						disabled={pageParam >= vm.getTotalPages()}
 					>
 						<ChevronRight />
 					</LightButton>
