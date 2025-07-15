@@ -1,0 +1,12 @@
+{
+  "name": "@playnite-insights/lib",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "devDependencies": {
+    "zod": "^3.25.76"
+  },
+  "dependencies": {
+    "@types/node": "^24.0.13"
+  }
+}

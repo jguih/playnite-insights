@@ -1,30 +1,34 @@
 FROM node:24.3-alpine AS base
-
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-RUN mkdir -p ./data/files ./data/tmp
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 FROM base AS build
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN pnpm run -r build
+RUN pnpm deploy --filter=playnite-insights /prod/playnite-insights
+RUN pnpm deploy --filter=@playnite-insights/infrastructure /prod/infra
 
-WORKDIR /app
-COPY . .
-RUN npm run build
+FROM base AS dev-deploy
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm deploy --filter=playnite-insights /prod/playnite-insights
 
 FROM base AS dev
-
-RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights (Dev)'
 
-COPY --chown=playnite-insights:playnite-insights . .
-# Include placeholder images for testing
-COPY --chown=playnite-insights:playnite-insights ./static/placeholder ./data/files/placeholder
-RUN chown -R playnite-insights:playnite-insights /app
+RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
+RUN mkdir -p ./data/files ./data/tmp
+RUN chown -R playnite-insights:playnite-insights ./data
+COPY --from=dev-deploy --chown=playnite-insights:playnite-insights /prod/playnite-insights .
+COPY --chown=playnite-insights:playnite-insights ./playnite-insights/static/placeholder ./data/files/placeholder
 
 EXPOSE 3000
 
@@ -43,8 +47,7 @@ COPY . .
 
 ENTRYPOINT ["npx", "vitest", "run"]
 
-FROM build AS prod
-
+FROM base AS prod
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='production'
@@ -52,7 +55,12 @@ ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-RUN chown -R playnite-insights:playnite-insights /app
+RUN mkdir -p ./data/files ./data/tmp
+RUN chown -R playnite-insights:playnite-insights ./data
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json ./package.json
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 
@@ -69,8 +77,13 @@ ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights (Stage)'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-COPY --chown=playnite-insights:playnite-insights ./static/placeholder ./data/files/placeholder
-RUN chown -R playnite-insights:playnite-insights /app
+RUN mkdir -p ./data/files ./data/tmp
+RUN chown -R playnite-insights:playnite-insights ./data
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json ./package.json
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/static/placeholder ./data/files/placeholder
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 

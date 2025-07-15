@@ -1,0 +1,5 @@
+packages:
+  - "playnite-insights"
+  - "playwright"
+  - "packages/@playnite-insights/*"
+injectWorkspacePackages: true
