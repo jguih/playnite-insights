@@ -1,10 +1,9 @@
+import { homePageDataSchema, type HomePageData } from '@playnite-insights/lib/client/home-page';
 import {
 	gamePageSizes,
-	homePageDataSchema,
 	type GamePageSize,
-	type GamePageSizes,
-	type HomePageData
-} from '@playnite-insights/lib';
+	type GamePageSizes
+} from '@playnite-insights/lib/client/playnite-game';
 import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 

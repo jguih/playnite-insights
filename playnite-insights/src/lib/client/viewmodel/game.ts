@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
-import type { PlayniteGame } from '@playnite-insights/lib';
+import { type PlayniteGame } from '@playnite-insights/lib/client/playnite-game';
+import { type GamePageData, gamePageDataSchema } from '@playnite-insights/lib/client/game-page';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
-import { gamePageDataSchema, type GamePageData } from '$lib/services/game-page/schemas';
 
 export const makeGamePageViewModel = (promise: Promise<Response>) => {
 	let pageData: GamePageData | undefined;

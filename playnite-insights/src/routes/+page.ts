@@ -1,12 +1,14 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import {
-	gamePageSizes,
-	gameSortBy,
-	gameSortOrder,
 	homePageSearchParamsKeys as paramKeys,
 	parseHomePageSearchParams
-} from '@playnite-insights/lib';
+} from '@playnite-insights/lib/client/home-page';
+import {
+	gamePageSizes,
+	gameSortBy,
+	gameSortOrder
+} from '@playnite-insights/lib/client/playnite-game';
 
 export const load: PageLoad = async ({ url, fetch }) => {
 	const params = new URLSearchParams(url.searchParams);

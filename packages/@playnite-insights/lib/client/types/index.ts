@@ -5,5 +5,3 @@ export type * from "./publisher";
 export type * from "./platform";
 export { LOG_LEVELS, type ValidLogLevels } from "./log";
 export type * from "./developer";
-export type * from "./dash-page";
-export type * from "./game-page";

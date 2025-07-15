@@ -8,6 +8,15 @@
     "@types/node": "^24.0.14",
     "zod": "^3.25.76"
   },
+  "exports": {
+    ".": "./index.ts",
+    "./client/home-page": "./client/home-page/index.ts",
+    "./client/playnite-game": "./client/playnite-game/index.ts",
+    "./client/game-page": "./client/game-page/index.ts",
+    "./client/dash-page": "./client/dash-page/index.ts",
+    "./client/schemas": "./client/schemas/index.ts",
+    "./client/types": "./client/types/index.ts"
+  },
   "engines": {
     "node": "^24.3.0",
     "pnpm": "^10.13.0"

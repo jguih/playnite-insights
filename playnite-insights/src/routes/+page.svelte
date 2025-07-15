@@ -21,8 +21,12 @@
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
-	import { gameSortBy, gameSortOrder, type HomePageData } from '@playnite-insights/lib';
-	// import { homePageSearchParamsKeys, type HomePageSearchParamKeys } from '@playnite-insights/core';
+	import {
+		type HomePageData,
+		homePageSearchParamsKeys,
+		type HomePageSearchParamKeys
+	} from '@playnite-insights/lib/client/home-page';
+	import { gameSortBy, gameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => makeHomePageViewModel({ data }));
@@ -37,8 +41,8 @@
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
 		const params = new URLSearchParams(page.url.searchParams);
-		params.set('pageSize', value);
-		params.set('page', '1');
+		params.set(homePageSearchParamsKeys.pageSize, value);
+		params.set(homePageSearchParamsKeys.page, '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
@@ -48,7 +52,7 @@
 
 	const handleOnPageChange = (value: number) => {
 		const newParams = new URLSearchParams(page.url.searchParams);
-		newParams.set('page', String(value));
+		newParams.set(homePageSearchParamsKeys.page, String(value));
 		const newUrl = `${page.url.pathname}?${newParams.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
@@ -56,9 +60,9 @@
 		goto(newUrl, { replaceState: true });
 	};
 
-	const setSearchParam = (key: string, value: string | boolean) => {
+	const setSearchParam = (key: HomePageSearchParamKeys, value: string | boolean) => {
 		const params = new URLSearchParams(page.url.searchParams);
-		params.set('page', '1');
+		params.set(homePageSearchParamsKeys.page, '1');
 		if (!value) {
 			params.delete(key);
 		} else if (typeof value === 'string') {

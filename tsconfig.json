@@ -4,6 +4,9 @@
       "@playnite-insights/lib": [
         "./packages/@playnite-insights/lib"
       ],
+      "@playnite-insights/lib/*": [
+        "./packages/@playnite-insights/lib/*"
+      ],
       "@playnite-insights/core": [
         "./packages/@playnite-insights/core"
       ],

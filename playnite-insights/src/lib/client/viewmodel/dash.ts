@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib';
+import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib/client/dash-page';
 import { getFormattedPlaytime } from '../utils/playnite-game';
 
 export const makeDashPageViewModel = (promise: Promise<Response>) => {
