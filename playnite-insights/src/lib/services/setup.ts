@@ -13,8 +13,12 @@ import { makeHomePageService } from './home-page/service';
 import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
 import { makeMediaFilesService } from './media-files/service';
-import { makeGenreRepository } from './genre/repository';
-import { getDb, makeFileSystemService, config } from '@playnite-insights/infrastructure';
+import {
+	getDb,
+	makeFileSystemService,
+	makeGenreRepository,
+	config
+} from '@playnite-insights/infrastructure';
 import {
 	makeLogService,
 	makeLibraryManifestService,

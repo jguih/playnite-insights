@@ -1,4 +1,4 @@
-export * from "./config/index";
-export * from "./database/database";
-
-export * from "./services/file-system/service";
+export * from "./config";
+export * from "./database";
+export * from "./services";
+export * from "./repository";
