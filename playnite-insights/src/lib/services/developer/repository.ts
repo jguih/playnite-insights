@@ -1,7 +1,7 @@
 import { developerSchema, type Developer } from '$lib/services/developer/schemas';
 import z from 'zod';
 import type { DatabaseSync } from 'node:sqlite';
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 
 type DeveloperRepositoryDeps = {
 	getDb: () => DatabaseSync;

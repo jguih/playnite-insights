@@ -3,19 +3,15 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-FROM base AS build
+FROM base AS deps
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+FROM deps AS build
 RUN pnpm run -r build
 RUN pnpm deploy --filter=playnite-insights /prod/playnite-insights
-RUN pnpm deploy --filter=@playnite-insights/infrastructure /prod/infra
-
-FROM base AS dev-deploy
-COPY . /usr/src/app
-WORKDIR /usr/src/app
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm deploy --filter=playnite-insights /prod/playnite-insights
+RUN pnpm deploy --filter=@playnite-insights/infra /prod/infra
 
 FROM base AS dev
 WORKDIR /app
@@ -27,26 +23,21 @@ ENV APP_NAME='Playnite Insights (Dev)'
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p ./data/files ./data/tmp
 RUN chown -R playnite-insights:playnite-insights ./data
-COPY --from=dev-deploy --chown=playnite-insights:playnite-insights /prod/playnite-insights .
-COPY --from=dev-deploy --chown=playnite-insights:playnite-insights /prod/playnite-insights/static/placeholder ./data/files/placeholder
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
+COPY --from=deps --chown=playnite-insights:playnite-insights /usr/src/app ./
+COPY --from=deps --chown=playnite-insights:playnite-insights /usr/src/app/playnite-insights/static/placeholder ./data/files/placeholder
+COPY --from=deps --chown=playnite-insights:playnite-insights /usr/src/app/packages/@playnite-insights/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 
 USER playnite-insights
 
-ENTRYPOINT [ "npx", "vite", "dev", "--host" ]
+ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "dev" ]
 
 FROM base AS vitest
-
 WORKDIR /app
-ENV WORK_DIR=/app
 ENV NODE_ENV='testing'
-ENV APP_NAME='Playnite Insights (Vitest)'
-
-COPY . .
-
-ENTRYPOINT ["npx", "vitest", "run"]
+COPY --from=deps /usr/src/app ./
+ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "test:unit" ]
 
 FROM base AS prod
 WORKDIR /app

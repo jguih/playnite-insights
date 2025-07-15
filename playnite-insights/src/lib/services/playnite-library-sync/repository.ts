@@ -1,4 +1,4 @@
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 import type { DatabaseSync } from 'node:sqlite';
 
 type PlayniteLibrarySyncRepositoryDeps = {

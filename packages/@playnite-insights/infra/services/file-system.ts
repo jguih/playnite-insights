@@ -1,4 +1,4 @@
-import { type FileSystemService } from "@playnite-insights/services";
+import { type FileSystemService } from "@playnite-insights/core";
 import * as fsAsync from "fs/promises";
 
 export const makeFileSystemService = (): FileSystemService => {

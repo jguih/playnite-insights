@@ -7,7 +7,7 @@ import {
 	type HomePageFilters,
 	type HomePageSorting
 } from './filter';
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 
 type HomePageServiceDeps = {
 	getDb: () => DatabaseSync;

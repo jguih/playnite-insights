@@ -19,8 +19,8 @@ import {
 	makePlatformRepository,
 	defaultLogger,
 	config
-} from '@playnite-insights/infrastructure';
-import { makeLibraryManifestService } from '@playnite-insights/services';
+} from '@playnite-insights/infra';
+import { makeLibraryManifestService } from '@playnite-insights/core';
 
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
@@ -43,10 +43,10 @@ export const setupServices = () => {
 	const logLevel = Number(process.env.LOG_LEVEL);
 	const commonDeps = { getDb, logService: defaultLogger, fileSystemService, ...config };
 	// Repositories
-	const publisherRepository = makePublisherRepository({ ...commonDeps });
-	const platformRepository = makePlatformRepository({ ...commonDeps });
+	const publisherRepository = makePublisherRepository();
+	const platformRepository = makePlatformRepository();
 	const developerRepository = makeDeveloperRepository({ ...commonDeps });
-	const genreRepository = makeGenreRepository({ ...commonDeps });
+	const genreRepository = makeGenreRepository();
 	const playniteGameRepository = makePlayniteGameRepository({
 		...commonDeps,
 		publisherRepository,

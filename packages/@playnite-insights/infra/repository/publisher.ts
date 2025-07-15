@@ -1,8 +1,5 @@
 import { publisherSchema, type Publisher } from "@playnite-insights/lib";
-import type {
-  LogService,
-  PublisherRepository,
-} from "@playnite-insights/services";
+import type { LogService, PublisherRepository } from "@playnite-insights/core";
 import type { DatabaseSync } from "node:sqlite";
 import z from "zod";
 import { getDb as _getDb } from "../database";

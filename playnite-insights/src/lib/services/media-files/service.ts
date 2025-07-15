@@ -1,6 +1,6 @@
 import { join } from 'path';
 import type { FileSystemAsyncDeps } from '../types';
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 
 type MediaFilesServiceDeps = FileSystemAsyncDeps & {
 	logService: LogService;

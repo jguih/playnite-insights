@@ -14,7 +14,7 @@ import type { PublisherRepository } from '$lib/services/publisher/repository';
 import type { PlatformRepository } from '$lib/services/platform/repository';
 import type { DeveloperRepository } from '$lib/services/developer/repository';
 import type { GenreRepository } from '$lib/services/genre/repository';
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 
 type PlayniteGameRepositoryDeps = {
 	getDb: () => DatabaseSync;

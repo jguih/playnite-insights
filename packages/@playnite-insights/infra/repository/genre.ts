@@ -1,6 +1,6 @@
 import z from "zod";
 import type { DatabaseSync } from "node:sqlite";
-import type { GenreRepository, LogService } from "@playnite-insights/services";
+import type { GenreRepository, LogService } from "@playnite-insights/core";
 import { type Genre, genreSchema } from "@playnite-insights/lib";
 import { getDb as _getDb } from "../database";
 import { defaultLogger } from "../services/log";

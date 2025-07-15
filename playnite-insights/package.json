@@ -4,7 +4,7 @@
   "version": "2.2.0",
   "type": "module",
   "scripts": {
-    "dev": "docker compose up --watch --force-recreate --build app-dev",
+    "dev": "vite dev --host",
     "prod:down": "docker compose down app-prod",
     "prod:up": "COMPOSE_BAKE=true docker compose up -d --build app-prod",
     "prod": "npm run prod:down ; npm run prod:up",
@@ -15,7 +15,7 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "test:unit": "COMPOSE_BAKE=true docker compose run --rm --build app-vitest",
+    "test:unit": "vitest run",
     "test": "npm run test:unit",
     "preversion": "npm run test"
   },
@@ -55,7 +55,7 @@
     "svelte-tiny-virtual-list": "^2.1.2",
     "zod": "^3.25.74",
     "@playnite-insights/lib": "workspace:*",
-    "@playnite-insights/services": "workspace:*",
-    "@playnite-insights/infrastructure": "workspace:*"
+    "@playnite-insights/core": "workspace:*",
+    "@playnite-insights/infra": "workspace:*"
   }
 }

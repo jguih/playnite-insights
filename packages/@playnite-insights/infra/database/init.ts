@@ -3,10 +3,7 @@ import { existsSync } from "fs";
 import { seedDb } from "./seed.js";
 import { exit } from "process";
 import { join } from "path";
-import type {
-  FileSystemService,
-  LogService,
-} from "@playnite-insights/services";
+import type { FileSystemService, LogService } from "@playnite-insights/core";
 
 type InitDatabaseDeps = {
   fileSystemService: FileSystemService;

@@ -1,5 +1,5 @@
 {
-  "name": "@playnite-insights/infrastructure",
+  "name": "@playnite-insights/infra",
   "version": "1.0.0",
   "main": "./index.ts",
   "types": "./index.ts",

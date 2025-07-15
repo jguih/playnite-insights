@@ -1,5 +1,5 @@
 import { LOG_LEVELS } from "@playnite-insights/lib";
-import { LogService } from "@playnite-insights/services";
+import { LogService } from "@playnite-insights/core";
 import { ZodError } from "zod";
 
 export const makeLogService = (

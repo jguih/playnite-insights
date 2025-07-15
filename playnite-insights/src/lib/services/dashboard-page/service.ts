@@ -1,7 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { type DashPageData } from './schemas';
 import { getLastSixMonthsInclusiveAbreviated } from '$lib/utils/date';
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 
 type DashPageServiceDeps = {
 	logService: LogService;

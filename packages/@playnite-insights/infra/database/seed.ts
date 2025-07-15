@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import { faker } from "@faker-js/faker";
-import type { LogService } from "@playnite-insights/services";
+import type { LogService } from "@playnite-insights/core";
 
 export const seedDb = (db: DatabaseSync, logService: LogService) => {
   logService.info("Seeding database...");

@@ -9,7 +9,7 @@ import busboy from 'busboy';
 import type { IncomingHttpHeaders } from 'http';
 import { Readable } from 'stream';
 import type { PlayniteGame } from '../playnite-game/schemas';
-import type { LogService } from '@playnite-insights/services';
+import type { LogService } from '@playnite-insights/core';
 
 type PlayniteLibraryImporterServiceDeps = FileSystemAsyncDeps &
 	StreamUtilsAsyncDeps & {
