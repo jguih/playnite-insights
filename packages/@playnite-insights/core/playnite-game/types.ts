@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type {
+  Developer,
   Genre,
   Platform,
   PlayniteGame,

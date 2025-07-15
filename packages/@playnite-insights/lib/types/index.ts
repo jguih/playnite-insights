@@ -5,3 +5,4 @@ export * from "./validation-result";
 export * from "./publisher";
 export * from "./platform";
 export * from "./log";
+export * from "./developer";

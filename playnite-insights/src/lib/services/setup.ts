@@ -6,7 +6,6 @@ import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
 import { makePlayniteGameRepository } from './playnite-game';
-import { makeDeveloperRepository } from './developer/repository';
 import { makeHomePageService } from './home-page/service';
 import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
@@ -17,6 +16,7 @@ import {
 	makeGenreRepository,
 	makePublisherRepository,
 	makePlatformRepository,
+	makeDeveloperRepository,
 	defaultLogger,
 	config
 } from '@playnite-insights/infra';
@@ -40,12 +40,11 @@ export const setupServices = () => {
 		createWriteStream: fs.createWriteStream,
 		pipeline: streamAsync.pipeline
 	};
-	const logLevel = Number(process.env.LOG_LEVEL);
 	const commonDeps = { getDb, logService: defaultLogger, fileSystemService, ...config };
 	// Repositories
 	const publisherRepository = makePublisherRepository();
 	const platformRepository = makePlatformRepository();
-	const developerRepository = makeDeveloperRepository({ ...commonDeps });
+	const developerRepository = makeDeveloperRepository();
 	const genreRepository = makeGenreRepository();
 	const playniteGameRepository = makePlayniteGameRepository({
 		...commonDeps,
