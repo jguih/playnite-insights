@@ -57,5 +57,9 @@
     "@playnite-insights/lib": "workspace:*",
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/infra": "workspace:*"
+  },
+  "engines": {
+    "node": "^24.3.0",
+    "pnpm": "^10.13.0"
   }
 }

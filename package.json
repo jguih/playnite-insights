@@ -5,6 +5,11 @@
   "workspaces": [
     "playnite-insights",
     "playwright",
-    "packages/*"
-  ]
+    "packages/@playnite-insights/lib",
+    "packages/@playnite-insights/infra",
+    "packages/@playnite-insights/core"
+  ],
+  "devDependencies": {
+    "@changesets/cli": "^2.29.5"
+  }
 }

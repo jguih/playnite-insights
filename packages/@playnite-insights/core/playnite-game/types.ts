@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { type PlayniteGame } from "@playnite-insights/lib";
+import type {
+  Genre,
+  Platform,
+  PlayniteGame,
+  Publisher,
+} from "@playnite-insights/lib";
 
 export type PlayniteGameRepository = {
   add: (
