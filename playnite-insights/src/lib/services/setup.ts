@@ -5,7 +5,6 @@ import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { makeHomePageService } from './home-page/service';
-import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
 import {
 	getDb,
@@ -19,7 +18,12 @@ import {
 	defaultLogger,
 	config
 } from '@playnite-insights/infra';
-import { makeLibraryManifestService, makeMediaFilesService } from '@playnite-insights/core';
+import {
+	makeLibraryManifestService,
+	makeMediaFilesService,
+	makeDashPageService
+} from '@playnite-insights/core';
+import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
@@ -39,7 +43,6 @@ export const setupServices = () => {
 		createWriteStream: fs.createWriteStream,
 		pipeline: streamAsync.pipeline
 	};
-	const commonDeps = { getDb, logService: defaultLogger, fileSystemService, ...config };
 	// Repositories
 	const publisherRepository = makePublisherRepository();
 	const platformRepository = makePlatformRepository();
@@ -55,6 +58,13 @@ export const setupServices = () => {
 		playniteLibrarySyncRepository,
 		genreRepository
 	};
+	const commonDeps = {
+		getDb,
+		logService: defaultLogger,
+		fileSystemService,
+		...config,
+		...repositories
+	};
 	// Services
 	const libraryManifestService = makeLibraryManifestService({
 		...FsAsyncDeps,
@@ -68,9 +78,12 @@ export const setupServices = () => {
 		...repositories,
 		libraryManifestService: libraryManifestService
 	});
-	const homePageService = makeHomePageService({ ...commonDeps, ...repositories });
-	const dashPageService = makeDashPageService({ ...commonDeps });
-	const gamePageService = makeGamePageService({ ...commonDeps, ...repositories });
+	const homePageService = makeHomePageService({ ...commonDeps });
+	const dashPageService = makeDashPageService({
+		...commonDeps,
+		getLastSixMonthsAbv: getLastSixMonthsAbreviated
+	});
+	const gamePageService = makeGamePageService({ ...commonDeps });
 	const mediaFilesService = makeMediaFilesService({ ...commonDeps });
 
 	const services = {

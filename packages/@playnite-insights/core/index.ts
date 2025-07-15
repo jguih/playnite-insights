@@ -8,3 +8,4 @@ export * from "./platform";
 export * from "./developer";
 export * from "./media-files";
 export * from "./playnite-library-sync";
+export * from "./dash-page";

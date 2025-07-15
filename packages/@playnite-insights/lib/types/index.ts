@@ -1,8 +1,9 @@
-export * from "./genre";
-export * from "./library-manifest";
-export * from "./playnite-game";
-export * from "./validation-result";
-export * from "./publisher";
-export * from "./platform";
-export * from "./log";
-export * from "./developer";
+export type * from "./genre";
+export type * from "./library-manifest";
+export type * from "./playnite-game";
+export type * from "./validation-result";
+export type * from "./publisher";
+export type * from "./platform";
+export type * from "./log";
+export type * from "./developer";
+export type * from "./dash-page";

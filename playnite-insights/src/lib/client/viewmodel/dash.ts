@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { dashPageDataSchema, type DashPageData } from '$lib/services/dashboard-page/schemas';
+import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib';
 import { getFormattedPlaytime } from '../utils/playnite-game';
 
 export const makeDashPageViewModel = (promise: Promise<Response>) => {
@@ -26,8 +26,8 @@ export const makeDashPageViewModel = (promise: Promise<Response>) => {
 					totalPlaytimeOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } }
 				};
 	const getPlayed = (): number => pageData?.played ?? 0;
-	const getTop10MostPlayedGames = (): DashPageData['top10MostPlayedGames'] =>
-		pageData?.top10MostPlayedGames ?? [];
+	const getTop10MostPlayedGames = (): DashPageData['topMostPlayedGames'] =>
+		pageData?.topMostPlayedGames ?? [];
 	const getIsError = (): boolean => isError;
 
 	const load = async () => {

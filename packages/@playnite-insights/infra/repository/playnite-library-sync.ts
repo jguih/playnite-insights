@@ -42,8 +42,74 @@ export const makePlayniteLibrarySyncRepository = (
     }
   };
 
+  const getTotalPlaytimeOverLast6Months = (): number[] => {
+    const query = `
+        SELECT totalPlaytimeSeconds FROM (
+          SELECT MAX(TotalPlaytimeSeconds) as totalPlaytimeSeconds, strftime('%Y-%m', Timestamp) as yearMonth
+          FROM playnite_library_sync
+          WHERE Timestamp >= datetime('now', '-6 months')
+          GROUP BY yearMonth
+          ORDER BY yearMonth
+        );
+      `;
+    try {
+      const stmt = getDb().prepare(query);
+      const result = stmt.all();
+      const data: number[] = [];
+      for (const entry of result) {
+        const value = entry.totalPlaytimeSeconds as number;
+        data.push(value);
+      }
+      logService.debug(
+        `Successfully queried total playtime over last 6 months: ${JSON.stringify(
+          data
+        )}`
+      );
+      return data;
+    } catch (error) {
+      logService.error(
+        "Failed to get total playtime over last 6 months",
+        error as Error
+      );
+      return [];
+    }
+  };
+
+  const getTotalGamesOwnedOverLast6Months = (): number[] => {
+    const query = `
+        SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
+        FROM playnite_library_sync
+        WHERE Timestamp >= datetime('now', '-6 months')
+        GROUP BY yearMonth
+        ORDER BY yearMonth;
+      `;
+    try {
+      const stmt = getDb().prepare(query);
+      const result = stmt.all();
+      const data: number[] = [];
+      for (const entry of result) {
+        const value = entry.totalGamesOwned as number;
+        data.push(value);
+      }
+      logService.debug(
+        `Successfully queried total games owned over last 6 months: ${JSON.stringify(
+          data
+        )}`
+      );
+      return data;
+    } catch (error) {
+      logService.error(
+        "Failed to get total games owned over last 6 months",
+        error as Error
+      );
+      return [];
+    }
+  };
+
   return {
     add,
+    getTotalGamesOwnedOverLast6Months,
+    getTotalPlaytimeOverLast6Months,
   };
 };
 
