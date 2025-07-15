@@ -9,7 +9,6 @@ import { makePlayniteGameRepository } from './playnite-game';
 import { makeHomePageService } from './home-page/service';
 import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
-import { makeMediaFilesService } from './media-files/service';
 import {
 	getDb,
 	makeFileSystemService,
@@ -20,7 +19,7 @@ import {
 	defaultLogger,
 	config
 } from '@playnite-insights/infra';
-import { makeLibraryManifestService } from '@playnite-insights/core';
+import { makeLibraryManifestService, makeMediaFilesService } from '@playnite-insights/core';
 
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
@@ -80,10 +79,7 @@ export const setupServices = () => {
 	const homePageService = makeHomePageService({ ...commonDeps, ...repositories });
 	const dashPageService = makeDashPageService({ ...commonDeps });
 	const gamePageService = makeGamePageService({ ...commonDeps, ...repositories });
-	const mediaFilesService = makeMediaFilesService({
-		...FsAsyncDeps,
-		...commonDeps
-	});
+	const mediaFilesService = makeMediaFilesService({ ...commonDeps });
 
 	const services = {
 		...repositories,
