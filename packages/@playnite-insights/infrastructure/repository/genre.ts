@@ -2,16 +2,20 @@ import z from "zod";
 import type { DatabaseSync } from "node:sqlite";
 import type { GenreRepository, LogService } from "@playnite-insights/services";
 import { type Genre, genreSchema } from "@playnite-insights/lib";
+import { getDb as _getDb } from "../database";
+import { defaultLogger } from "../services/log";
 
 type GenreRepositoryDeps = {
   logService: LogService;
   getDb: () => DatabaseSync;
 };
 
-export const makeGenreRepository = ({
-  logService,
-  getDb,
-}: GenreRepositoryDeps): GenreRepository => {
+export const makeGenreRepository = (
+  { logService, getDb }: GenreRepositoryDeps = {
+    getDb: _getDb,
+    logService: defaultLogger,
+  }
+): GenreRepository => {
   const add = (genre: Genre): boolean => {
     const db = getDb();
     const query = `

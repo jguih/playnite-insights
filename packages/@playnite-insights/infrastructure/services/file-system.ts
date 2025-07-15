@@ -14,3 +14,6 @@ export const makeFileSystemService = (): FileSystemService => {
     constants: fsAsync.constants,
   };
 };
+
+export const defaultFileSystemService: FileSystemService =
+  makeFileSystemService();

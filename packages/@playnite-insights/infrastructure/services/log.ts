@@ -1,14 +1,6 @@
+import { LOG_LEVELS } from "@playnite-insights/lib";
+import { LogService } from "@playnite-insights/services";
 import { ZodError } from "zod";
-import { LogService } from "./types";
-
-export const LOG_LEVELS = {
-  none: 1000,
-  debug: 0,
-  info: 1,
-  success: 2,
-  warning: 3,
-  error: 4,
-} as const;
 
 export const makeLogService = (
   CURRENT_LOG_LEVEL: (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS]
@@ -80,3 +72,8 @@ export const isValidLogLevel = (
   const validLevels = [1000, 0, 1, 2, 3, 4];
   return validLevels.includes(value);
 };
+
+const logLevel = Number(process.env.LOG_LEVEL);
+export const defaultLogger = makeLogService(
+  isValidLogLevel(logLevel) ? logLevel : LOG_LEVELS.info
+);

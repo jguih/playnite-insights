@@ -5,7 +5,6 @@ import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
-import { makePlatformRepository } from '$lib/services/platform/repository';
 import { makePlayniteGameRepository } from './playnite-game';
 import { makeDeveloperRepository } from './developer/repository';
 import { makeHomePageService } from './home-page/service';
@@ -17,14 +16,11 @@ import {
 	makeFileSystemService,
 	makeGenreRepository,
 	makePublisherRepository,
+	makePlatformRepository,
+	defaultLogger,
 	config
 } from '@playnite-insights/infrastructure';
-import {
-	makeLogService,
-	makeLibraryManifestService,
-	LOG_LEVELS,
-	isValidLogLevel
-} from '@playnite-insights/services';
+import { makeLibraryManifestService } from '@playnite-insights/services';
 
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
@@ -45,8 +41,7 @@ export const setupServices = () => {
 		pipeline: streamAsync.pipeline
 	};
 	const logLevel = Number(process.env.LOG_LEVEL);
-	const logService = makeLogService(isValidLogLevel(logLevel) ? logLevel : LOG_LEVELS.info);
-	const commonDeps = { getDb, logService, fileSystemService, ...config };
+	const commonDeps = { getDb, logService: defaultLogger, fileSystemService, ...config };
 	// Repositories
 	const publisherRepository = makePublisherRepository({ ...commonDeps });
 	const platformRepository = makePlatformRepository({ ...commonDeps });
@@ -93,7 +88,7 @@ export const setupServices = () => {
 
 	const services = {
 		...repositories,
-		log: logService,
+		log: defaultLogger,
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
 		homePage: homePageService,

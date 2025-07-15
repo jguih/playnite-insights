@@ -5,6 +5,8 @@ import type {
 } from "@playnite-insights/services";
 import type { DatabaseSync } from "node:sqlite";
 import z from "zod";
+import { getDb as _getDb } from "../database";
+import { defaultLogger } from "../services/log";
 
 type PublisherRepositoryDeps = {
   getDb: () => DatabaseSync;
@@ -12,10 +14,13 @@ type PublisherRepositoryDeps = {
 };
 
 export const makePublisherRepository = (
-  deps: PublisherRepositoryDeps
+  { getDb, logService }: PublisherRepositoryDeps = {
+    getDb: _getDb,
+    logService: defaultLogger,
+  }
 ): PublisherRepository => {
   const add = (publisher: Publisher): boolean => {
-    const db = deps.getDb();
+    const db = getDb();
     const query = `
     INSERT INTO publisher
       (Id, Name)
@@ -25,10 +30,10 @@ export const makePublisherRepository = (
     try {
       const stmt = db.prepare(query);
       stmt.run(publisher.Id, publisher.Name);
-      deps.logService.debug(`Added publisher ${publisher.Name}`);
+      logService.debug(`Added publisher ${publisher.Name}`);
       return true;
     } catch (error) {
-      deps.logService.error(
+      logService.error(
         `Failed to add publisher ${publisher.Name}`,
         error as Error
       );
@@ -37,7 +42,7 @@ export const makePublisherRepository = (
   };
 
   const exists = (publisher: Publisher): boolean => {
-    const db = deps.getDb();
+    const db = getDb();
     const query = `
     SELECT EXISTS (
       SELECT 1 FROM publisher 
@@ -52,7 +57,7 @@ export const makePublisherRepository = (
       }
       return false;
     } catch (error) {
-      deps.logService.error(
+      logService.error(
         `Failed to check if publisher ${publisher.Name} exists`,
         error as Error
       );
@@ -61,7 +66,7 @@ export const makePublisherRepository = (
   };
 
   const update = (publisher: Publisher): boolean => {
-    const db = deps.getDb();
+    const db = getDb();
     const query = `
     UPDATE publisher
     SET
@@ -71,10 +76,10 @@ export const makePublisherRepository = (
     try {
       const stmt = db.prepare(query);
       stmt.run(publisher.Name, publisher.Id);
-      deps.logService.debug(`Updated data for publisher ${publisher.Name}`);
+      logService.debug(`Updated data for publisher ${publisher.Name}`);
       return true;
     } catch (error) {
-      deps.logService.error(
+      logService.error(
         `Failed to update publisher ${publisher.Name}`,
         error as Error
       );
@@ -83,7 +88,7 @@ export const makePublisherRepository = (
   };
 
   const getById = (id: string): Publisher | undefined => {
-    const db = deps.getDb();
+    const db = getDb();
     const query = `
     SELECT *
     FROM publisher
@@ -93,13 +98,10 @@ export const makePublisherRepository = (
       const stmt = db.prepare(query);
       const result = stmt.get(id);
       const publisher = z.optional(publisherSchema).parse(result);
-      deps.logService.debug(`Found publisher ${publisher?.Name}`);
+      logService.debug(`Found publisher ${publisher?.Name}`);
       return publisher;
     } catch (error) {
-      deps.logService.error(
-        `Failed to get publisher with if ${id}`,
-        error as Error
-      );
+      logService.error(`Failed to get publisher with if ${id}`, error as Error);
       return;
     }
   };
