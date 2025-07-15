@@ -1,6 +1,6 @@
-import { z } from "zod";
 import type {
   Developer,
+  GameManifestData,
   Genre,
   Platform,
   PlayniteGame,
@@ -48,7 +48,7 @@ export type PlayniteGameRepository = {
   ) => boolean;
   deletePublishersFor: (game: Pick<PlayniteGame, "Id" | "Name">) => boolean;
   getById: (id: string) => PlayniteGame | undefined;
-  getManifestData: () => z.infer<typeof gameManifestDataSchema> | undefined;
+  getManifestData: () => GameManifestData | undefined;
   getTotal: (query?: string | null) => number;
   getTotalPlaytimeSeconds: () => number | undefined;
 };

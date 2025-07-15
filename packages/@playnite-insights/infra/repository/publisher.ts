@@ -121,3 +121,6 @@ export const makePublisherRepository = (
     hasChanges,
   };
 };
+
+export const defaultPublisherRepository: PublisherRepository =
+  makePublisherRepository();

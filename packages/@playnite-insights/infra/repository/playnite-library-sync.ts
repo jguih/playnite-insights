@@ -46,3 +46,6 @@ export const makePlayniteLibrarySyncRepository = (
     add,
   };
 };
+
+export const defaultPlayniteLibrarySyncRepository: PlayniteLibrarySyncRepository =
+  makePlayniteLibrarySyncRepository();

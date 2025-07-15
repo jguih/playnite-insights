@@ -4,7 +4,6 @@ import { makePlayniteLibraryImporterService } from './playnite-library-importer/
 import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import { makePlayniteGameRepository } from './playnite-game';
 import { makeHomePageService } from './home-page/service';
 import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
@@ -16,6 +15,7 @@ import {
 	makePlatformRepository,
 	makeDeveloperRepository,
 	makePlayniteLibrarySyncRepository,
+	makePlayniteGameRepository,
 	defaultLogger,
 	config
 } from '@playnite-insights/infra';
@@ -45,13 +45,7 @@ export const setupServices = () => {
 	const platformRepository = makePlatformRepository();
 	const developerRepository = makeDeveloperRepository();
 	const genreRepository = makeGenreRepository();
-	const playniteGameRepository = makePlayniteGameRepository({
-		...commonDeps,
-		publisherRepository,
-		platformRepository,
-		developerRepository,
-		genreRepository
-	});
+	const playniteGameRepository = makePlayniteGameRepository();
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository();
 	const repositories = {
 		publisherRepository,

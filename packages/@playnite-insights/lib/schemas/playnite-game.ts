@@ -1,4 +1,5 @@
 import z from "zod";
+import { developerSchema } from "./developer";
 
 export const playniteGameSchema = z.object({
   Id: z.string(),
@@ -15,3 +16,15 @@ export const playniteGameSchema = z.object({
   Icon: z.string().nullable(),
   ContentHash: z.string(),
 });
+
+export const gameByIdSchema = z.object({
+  game: z.optional(playniteGameSchema),
+  developers: z.array(developerSchema).optional(),
+});
+
+export const gameManifestDataSchema = z.array(
+  z.object({
+    Id: z.string(),
+    ContentHash: z.string(),
+  })
+);

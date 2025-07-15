@@ -143,3 +143,6 @@ export const makePlatformRepository = (
     hasChanges,
   };
 };
+
+export const defaultPlatformRepository: PlatformRepository =
+  makePlatformRepository();

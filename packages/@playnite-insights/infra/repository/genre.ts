@@ -109,3 +109,5 @@ export const makeGenreRepository = (
     hasChanges,
   };
 };
+
+export const defaultGenreRepository: GenreRepository = makeGenreRepository();

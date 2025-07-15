@@ -115,3 +115,6 @@ export const makeDeveloperRepository = (
     hasChanges,
   };
 };
+
+export const defaultDeveloperRepository: DeveloperRepository =
+  makeDeveloperRepository();
