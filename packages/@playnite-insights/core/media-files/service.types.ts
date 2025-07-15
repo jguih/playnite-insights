@@ -1,3 +1,12 @@
+import { FileSystemService } from "../file-system";
+import { LogService } from "../log";
+
+export type MediaFilesServiceDeps = {
+  fileSystemService: FileSystemService;
+  logService: LogService;
+  FILES_DIR: string;
+};
+
 export type MediaFilesService = {
   /**
    * Retrieves a game image from the file system.

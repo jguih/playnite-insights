@@ -1,13 +1,5 @@
 import { join } from "path";
-import type { LogService } from "../log";
-import type { FileSystemService } from "../file-system";
-import { MediaFilesService } from "./types";
-
-type MediaFilesServiceDeps = {
-  fileSystemService: FileSystemService;
-  logService: LogService;
-  FILES_DIR: string;
-};
+import { MediaFilesService, MediaFilesServiceDeps } from "./service.types";
 
 export const makeMediaFilesService = ({
   logService,

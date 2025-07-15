@@ -1,18 +1,5 @@
-import type { LogService } from "../log";
 import type { DashPageData } from "@playnite-insights/lib";
-import type { PlayniteLibrarySyncRepository } from "../playnite-library-sync";
-import type { DashPageService } from "./types";
-import type { PlayniteGameRepository } from "../playnite-game";
-
-type DashPageServiceDeps = {
-  logService: LogService;
-  playniteLibrarySyncRepository: PlayniteLibrarySyncRepository;
-  playniteGameRepository: PlayniteGameRepository;
-  /**
-   * @returns The last 6 months names in ascending order and abreviated. Should include the current month.
-   */
-  getLastSixMonthsAbv: () => string[];
-};
+import type { DashPageService, DashPageServiceDeps } from "./service.types";
 
 export const makeDashPageService = ({
   logService,

@@ -4,6 +4,6 @@ export type * from "./playnite-game";
 export type * from "./validation-result";
 export type * from "./publisher";
 export type * from "./platform";
-export type * from "./log";
+export { LOG_LEVELS, type ValidLogLevels } from "./log";
 export type * from "./developer";
 export type * from "./dash-page";

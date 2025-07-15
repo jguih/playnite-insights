@@ -1,18 +1,9 @@
 import { join } from "path";
-import { type LibraryManifestService } from "./types";
-import { LogService } from "../log/types";
+import type {
+  LibraryManifestServiceDeps,
+  LibraryManifestService,
+} from "./service.types";
 import { type PlayniteLibraryManifest } from "@playnite-insights/lib";
-import { type PlayniteGameRepository } from "../playnite-game/repository";
-import { type FileSystemService } from "../file-system/types";
-
-type LibraryManifestServiceDeps = {
-  getManifestData: PlayniteGameRepository["getManifestData"];
-  fileSystemService: FileSystemService;
-  logService: LogService;
-  LIBRARY_MANIFEST_FILE: string;
-  FILES_DIR: string;
-  CONTENT_HASH_FILE_NAME: string;
-};
 
 export const makeLibraryManifestService = ({
   getManifestData,

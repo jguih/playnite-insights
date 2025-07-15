@@ -28,7 +28,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.0.0",
     "@types/busboy": "^1.5.4",
-    "@types/node": "^24.0.4",
+    "@types/node": "^24.0.14",
     "@vitest/browser": "^3.2.3",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -50,13 +50,13 @@
     "@faker-js/faker": "^9.9.0",
     "@inlang/paraglide-js": "^2.0.0",
     "@lucide/svelte": "^0.525.0",
+    "@playnite-insights/core": "workspace:*",
+    "@playnite-insights/infra": "workspace:*",
+    "@playnite-insights/lib": "workspace:*",
     "busboy": "^1.6.0",
     "echarts": "^5.6.0",
     "svelte-tiny-virtual-list": "^2.1.2",
-    "zod": "^3.25.74",
-    "@playnite-insights/lib": "workspace:*",
-    "@playnite-insights/core": "workspace:*",
-    "@playnite-insights/infra": "workspace:*"
+    "zod": "^3.25.74"
   },
   "engines": {
     "node": "^24.3.0",
