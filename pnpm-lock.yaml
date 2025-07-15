@@ -11,6 +11,9 @@ importers:
 
   packages/@playnite-insights/infrastructure:
     dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
       '@types/node':
         specifier: ^24.0.13
         version: 24.0.13

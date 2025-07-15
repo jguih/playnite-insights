@@ -28,7 +28,8 @@ RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-in
 RUN mkdir -p ./data/files ./data/tmp
 RUN chown -R playnite-insights:playnite-insights ./data
 COPY --from=dev-deploy --chown=playnite-insights:playnite-insights /prod/playnite-insights .
-COPY --chown=playnite-insights:playnite-insights ./playnite-insights/static/placeholder ./data/files/placeholder
+COPY --from=dev-deploy --chown=playnite-insights:playnite-insights /prod/playnite-insights/static/placeholder ./data/files/placeholder
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 

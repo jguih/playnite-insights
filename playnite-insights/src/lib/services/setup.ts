@@ -1,12 +1,9 @@
 import * as fsAsync from 'fs/promises';
 import * as fs from 'fs';
-import { makeLibraryManifestService } from './library-manifest/library-manifest';
-import * as config from '../config/config';
 import { makePlayniteLibraryImporterService } from './playnite-library-importer/service';
 import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import { getDb } from '$lib/infrastructure/database';
 import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
 import { makePublisherRepository } from '$lib/services/publisher/repository';
 import { makePlatformRepository } from '$lib/services/platform/repository';
@@ -17,9 +14,16 @@ import { makeDashPageService } from './dashboard-page/service';
 import { makeGamePageService } from './game-page/service';
 import { makeMediaFilesService } from './media-files/service';
 import { makeGenreRepository } from './genre/repository';
-import { makeLogService, LOG_LEVELS, isValidLogLevel } from '@playnite-insights/services';
+import { getDb, makeFileSystemService, config } from '@playnite-insights/infrastructure';
+import {
+	makeLogService,
+	makeLibraryManifestService,
+	LOG_LEVELS,
+	isValidLogLevel
+} from '@playnite-insights/services';
 
 export const setupServices = () => {
+	const fileSystemService = makeFileSystemService();
 	const FsAsyncDeps: FileSystemAsyncDeps = {
 		readdir: fsAsync.readdir,
 		access: fsAsync.access,
@@ -38,7 +42,7 @@ export const setupServices = () => {
 	};
 	const logLevel = Number(process.env.LOG_LEVEL);
 	const logService = makeLogService(isValidLogLevel(logLevel) ? logLevel : LOG_LEVELS.info);
-	const commonDeps = { getDb, logService, ...config };
+	const commonDeps = { getDb, logService, fileSystemService, ...config };
 	// Repositories
 	const publisherRepository = makePublisherRepository({ ...commonDeps });
 	const platformRepository = makePlatformRepository({ ...commonDeps });

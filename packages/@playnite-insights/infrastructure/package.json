@@ -8,6 +8,7 @@
     "zod": "^3.25.76"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@types/node": "^24.0.13"
   }
 }
