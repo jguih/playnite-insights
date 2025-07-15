@@ -16,20 +16,13 @@
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
-	import { type HomePageData } from '$lib/services/home-page/schemas';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
-	import {
-		getSortByLabel,
-		getSortOrderLabel,
-		searchParamsKeys,
-		validSortBy,
-		validSortOrder,
-		type ValidSearchParamKeys
-	} from '$lib/services/home-page/validation';
+	import { gameSortBy, gameSortOrder, type HomePageData } from '@playnite-insights/lib';
+	// import { homePageSearchParamsKeys, type HomePageSearchParamKeys } from '@playnite-insights/core';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => makeHomePageViewModel({ data }));
@@ -44,8 +37,8 @@
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
 		const params = new URLSearchParams(page.url.searchParams);
-		params.set(searchParamsKeys.pageSize, value);
-		params.set(searchParamsKeys.page, '1');
+		params.set('pageSize', value);
+		params.set('page', '1');
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
@@ -55,7 +48,7 @@
 
 	const handleOnPageChange = (value: number) => {
 		const newParams = new URLSearchParams(page.url.searchParams);
-		newParams.set(searchParamsKeys.page, String(value));
+		newParams.set('page', String(value));
 		const newUrl = `${page.url.pathname}?${newParams.toString()}`;
 		if (main) {
 			main.scrollTop = 0;
@@ -63,7 +56,7 @@
 		goto(newUrl, { replaceState: true });
 	};
 
-	const setSearchParam = (key: ValidSearchParamKeys, value: string | boolean) => {
+	const setSearchParam = (key: string, value: string | boolean) => {
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set('page', '1');
 		if (!value) {
@@ -92,7 +85,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -108,13 +101,13 @@
 	sortOrder={sortOrderParam}
 >
 	{#snippet renderSortOrderOptions()}
-		{#each validSortOrder as sortOrder}
-			<option value={sortOrder}>{getSortOrderLabel(sortOrder)}</option>
+		{#each gameSortOrder as sortOrder}
+			<option value={sortOrder}>{sortOrder}</option>
 		{/each}
 	{/snippet}
 	{#snippet renderSortByOptions()}
-		{#each validSortBy as sortBy}
-			<option value={sortBy}>{getSortByLabel(sortBy)}</option>
+		{#each gameSortBy as sortBy}
+			<option value={sortBy}>{sortBy}</option>
 		{/each}
 	{/snippet}
 </FiltersSidebar>

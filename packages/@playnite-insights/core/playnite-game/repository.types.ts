@@ -2,8 +2,12 @@ import type {
   DashPageData,
   DashPageGame as DashPageGame,
   Developer,
+  GameFilters,
   GameManifestData,
+  GamePageSize,
+  GameSorting,
   Genre,
+  HomePageData,
   Platform,
   PlayniteGame,
   Publisher,
@@ -51,7 +55,7 @@ export type PlayniteGameRepository = {
   deletePublishersFor: (game: Pick<PlayniteGame, "Id" | "Name">) => boolean;
   getById: (id: string) => PlayniteGame | undefined;
   getManifestData: () => GameManifestData | undefined;
-  getTotal: (query?: string | null) => number;
+  getTotal: (filters?: GameFilters) => number;
   getTotalPlaytimeSeconds: () => number | undefined;
   /**
    * Gets the top `total` games for dashboard page
@@ -66,4 +70,18 @@ export type PlayniteGameRepository = {
    * @returns
    */
   getGamesForDashPage: () => DashPageGame[];
+  /**
+   * Gets games for home page
+   * @param offset
+   * @param pageSize
+   * @param filters
+   * @param sorting
+   * @returns
+   */
+  getGamesForHomePage: (
+    offset: number,
+    pageSize: GamePageSize,
+    filters?: GameFilters,
+    sorting?: GameSorting
+  ) => HomePageData | undefined;
 };

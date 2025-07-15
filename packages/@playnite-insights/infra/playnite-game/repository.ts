@@ -10,22 +10,31 @@ import z from "zod";
 import type { DatabaseSync } from "node:sqlite";
 import { getDb as _getDb } from "../database";
 import {
-  DashPageData,
-  DashPageGame,
-  Developer,
+  type DashPageData,
+  type DashPageGame,
+  type Developer,
   developerSchema,
-  GameManifestData,
-  Genre,
-  Platform,
-  PlayniteGame,
+  type GameManifestData,
+  type Genre,
+  type Platform,
+  type PlayniteGame,
   playniteGameSchema,
-  Publisher,
+  type Publisher,
+  type GameFilters,
+  GameSorting,
+  HomePageData,
+  homePageGameSchema,
+  GamePageSize,
 } from "@playnite-insights/lib";
 import { defaultLogger } from "../services";
-import { defaultPublisherRepository } from "./publisher";
-import { defaultPlatformRepository } from "./platform";
-import { defaultDeveloperRepository } from "./developer";
-import { defaultGenreRepository } from "./genre";
+import { defaultPublisherRepository } from "../repository/publisher";
+import { defaultPlatformRepository } from "../repository/platform";
+import { defaultDeveloperRepository } from "../repository/developer";
+import { defaultGenreRepository } from "../repository/genre";
+import {
+  getOrderByClause,
+  getWhereClauseAndParamsFromFilters,
+} from "./filtering-and-sorting";
 
 type PlayniteGameRepositoryDeps = {
   getDb: () => DatabaseSync;
@@ -53,28 +62,20 @@ export const makePlayniteGameRepository = (
     genreRepository: defaultGenreRepository,
   }
 ): PlayniteGameRepository => {
-  const getTotalResultSchema = z.object({
-    total: z.number(),
-  });
-  const getTotal = (query?: string | null): number => {
+  const getTotal = (filters?: GameFilters): number => {
     const db = getDb();
-    let sqlQuery = `
-      SELECT count(*) as total 
-      FROM playnite_game pg
-      WHERE 1=1
-    `;
-    const params = [];
-    if (query) {
-      sqlQuery += ` AND LOWER(pg.Name) LIKE ?`;
-      params.push(`%${query.toLowerCase()}%`);
-    }
+    let query = `
+        SELECT 
+          COUNT(*) AS Total
+        FROM playnite_game pg
+      `;
+    const { where, params } = getWhereClauseAndParamsFromFilters(filters);
+    query += where;
     try {
-      const stmt = db.prepare(sqlQuery);
-      const result = stmt.get(...params);
-      const data = getTotalResultSchema.parse(result);
-      return data.total;
+      const total = (db.prepare(query).get(...params)?.Total as number) ?? 0;
+      return total;
     } catch (error) {
-      logService.error("Failed to get total amount of games", error as Error);
+      logService.error(`Failed to get total games count`, error as Error);
       return 0;
     }
   };
@@ -673,6 +674,57 @@ export const makePlayniteGameRepository = (
     }
   };
 
+  const getGamesForHomePage = (
+    offset: number,
+    pageSize: GamePageSize,
+    filters?: GameFilters,
+    sorting?: GameSorting
+  ): HomePageData | undefined => {
+    logService.debug(
+      `Getting home page data using: ${JSON.stringify({
+        offset,
+        pageSize,
+        filters,
+        sorting,
+      })}`
+    );
+    const db = getDb();
+    let query = `
+        SELECT 
+          pg.Id,
+          pg.Name,
+          pg.CoverImage
+        FROM playnite_game pg
+      `;
+    const { where, params } = getWhereClauseAndParamsFromFilters(filters);
+    const orderBy = getOrderByClause(sorting);
+    query += where;
+    query += orderBy;
+    query += ` LIMIT ? OFFSET ?;`;
+    params.push(pageSize.toString());
+    params.push(offset.toString());
+
+    try {
+      const total = getTotal(filters);
+      const stmt = db.prepare(query);
+      const result = stmt.all(...params);
+      const games = z.optional(homePageGameSchema).parse(result) ?? [];
+      const items = games.length;
+      const hasNextPage = offset + Number(pageSize) < total;
+      const totalPages = Math.ceil(total / Number(pageSize));
+      logService.success(
+        `Fetched game list for home page, returning games ${offset} to ${Math.min(
+          Number(pageSize) + offset,
+          total
+        )} out of ${total}`
+      );
+      return { games, offset, items, total, hasNextPage, totalPages };
+    } catch (error) {
+      logService.error("Failed to get home page data", error as Error);
+      return undefined;
+    }
+  };
+
   return {
     add,
     update,
@@ -693,5 +745,6 @@ export const makePlayniteGameRepository = (
     getTotal,
     getTopMostPlayedGamesForDashPage,
     getGamesForDashPage,
+    getGamesForHomePage,
   };
 };

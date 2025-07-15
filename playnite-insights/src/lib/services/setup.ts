@@ -4,7 +4,6 @@ import { makePlayniteLibraryImporterService } from './playnite-library-importer/
 import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
-import { makeHomePageService } from './home-page/service';
 import {
 	getDb,
 	makeFileSystemService,
@@ -21,7 +20,8 @@ import {
 	makeLibraryManifestService,
 	makeMediaFilesService,
 	makeDashPageService,
-	makeGamePageService
+	makeGamePageService,
+	makeHomePageService
 } from '@playnite-insights/core';
 import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 

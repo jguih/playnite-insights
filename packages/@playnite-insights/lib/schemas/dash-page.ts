@@ -1,5 +1,5 @@
-import { playniteGameSchema } from "@playnite-insights/lib";
 import z from "zod";
+import { playniteGameSchema } from "../playnite-game";
 
 export const dashPageDataSchema = z.object({
   total: z.number(),

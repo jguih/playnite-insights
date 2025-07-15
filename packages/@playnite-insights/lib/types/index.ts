@@ -1,6 +1,5 @@
 export type * from "./genre";
 export type * from "./library-manifest";
-export type * from "./playnite-game";
 export type * from "./validation-result";
 export type * from "./publisher";
 export type * from "./platform";

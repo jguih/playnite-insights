@@ -1,5 +1,5 @@
 import z from "zod";
-import { developerSchema } from "./developer";
+import { developerSchema } from "../schemas";
 
 export const playniteGameSchema = z.object({
   Id: z.string(),
@@ -28,3 +28,7 @@ export const gameManifestDataSchema = z.array(
     ContentHash: z.string(),
   })
 );
+
+export const gameSortBy = ["Id", "IsInstalled"] as const;
+export const gameSortOrder = ["asc", "desc"] as const;
+export const gamePageSizes = ["25", "50", "75", "100"] as const;

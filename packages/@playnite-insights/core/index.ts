@@ -10,3 +10,4 @@ export * from "./media-files";
 export * from "./playnite-library-sync";
 export * from "./dash-page";
 export * from "./game-page";
+export * from "./home-page";
