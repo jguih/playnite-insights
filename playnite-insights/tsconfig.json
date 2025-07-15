@@ -1,5 +1,6 @@
 {
   "extends": [
+    "../tsconfig.json",
     "./.svelte-kit/tsconfig.json"
   ],
   "compilerOptions": {

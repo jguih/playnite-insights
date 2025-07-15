@@ -5,12 +5,13 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "devDependencies": {
-    "@playnite-insights/lib": "workspace:*",
-    "zod": "^3.25.76"
+    "@types/node": "^24.0.13"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.9.0",
-    "@types/node": "^24.0.13"
+    "@playnite-insights/lib": "workspace:*",
+    "@playnite-insights/core": "workspace:*",
+    "zod": "^3.25.76",
+    "@faker-js/faker": "^9.9.0"
   },
   "engines": {
     "node": "^24.3.0",

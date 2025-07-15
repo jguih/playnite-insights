@@ -6,6 +6,9 @@
       ],
       "@playnite-insights/core": [
         "./packages/@playnite-insights/core"
+      ],
+      "@playnite-insights/infra": [
+        "./packages/@playnite-insights/infra"
       ]
     }
   }
