@@ -5,7 +5,6 @@ import * as stream from 'stream';
 import * as streamAsync from 'stream/promises';
 import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import { makePlayniteLibrarySyncRepository } from '$lib/services/playnite-library-sync/repository';
-import { makePublisherRepository } from '$lib/services/publisher/repository';
 import { makePlatformRepository } from '$lib/services/platform/repository';
 import { makePlayniteGameRepository } from './playnite-game';
 import { makeDeveloperRepository } from './developer/repository';
@@ -17,6 +16,7 @@ import {
 	getDb,
 	makeFileSystemService,
 	makeGenreRepository,
+	makePublisherRepository,
 	config
 } from '@playnite-insights/infrastructure';
 import {
