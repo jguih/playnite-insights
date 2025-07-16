@@ -17,6 +17,9 @@
 			case 'lg': {
 				return 'w-11 h-11';
 			}
+			case 'fit': {
+				return '';
+			}
 		}
 	};
 </script>

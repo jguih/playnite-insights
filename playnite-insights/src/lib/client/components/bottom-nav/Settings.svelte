@@ -8,11 +8,11 @@
 </script>
 
 {#if selected}
-	<SelectedAnchor href="/" {...props}>
+	<SelectedAnchor href="/settings" {...props}>
 		<Settings />
 	</SelectedAnchor>
 {:else}
-	<BaseAnchor href="/" {...props}>
+	<BaseAnchor href="/settings" {...props}>
 		<Settings />
 	</BaseAnchor>
 {/if}

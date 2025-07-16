@@ -15,7 +15,7 @@ services:
       watch:
         - path: ./playnite-insights
           action: sync
-          target: /app
+          target: /app/playnite-insights
           ignore:
             - node_modules/
             - data/

@@ -8,13 +8,13 @@
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import { getPlayniteGameImageUrl, getPlaytimeInHours } from '$lib/client/utils/playnite-game.js';
-	import { ArrowLeft, Search } from '@lucide/svelte';
+	import { getPlayniteGameImageUrl } from '$lib/client/utils/playnite-game.js';
+	import { ArrowLeft } from '@lucide/svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
-	import BaseButton from '$lib/client/components/buttons/BaseButton.svelte';
 	import { makeDashPageViewModel } from '$lib/client/viewmodel/dash.js';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 
 	const { data } = $props();
 	let vm = $derived(makeDashPageViewModel(data.promise));
@@ -31,9 +31,9 @@
 <BaseAppLayout>
 	<Header>
 		{#snippet action()}
-			<BaseButton onclick={() => history.back()}>
+			<LightButton onclick={() => history.back()}>
 				<ArrowLeft />
-			</BaseButton>
+			</LightButton>
 		{/snippet}
 	</Header>
 	{#await vm.load()}
@@ -45,7 +45,7 @@
 			{:else}
 				<div>
 					<h1 class="text-2xl">Overview</h1>
-					<Divider class="mb-4 border-1" />
+					<Divider class="border-1 mb-4" />
 					{@render infoSection(m.dash_games_in_library(), vm.getTotal())}
 					{@render infoSection(m.dash_intalled(), vm.getIsInstalled())}
 					{@render infoSection(m.dash_not_installed(), vm.getNotInstalled())}
@@ -88,7 +88,7 @@
 				</div>
 				<div>
 					<h1 class="text-2xl">Top 10</h1>
-					<Divider class="mb-4 border-1" />
+					<Divider class="border-1 mb-4" />
 					{#if vm.getTop10MostPlayedGames()}
 						<ul class="mb-6 grid list-none grid-cols-1 gap-1 p-0">
 							{#each vm.getTop10MostPlayedGames() as game}

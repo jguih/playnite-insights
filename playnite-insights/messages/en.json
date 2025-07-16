@@ -1,6 +1,6 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "hello_world": "Hello, {name} from en!",
+  "language_name": "English",
   "home_title": "My Games",
   "home_showing_games_counter": "Showing games {count1}-{count2} of {totalCount}",
   "home_no_games_found": "No games found",
