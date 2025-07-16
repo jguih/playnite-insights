@@ -8,5 +8,6 @@ export * from "./client/publisher";
 export * from "./client/developer";
 export * from "./client/library-manifest";
 export * from "./client/log";
+export * from "./client/playnite-library-importer";
 
 export * from "./client/types";

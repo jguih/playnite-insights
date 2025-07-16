@@ -1,6 +1,6 @@
 import z from "zod";
 import { playniteGameSchema } from "../playnite-game";
-import { developerSchema } from "../schemas";
+import { developerSchema } from "../developer/schemas";
 
 export const gamePageDataSchema = z
   .object({

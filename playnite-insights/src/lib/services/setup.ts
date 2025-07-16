@@ -1,9 +1,3 @@
-import * as fsAsync from 'fs/promises';
-import * as fs from 'fs';
-import { makePlayniteLibraryImporterService } from './playnite-library-importer/service';
-import * as stream from 'stream';
-import * as streamAsync from 'stream/promises';
-import type { FileSystemAsyncDeps, StreamUtilsAsyncDeps } from './types';
 import {
 	getDb,
 	makeFileSystemService,
@@ -13,6 +7,7 @@ import {
 	makeDeveloperRepository,
 	makePlayniteLibrarySyncRepository,
 	makePlayniteGameRepository,
+	makeStreamUtilsService,
 	defaultLogger,
 	config
 } from '@playnite-insights/infra';
@@ -21,28 +16,14 @@ import {
 	makeMediaFilesService,
 	makeDashPageService,
 	makeGamePageService,
-	makeHomePageService
+	makeHomePageService,
+	makePlayniteLibraryImporterService
 } from '@playnite-insights/core';
 import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
-	const FsAsyncDeps: FileSystemAsyncDeps = {
-		readdir: fsAsync.readdir,
-		access: fsAsync.access,
-		readfile: fsAsync.readFile,
-		writeFile: fsAsync.writeFile,
-		rm: fsAsync.rm,
-		unlink: fsAsync.unlink,
-		stat: fsAsync.stat,
-		mkdir: fsAsync.mkdir,
-		constants: fsAsync.constants
-	};
-	const streamUtilsAsyncDeps: StreamUtilsAsyncDeps = {
-		readableFromWeb: stream.Readable.fromWeb,
-		createWriteStream: fs.createWriteStream,
-		pipeline: streamAsync.pipeline
-	};
+	const streamUtilsService = makeStreamUtilsService();
 	// Repositories
 	const publisherRepository = makePublisherRepository();
 	const platformRepository = makePlatformRepository();
@@ -62,18 +43,16 @@ export const setupServices = () => {
 		getDb,
 		logService: defaultLogger,
 		fileSystemService,
+		streamUtilsService,
 		...config,
 		...repositories
 	};
 	// Services
 	const libraryManifestService = makeLibraryManifestService({
-		...FsAsyncDeps,
 		...commonDeps,
 		getManifestData: playniteGameRepository.getManifestData
 	});
 	const playniteLibraryImporterService = makePlayniteLibraryImporterService({
-		...FsAsyncDeps,
-		...streamUtilsAsyncDeps,
 		...commonDeps,
 		...repositories,
 		libraryManifestService: libraryManifestService

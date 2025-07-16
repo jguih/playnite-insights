@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LibraryManifestService } from "./service.types";
 import { makeLibraryManifestService } from "./service";
+import { makeMocks } from "../tests/mocks";
+import { join } from "path";
+import { PlayniteLibraryManifest } from "@playnite-insights/lib";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 
 const createDeps = () => {
-  const mocks = createMocks();
+  const mocks = makeMocks();
   return {
-    ...mocks.fsAsyncDeps,
-    logService: mocks.services.log,
+    ...mocks,
     CONTENT_HASH_FILE_NAME: "contentHash.txt",
     FILES_DIR: "/files_dir",
     LIBRARY_MANIFEST_FILE: "/app/data/manifest.json",
@@ -22,7 +24,7 @@ describe("Library manifest", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     deps = createDeps();
-    service = makeLibraryManifestService();
+    service = makeLibraryManifestService(deps);
   });
 
   it("fails when no manifest data is found", async () => {
@@ -32,7 +34,7 @@ describe("Library manifest", () => {
     const result = await service.write();
     // Assert
     expect(result.isValid).toBe(false);
-    expect(deps.writeFile).not.toHaveBeenCalled();
+    expect(deps.fileSystemService.writeFile).not.toHaveBeenCalled();
   });
 
   it("reads media files directory when manifest data is found", async () => {
@@ -41,7 +43,7 @@ describe("Library manifest", () => {
     // Act
     await service.write();
     // Assert
-    expect(deps.readdir).toHaveBeenCalledWith(
+    expect(deps.fileSystemService.readdir).toHaveBeenCalledWith(
       deps.FILES_DIR,
       expect.anything()
     );
@@ -53,13 +55,13 @@ describe("Library manifest", () => {
     // Act
     await service.write();
     // Assert
-    expect(deps.readdir).not.toHaveBeenCalled();
+    expect(deps.fileSystemService.readdir).not.toHaveBeenCalled();
   });
 
   it("should read contentHash.txt file and include its contents in the manifest", async () => {
     // Arrange
     deps.getManifestData.mockReturnValueOnce([]);
-    deps.readdir.mockResolvedValueOnce([
+    deps.fileSystemService.readdir.mockResolvedValueOnce([
       {
         isDirectory: () => true,
         name: "dir",
@@ -73,7 +75,7 @@ describe("Library manifest", () => {
     // Act
     await service.write();
     // Assert
-    expect(deps.readfile).toHaveBeenCalledWith(
+    expect(deps.fileSystemService.readfile).toHaveBeenCalledWith(
       contentHashFilePath,
       expect.any(String)
     );
@@ -99,13 +101,14 @@ describe("Library manifest", () => {
       totalGamesInLibrary: 1,
     };
     deps.getManifestData.mockReturnValueOnce(manifestData);
-    deps.readdir.mockResolvedValueOnce(dirs);
-    deps.readfile.mockResolvedValueOnce("my-random-hash");
+    deps.fileSystemService.readdir.mockResolvedValueOnce(dirs);
+    deps.fileSystemService.readfile.mockResolvedValueOnce("my-random-hash");
     // Act
     await service.write();
     // Assert
-    expect(deps.writeFile).toHaveBeenCalled();
-    const [calledPath, calledContent] = deps.writeFile.mock.calls[0];
+    expect(deps.fileSystemService.writeFile).toHaveBeenCalled();
+    const [calledPath, calledContent] =
+      deps.fileSystemService.writeFile.mock.calls[0];
     expect(calledPath).toBe(deps.LIBRARY_MANIFEST_FILE);
     expect(JSON.parse(calledContent)).toEqual(manifest);
   });
@@ -118,13 +121,14 @@ describe("Library manifest", () => {
       totalGamesInLibrary: 0,
     };
     deps.getManifestData.mockReturnValueOnce([]);
-    deps.readdir.mockResolvedValueOnce([]);
-    deps.readfile.mockResolvedValueOnce("");
+    deps.fileSystemService.readdir.mockResolvedValueOnce([]);
+    deps.fileSystemService.readfile.mockResolvedValueOnce("");
     // Act
     await service.write();
     // Assert
-    expect(deps.writeFile).toHaveBeenCalled();
-    const [calledPath, calledContent] = deps.writeFile.mock.calls[0];
+    expect(deps.fileSystemService.writeFile).toHaveBeenCalled();
+    const [calledPath, calledContent] =
+      deps.fileSystemService.writeFile.mock.calls[0];
     expect(calledPath).toBe(deps.LIBRARY_MANIFEST_FILE);
     expect(JSON.parse(calledContent)).toEqual(manifest);
   });

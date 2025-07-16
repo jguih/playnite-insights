@@ -1,5 +1,5 @@
 import { services } from '$lib';
-import { syncGameListCommandSchema } from '$lib/services/playnite-library-importer/schemas';
+import { syncGameListCommandSchema } from '@playnite-insights/lib';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {
