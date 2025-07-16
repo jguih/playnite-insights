@@ -36,6 +36,7 @@
 	let notInstalledParam = $derived(data.notInstalled);
 	let sortByParam = $derived(data.sortBy);
 	let sortOrderParam = $derived(data.sortOrder);
+	let queryParam = $derived(data.query);
 	let main: HTMLElement | undefined = $state();
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
@@ -60,7 +61,7 @@
 		goto(newUrl, { replaceState: true });
 	};
 
-	const setSearchParam = (key: HomePageSearchParamKeys, value: string | boolean) => {
+	const setSearchParam = (key: HomePageSearchParamKeys, value: string | boolean | null) => {
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set(homePageSearchParamsKeys.page, '1');
 		if (!value) {
@@ -106,12 +107,12 @@
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}
-			<option value={sortOrder}>{sortOrder}</option>
+			<option value={sortOrder}>{vm.getSortOrderLabel(sortOrder)}</option>
 		{/each}
 	{/snippet}
 	{#snippet renderSortByOptions()}
 		{#each gameSortBy as sortBy}
-			<option value={sortBy}>{sortBy}</option>
+			<option value={sortBy}>{vm.getSortByLabel(sortBy)}</option>
 		{/each}
 	{/snippet}
 </FiltersSidebar>
@@ -127,7 +128,10 @@
 			</a>
 		{/snippet}
 		<div class="flex flex-row items-center gap-2">
-			<HeaderSearchBar />
+			<HeaderSearchBar
+				value={queryParam}
+				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
+			/>
 			<LightButton>
 				<ListFilter onclick={() => (filtersState.show = !filtersState.show)} />
 			</LightButton>

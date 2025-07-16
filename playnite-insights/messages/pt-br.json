@@ -37,5 +37,14 @@
   "month_december": "Dezembro",
   "error_something_went_wrong": "Algo deu errado.",
   "yes": "Sim",
-  "no": "Não"
+  "no": "Não",
+  "option_sort_ascending": "Crescente",
+  "option_sort_descending": "Decrescente",
+  "option_sortby_id": "Id",
+  "option_sortby_is_installed": "Instalado",
+  "filters_title": "Filtros",
+  "label_sort_order": "Ordem",
+  "label_sort_by": "Ordenar por",
+  "label_filter_installed": "Instalado",
+  "label_filter_not_installed": "Não instalado"
 }

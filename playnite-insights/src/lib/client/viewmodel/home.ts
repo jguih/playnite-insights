@@ -2,10 +2,13 @@ import { homePageDataSchema, type HomePageData } from '@playnite-insights/lib/cl
 import {
 	gamePageSizes,
 	type GamePageSize,
-	type GamePageSizes
+	type GamePageSizes,
+	type GameSortBy,
+	type GameSortOrder
 } from '@playnite-insights/lib/client/playnite-game';
 import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
+import { m } from '$lib/paraglide/messages';
 
 export const makeHomePageViewModel = ({ data }: PageProps) => {
 	let pageData: HomePageData | undefined;
@@ -24,6 +27,24 @@ export const makeHomePageViewModel = ({ data }: PageProps) => {
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getPageSizeList = (): GamePageSizes => gamePageSizes;
 	const getIsError = (): boolean => isError;
+
+	const getSortOrderLabel = (sortOrder: GameSortOrder): string => {
+		switch (sortOrder) {
+			case 'asc':
+				return m.option_sort_ascending();
+			case 'desc':
+				return m.option_sort_descending();
+		}
+	};
+
+	const getSortByLabel = (sortBy: GameSortBy): string => {
+		switch (sortBy) {
+			case 'Id':
+				return m.option_sortby_id();
+			case 'IsInstalled':
+				return m.option_sortby_is_installed();
+		}
+	};
 
 	const load = async () => {
 		try {
@@ -50,6 +71,8 @@ export const makeHomePageViewModel = ({ data }: PageProps) => {
 		getImageURL,
 		getPageSizeList,
 		getIsError,
+		getSortOrderLabel,
+		getSortByLabel,
 		load
 	};
 };

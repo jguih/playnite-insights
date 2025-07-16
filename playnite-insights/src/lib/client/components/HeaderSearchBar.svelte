@@ -11,23 +11,17 @@
 	} from 'svelte/elements';
 	import SearchBarButton from './buttons/SearchBarButton.svelte';
 
-	let { ...props }: HTMLInputAttributes = $props();
+	let {
+		value = $bindable(),
+		onChange,
+		...props
+	}: {
+		value: string | null;
+		onChange: (value: string | null) => void;
+	} & Omit<HTMLInputAttributes, 'value'> = $props();
 	let input: HTMLInputElement;
-	let value: string | null = $derived(page.url.searchParams.get('query'));
 	let clearBtn: HTMLButtonElement | undefined = $state();
-	let timeout: NodeJS.Timeout | null = $state(null);
-
-	const pushValue = (value: string | null) => {
-		const params = new URLSearchParams(page.url.searchParams);
-		if (!value) {
-			params.delete('query');
-		} else {
-			params.set('page', '1');
-			params.set('query', value);
-		}
-		const newUrl = `${page.url.pathname}?${params.toString()}`;
-		goto(newUrl, { replaceState: true, keepFocus: true });
-	};
+	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 
 	const handleOnChange: ChangeEventHandler<HTMLInputElement> = (e) => {
 		const value = e.currentTarget.value;
@@ -35,7 +29,7 @@
 			clearTimeout(timeout);
 		}
 		timeout = setTimeout(() => {
-			pushValue(value);
+			onChange(value);
 		}, 1000);
 	};
 
@@ -43,7 +37,7 @@
 		if (timeout) {
 			clearTimeout(timeout);
 		}
-		pushValue(input.value);
+		onChange(input.value);
 	};
 
 	const handleSubmit: EventHandler<SubmitEvent> = (e) => {
@@ -51,12 +45,12 @@
 		if (timeout) {
 			clearTimeout(timeout);
 		}
-		pushValue(input.value);
+		onChange(input.value);
 		input.blur();
 	};
 
 	const handleOnClear: EventHandler<MouseEvent> = (e) => {
-		pushValue(null);
+		onChange(null);
 		clearBtn?.blur();
 	};
 </script>
