@@ -1,10 +1,10 @@
 import { SyncGameListCommand, ValidationResult } from "@playnite-insights/lib";
-import { FileSystemService } from "../file-system/service.types";
+import { FileSystemService } from "../file-system.types";
 import { LibraryManifestService } from "../library-manifest/service.types";
-import { LogService } from "../log/service.types";
-import { PlayniteGameRepository } from "../playnite-game/repository.types";
-import { PlayniteLibrarySyncRepository } from "../playnite-library-sync/repository.types";
-import { StreamUtilsService } from "../stream-utils/service.types";
+import { LogService } from "../log.types";
+import { PlayniteGameRepository } from "../playnite-game.types";
+import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import { StreamUtilsService } from "../stream-utils.types";
 
 export type PlayniteLibraryImporterServiceDeps = {
   playniteGameRepository: PlayniteGameRepository;

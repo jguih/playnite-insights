@@ -1,5 +1,5 @@
 import { GamePageData } from "@playnite-insights/lib";
-import { PlayniteGameRepository } from "../playnite-game";
+import { PlayniteGameRepository } from "../playnite-game.types";
 
 export type GamePageServiceDeps = {
   playniteGameRepository: PlayniteGameRepository;

@@ -2,9 +2,9 @@ import {
   PlayniteLibraryManifest,
   type ValidationResult,
 } from "@playnite-insights/lib";
-import { PlayniteGameRepository } from "../playnite-game";
-import { FileSystemService } from "../file-system";
-import { LogService } from "../log";
+import { PlayniteGameRepository } from "../playnite-game.types";
+import { FileSystemService } from "../file-system.types";
+import { LogService } from "../log.types";
 
 export type LibraryManifestServiceDeps = {
   getManifestData: PlayniteGameRepository["getManifestData"];

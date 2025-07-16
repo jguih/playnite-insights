@@ -1,5 +1,5 @@
 import { GameFilters, GameSorting, HomePageData } from "@playnite-insights/lib";
-import { PlayniteGameRepository } from "../playnite-game";
+import { PlayniteGameRepository } from "../playnite-game.types";
 
 export type HomePageServiceDeps = {
   playniteGameRepository: PlayniteGameRepository;

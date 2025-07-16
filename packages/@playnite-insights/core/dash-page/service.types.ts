@@ -1,7 +1,7 @@
 import { DashPageData } from "@playnite-insights/lib";
-import { LogService } from "../log";
-import { PlayniteLibrarySyncRepository } from "../playnite-library-sync";
-import { PlayniteGameRepository } from "../playnite-game";
+import { LogService } from "../log.types";
+import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import { PlayniteGameRepository } from "../playnite-game.types";
 
 export type DashPageServiceDeps = {
   logService: LogService;
