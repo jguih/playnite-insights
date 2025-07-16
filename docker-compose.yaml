@@ -19,6 +19,9 @@ services:
           ignore:
             - node_modules/
             - data/
+        - path: ./packages
+          action: sync
+          target: /app/packages
         - path: ./
           action: rebuild
           target: /app/package.json

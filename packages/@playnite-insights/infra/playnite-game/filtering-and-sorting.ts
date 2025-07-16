@@ -30,13 +30,22 @@ export const getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
 
 export const getOrderByClause = (sorting?: GameSorting): string => {
   if (!sorting) return ` ORDER BY Id ASC`;
-
+  const order = sorting.order.toUpperCase();
   switch (sorting.by) {
     case "IsInstalled": {
-      return ` ORDER BY IsInstalled ${sorting.order.toUpperCase()}, Id ASC`;
+      return ` ORDER BY IsInstalled ${order}, Id ASC`;
     }
     case "Id": {
-      return ` ORDER BY Id ${sorting.order.toUpperCase()}`;
+      return ` ORDER BY Id ${order}`;
+    }
+    case "Added": {
+      return ` ORDER BY Added ${order}, Id ASC`;
+    }
+    case "LastActivity": {
+      return ` ORDER BY LastActivity ${order}, Id ASC`;
+    }
+    case "Playtime": {
+      return ` ORDER BY Playtime ${order}, Id ASC`;
     }
     default:
       return ` ORDER BY Id ASC`;

@@ -43,6 +43,14 @@ export const makeHomePageViewModel = ({ data }: PageProps) => {
 				return m.option_sortby_id();
 			case 'IsInstalled':
 				return m.option_sortby_is_installed();
+			case 'Added':
+				return m.option_sortby_added();
+			case 'LastActivity':
+				return m.option_sortby_last_activity();
+			case 'Playtime':
+				return m.option_sortby_playtime();
+			default:
+				return sortBy;
 		}
 	};
 
