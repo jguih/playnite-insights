@@ -1,5 +1,5 @@
 import z from "zod";
-import { developerSchema } from "../schemas";
+import { developerSchema } from "../developer/schemas";
 
 export const playniteGameSchema = z.object({
   Id: z.string(),

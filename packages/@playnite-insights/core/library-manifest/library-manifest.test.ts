@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeLibraryManifestService } from "../../../../playnite-insights/src/lib/services/library-manifest/library-manifest";
-import { createMocks } from "../../../../playnite-insights/src/tests/mocks";
-import { join } from "path";
-import type { PlayniteLibraryManifest } from "./schemas";
+import { LibraryManifestService } from "./service.types";
+import { makeLibraryManifestService } from "./service";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 
@@ -18,13 +16,13 @@ const createDeps = () => {
   };
 };
 let deps: ReturnType<typeof createDeps>;
-let service: ReturnType<typeof makeLibraryManifestService>;
+let service: LibraryManifestService;
 
 describe("Library manifest", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     deps = createDeps();
-    service = makeLibraryManifestService(deps);
+    service = makeLibraryManifestService();
   });
 
   it("fails when no manifest data is found", async () => {

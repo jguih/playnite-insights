@@ -6,5 +6,3 @@ export const LOG_LEVELS = {
   warning: 3,
   error: 4,
 } as const;
-
-export type ValidLogLevels = typeof LOG_LEVELS;
