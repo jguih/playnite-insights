@@ -84,3 +84,21 @@ EXPOSE 3000
 USER playnite-insights
 
 ENTRYPOINT ["node", "build"]
+
+FROM mcr.microsoft.com/playwright:v1.54.1-noble AS playwright-base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable pnpm
+
+FROM playwright-base AS playwright-deps
+COPY ./packages /usr/src/app/packages
+COPY ./playwright /usr/src/app/playwright
+COPY ./pnpm-workspace.yaml /usr/src/app
+COPY ./package.json /usr/src/app
+COPY ./tsconfig.json /usr/src/app
+WORKDIR /usr/src/app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+
+FROM playwright-deps AS playwright
+WORKDIR /usr/src/app
+ENTRYPOINT ["pnpm", "--filter", "playwright", "exec", "playwright", "test"]

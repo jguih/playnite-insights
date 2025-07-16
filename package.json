@@ -9,6 +9,10 @@
     "packages/@playnite-insights/infra",
     "packages/@playnite-insights/core"
   ],
+  "scripts": {
+    "stage:up": "docker compose up -d --build app-stage",
+    "test:e2e": "docker compose run --rm --build app-playwright"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.29.5"
   }

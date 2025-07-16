@@ -9,14 +9,10 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@faker-js/faker": "^9.9.0",
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/lib": "workspace:*",
+    "@faker-js/faker": "^9.9.0",
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.0.14"
-  },
-  "engines": {
-    "node": "^24.3.0",
-    "pnpm": "^10.13.0"
   }
 }

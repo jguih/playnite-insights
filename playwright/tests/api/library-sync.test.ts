@@ -1,8 +1,19 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type APIRequestContext } from "@playwright/test";
-import { libraryManifestSchema } from "@playnite-insights/lib";
+import {
+  libraryManifestSchema,
+  type SyncGameListCommand,
+} from "@playnite-insights/lib";
 
-const gameId = faker.string.uuid();
+const createGame = (id: string): SyncGameListCommand["AddedItems"][number] => {
+  return {
+    Id: id,
+    ContentHash: faker.string.uuid(),
+    IsInstalled: faker.datatype.boolean(),
+    Playtime: faker.number.int({ min: 10, max: 20000 }),
+    Name: faker.book.title(),
+  };
+};
 
 const getLibraryManifest = async (request: APIRequestContext) => {
   const manifestResponse = await request.get(`/api/sync/manifest`);
@@ -37,89 +48,56 @@ test("return ok status when command only contains empty arrays", async ({
   expect(result.ok());
 });
 
-test("add new game on library sync", async ({ request }) => {
+test("add, update and delete a game on library sync", async ({ request }) => {
   // Arrange
-  const newGame: SyncGameListCommand["AddedItems"][number] = {
-    Id: gameId,
-    ContentHash: faker.string.uuid(),
-    IsInstalled: false,
-    Playtime: 0,
-    Name: "Test Game",
-  };
-  const data: SyncGameListCommand = {
-    AddedItems: [newGame],
+  const gameId = faker.string.uuid();
+  const addGame = createGame(gameId);
+  const updateGame = createGame(gameId);
+  const addData: SyncGameListCommand = {
+    AddedItems: [addGame],
     RemovedItems: [],
     UpdatedItems: [],
   };
-  // Act
-  const result = await request.post(`/api/sync/games`, { data: data });
-  const manifestResponse = await request.get(`/api/sync/manifest`);
-  expect(manifestResponse.ok()).toBeTruthy();
-  const manifest = libraryManifestSchema.safeParse(
-    await manifestResponse.json()
-  );
-  const gamesInLibrary = manifest.success
-    ? manifest.data.gamesInLibrary.map((g) => g.gameId)
-    : [];
-  // Assert
-  expect(result.ok());
-  expect(manifest.success).toBeTruthy();
-  expect(gamesInLibrary).toContain(newGame.Id);
-});
-
-test("update game on library sync", async ({ request }) => {
-  // Arrange
-  const gameToUpdate: SyncGameListCommand["AddedItems"][number] = {
-    Id: gameId,
-    ContentHash: faker.string.uuid(),
-    IsInstalled: false,
-    Playtime: 0,
-    Name: "Test Game #2",
-  };
-  const data: SyncGameListCommand = {
+  const updateData: SyncGameListCommand = {
     AddedItems: [],
     RemovedItems: [],
-    UpdatedItems: [gameToUpdate],
+    UpdatedItems: [updateGame],
   };
-  let manifest = await getLibraryManifest(request);
-  const oldGameInLibrary = manifest.gamesInLibrary.find(
-    (g) => g.gameId === gameId
-  );
-  const oldContentHash = oldGameInLibrary?.contentHash;
-  expect(oldContentHash).toBeDefined();
-  // Act
-  const result = await request.post(`/api/sync/games`, { data: data });
-  manifest = await getLibraryManifest(request);
-  const gameInLibrary = manifest.gamesInLibrary.find(
-    (g) => g.gameId === gameId
-  );
-  const newContentHash = gameInLibrary?.contentHash;
-  // Assert
-  expect(result.ok());
-  expect(gameInLibrary).toBeDefined();
-  expect(newContentHash).toBeDefined();
-  expect(oldContentHash !== newContentHash).toBeTruthy();
-});
-
-test("remove game on library sync", async ({ request }) => {
-  // Arrange
-  const data: SyncGameListCommand = {
+  const removeData: SyncGameListCommand = {
     AddedItems: [],
     RemovedItems: [gameId],
     UpdatedItems: [],
   };
+  // Act & Assert
+  // Add
+  const addResult = await request.post(`/api/sync/games`, { data: addData });
+  expect(addResult.ok()).toBeTruthy();
   let manifest = await getLibraryManifest(request);
-  const oldGameInLibrary = manifest.gamesInLibrary.find(
-    (g) => g.gameId === gameId
-  );
-  expect(oldGameInLibrary).toBeDefined();
-  // Act
-  const result = await request.post(`/api/sync/games`, { data: data });
+  expect(
+    manifest.gamesInLibrary.find((g) => g.gameId === addGame.Id)
+  ).toBeTruthy();
+  expect(
+    manifest.gamesInLibrary.find((g) => g.contentHash === addGame.ContentHash)
+  ).toBeTruthy();
+  // Update
+  const updateResult = await request.post(`/api/sync/games`, {
+    data: updateData,
+  });
+  expect(updateResult.ok()).toBeTruthy();
   manifest = await getLibraryManifest(request);
-  const gameInLibrary = manifest.gamesInLibrary.find(
-    (g) => g.gameId === gameId
-  );
-  // Assert
-  expect(result.ok());
-  expect(gameInLibrary).toBeUndefined();
+  expect(
+    manifest.gamesInLibrary.find((g) => g.gameId === updateGame.Id)
+  ).toBeTruthy();
+  expect(
+    manifest.gamesInLibrary.find(
+      (g) => g.contentHash === updateGame.ContentHash
+    )
+  ).toBeTruthy();
+  // Remove
+  const removeResult = await request.post(`/api/sync/games`, {
+    data: removeData,
+  });
+  expect(removeResult.ok()).toBeTruthy();
+  manifest = await getLibraryManifest(request);
+  expect(manifest.gamesInLibrary.find((g) => g.gameId === gameId)).toBeFalsy();
 });
