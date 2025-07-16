@@ -8,13 +8,10 @@
 	import { filtersState } from './store.svelte';
 	import Divider from '../Divider.svelte';
 	import Select from '../Select.svelte';
-	import type {
-		ValidSearchParamKeys,
-		ValidSortBy,
-		ValidSortOrder
-	} from '$lib/services/home-page/validation';
 	import type { Snippet } from 'svelte';
 	import Checkbox from '../forms/Checkbox.svelte';
+	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client/home-page';
+	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 
 	let {
 		setSearchParam,
@@ -25,11 +22,11 @@
 		renderSortOrderOptions,
 		renderSortByOptions
 	}: {
-		setSearchParam: (key: ValidSearchParamKeys, value: string | boolean) => void;
+		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		installed: boolean;
 		notInstalled: boolean;
-		sortOrder: ValidSortOrder;
-		sortBy: ValidSortBy;
+		sortOrder: GameSortOrder;
+		sortBy: GameSortBy;
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
 	} = $props();
@@ -71,7 +68,7 @@
 					{@render renderSortByOptions()}
 				</Select>
 			</label>
-			<Divider class="my-2 border-1" />
+			<Divider class="border-1 my-2" />
 			<fieldset class="bg-background-2 flex flex-col justify-center">
 				<label for="installed" class="text-md flex flex-row items-center gap-2 p-3">
 					<Checkbox
