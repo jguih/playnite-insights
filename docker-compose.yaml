@@ -13,30 +13,32 @@ services:
       # TEST_DATA: true
     develop:
       watch:
-        - path: ./
+        - path: ./playnite-insights
           action: sync
           target: /app
           ignore:
             - node_modules/
             - data/
         - path: ./
+          action: rebuild
+          target: /app/package.json
           include:
             - package.json
-          target: /app/package.json
+        - path: ./playnite-insights
           action: rebuild
-        - path: ./
+          target: /app/playnite-insights/package.json
+          include:
+            - package.json
+        - path: ./playnite-insights
+          action: rebuild
+          target: /app/playnite-insights/vite.config.ts
           include:
             - vite.config.ts
-          target: /app/vite.config.ts
+        - path: ./playnite-insights
           action: rebuild
-        - path: ./
+          target: /app/playnite-insights/svelte.config.js
           include:
             - svelte.config.js
-          target: /app/svelte.config.js
-          action: rebuild
-        - path: ./docker
-          target: /app/docker
-          action: rebuild
     volumes:
       - playnite-insights-dev-data:/app/data
     networks:
@@ -57,7 +59,6 @@ services:
       target: stage
     container_name: app-stage
     environment:
-      LOG_LEVEL: 0 # debug
       ORIGIN: ${ORIGIN_STAGE} # make sure there's no trailing slash
       TEST_DATA: true
 
@@ -89,7 +90,6 @@ services:
       target: prod
     container_name: app-prod
     environment:
-      LOG_LEVEL: 0 # debug
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
     volumes:
       - playnite-insights-prod-data:/app/data
