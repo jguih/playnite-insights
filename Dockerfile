@@ -7,6 +7,8 @@ FROM base AS deps
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# Run unit tests
+RUN pnpm --filter core test
 
 FROM deps AS build
 RUN pnpm run -r build

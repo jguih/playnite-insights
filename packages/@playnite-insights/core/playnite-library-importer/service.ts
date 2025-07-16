@@ -1,7 +1,5 @@
 import { join } from "path";
-import * as busboy from "busboy";
 import type { IncomingHttpHeaders } from "http";
-import { Readable } from "stream";
 import {
   PlayniteGame,
   SyncGameListCommand,
@@ -12,17 +10,7 @@ import {
   PlayniteLibraryImporterService,
   PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
-
-const readableFromWeb = (webStream: ReadableStream<Uint8Array>): Readable => {
-  const reader = webStream.getReader();
-  return new Readable({
-    async read() {
-      const { done, value } = await reader.read();
-      if (done) return this.push(null);
-      this.push(Buffer.from(value));
-    },
-  });
-};
+import busboy from "busboy";
 
 export const makePlayniteLibraryImporterService = ({
   playniteGameRepository,

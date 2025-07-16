@@ -13,6 +13,6 @@
       "@playnite-insights/infra": [
         "./packages/@playnite-insights/infra"
       ]
-    }
+    },
   }
 }
