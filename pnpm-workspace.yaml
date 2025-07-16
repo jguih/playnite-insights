@@ -1,0 +1,7 @@
+packages:
+  - "playnite-insights"
+  - "playwright"
+  - "packages/@playnite-insights/lib"
+  - "packages/@playnite-insights/infra"
+  - "packages/@playnite-insights/core"
+injectWorkspacePackages: true

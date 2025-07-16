@@ -3,7 +3,7 @@ name: Create and publish prod Docker image
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 env:
   REGISTRY: ghcr.io
