@@ -679,7 +679,7 @@ export const makePlayniteGameRepository = (
     pageSize: GamePageSize,
     filters?: GameFilters,
     sorting?: GameSorting
-  ): HomePageData | undefined => {
+  ): HomePageData["games"] | undefined => {
     logService.debug(
       `Getting home page data using: ${JSON.stringify({
         offset,
@@ -708,7 +708,7 @@ export const makePlayniteGameRepository = (
       const total = getTotal(filters);
       const stmt = db.prepare(query);
       const result = stmt.all(...params);
-      const games = z.optional(homePageGameSchema).parse(result) ?? [];
+      const games = z.optional(z.array(homePageGameSchema)).parse(result) ?? [];
       const items = games.length;
       const hasNextPage = offset + Number(pageSize) < total;
       const totalPages = Math.ceil(total / Number(pageSize));

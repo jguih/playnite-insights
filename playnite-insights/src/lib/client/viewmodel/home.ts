@@ -1,4 +1,9 @@
-import { homePageDataSchema, type HomePageData } from '@playnite-insights/lib/client/home-page';
+import {
+	homePageDataSchema,
+	type HomePageData,
+	type HomePageGame,
+	type HomePageSearchParamKeys
+} from '@playnite-insights/lib/client/home-page';
 import {
 	gamePageSizes,
 	type GamePageSize,
@@ -9,21 +14,20 @@ import {
 import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
+import { ZodError } from 'zod';
 
 export const makeHomePageViewModel = ({ data }: PageProps) => {
-	let pageData: HomePageData | undefined;
+	let games: HomePageData['games'];
+	let developers: HomePageData['developers'];
 	let isError: boolean = false;
 
-	const getPage = (): string => data.page;
-	const getPageSize = (): GamePageSize => data.pageSize;
-	const getQuery = (): string | null => data.query;
 	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
-	const getTotalGamesCount = (): number => (pageData ? pageData.total : 0);
+	const getTotalGamesCount = (): number => (games ? games.total : 0);
 	const getGameCountFrom = (): number => getOffset();
 	const getGameCountTo = (): number =>
 		Math.min(Number(data.pageSize) + getOffset(), getTotalGamesCount());
-	const getTotalPages = (): number => (pageData ? pageData.totalPages : 0);
-	const getGameList = (): HomePageData['games'] => (pageData ? pageData.games : []);
+	const getTotalPages = (): number => (games ? games.totalPages : 0);
+	const getGameList = (): HomePageGame[] | undefined => games?.games;
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getPageSizeList = (): GamePageSizes => gamePageSizes;
 	const getIsError = (): boolean => isError;
@@ -58,18 +62,20 @@ export const makeHomePageViewModel = ({ data }: PageProps) => {
 		try {
 			const response = await data.promise;
 			const result = homePageDataSchema.parse(await response.json());
-			pageData = result;
+			games = result.games;
+			developers = result.developers;
 			isError = false;
 		} catch (error) {
 			isError = true;
+			if (error && error instanceof ZodError) {
+				console.error(error.format());
+				return;
+			}
 			console.error(error);
 		}
 	};
 
 	return {
-		getPage,
-		getPageSize,
-		getQuery,
 		getOffset,
 		getTotalGamesCount,
 		getGameCountFrom,

@@ -83,5 +83,5 @@ export type PlayniteGameRepository = {
     pageSize: GamePageSize,
     filters?: GameFilters,
     sorting?: GameSorting
-  ) => HomePageData | undefined;
+  ) => HomePageData["games"] | undefined;
 };

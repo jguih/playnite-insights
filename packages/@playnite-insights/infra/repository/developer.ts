@@ -87,10 +87,10 @@ export const makeDeveloperRepository = (
   const getById = (id: string): Developer | undefined => {
     const db = getDb();
     const query = `
-    SELECT *
-    FROM developer
-    WHERE Id = ?;
-  `;
+      SELECT *
+      FROM developer
+      WHERE Id = ?;
+    `;
     try {
       const stmt = db.prepare(query);
       const result = stmt.get(id);
@@ -107,12 +107,27 @@ export const makeDeveloperRepository = (
     return oldDev.Id != newDev.Id || oldDev.Name != newDev.Name;
   };
 
+  const all: DeveloperRepository["all"] = () => {
+    const db = getDb();
+    const query = `SELECT * FROM developer`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const devs = z.optional(z.array(developerSchema)).parse(result);
+      logService.debug(`Found ${devs.length} developers`);
+      return devs;
+    } catch (error) {
+      logService.error(`Failed to get developer list`, error as Error);
+    }
+  };
+
   return {
     add,
     update,
     exists,
     getById,
     hasChanges,
+    all,
   };
 };
 

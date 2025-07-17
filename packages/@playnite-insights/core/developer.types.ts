@@ -6,4 +6,5 @@ export type DeveloperRepository = {
   update: (platform: Developer) => boolean;
   getById: (id: string) => Developer | undefined;
   hasChanges: (oldDeveloper: Developer, newDeveloper: Developer) => boolean;
+  all: () => Developer[] | undefined;
 };

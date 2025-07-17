@@ -22,9 +22,9 @@
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
 	import {
-		type HomePageData,
 		homePageSearchParamsKeys,
-		type HomePageSearchParamKeys
+		type HomePageSearchParamKeys,
+		type HomePageGame
 	} from '@playnite-insights/lib/client/home-page';
 	import { gameSortBy, gameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 
@@ -78,7 +78,7 @@
 	};
 </script>
 
-{#snippet gameCard(game: HomePageData['games'][number])}
+{#snippet gameCard(game: HomePageGame)}
 	<li
 		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-background-1 m-0 aspect-[1/1.6] border-4 border-solid p-0 shadow-md outline-0"
 	>
@@ -183,11 +183,15 @@
 				</label>
 
 				{#key pageParam}
-					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-						{#each vm.getGameList() as game}
-							{@render gameCard(game)}
-						{/each}
-					</ul>
+					{#if vm.getGameList()}
+						<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+							{#each vm.getGameList()! as game}
+								{@render gameCard(game)}
+							{/each}
+						</ul>
+					{:else}
+						<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
+					{/if}
 				{/key}
 
 				<nav class="mt-4 flex flex-row justify-center gap-2">
