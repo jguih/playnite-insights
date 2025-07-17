@@ -59,8 +59,8 @@
 	class={`bg-background-2 hover:border-primary-500 focus-within:border-primary-700 active-within:border-primary-700 flex flex-row items-center justify-center gap-2 border-2 border-solid border-transparent p-1`}
 	onsubmit={handleSubmit}
 >
-	<SearchBarButton size="sm">
-		<Search class="opacity-80" />
+	<SearchBarButton>
+		<Search class="h-5 w-5 opacity-80" />
 	</SearchBarButton>
 	<input
 		{...props}
@@ -71,7 +71,7 @@
 		placeholder={m.home_search_bar_placeholder()}
 		onblur={handleOnBlur}
 	/>
-	<SearchBarButton button={clearBtn} onclick={handleOnClear} type="button" size="sm">
-		<XIcon class="opacity-80" />
+	<SearchBarButton button={clearBtn} onclick={handleOnClear} type="button">
+		<XIcon class="h-5 w-5 opacity-80" />
 	</SearchBarButton>
 </form>

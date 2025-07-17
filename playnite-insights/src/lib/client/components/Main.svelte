@@ -7,7 +7,7 @@
 
 	let {
 		main = $bindable<HTMLElement>(),
-		bottomNav = false,
+		bottomNav = true,
 		...props
 	}: HTMLAttributes<HTMLElement> & {
 		main?: ReturnType<typeof $bindable<HTMLElement>>;

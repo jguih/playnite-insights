@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { XIcon } from '@lucide/svelte';
+	import { ChevronDown, XIcon } from '@lucide/svelte';
 	import LightButton from '../buttons/LightButton.svelte';
 	import Backdrop from '../sidebar/Backdrop.svelte';
 	import Sidebar from '../sidebar/Sidebar.svelte';
@@ -13,6 +13,8 @@
 	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client/home-page';
 	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 	import { m } from '$lib/paraglide/messages';
+	import Dropdown from '../dropdown/Dropdown.svelte';
+	import DropdownBody from '../dropdown/DropdownBody.svelte';
 
 	let {
 		setSearchParam,
@@ -38,11 +40,7 @@
 	<Sidebar width={80}>
 		<SidebarHeader>
 			<h1 class="text-xl">{m.filters_title()}</h1>
-			<LightButton
-				class="opacity-80"
-				size="md"
-				onclick={() => (filtersState.show = !filtersState.show)}
-			>
+			<LightButton class="opacity-80" onclick={() => (filtersState.show = !filtersState.show)}>
 				<XIcon />
 			</LightButton>
 		</SidebarHeader>
@@ -95,6 +93,50 @@
 					{m.label_filter_not_installed()}
 				</label>
 			</fieldset>
+			<Divider class="border-1 my-2" />
+			<Dropdown class=" w-full">
+				{#snippet button({ onclick })}
+					<LightButton {onclick} class="bg-background-2 w-full p-2">
+						Genres <ChevronDown class="h-5 w-5" />
+					</LightButton>
+				{/snippet}
+				{#snippet body()}
+					<DropdownBody>Testing</DropdownBody>
+				{/snippet}
+			</Dropdown>
+			<hr class="border-background-1" />
+			<Dropdown class=" w-full">
+				{#snippet button({ onclick })}
+					<LightButton {onclick} class="bg-background-2 w-full p-2">
+						Platforms<ChevronDown class="h-5 w-5" />
+					</LightButton>
+				{/snippet}
+				{#snippet body()}
+					<DropdownBody>Testing</DropdownBody>
+				{/snippet}
+			</Dropdown>
+			<hr class="border-background-1" />
+			<Dropdown class=" w-full">
+				{#snippet button({ onclick })}
+					<LightButton {onclick} class="bg-background-2 w-full p-2">
+						Publishers<ChevronDown class="h-5 w-5" />
+					</LightButton>
+				{/snippet}
+				{#snippet body()}
+					<DropdownBody>Testing</DropdownBody>
+				{/snippet}
+			</Dropdown>
+			<hr class="border-background-1" />
+			<Dropdown class=" w-full">
+				{#snippet button({ onclick })}
+					<LightButton {onclick} class="bg-background-2 w-full p-2">
+						Developers<ChevronDown class="h-5 w-5" />
+					</LightButton>
+				{/snippet}
+				{#snippet body()}
+					<DropdownBody>Testing</DropdownBody>
+				{/snippet}
+			</Dropdown>
 		</SidebarBody>
 	</Sidebar>
 {/if}
