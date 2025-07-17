@@ -94,6 +94,7 @@ services:
     container_name: app-prod
     environment:
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
+      APP_NAME: "Playnite Insights (Prod)"
     volumes:
       - playnite-insights-prod-data:/app/data
     networks:

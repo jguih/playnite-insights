@@ -1,11 +1,13 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
+	import type { Snippet } from 'svelte';
 
-  let { children } : { children?: Snippet } = $props();
+	let { children }: { children?: Snippet } = $props();
 </script>
 
-<div class="bg-background-1 shadow-lg z-1000 flex flex-row justify-between items-center pl-8 pr-8 pt-4 pb-4">
-  {#if children}
-    {@render children()}
-  {/if}
+<div
+	class="bg-background-1 z-1000 fixed bottom-0 left-0 right-0 flex h-[3.4rem] flex-row items-center justify-between pb-4 pl-8 pr-8 pt-4 shadow-lg"
+>
+	{#if children}
+		{@render children()}
+	{/if}
 </div>

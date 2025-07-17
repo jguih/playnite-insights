@@ -14,7 +14,7 @@
 
 <aside
 	{...props}
-	class={`bg-background-1 fixed top-0 right-0 left-0 z-1002 h-full max-w-full overflow-y-auto shadow-xl ${props.class ?? ''}`}
+	class={`bg-background-1 z-1002 max-w-dvw fixed left-0 right-0 top-0 h-dvh overflow-y-auto shadow-xl ${props.class ?? ''}`}
 	style:width={`${width}dvw`}
 	role="presentation"
 	transition:fly={{ x: `-${width}dvw`, duration: 300 }}

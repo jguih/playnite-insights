@@ -3,7 +3,7 @@
 	import Divider from '$lib/client/components/Divider.svelte';
 	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 	import Header from '$lib/client/components/Header.svelte';
-	import AppLayoutWithoutBottomNav from '$lib/client/components/layout/AppLayoutWithoutBottomNav.svelte';
+	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { makeGamePageViewModel } from '$lib/client/viewmodel/game.js';
@@ -23,7 +23,7 @@
 	<Divider />
 {/snippet}
 
-<AppLayoutWithoutBottomNav>
+<BaseAppLayout>
 	<Header>
 		{#snippet action()}
 			<LightButton onclick={() => history.back()}>
@@ -32,11 +32,11 @@
 		{/snippet}
 	</Header>
 	{#await vm.load()}
-		<Main>
+		<Main bottomNav={false}>
 			<Loading />
 		</Main>
 	{:then}
-		<Main>
+		<Main bottomNav={false}>
 			{#if vm.getIsError()}
 				<SomethingWentWrong />
 			{:else if game}
@@ -46,7 +46,7 @@
 					alt={`${game.Name} background image`}
 					class="aspect-3/2 w-full"
 				/>
-				<div class="mt-4 mb-4 flex flex-col">
+				<div class="mb-4 mt-4 flex flex-col">
 					{@render infoSection(m.game_info_release_date(), vm.getReleaseDate())}
 					{@render infoSection(m.game_info_added(), vm.getAdded())}
 					{@render infoSection(m.game_info_playtime(), vm.getPlaytime())}
@@ -69,4 +69,4 @@
 			{/if}
 		</Main>
 	{/await}
-</AppLayoutWithoutBottomNav>
+</BaseAppLayout>

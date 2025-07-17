@@ -2,13 +2,17 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { mainScrollPosition } from '$lib/stores/main-scroll-position.svelte';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
 		main = $bindable<HTMLElement>(),
+		bottomNav = false,
 		...props
-	}: HTMLAttributes<HTMLElement> & { main?: ReturnType<typeof $bindable<HTMLElement>> } = $props();
+	}: HTMLAttributes<HTMLElement> & {
+		main?: ReturnType<typeof $bindable<HTMLElement>>;
+		bottomNav?: boolean;
+	} = $props();
 	const pathname = $derived(page.url.pathname);
 
 	onMount(() => {
@@ -31,7 +35,9 @@
 
 <main
 	{...props}
-	class="h-full overflow-x-hidden overflow-y-scroll p-4 pb-12 {props?.class ?? ''}"
+	class={`absolute ${bottomNav ? 'bottom-[3.4rem]' : 'bottom-0'} left-0 right-0 top-[3.4rem] overflow-y-auto overflow-x-hidden p-4 pb-12 ${
+		props?.class ?? ''
+	}`}
 	bind:this={main}
 >
 	{#if props.children}
