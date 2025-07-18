@@ -1,4 +1,5 @@
 import {
+  Developer,
   GameFilters,
   GamePageSize,
   GameSorting,
@@ -13,10 +14,11 @@ export type HomePageServiceDeps = {
 };
 
 export type HomePageService = {
-  getData: (
+  getGames: (
     offset: number,
     pageSize: GamePageSize,
     filters?: GameFilters,
     sorting?: GameSorting
   ) => HomePageData | undefined;
+  getDevs: () => Developer[] | undefined;
 };

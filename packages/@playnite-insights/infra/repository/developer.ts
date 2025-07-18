@@ -109,7 +109,7 @@ export const makeDeveloperRepository = (
 
   const all: DeveloperRepository["all"] = () => {
     const db = getDb();
-    const query = `SELECT * FROM developer`;
+    const query = `SELECT * FROM developer ORDER BY Name ASC`;
     try {
       const stmt = db.prepare(query);
       const result = stmt.all();

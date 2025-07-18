@@ -18,7 +18,7 @@ export const GET: RequestHandler = ({ url }) => {
 		by: sortBy,
 		order: sortOrder
 	};
-	const data = services.homePage.getData(offset, pageSize, filters, sorting);
+	const data = services.homePage.getGames(offset, pageSize, filters, sorting);
 	if (!data) {
 		return json(null, { status: 400 });
 	}

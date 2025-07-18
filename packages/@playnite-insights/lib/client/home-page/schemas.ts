@@ -1,5 +1,4 @@
 import z from "zod";
-import { developerSchema } from "../developer";
 
 export const homePageGameSchema = z.object({
   Id: z.string(),
@@ -8,17 +7,12 @@ export const homePageGameSchema = z.object({
 });
 
 export const homePageDataSchema = z.object({
-  games: z
-    .object({
-      games: z.array(homePageGameSchema),
-      total: z.number(),
-      hasNextPage: z.boolean(),
-      totalPages: z.number(),
-      offset: z.number(),
-      items: z.number(),
-    })
-    .optional(),
-  developers: z.array(developerSchema).optional(),
+  games: z.array(homePageGameSchema),
+  total: z.number(),
+  hasNextPage: z.boolean(),
+  totalPages: z.number(),
+  offset: z.number(),
+  items: z.number(),
 });
 
 export const homePageSearchParamsKeys = {

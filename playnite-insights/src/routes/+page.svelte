@@ -29,7 +29,8 @@
 	import { gameSortBy, gameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 
 	let { data }: PageProps = $props();
-	let vm = $derived.by(() => makeHomePageViewModel({ data }));
+	let vm = $derived.by(() => makeHomePageViewModel(data));
+	let developers = $derived(data.developers);
 	let pageSizeParam = $derived(data.pageSize);
 	let pageParam = $derived(Number(data.page));
 	let installedParam = $derived(data.installed);
@@ -104,6 +105,7 @@
 	notInstalled={notInstalledParam}
 	sortBy={sortByParam}
 	sortOrder={sortOrderParam}
+	{developers}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}

@@ -4,14 +4,16 @@ export const makeHomePageService = ({
   playniteGameRepository,
   developerRepository,
 }: HomePageServiceDeps): HomePageService => {
-  const getData: HomePageService["getData"] = (...props) => {
-    return {
-      games: playniteGameRepository.getGamesForHomePage(...props),
-      developers: developerRepository.all(),
-    };
+  const getGames: HomePageService["getGames"] = (...props) => {
+    return playniteGameRepository.getGamesForHomePage(...props);
+  };
+
+  const getDevs: HomePageService["getDevs"] = () => {
+    return developerRepository.all();
   };
 
   return {
-    getData,
+    getGames,
+    getDevs,
   };
 };

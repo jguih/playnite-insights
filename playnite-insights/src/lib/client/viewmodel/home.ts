@@ -16,9 +16,8 @@ import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
 import { ZodError } from 'zod';
 
-export const makeHomePageViewModel = ({ data }: PageProps) => {
-	let games: HomePageData['games'];
-	let developers: HomePageData['developers'];
+export const makeHomePageViewModel = (data: PageProps['data']) => {
+	let games: HomePageData;
 	let isError: boolean = false;
 
 	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
@@ -62,8 +61,7 @@ export const makeHomePageViewModel = ({ data }: PageProps) => {
 		try {
 			const response = await data.promise;
 			const result = homePageDataSchema.parse(await response.json());
-			games = result.games;
-			developers = result.developers;
+			games = result;
 			isError = false;
 		} catch (error) {
 			isError = true;

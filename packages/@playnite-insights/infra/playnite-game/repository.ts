@@ -679,7 +679,7 @@ export const makePlayniteGameRepository = (
     pageSize: GamePageSize,
     filters?: GameFilters,
     sorting?: GameSorting
-  ): HomePageData["games"] | undefined => {
+  ): HomePageData | undefined => {
     logService.debug(
       `Getting home page data using: ${JSON.stringify({
         offset,

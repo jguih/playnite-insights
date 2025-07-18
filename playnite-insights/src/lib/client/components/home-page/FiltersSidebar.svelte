@@ -14,6 +14,8 @@
 	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 	import { m } from '$lib/paraglide/messages';
 	import FilterDropdown from './FilterDropdown.svelte';
+	import HeaderSearchBar from '../HeaderSearchBar.svelte';
+	import type { Developer } from '@playnite-insights/lib/client/developer';
 
 	let {
 		setSearchParam,
@@ -22,7 +24,8 @@
 		sortOrder,
 		sortBy,
 		renderSortOrderOptions,
-		renderSortByOptions
+		renderSortByOptions,
+		developers
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		installed: boolean;
@@ -31,6 +34,7 @@
 		sortBy: GameSortBy;
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
+		developers?: Developer[];
 	} = $props();
 </script>
 
@@ -68,7 +72,7 @@
 			</label>
 			<Divider class="border-1 my-2" />
 			<fieldset class="bg-background-2 flex flex-col justify-center">
-				<label for="installed" class="text-md flex flex-row items-center gap-2 p-3">
+				<label for="installed" class="text-md flex flex-row items-center gap-2 p-2">
 					<Checkbox
 						checked={installed}
 						name="installed"
@@ -80,7 +84,7 @@
 					{m.label_filter_installed()}
 				</label>
 				<hr class="border-background-1" />
-				<label for="not_installed" class="text-md flex flex-row items-center gap-2 p-3">
+				<label for="not_installed" class="text-md flex flex-row items-center gap-2 p-2">
 					<Checkbox
 						checked={notInstalled}
 						name="not_installed"
@@ -106,7 +110,26 @@
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown label="Developers">
-				<p>testing</p>
+				{#if developers}
+					<HeaderSearchBar value={''} onChange={() => undefined} />
+					<fieldset class="h-48 overflow-y-auto">
+						{#each developers as dev}
+							<label for={`dev-${dev.Id}`} class="text-md flex flex-row items-center gap-2 p-2">
+								<Checkbox
+									checked={false}
+									name="developers"
+									id={`dev-${dev.Id}`}
+									onchange={(e) => {
+										setSearchParam('developers', dev.Id);
+									}}
+								/>
+								{dev.Name}
+							</label>
+						{/each}
+					</fieldset>
+				{:else}
+					<p>No devs to show</p>
+				{/if}
 			</FilterDropdown>
 		</SidebarBody>
 	</Sidebar>
