@@ -67,7 +67,7 @@ export type PlayniteGameRepository = {
   ) => DashPageData["topMostPlayedGames"];
   /**
    * Gets games for dashboard page
-   * @returns
+   * @deprecated Will by replaced by `all()` due to offline support
    */
   getGamesForDashPage: () => DashPageGame[];
   /**
@@ -77,6 +77,7 @@ export type PlayniteGameRepository = {
    * @param filters
    * @param sorting
    * @returns
+   * @deprecated Will by replaced by `all()` due to offline support
    */
   getGamesForHomePage: (
     offset: number,
@@ -84,4 +85,8 @@ export type PlayniteGameRepository = {
     filters?: GameFilters,
     sorting?: GameSorting
   ) => HomePageData | undefined;
+  /**
+   * Returns a list with all games
+   */
+  all: () => PlayniteGame[] | undefined;
 };

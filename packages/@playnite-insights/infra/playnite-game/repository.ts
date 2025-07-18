@@ -725,6 +725,21 @@ export const makePlayniteGameRepository = (
     }
   };
 
+  const all: PlayniteGameRepository["all"] = () => {
+    logService.debug(`Fetching all games from database`);
+    const db = getDb();
+    const query = `SELECT * FROM playnite_game pg ORDER BY Id ASC`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const games = z.optional(z.array(playniteGameSchema)).parse(result);
+      return games;
+    } catch (error) {
+      logService.error("Failed to get home page data", error as Error);
+      return;
+    }
+  };
+
   return {
     add,
     update,
@@ -746,5 +761,6 @@ export const makePlayniteGameRepository = (
     getTopMostPlayedGamesForDashPage,
     getGamesForDashPage,
     getGamesForHomePage,
+    all,
   };
 };

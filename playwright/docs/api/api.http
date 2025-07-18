@@ -6,6 +6,10 @@ Content-Type: {{contentType}}
 GET {{protocol}}://{{host}}/api/game/f0f93674-2cba-440c-b3da-56f109aced0d
 Content-Type: {{contentType}}
 
+### Get all games
+GET {{protocol}}://{{host}}/api/game
+Content-Type: {{contentType}}
+
 ### Get dashboard page data
 GET {{protocol}}://{{host}}/api/dash
 Content-Type: {{contentType}}
