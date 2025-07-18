@@ -30,7 +30,6 @@
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => makeHomePageViewModel(data));
-	let developers = $derived(data.developers);
 	let pageSizeParam = $derived(data.pageSize);
 	let pageParam = $derived(Number(data.page));
 	let installedParam = $derived(data.installed);
@@ -105,7 +104,7 @@
 	notInstalled={notInstalledParam}
 	sortBy={sortByParam}
 	sortOrder={sortOrderParam}
-	{developers}
+	developers={[]}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}

@@ -1,32 +1,75 @@
-import {
-	homePageDataSchema,
-	type HomePageData,
-	type HomePageGame,
-	type HomePageSearchParamKeys
-} from '@playnite-insights/lib/client/home-page';
+import { type HomePageGame } from '@playnite-insights/lib/client/home-page';
 import {
 	gamePageSizes,
-	type GamePageSize,
+	playniteGameSchema,
 	type GamePageSizes,
 	type GameSortBy,
-	type GameSortOrder
+	type GameSortOrder,
+	type PlayniteGame
 } from '@playnite-insights/lib/client/playnite-game';
 import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
-import { ZodError } from 'zod';
+import z, { ZodError } from 'zod';
 
 export const makeHomePageViewModel = (data: PageProps['data']) => {
-	let games: HomePageData;
+	let games: PlayniteGame[] | undefined;
 	let isError: boolean = false;
 
+	const applyFilters = (games?: PlayniteGame[]) => {
+		if (!games) return;
+		let filtered = games;
+		const query = data.query;
+		const installed = data.installed && !data.notInstalled;
+		const notInstalled = !data.installed && data.notInstalled;
+		if (query !== null) {
+			filtered = games.filter((g) => g.Name?.toLowerCase().includes(query.toLowerCase()));
+		}
+		if (installed) {
+			filtered = filtered.filter((g) => +g.IsInstalled);
+		}
+		if (notInstalled) {
+			filtered = filtered.filter((g) => !+g.IsInstalled);
+		}
+		return filtered;
+	};
+
+	const applySorting = (games?: PlayniteGame[]) => {
+		if (!games) return;
+		const sortBy = data.sortBy;
+		const sortOrder = data.sortOrder;
+		const multiplier = sortOrder === 'asc' ? 1 : -1;
+
+		return games.sort((a, b) => {
+			let aValue = a[sortBy];
+			let bValue = b[sortBy];
+
+			if (sortBy === 'Added' || sortBy === 'LastActivity') {
+				aValue = aValue ? new Date(aValue).getTime() : null;
+				bValue = bValue ? new Date(bValue).getTime() : null;
+			}
+
+			const aIsNull = aValue === null || aValue === undefined;
+			const bIsNull = bValue === null || bValue === undefined;
+
+			if (aIsNull && bIsNull) return a.Id.localeCompare(b.Id);
+			if (aIsNull) return -1 * multiplier;
+			if (bIsNull) return 1 * multiplier;
+
+			if (aValue! < bValue!) return -1 * multiplier;
+			if (aValue! > bValue!) return 1 * multiplier;
+
+			return 0;
+		});
+	};
+
 	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
-	const getTotalGamesCount = (): number => (games ? games.total : 0);
+	const getTotalGamesCount = (): number => (games ? games.length : 0);
 	const getGameCountFrom = (): number => getOffset();
 	const getGameCountTo = (): number =>
 		Math.min(Number(data.pageSize) + getOffset(), getTotalGamesCount());
-	const getTotalPages = (): number => (games ? games.totalPages : 0);
-	const getGameList = (): HomePageGame[] | undefined => games?.games;
+	const getTotalPages = (): number => (games ? Math.ceil(games.length / Number(data.pageSize)) : 0);
+	const getGameList = (): HomePageGame[] | undefined => applySorting(applyFilters(games));
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getPageSizeList = (): GamePageSizes => gamePageSizes;
 	const getIsError = (): boolean => isError;
@@ -60,7 +103,7 @@ export const makeHomePageViewModel = (data: PageProps['data']) => {
 	const load = async () => {
 		try {
 			const response = await data.promise;
-			const result = homePageDataSchema.parse(await response.json());
+			const result = z.optional(z.array(playniteGameSchema)).parse(await response.json());
 			games = result;
 			isError = false;
 		} catch (error) {

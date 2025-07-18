@@ -10,7 +10,7 @@ import {
 	gameSortOrder
 } from '@playnite-insights/lib/client/playnite-game';
 
-export const load: PageLoad = ({ url, fetch, data }) => {
+export const load: PageLoad = ({ url, fetch }) => {
 	const params = new URLSearchParams(url.searchParams);
 	let changed = false;
 	if (!params.has(paramKeys.page)) {
@@ -34,10 +34,9 @@ export const load: PageLoad = ({ url, fetch, data }) => {
 	}
 	const parsedValues = parseHomePageSearchParams(params);
 
-	const promise = fetch(`/api/home?${params.toString()}`);
+	const promise = fetch(`/api/game`);
 	return {
 		promise,
-		developers: data.developers,
 		...parsedValues
 	};
 };
