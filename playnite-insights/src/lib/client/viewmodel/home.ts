@@ -63,13 +63,22 @@ export const makeHomePageViewModel = (data: PageProps['data']) => {
 		});
 	};
 
+	const applyPagination = (games?: PlayniteGame[]) => {
+		if (!games) return;
+		const pageSize = Number(data.pageSize);
+		const offset = (Number(data.page) - 1) * Number(data.pageSize);
+		const end = Math.min(offset + pageSize, games.length);
+		return games.slice(offset, end);
+	};
+
 	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
 	const getTotalGamesCount = (): number => (games ? games.length : 0);
 	const getGameCountFrom = (): number => getOffset();
 	const getGameCountTo = (): number =>
 		Math.min(Number(data.pageSize) + getOffset(), getTotalGamesCount());
 	const getTotalPages = (): number => (games ? Math.ceil(games.length / Number(data.pageSize)) : 0);
-	const getGameList = (): HomePageGame[] | undefined => applySorting(applyFilters(games));
+	const getGameList = (): HomePageGame[] | undefined =>
+		applyPagination(applySorting(applyFilters(games)));
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getPageSizeList = (): GamePageSizes => gamePageSizes;
 	const getIsError = (): boolean => isError;
