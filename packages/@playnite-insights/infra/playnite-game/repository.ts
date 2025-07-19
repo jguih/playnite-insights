@@ -21,11 +21,6 @@ import {
   playniteGameSchema,
   type Publisher,
   type GameFilters,
-  GameSorting,
-  HomePageData,
-  homePageGameSchema,
-  GamePageSize,
-  FullGame,
   platformSchema,
   fullGameSchema,
 } from "@playnite-insights/lib";

@@ -2,10 +2,14 @@
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
-	import { devStore, gameStore } from '$lib/stores/app-data.svelte';
-	import { fetchGames } from '$lib/client/utils/playnite-game';
-	import { fetchDevs } from '$lib/client/use-devs';
-	import { error } from '@sveltejs/kit';
+	import {
+		dashStore,
+		devStore,
+		gameStore,
+		loadDashData,
+		loadDevs,
+		loadGames
+	} from '$lib/stores/app-data.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 
 	let { children, data }: { children: Snippet } & LayoutProps = $props();
@@ -15,23 +19,15 @@
 	onMount(async () => {
 		if (!gameStore.raw) {
 			isLoading = true;
-			await fetchGames()
-				.then((games) => {
-					gameStore.raw = games;
-				})
-				.catch((err) => {
-					error(500, 'Failed to fetch games');
-				});
+			await loadGames();
 		}
 		if (!devStore.raw) {
 			isLoading = true;
-			await fetchDevs()
-				.then((devs) => {
-					devStore.raw = devs;
-				})
-				.catch((err) => {
-					error(500, 'Failed to fetch devs');
-				});
+			await loadDevs();
+		}
+		if (!dashStore.pageData) {
+			isLoading = true;
+			await loadDashData();
 		}
 		isLoading = false;
 	});

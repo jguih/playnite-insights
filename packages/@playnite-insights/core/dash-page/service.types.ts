@@ -14,5 +14,5 @@ export type DashPageServiceDeps = {
 };
 
 export type DashPageService = {
-  getPageData: () => DashPageData | undefined;
+  getPageData: () => DashPageData;
 };

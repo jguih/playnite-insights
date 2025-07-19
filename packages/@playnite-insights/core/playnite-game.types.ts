@@ -65,7 +65,6 @@ export type PlayniteGameRepository = {
   ) => DashPageData["topMostPlayedGames"];
   /**
    * Gets games for dashboard page
-   * @deprecated Will by replaced by `all()` due to offline support
    */
   getGamesForDashPage: () => DashPageGame[];
   /**
