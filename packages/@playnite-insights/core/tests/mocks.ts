@@ -1,12 +1,12 @@
 import { vi } from "vitest";
-import { LogService } from "../log";
+import { LogService } from "../log.types";
 import { LOG_LEVELS } from "@playnite-insights/lib/client/log";
-import { FileSystemService } from "../file-system";
+import { FileSystemService } from "../file-system.types";
 import { constants } from "fs/promises";
-import { StreamUtilsService } from "../stream-utils";
-import { PlayniteGameRepository } from "../playnite-game";
+import { StreamUtilsService } from "../stream-utils.types";
+import { PlayniteGameRepository } from "../playnite-game.types";
 import { LibraryManifestService } from "../library-manifest";
-import { PlayniteLibrarySyncRepository } from "../playnite-library-sync";
+import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
 
 export const makeMocks = () => {
   const logService = {
@@ -44,7 +44,6 @@ export const makeMocks = () => {
     exists: vi.fn(),
     addDeveloperFor: vi.fn(),
     deleteDevelopersFor: vi.fn(),
-    getDevelopers: vi.fn(),
     addPlatformFor: vi.fn(),
     deletePlatformsFor: vi.fn(),
     addGenreFor: vi.fn(),
@@ -57,7 +56,7 @@ export const makeMocks = () => {
     getTotalPlaytimeSeconds: vi.fn(),
     getTopMostPlayedGamesForDashPage: vi.fn(),
     getGamesForDashPage: vi.fn(),
-    getGamesForHomePage: vi.fn(),
+    all: vi.fn(),
   } satisfies PlayniteGameRepository;
 
   const libraryManifestService = {

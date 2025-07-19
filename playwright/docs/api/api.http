@@ -1,9 +1,5 @@
-### Get all developers
-GET {{protocol}}://{{host}}/api/developer
-Content-Type: {{contentType}}
-
-### Get all publishers
-GET {{protocol}}://{{host}}/api/publisher
+### Get all companies
+GET {{protocol}}://{{host}}/api/company
 Content-Type: {{contentType}}
 
 ### Get all platforms

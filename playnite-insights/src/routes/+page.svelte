@@ -29,7 +29,7 @@
 		gameSortOrder,
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
-	import { devStore, gameStore } from '$lib/stores/app-data.svelte';
+	import { companyStore, gameStore } from '$lib/stores/app-data.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -142,7 +142,7 @@
 	{sortByParam}
 	{sortOrderParam}
 	{developersParam}
-	developerList={devStore.raw}
+	developerList={companyStore.raw}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}

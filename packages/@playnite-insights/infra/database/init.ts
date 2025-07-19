@@ -34,7 +34,7 @@ export const initDatabase = async ({
     logService.error(`Failed to remove database file`, error as Error);
     exit(1);
   }
-  const db = new DatabaseSync(DB_FILE);
+  const db = new DatabaseSync(DB_FILE, { enableForeignKeyConstraints: true });
   try {
     db.exec(`
       CREATE TABLE IF NOT EXISTS __migrations (
@@ -67,6 +67,7 @@ export const initDatabase = async ({
     // Apply missing migrations
     for (const fileName of migrationFiles) {
       if (applied.includes(fileName)) continue;
+      logService.debug(`Applying migration ${fileName}...`);
       const absolutePath = join(MIGRATIONS_DIR, fileName);
       const sqlContents = await fileSystemService.readfile(
         absolutePath,

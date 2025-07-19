@@ -3,11 +3,11 @@
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 	import {
+		companyStore,
 		dashStore,
-		devStore,
 		gameStore,
+		loadCompanies,
 		loadDashData,
-		loadDevs,
 		loadGames
 	} from '$lib/stores/app-data.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
@@ -21,9 +21,9 @@
 			isLoading = true;
 			await loadGames();
 		}
-		if (!devStore.raw) {
+		if (!companyStore.raw) {
 			isLoading = true;
-			await loadDevs();
+			await loadCompanies();
 		}
 		if (!dashStore.pageData) {
 			isLoading = true;

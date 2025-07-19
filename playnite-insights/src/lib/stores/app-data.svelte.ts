@@ -1,21 +1,25 @@
-import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib';
-import { developerSchema, type Developer } from '@playnite-insights/lib/client/developer';
+import {
+	companySchema,
+	dashPageDataSchema,
+	type Company,
+	type DashPageData
+} from '@playnite-insights/lib';
 import { fullGameSchema, type FullGame } from '@playnite-insights/lib/client/playnite-game';
 import { error } from '@sveltejs/kit';
 import z from 'zod';
 
 export const gameStore: { raw?: FullGame[] } = $state({});
-export const devStore: { raw?: Developer[] } = $state({});
+export const companyStore: { raw?: Company[] } = $state({});
 export const dashStore: { pageData?: DashPageData } = $state({});
 
-export const loadDevs = async () => {
+export const loadCompanies = async () => {
 	const origin = window.location.origin;
-	const url = `${origin}/api/developer`;
+	const url = `${origin}/api/company`;
 	try {
 		const response = await fetch(url);
 		const asJson = await response.json();
-		const devs = z.optional(z.array(developerSchema)).parse(asJson);
-		devStore.raw = devs;
+		const companies = z.optional(z.array(companySchema)).parse(asJson);
+		companyStore.raw = companies;
 	} catch (err) {
 		error(500, `Failed to fetch developers: ${(err as Error).message}`);
 	}
