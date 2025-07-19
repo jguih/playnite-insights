@@ -34,9 +34,7 @@ export const load: PageLoad = ({ url, fetch }) => {
 	}
 	const parsedValues = parseHomePageSearchParams(params);
 
-	const promise = fetch(`/api/game`);
 	return {
-		promise,
 		...parsedValues
 	};
 };

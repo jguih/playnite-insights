@@ -32,7 +32,7 @@
 		{/snippet}
 	</Header>
 	{#await vm.load()}
-		<Main bottomNav={false}>
+		<Main bottomNav={false} restoreScroll={false}>
 			<Loading />
 		</Main>
 	{:then}

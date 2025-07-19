@@ -1,7 +1,5 @@
-import { type HomePageGame } from '@playnite-insights/lib/client/home-page';
 import {
 	gamePageSizes,
-	playniteGameSchema,
 	type GamePageSizes,
 	type GameSortBy,
 	type GameSortOrder,
@@ -12,13 +10,15 @@ import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
 import z, { ZodError } from 'zod';
 
-export const makeHomePageViewModel = (data: PageProps['data']) => {
-	let games: PlayniteGame[] | undefined;
+export const makeHomePageViewModel = (
+	games: PlayniteGame[] | undefined,
+	data: PageProps['data']
+) => {
 	let isError: boolean = false;
 
 	const applyFilters = (games?: PlayniteGame[]) => {
 		if (!games) return;
-		let filtered = games;
+		let filtered = [...games];
 		const query = data.query;
 		const installed = data.installed && !data.notInstalled;
 		const notInstalled = !data.installed && data.notInstalled;
@@ -36,11 +36,12 @@ export const makeHomePageViewModel = (data: PageProps['data']) => {
 
 	const applySorting = (games?: PlayniteGame[]) => {
 		if (!games) return;
+		let sorted = [...games];
 		const sortBy = data.sortBy;
 		const sortOrder = data.sortOrder;
 		const multiplier = sortOrder === 'asc' ? 1 : -1;
 
-		return games.sort((a, b) => {
+		return sorted.sort((a, b) => {
 			let aValue = a[sortBy];
 			let bValue = b[sortBy];
 
@@ -65,10 +66,11 @@ export const makeHomePageViewModel = (data: PageProps['data']) => {
 
 	const applyPagination = (games?: PlayniteGame[]) => {
 		if (!games) return;
+		const paginated = [...games];
 		const pageSize = Number(data.pageSize);
 		const offset = (Number(data.page) - 1) * Number(data.pageSize);
 		const end = Math.min(offset + pageSize, games.length);
-		return games.slice(offset, end);
+		return paginated.slice(offset, end);
 	};
 
 	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
@@ -77,11 +79,10 @@ export const makeHomePageViewModel = (data: PageProps['data']) => {
 	const getGameCountTo = (): number =>
 		Math.min(Number(data.pageSize) + getOffset(), getTotalGamesCount());
 	const getTotalPages = (): number => (games ? Math.ceil(games.length / Number(data.pageSize)) : 0);
-	const getGameList = (): HomePageGame[] | undefined =>
-		applyPagination(applySorting(applyFilters(games)));
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getPageSizeList = (): GamePageSizes => gamePageSizes;
 	const getIsError = (): boolean => isError;
+	const getGameList = () => applyPagination(applySorting(applyFilters(games)));
 
 	const getSortOrderLabel = (sortOrder: GameSortOrder): string => {
 		switch (sortOrder) {
@@ -109,34 +110,17 @@ export const makeHomePageViewModel = (data: PageProps['data']) => {
 		}
 	};
 
-	const load = async () => {
-		try {
-			const response = await data.promise;
-			const result = z.optional(z.array(playniteGameSchema)).parse(await response.json());
-			games = result;
-			isError = false;
-		} catch (error) {
-			isError = true;
-			if (error && error instanceof ZodError) {
-				console.error(error.format());
-				return;
-			}
-			console.error(error);
-		}
-	};
-
 	return {
 		getOffset,
 		getTotalGamesCount,
 		getGameCountFrom,
 		getGameCountTo,
 		getTotalPages,
-		getGameList,
 		getImageURL,
 		getPageSizeList,
 		getIsError,
 		getSortOrderLabel,
 		getSortByLabel,
-		load
+		getGameList
 	};
 };

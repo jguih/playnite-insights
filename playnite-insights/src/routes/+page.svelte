@@ -17,7 +17,6 @@
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
 	import Loading from '$lib/client/components/Loading.svelte';
-	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
@@ -26,10 +25,23 @@
 		type HomePageSearchParamKeys,
 		type HomePageGame
 	} from '@playnite-insights/lib/client/home-page';
-	import { gameSortBy, gameSortOrder } from '@playnite-insights/lib/client/playnite-game';
+	import {
+		gameSortBy,
+		gameSortOrder,
+		playniteGameSchema
+	} from '@playnite-insights/lib/client/playnite-game';
+	import { onMount } from 'svelte';
+	import { gameStore } from '$lib/stores/app-data.svelte';
+	import z from 'zod';
 
 	let { data }: PageProps = $props();
-	let vm = $derived.by(() => makeHomePageViewModel(data));
+	let vm = $derived.by(() => {
+		const games = gameStore.raw ? [...gameStore.raw] : undefined;
+		const params = { ...data };
+		return makeHomePageViewModel(games, params);
+	});
+	let gamesFiltered = $derived(vm.getGameList());
+	let isLoading: boolean = $state(false);
 	let pageSizeParam = $derived(data.pageSize);
 	let pageParam = $derived(Number(data.page));
 	let installedParam = $derived(data.installed);
@@ -74,8 +86,31 @@
 			else params.delete(key);
 		}
 		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		if (main) {
+			main.scrollTop = 0;
+		}
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
+
+	const updateGameStore = async () => {
+		const origin = window.location.origin;
+		const url = `${origin}/api/game`;
+		try {
+			isLoading = true;
+			const response = await fetch(url);
+			const asJson = await response.json();
+			const games = z.optional(z.array(playniteGameSchema)).parse(asJson);
+			gameStore.raw = games;
+		} catch (error) {
+			console.error(error);
+		} finally {
+			isLoading = false;
+		}
+	};
+
+	onMount(async () => {
+		if (!gameStore.raw) updateGameStore();
+	});
 </script>
 
 {#snippet gameCard(game: HomePageGame)}
@@ -138,8 +173,8 @@
 			</LightButton>
 		</div>
 	</Header>
-	{#await vm.load()}
-		<Main>
+	<Main bind:main>
+		{#if isLoading}
 			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
 				<div class="my-[0.35rem] h-[0.875rem] w-40 animate-pulse bg-neutral-300/60"></div>
@@ -153,77 +188,71 @@
 				</Select>
 			</label>
 			<Loading />
-		</Main>
-	{:then}
-		<Main bind:main>
-			{#if vm.getIsError()}
-				<SomethingWentWrong />
-			{:else}
-				<h1 class="text-lg">{m.home_title()}</h1>
-				<div class="mb-2">
-					{#if vm.getTotalGamesCount() === 0}
-						<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
-					{/if}
-					{#if vm.getTotalGamesCount() > 0}
-						<p class="text-sm text-neutral-300/60">
-							{m.home_showing_games_counter({
-								count1: vm.getGameCountFrom(),
-								count2: vm.getGameCountTo(),
-								totalCount: vm.getTotalGamesCount()
-							})}
-						</p>
-					{/if}
-				</div>
-				<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-					{m.home_label_items_per_page()}
-					<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
-						{#each vm.getPageSizeList() as option}
-							<option value={option}>{option}</option>
+		{:else}
+			<h1 class="text-lg">{m.home_title()}</h1>
+			<div class="mb-2">
+				{#if vm.getTotalGamesCount() === 0}
+					<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
+				{/if}
+				{#if vm.getTotalGamesCount() > 0}
+					<p class="text-sm text-neutral-300/60">
+						{m.home_showing_games_counter({
+							count1: vm.getGameCountFrom(),
+							count2: vm.getGameCountTo(),
+							totalCount: vm.getTotalGamesCount()
+						})}
+					</p>
+				{/if}
+			</div>
+			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
+				{m.home_label_items_per_page()}
+				<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
+					{#each vm.getPageSizeList() as option}
+						<option value={option}>{option}</option>
+					{/each}
+				</Select>
+			</label>
+
+			{#key page.url.searchParams.toString()}
+				{#if gamesFiltered}
+					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+						{#each gamesFiltered as game}
+							{@render gameCard(game)}
 						{/each}
-					</Select>
-				</label>
+					</ul>
+				{:else}
+					<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
+				{/if}
+			{/key}
 
-				{#key pageParam}
-					{#if vm.getGameList()}
-						<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-							{#each vm.getGameList()! as game}
-								{@render gameCard(game)}
-							{/each}
-						</ul>
-					{:else}
-						<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
-					{/if}
-				{/key}
+			<nav class="mt-4 flex flex-row justify-center gap-2">
+				<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
+					<ChevronLeft />
+				</LightButton>
 
-				<nav class="mt-4 flex flex-row justify-center gap-2">
-					<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
-						<ChevronLeft />
+				{#if pageParam > 1}
+					<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
+						{pageParam - 1}
 					</LightButton>
-
-					{#if pageParam > 1}
-						<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
-							{pageParam - 1}
-						</LightButton>
-					{/if}
-					<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
-						{pageParam}
-					</SelectedButton>
-					{#if pageParam < vm.getTotalPages()}
-						<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
-							{pageParam + 1}
-						</LightButton>
-					{/if}
-
-					<LightButton
-						onclick={() => handleOnPageChange(pageParam + 1)}
-						disabled={pageParam >= vm.getTotalPages()}
-					>
-						<ChevronRight />
+				{/if}
+				<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
+					{pageParam}
+				</SelectedButton>
+				{#if pageParam < vm.getTotalPages()}
+					<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
+						{pageParam + 1}
 					</LightButton>
-				</nav>
-			{/if}
-		</Main>
-	{/await}
+				{/if}
+
+				<LightButton
+					onclick={() => handleOnPageChange(pageParam + 1)}
+					disabled={pageParam >= vm.getTotalPages()}
+				>
+					<ChevronRight />
+				</LightButton>
+			</nav>
+		{/if}
+	</Main>
 
 	<BottomNav>
 		<Home selected={true} />
