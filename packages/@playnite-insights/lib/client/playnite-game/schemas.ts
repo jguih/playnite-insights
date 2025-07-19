@@ -38,11 +38,10 @@ export const gameManifestDataSchema = z.array(
 );
 
 export const gameSortBy = [
-  "Id",
+  "LastActivity",
   "IsInstalled",
   "Added",
-  "LastActivity",
   "Playtime",
 ] as const;
-export const gameSortOrder = ["asc", "desc"] as const;
+export const gameSortOrder = ["desc", "asc"] as const;
 export const gamePageSizes = ["25", "50", "75", "100"] as const;

@@ -1,7 +1,8 @@
 import {
-  GamePageSize,
-  GameSortBy,
-  GameSortOrder,
+  type GamePageSize,
+  type GameSortBy,
+  type GameSortOrder,
+  gameSortBy,
   isValidGamePageSize,
   isValidGameSortBy,
   isValidGameSortOrder,
@@ -33,7 +34,9 @@ export const parseHomePageSearchParams = (params: URLSearchParams) => {
     params.get(homePageSearchParamsKeys.notInstalled) === "1";
   // Sorting
   const _sortBy = params.get(homePageSearchParamsKeys.sortBy);
-  const sortBy: GameSortBy = isValidGameSortBy(_sortBy) ? _sortBy : "Id";
+  const sortBy: GameSortBy = isValidGameSortBy(_sortBy)
+    ? _sortBy
+    : gameSortBy[0];
   const _sortOrder = params.get(homePageSearchParamsKeys.sortOrder);
   const sortOrder: GameSortOrder = isValidGameSortOrder(_sortOrder)
     ? _sortOrder

@@ -6,39 +6,22 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { fetchGames } from '$lib/client/utils/playnite-game.js';
 	import { makeGamePageViewModel } from '$lib/client/viewmodel/game.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { gameStore } from '$lib/stores/app-data.svelte.js';
+	import { devStore, gameStore } from '$lib/stores/app-data.svelte.js';
 	import { ArrowLeft } from '@lucide/svelte';
-	import { onMount } from 'svelte';
 
 	let { data } = $props();
 	const vm = $derived.by(() => {
 		const games = gameStore.raw ? [...gameStore.raw] : undefined;
+		const devs = devStore.raw ? [...devStore.raw] : undefined;
 		const game = games?.find((g) => g.Id === data.gameId);
-		return makeGamePageViewModel(game);
+		return makeGamePageViewModel(game, devs);
 	});
 	let game = $derived(vm.getGame());
 	let isLoading: boolean = $state(false);
 	let isError: boolean = $state(false);
 	$inspect(game);
-
-	onMount(async () => {
-		if (!gameStore.raw) {
-			isLoading = true;
-			await fetchGames()
-				.then((games) => {
-					gameStore.raw = games;
-					isError = false;
-					isLoading = false;
-				})
-				.catch((err) => {
-					isError = true;
-					isLoading = false;
-				});
-		}
-	});
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}

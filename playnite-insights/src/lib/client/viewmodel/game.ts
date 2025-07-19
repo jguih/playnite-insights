@@ -1,12 +1,16 @@
 import { m } from '$lib/paraglide/messages';
-import { type PlayniteGame } from '@playnite-insights/lib/client/playnite-game';
+import { type FullGame } from '@playnite-insights/lib/client/playnite-game';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
+import type { Developer } from '@playnite-insights/lib/client/developer';
 
-export const makeGamePageViewModel = (game?: PlayniteGame) => {
-	const getGame = (): PlayniteGame | undefined => game;
+export const makeGamePageViewModel = (game?: FullGame, devs?: Developer[]) => {
+	const getGame = (): FullGame | undefined => game;
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getDevelopers = (): string => {
-		return '';
+		if (!game || !game.Developers || !devs) return '';
+		const gameDevs = game.Developers.split(',').sort();
+		const fullDevs = devs.filter((dev) => gameDevs.includes(dev.Id));
+		return fullDevs.map((d) => d.Name).join(', ');
 	};
 	const getPlaytime = (): string => {
 		if (game?.Playtime && game.Playtime > 0) {

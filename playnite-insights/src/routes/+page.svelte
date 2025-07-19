@@ -29,9 +29,7 @@
 		gameSortOrder,
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
-	import { onMount } from 'svelte';
 	import { gameStore } from '$lib/stores/app-data.svelte';
-	import { fetchGames } from '$lib/client/utils/playnite-game';
 	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 
 	let { data }: PageProps = $props();
@@ -92,22 +90,6 @@
 		}
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
-
-	onMount(async () => {
-		if (!gameStore.raw) {
-			isLoading = true;
-			await fetchGames()
-				.then((games) => {
-					gameStore.raw = games;
-					isError = false;
-					isLoading = false;
-				})
-				.catch((err) => {
-					isError = true;
-					isLoading = false;
-				});
-		}
-	});
 </script>
 
 {#snippet gameCard(game: PlayniteGame)}
