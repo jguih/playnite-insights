@@ -22,10 +22,13 @@
 	import { filtersState } from '$lib/client/components/home-page/store.svelte';
 	import {
 		homePageSearchParamsKeys,
-		type HomePageSearchParamKeys,
-		type HomePageGame
+		type HomePageSearchParamKeys
 	} from '@playnite-insights/lib/client/home-page';
-	import { gameSortBy, gameSortOrder } from '@playnite-insights/lib/client/playnite-game';
+	import {
+		gameSortBy,
+		gameSortOrder,
+		type PlayniteGame
+	} from '@playnite-insights/lib/client/playnite-game';
 	import { onMount } from 'svelte';
 	import { gameStore } from '$lib/stores/app-data.svelte';
 	import { fetchGames } from '$lib/client/utils/playnite-game';
@@ -107,7 +110,7 @@
 	});
 </script>
 
-{#snippet gameCard(game: HomePageGame)}
+{#snippet gameCard(game: PlayniteGame)}
 	<li
 		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-background-1 m-0 aspect-[1/1.6] border-4 border-solid p-0 shadow-md outline-0"
 	>

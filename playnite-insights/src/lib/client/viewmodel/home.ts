@@ -8,7 +8,6 @@ import {
 import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
-import z, { ZodError } from 'zod';
 
 export const makeHomePageViewModel = (
 	games: PlayniteGame[] | undefined,
