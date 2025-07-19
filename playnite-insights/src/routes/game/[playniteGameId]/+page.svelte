@@ -1,10 +1,8 @@
 <script lang="ts">
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
-	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
-	import Loading from '$lib/client/components/Loading.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { makeGamePageViewModel } from '$lib/client/viewmodel/game.js';
 	import { m } from '$lib/paraglide/messages.js';
@@ -19,8 +17,6 @@
 		return makeGamePageViewModel(game, devs);
 	});
 	let game = $derived(vm.getGame());
-	let isLoading: boolean = $state(false);
-	let isError: boolean = $state(false);
 	$inspect(game);
 </script>
 
@@ -41,11 +37,7 @@
 		{/snippet}
 	</Header>
 	<Main bottomNav={false}>
-		{#if isError}
-			<SomethingWentWrong />
-		{:else if isLoading}
-			<Loading />
-		{:else if game}
+		{#if game}
 			<h2 class="mb-4 text-2xl font-semibold">{game.Name}</h2>
 			<img
 				src={vm.getImageURL(game.BackgroundImage)}

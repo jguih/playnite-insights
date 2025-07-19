@@ -29,8 +29,7 @@
 		gameSortOrder,
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
-	import { gameStore } from '$lib/stores/app-data.svelte';
-	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
+	import { devStore, gameStore } from '$lib/stores/app-data.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -39,8 +38,6 @@
 		return makeHomePageViewModel(games, params);
 	});
 	let gamesFiltered = $derived(vm.getGameList());
-	let isLoading: boolean = $state(false);
-	let isError: boolean = $state(false);
 	let pageSizeParam = $derived(data.pageSize);
 	let pageParam = $derived(Number(data.page));
 	let installedParam = $derived(data.installed);
@@ -118,7 +115,7 @@
 	notInstalled={notInstalledParam}
 	sortBy={sortByParam}
 	sortOrder={sortOrderParam}
-	developers={[]}
+	developers={devStore.raw}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}
@@ -153,86 +150,68 @@
 		</div>
 	</Header>
 	<Main bind:main>
-		{#if isError}
-			<SomethingWentWrong />
-		{:else if isLoading}
-			<h1 class="text-lg">{m.home_title()}</h1>
-			<div class="mb-2">
-				<div class="my-[0.35rem] h-[0.875rem] w-40 animate-pulse bg-neutral-300/60"></div>
-			</div>
-			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
-					{#each vm.getPageSizeList() as option}
-						<option value={option}>{option}</option>
+		<h1 class="text-lg">{m.home_title()}</h1>
+		<div class="mb-2">
+			{#if vm.getTotalGamesCount() === 0}
+				<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
+			{/if}
+			{#if vm.getTotalGamesCount() > 0}
+				<p class="text-sm text-neutral-300/60">
+					{m.home_showing_games_counter({
+						count1: vm.getGameCountFrom(),
+						count2: vm.getGameCountTo(),
+						totalCount: vm.getTotalGamesCount()
+					})}
+				</p>
+			{/if}
+		</div>
+		<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
+			{m.home_label_items_per_page()}
+			<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
+				{#each vm.getPageSizeList() as option}
+					<option value={option}>{option}</option>
+				{/each}
+			</Select>
+		</label>
+
+		{#key pageParam}
+			{#if gamesFiltered}
+				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+					{#each gamesFiltered as game}
+						{@render gameCard(game)}
 					{/each}
-				</Select>
-			</label>
-			<Loading />
-		{:else}
-			<h1 class="text-lg">{m.home_title()}</h1>
-			<div class="mb-2">
-				{#if vm.getTotalGamesCount() === 0}
-					<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
-				{/if}
-				{#if vm.getTotalGamesCount() > 0}
-					<p class="text-sm text-neutral-300/60">
-						{m.home_showing_games_counter({
-							count1: vm.getGameCountFrom(),
-							count2: vm.getGameCountTo(),
-							totalCount: vm.getTotalGamesCount()
-						})}
-					</p>
-				{/if}
-			</div>
-			<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
-				{m.home_label_items_per_page()}
-				<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
-					{#each vm.getPageSizeList() as option}
-						<option value={option}>{option}</option>
-					{/each}
-				</Select>
-			</label>
+				</ul>
+			{:else}
+				<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
+			{/if}
+		{/key}
 
-			{#key page.url.searchParams.toString()}
-				{#if gamesFiltered}
-					<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-						{#each gamesFiltered as game}
-							{@render gameCard(game)}
-						{/each}
-					</ul>
-				{:else}
-					<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
-				{/if}
-			{/key}
+		<nav class="mt-4 flex flex-row justify-center gap-2">
+			<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
+				<ChevronLeft />
+			</LightButton>
 
-			<nav class="mt-4 flex flex-row justify-center gap-2">
-				<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
-					<ChevronLeft />
+			{#if pageParam > 1}
+				<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
+					{pageParam - 1}
 				</LightButton>
-
-				{#if pageParam > 1}
-					<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
-						{pageParam - 1}
-					</LightButton>
-				{/if}
-				<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
-					{pageParam}
-				</SelectedButton>
-				{#if pageParam < vm.getTotalPages()}
-					<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
-						{pageParam + 1}
-					</LightButton>
-				{/if}
-
-				<LightButton
-					onclick={() => handleOnPageChange(pageParam + 1)}
-					disabled={pageParam >= vm.getTotalPages()}
-				>
-					<ChevronRight />
+			{/if}
+			<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
+				{pageParam}
+			</SelectedButton>
+			{#if pageParam < vm.getTotalPages()}
+				<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
+					{pageParam + 1}
 				</LightButton>
-			</nav>
-		{/if}
+			{/if}
+
+			<LightButton
+				onclick={() => handleOnPageChange(pageParam + 1)}
+				disabled={pageParam >= vm.getTotalPages()}
+			>
+				<ChevronRight />
+			</LightButton>
+		</nav>
 	</Main>
 
 	<BottomNav>

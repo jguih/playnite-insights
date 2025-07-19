@@ -61,19 +61,18 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		});
 	};
 
-	const applyPagination = () => {
+	const getPaginatedList = () => {
 		if (!resolvedGames) return;
 		const paginated = [...resolvedGames];
 		const pageSize = Number(data.pageSize);
 		const offset = (Number(data.page) - 1) * Number(data.pageSize);
 		const end = Math.min(offset + pageSize, resolvedGames.length);
-		resolvedGames = paginated.slice(offset, end);
+		return paginated.slice(offset, end);
 	};
 
 	resolvedGames = games ? [...games] : undefined;
 	applyFilters();
 	applySorting();
-	applyPagination();
 
 	const getOffset = (): number => (Number(data.page) - 1) * Number(data.pageSize);
 	const getTotalGamesCount = (): number => (resolvedGames ? resolvedGames.length : 0);
@@ -85,7 +84,7 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getPageSizeList = (): GamePageSizes => gamePageSizes;
 	const getIsError = (): boolean => isError;
-	const getGameList = () => resolvedGames;
+	const getGameList = () => getPaginatedList();
 
 	const getSortOrderLabel = (sortOrder: GameSortOrder): string => {
 		switch (sortOrder) {

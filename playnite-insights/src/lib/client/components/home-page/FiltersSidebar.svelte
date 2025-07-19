@@ -110,7 +110,7 @@
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown label="Developers">
-				{#if developers}
+				{#if developers && developers.length > 0}
 					<HeaderSearchBar value={''} onChange={() => undefined} />
 					<fieldset class="h-48 overflow-y-auto">
 						{#each developers as dev}
