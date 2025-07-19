@@ -21,20 +21,16 @@ import {
   playniteGameSchema,
   type Publisher,
   type GameFilters,
-  GameSorting,
-  HomePageData,
-  homePageGameSchema,
-  GamePageSize,
+  platformSchema,
+  fullGameRawSchema,
+  FullGame,
 } from "@playnite-insights/lib";
 import { defaultLogger } from "../services";
 import { defaultPublisherRepository } from "../repository/publisher";
 import { defaultPlatformRepository } from "../repository/platform";
 import { defaultDeveloperRepository } from "../repository/developer";
 import { defaultGenreRepository } from "../repository/genre";
-import {
-  getOrderByClause,
-  getWhereClauseAndParamsFromFilters,
-} from "./filtering-and-sorting";
+import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
 
 type PlayniteGameRepositoryDeps = {
   getDb: () => DatabaseSync;
@@ -77,35 +73,6 @@ export const makePlayniteGameRepository = (
     } catch (error) {
       logService.error(`Failed to get total games count`, error as Error);
       return 0;
-    }
-  };
-
-  const getDevelopers = (
-    game: Pick<PlayniteGame, "Id" | "Name">
-  ): Array<Developer> | undefined => {
-    const db = getDb();
-    const query = `
-    SELECT dev.Id, dev.Name 
-    FROM playnite_game_developer pgdev
-    JOIN developer dev ON dev.Id = pgdev.DeveloperId
-    WHERE pgdev.GameId = (?)
-  `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all(game.Id);
-      const data = z.array(developerSchema).parse(result);
-      logService.debug(
-        `Developer list for ${game.Name} fetched: ${data
-          .map((d) => d.Name)
-          .join(", ")}`
-      );
-      return data;
-    } catch (error) {
-      logService.error(
-        `Failed to get developer list for ${game.Name}:`,
-        error as Error
-      );
-      return undefined;
     }
   };
 
@@ -198,6 +165,35 @@ export const makePlayniteGameRepository = (
     }
   };
 
+  const getDevelopers = (
+    game: Pick<PlayniteGame, "Id" | "Name">
+  ): Array<Developer> | undefined => {
+    const db = getDb();
+    const query = `
+    SELECT dev.Id, dev.Name 
+    FROM playnite_game_developer pgdev
+    JOIN developer dev ON dev.Id = pgdev.DeveloperId
+    WHERE pgdev.GameId = (?)
+  `;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all(game.Id);
+      const data = z.array(developerSchema).parse(result);
+      logService.debug(
+        `Developer list for ${game.Name} fetched: ${data
+          .map((d) => d.Name)
+          .join(", ")}`
+      );
+      return data;
+    } catch (error) {
+      logService.error(
+        `Failed to get developer list for ${game.Name}:`,
+        error as Error
+      );
+      return undefined;
+    }
+  };
+
   const addPlatformFor = (
     game: Pick<PlayniteGame, "Id" | "Name">,
     platform: Platform
@@ -241,6 +237,36 @@ export const makePlayniteGameRepository = (
         error as Error
       );
       return false;
+    }
+  };
+
+  const getPlatforms = (
+    game: Pick<PlayniteGame, "Id" | "Name">
+  ): Array<Platform> | undefined => {
+    const db = getDb();
+    const query = `
+    SELECT plat.*
+    FROM playnite_game_platform pgplat
+    JOIN platform plat ON plat.Id = pgplat.PlatformId
+    WHERE pgplat.GameId = (?)
+  `;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all(game.Id);
+      logService.debug(JSON.stringify(result));
+      const data = z.optional(z.array(platformSchema)).parse(result);
+      logService.debug(
+        `Platform list for ${game.Name} fetched: ${data
+          .map((d) => d.Name)
+          .join(", ")}`
+      );
+      return data;
+    } catch (error) {
+      logService.error(
+        `Failed to get platform list for ${game.Name}:`,
+        error as Error
+      );
+      return undefined;
     }
   };
 
@@ -674,54 +700,45 @@ export const makePlayniteGameRepository = (
     }
   };
 
-  const getGamesForHomePage = (
-    offset: number,
-    pageSize: GamePageSize,
-    filters?: GameFilters,
-    sorting?: GameSorting
-  ): HomePageData | undefined => {
-    logService.debug(
-      `Getting home page data using: ${JSON.stringify({
-        offset,
-        pageSize,
-        filters,
-        sorting,
-      })}`
-    );
+  const all: PlayniteGameRepository["all"] = () => {
     const db = getDb();
-    let query = `
-        SELECT 
-          pg.Id,
-          pg.Name,
-          pg.CoverImage
-        FROM playnite_game pg
-      `;
-    const { where, params } = getWhereClauseAndParamsFromFilters(filters);
-    const orderBy = getOrderByClause(sorting);
-    query += where;
-    query += orderBy;
-    query += ` LIMIT ? OFFSET ?;`;
-    params.push(pageSize.toString());
-    params.push(offset.toString());
-
+    const separator = ",";
+    const query = `
+      SELECT 
+        pg.*, 
+        GROUP_CONCAT(pgg.GenreId) AS Genres,
+        GROUP_CONCAT(pgp.PlatformId) as Platforms,
+        GROUP_CONCAT(pgd.DeveloperId) as Developers,
+        GROUP_CONCAT(pgpub.PublisherId) as Publishers
+      FROM playnite_game pg 
+      LEFT JOIN playnite_game_genre pgg ON pgg.GameId = pg.Id
+      LEFT JOIN playnite_game_platform pgp ON pgp.GameId = pg.Id
+      LEFT JOIN playnite_game_developer pgd ON pgd.GameId = pg.Id
+      LEFT JOIN playnite_game_publisher pgpub ON pgpub.GameId = pg.Id
+      GROUP BY pg.Id
+      ORDER BY pg.Id ASC;`;
     try {
-      const total = getTotal(filters);
       const stmt = db.prepare(query);
-      const result = stmt.all(...params);
-      const games = z.optional(homePageGameSchema).parse(result) ?? [];
-      const items = games.length;
-      const hasNextPage = offset + Number(pageSize) < total;
-      const totalPages = Math.ceil(total / Number(pageSize));
-      logService.success(
-        `Fetched game list for home page, returning games ${offset} to ${Math.min(
-          Number(pageSize) + offset,
-          total
-        )} out of ${total}`
-      );
-      return { games, offset, items, total, hasNextPage, totalPages };
+      const result = stmt.all();
+      const raw = z.optional(z.array(fullGameRawSchema)).parse(result);
+      const games = raw.map((g) => {
+        const devs = g.Developers ? g.Developers.split(separator) : [];
+        const publishers = g.Publishers ? g.Publishers.split(separator) : [];
+        const platforms = g.Platforms ? g.Platforms.split(separator) : [];
+        const genres = g.Genres ? g.Genres.split(separator) : [];
+        return {
+          ...g,
+          Developers: devs,
+          Publishers: publishers,
+          Platforms: platforms,
+          Genres: genres,
+        } as FullGame;
+      });
+      logService.debug(`Found ${games.length} games`);
+      return games;
     } catch (error) {
-      logService.error("Failed to get home page data", error as Error);
-      return undefined;
+      logService.error("Failed to get all games from database", error as Error);
+      return;
     }
   };
 
@@ -745,6 +762,6 @@ export const makePlayniteGameRepository = (
     getTotal,
     getTopMostPlayedGamesForDashPage,
     getGamesForDashPage,
-    getGamesForHomePage,
+    all,
   };
 };

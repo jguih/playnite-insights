@@ -7,8 +7,13 @@ FROM base AS deps
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-# Run unit tests
-RUN pnpm --filter core test
+RUN pnpm test:unit
+
+FROM base AS dev-deps
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+RUN pnpm test:unit
 
 FROM deps AS build
 RUN pnpm run -r build
@@ -25,9 +30,9 @@ ENV APP_NAME='Playnite Insights (Dev)'
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p ./data/files ./data/tmp
 RUN chown -R playnite-insights:playnite-insights ./data
-COPY --from=deps --chown=playnite-insights:playnite-insights /usr/src/app ./
-COPY --from=deps --chown=playnite-insights:playnite-insights /usr/src/app/playnite-insights/static/placeholder ./data/files/placeholder
-COPY --from=deps --chown=playnite-insights:playnite-insights /usr/src/app/packages/@playnite-insights/infra/migrations ./infra/migrations
+COPY --from=dev-deps --chown=playnite-insights:playnite-insights /usr/src/app .
+COPY --from=dev-deps --chown=playnite-insights:playnite-insights /usr/src/app/playnite-insights/static/placeholder ./data/files/placeholder
+COPY --from=dev-deps --chown=playnite-insights:playnite-insights /usr/src/app/packages/@playnite-insights/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 

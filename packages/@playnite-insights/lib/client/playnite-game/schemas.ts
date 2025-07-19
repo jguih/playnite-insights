@@ -17,6 +17,22 @@ export const playniteGameSchema = z.object({
   ContentHash: z.string(),
 });
 
+export const fullGameRawSchema = z.object({
+  ...playniteGameSchema.shape,
+  Developers: z.string().nullable(),
+  Publishers: z.string().nullable(),
+  Genres: z.string().nullable(),
+  Platforms: z.string().nullable(),
+});
+
+export const fullGameSchema = z.object({
+  ...playniteGameSchema.shape,
+  Developers: z.array(z.string()),
+  Publishers: z.array(z.string()),
+  Genres: z.array(z.string()),
+  Platforms: z.array(z.string()),
+});
+
 export const gameByIdSchema = z.object({
   game: z.optional(playniteGameSchema),
   developers: z.array(developerSchema).optional(),
@@ -30,11 +46,10 @@ export const gameManifestDataSchema = z.array(
 );
 
 export const gameSortBy = [
-  "Id",
+  "LastActivity",
   "IsInstalled",
   "Added",
-  "LastActivity",
   "Playtime",
 ] as const;
-export const gameSortOrder = ["asc", "desc"] as const;
+export const gameSortOrder = ["desc", "asc"] as const;
 export const gamePageSizes = ["25", "50", "75", "100"] as const;

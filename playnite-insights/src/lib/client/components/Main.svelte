@@ -7,25 +7,27 @@
 
 	let {
 		main = $bindable<HTMLElement>(),
-		bottomNav = false,
+		bottomNav = true,
+		restoreScroll = true,
 		...props
 	}: HTMLAttributes<HTMLElement> & {
 		main?: ReturnType<typeof $bindable<HTMLElement>>;
 		bottomNav?: boolean;
+		restoreScroll?: boolean;
 	} = $props();
 	const pathname = $derived(page.url.pathname);
 
 	onMount(() => {
 		// Restore previous scroll position
-		if (main && mainScrollPosition[pathname]) {
+		if (main && mainScrollPosition[pathname] && restoreScroll) {
 			requestAnimationFrame(() => {
-				main.scrollTop = mainScrollPosition[pathname].scrollTop;
+				if (main) main.scrollTop = mainScrollPosition[pathname].scrollTop;
 			});
 		}
 	});
 
 	beforeNavigate(() => {
-		if (main) {
+		if (main && restoreScroll) {
 			mainScrollPosition[pathname] = {
 				scrollTop: main.scrollTop
 			};

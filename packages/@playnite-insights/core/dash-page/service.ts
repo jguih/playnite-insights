@@ -7,7 +7,7 @@ export const makeDashPageService = ({
   playniteGameRepository,
   getLastSixMonthsAbv,
 }: DashPageServiceDeps): DashPageService => {
-  const getPageData = (): DashPageData | undefined => {
+  const getPageData = (): DashPageData => {
     const data = playniteGameRepository.getGamesForDashPage();
     const total = data.length;
     const isInstalled =

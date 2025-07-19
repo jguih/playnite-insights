@@ -1,11 +1,8 @@
 import { m } from '$lib/paraglide/messages';
-import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib/client/dash-page';
+import { type DashPageData } from '@playnite-insights/lib/client/dash-page';
 import { getFormattedPlaytime } from '../utils/playnite-game';
 
-export const makeDashPageViewModel = (promise: Promise<Response>) => {
-	let pageData: DashPageData | undefined;
-	let isError: boolean = false;
-
+export const makeDashPageViewModel = (pageData?: DashPageData) => {
 	const getTotal = (): number => pageData?.total ?? 0;
 	const getIsInstalled = (): number => pageData?.isInstalled ?? 0;
 	const getNotInstalled = (): number => pageData?.notInstalled ?? 0;
@@ -28,21 +25,8 @@ export const makeDashPageViewModel = (promise: Promise<Response>) => {
 	const getPlayed = (): number => pageData?.played ?? 0;
 	const getTop10MostPlayedGames = (): DashPageData['topMostPlayedGames'] =>
 		pageData?.topMostPlayedGames ?? [];
-	const getIsError = (): boolean => isError;
-
-	const load = async () => {
-		try {
-			const response = await promise;
-			pageData = dashPageDataSchema.parse(await response.json());
-			isError = false;
-		} catch (error) {
-			console.error(error);
-			isError = true;
-		}
-	};
 
 	return {
-		load,
 		getTotal,
 		getIsInstalled,
 		getNotInstalled,
@@ -51,7 +35,6 @@ export const makeDashPageViewModel = (promise: Promise<Response>) => {
 		getTotalPlayedPercent,
 		getCharts,
 		getPlayed,
-		getTop10MostPlayedGames,
-		getIsError
+		getTop10MostPlayedGames
 	};
 };

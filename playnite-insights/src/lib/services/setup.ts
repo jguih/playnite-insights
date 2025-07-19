@@ -16,7 +16,6 @@ import {
 	makeMediaFilesService,
 	makeDashPageService,
 	makeGamePageService,
-	makeHomePageService,
 	makePlayniteLibraryImporterService
 } from '@playnite-insights/core';
 import { getLastSixMonthsAbreviated } from '$lib/utils/date';
@@ -57,7 +56,6 @@ export const setupServices = () => {
 		...repositories,
 		libraryManifestService: libraryManifestService
 	});
-	const homePageService = makeHomePageService({ ...commonDeps });
 	const dashPageService = makeDashPageService({
 		...commonDeps,
 		getLastSixMonthsAbv: getLastSixMonthsAbreviated
@@ -70,7 +68,6 @@ export const setupServices = () => {
 		log: defaultLogger,
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
-		homePage: homePageService,
 		dashPage: dashPageService,
 		gamePage: gamePageService,
 		mediaFiles: mediaFilesService,

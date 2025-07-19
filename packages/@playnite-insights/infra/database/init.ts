@@ -36,7 +36,6 @@ export const initDatabase = async ({
   }
   const db = new DatabaseSync(DB_FILE);
   try {
-    logService.debug(`Creating migrations table`);
     db.exec(`
       CREATE TABLE IF NOT EXISTS __migrations (
         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,8 +47,7 @@ export const initDatabase = async ({
     logService.error(`Failed to create migrations table`, error as Error);
     exit(1);
   }
-  logService.debug("Applying migrations");
-  logService.info(`Initializing database`);
+  logService.info(`Initializing database...`);
   try {
     // Get applied migrations
     const applied =
@@ -65,6 +63,7 @@ export const initDatabase = async ({
       .filter((entry) => entry.isFile())
       .map((entry) => entry.name)
       .filter((entry) => entry.endsWith(".sql"));
+    let migrationsApplied = 0;
     // Apply missing migrations
     for (const fileName of migrationFiles) {
       if (applied.includes(fileName)) continue;
@@ -78,8 +77,10 @@ export const initDatabase = async ({
         `INSERT INTO __migrations (Name, AppliedAt) VALUES (?, datetime('now'))`
       ).run(fileName);
       logService.debug(`Migration applied ${fileName}`);
+      migrationsApplied++;
     }
-    logService.success(`Database initialized without issues`);
+    logService.info(`Applied ${migrationsApplied} migrations`);
+    logService.success(`Database initialized`);
   } catch (error) {
     logService.error("Failed to initialize database", error as Error);
     exit(1);

@@ -18,3 +18,7 @@
   --color-background-1: hsl(228, 48%, 15%);
   --color-background-2: hsl(228, 48%, 18%);
 }
+
+body {
+  @apply text-white bg-background overflow-hidden;
+}

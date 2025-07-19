@@ -10,7 +10,7 @@
     "packages/@playnite-insights/core"
   ],
   "scripts": {
-    "dev": "docker compose up --watch --build app-dev",
+    "dev": "docker compose up --watch app-dev",
     "prod": "docker compose up -d --build app-prod",
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",

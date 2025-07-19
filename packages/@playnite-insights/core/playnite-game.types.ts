@@ -2,12 +2,10 @@ import type {
   DashPageData,
   DashPageGame as DashPageGame,
   Developer,
+  FullGame,
   GameFilters,
   GameManifestData,
-  GamePageSize,
-  GameSorting,
   Genre,
-  HomePageData,
   Platform,
   PlayniteGame,
   Publisher,
@@ -67,21 +65,10 @@ export type PlayniteGameRepository = {
   ) => DashPageData["topMostPlayedGames"];
   /**
    * Gets games for dashboard page
-   * @returns
    */
   getGamesForDashPage: () => DashPageGame[];
   /**
-   * Gets games for home page
-   * @param offset
-   * @param pageSize
-   * @param filters
-   * @param sorting
-   * @returns
+   * Returns a list with all games
    */
-  getGamesForHomePage: (
-    offset: number,
-    pageSize: GamePageSize,
-    filters?: GameFilters,
-    sorting?: GameSorting
-  ) => HomePageData | undefined;
+  all: () => FullGame[] | undefined;
 };
