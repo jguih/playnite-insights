@@ -6,4 +6,5 @@ export type PlatformRepository = {
   update: (platform: Platform) => boolean;
   getById: (id: string) => Platform | undefined;
   hasChanges: (oldPlatform: Platform, newPlatform: Platform) => boolean;
+  all: () => Platform[] | undefined;
 };

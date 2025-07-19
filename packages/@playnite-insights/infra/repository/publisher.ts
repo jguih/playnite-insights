@@ -113,12 +113,27 @@ export const makePublisherRepository = (
     );
   };
 
+  const all: PublisherRepository["all"] = () => {
+    const db = getDb();
+    const query = `SELECT * FROM publisher ORDER BY Name ASC`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const publishers = z.optional(z.array(publisherSchema)).parse(result);
+      logService.debug(`Found ${publishers.length} publishers`);
+      return publishers;
+    } catch (error) {
+      logService.error(`Failed to get publisher list`, error as Error);
+    }
+  };
+
   return {
     add,
     exists,
     update,
     getById,
     hasChanges,
+    all,
   };
 };
 
