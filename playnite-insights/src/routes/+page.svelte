@@ -12,7 +12,7 @@
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
-	import HeaderSearchBar from '$lib/client/components/HeaderSearchBar.svelte';
+	import SearchBar from '$lib/client/components/SearchBar.svelte';
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
@@ -45,6 +45,7 @@
 	let sortByParam = $derived(data.sortBy);
 	let sortOrderParam = $derived(data.sortOrder);
 	let queryParam = $derived(data.query);
+	let developersParam = $derived(data.developers);
 	let main: HTMLElement | undefined = $state();
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
@@ -87,6 +88,29 @@
 		}
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
+
+	const appendSearchParam = (key: HomePageSearchParamKeys, value: string) => {
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set(homePageSearchParamsKeys.page, '1');
+		params.append(key, value);
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		if (main) {
+			main.scrollTop = 0;
+		}
+		goto(newUrl, { replaceState: true, keepFocus: true });
+	};
+
+	const removeSearchParam = (key: HomePageSearchParamKeys, value?: string | null) => {
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set(homePageSearchParamsKeys.page, '1');
+		if (value) params.delete(key, value);
+		else params.delete(key);
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		if (main) {
+			main.scrollTop = 0;
+		}
+		goto(newUrl, { replaceState: true, keepFocus: true });
+	};
 </script>
 
 {#snippet gameCard(game: PlayniteGame)}
@@ -111,11 +135,14 @@
 
 <FiltersSidebar
 	{setSearchParam}
-	installed={installedParam}
-	notInstalled={notInstalledParam}
-	sortBy={sortByParam}
-	sortOrder={sortOrderParam}
-	developers={devStore.raw}
+	{appendSearchParam}
+	{removeSearchParam}
+	{installedParam}
+	{notInstalledParam}
+	{sortByParam}
+	{sortOrderParam}
+	{developersParam}
+	developerList={devStore.raw}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}
@@ -140,7 +167,7 @@
 			</a>
 		{/snippet}
 		<div class="flex flex-row items-center gap-2">
-			<HeaderSearchBar
+			<SearchBar
 				value={queryParam}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>

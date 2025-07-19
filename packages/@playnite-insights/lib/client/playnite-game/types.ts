@@ -1,5 +1,6 @@
 import z from "zod";
 import {
+  fullGameRawSchema,
   fullGameSchema,
   gameManifestDataSchema,
   gamePageSizes,
@@ -9,6 +10,7 @@ import {
 } from "./schemas";
 
 export type PlayniteGame = z.infer<typeof playniteGameSchema>;
+export type FullGameRaw = z.infer<typeof fullGameRawSchema>;
 export type FullGame = z.infer<typeof fullGameSchema>;
 export type GameManifestData = z.infer<typeof gameManifestDataSchema>;
 export type GameSortBy = (typeof gameSortBy)[number];

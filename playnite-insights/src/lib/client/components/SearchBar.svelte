@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { m } from '$lib/paraglide/messages';
 	import { Search, XIcon } from '@lucide/svelte';
 	import type {
@@ -14,10 +12,12 @@
 	let {
 		value = $bindable(),
 		onChange,
+		delay = 1000,
 		...props
 	}: {
 		value: string | null;
 		onChange: (value: string | null) => void;
+		delay?: number;
 	} & Omit<HTMLInputAttributes, 'value'> = $props();
 	let input: HTMLInputElement;
 	let clearBtn: HTMLButtonElement | undefined = $state();
@@ -30,7 +30,7 @@
 		}
 		timeout = setTimeout(() => {
 			onChange(value);
-		}, 1000);
+		}, delay);
 	};
 
 	const handleOnBlur: FocusEventHandler<HTMLInputElement> = () => {
@@ -56,7 +56,7 @@
 </script>
 
 <form
-	class={`bg-background-2 hover:border-primary-500 focus-within:border-primary-700 active-within:border-primary-700 flex flex-row items-center justify-center gap-2 border-2 border-solid border-transparent p-1`}
+	class={`bg-background-2 hover:border-primary-500 focus-within:border-primary-700 active-within:border-primary-700 flex w-full grow flex-row items-center justify-center gap-2 border-2 border-solid border-transparent p-1`}
 	onsubmit={handleSubmit}
 >
 	<SearchBarButton>

@@ -14,28 +14,59 @@
 	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 	import { m } from '$lib/paraglide/messages';
 	import FilterDropdown from './FilterDropdown.svelte';
-	import HeaderSearchBar from '../HeaderSearchBar.svelte';
+	import SearchBar from '../SearchBar.svelte';
 	import type { Developer } from '@playnite-insights/lib/client/developer';
+	import FilterCheckboxFieldset from './FilterCheckboxFieldset.svelte';
+	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
 
 	let {
 		setSearchParam,
-		installed,
-		notInstalled,
-		sortOrder,
-		sortBy,
+		appendSearchParam,
+		removeSearchParam,
+		installedParam,
+		notInstalledParam,
+		sortOrderParam,
+		sortByParam,
+		developersParam,
 		renderSortOrderOptions,
 		renderSortByOptions,
-		developers
+		developerList
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
-		installed: boolean;
-		notInstalled: boolean;
-		sortOrder: GameSortOrder;
-		sortBy: GameSortBy;
+		appendSearchParam: (key: HomePageSearchParamKeys, value: string) => void;
+		removeSearchParam: (key: HomePageSearchParamKeys, value?: string | null) => void;
+		installedParam: boolean;
+		notInstalledParam: boolean;
+		sortOrderParam: GameSortOrder;
+		sortByParam: GameSortBy;
+		developersParam: string[];
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
-		developers?: Developer[];
+		developerList?: Developer[];
 	} = $props();
+
+	let developerSearchFilter: string | null = $state(null);
+	let developerListFiltered = $derived.by(() => {
+		if (!developerList) return developerList;
+		if (!developerSearchFilter) return developerList;
+		return developerList.filter((d) =>
+			d.Name.toLowerCase().includes(developerSearchFilter!.toLowerCase())
+		);
+	});
+
+	const handleOnChange = (
+		event: Event & {
+			currentTarget: EventTarget & HTMLInputElement;
+		},
+		key: HomePageSearchParamKeys,
+		value: string
+	) => {
+		if (event.currentTarget.checked) {
+			appendSearchParam(key, value);
+		} else {
+			removeSearchParam(key, value);
+		}
+	};
 </script>
 
 {#if filtersState.show}
@@ -53,7 +84,7 @@
 				<Select
 					id="sort-order"
 					class="bg-background-2 mt-1 w-full"
-					value={sortOrder}
+					value={sortOrderParam}
 					onchange={(e) => setSearchParam('sortOrder', e.currentTarget.value)}
 				>
 					{@render renderSortOrderOptions()}
@@ -64,7 +95,7 @@
 				<Select
 					id="sort-by"
 					class="bg-background-2 mt-1 w-full"
-					value={sortBy}
+					value={sortByParam}
 					onchange={(e) => setSearchParam('sortBy', e.currentTarget.value)}
 				>
 					{@render renderSortByOptions()}
@@ -74,7 +105,7 @@
 			<fieldset class="bg-background-2 flex flex-col justify-center">
 				<label for="installed" class="text-md flex flex-row items-center gap-2 p-2">
 					<Checkbox
-						checked={installed}
+						checked={installedParam}
 						name="installed"
 						id="installed"
 						onchange={(e) => {
@@ -86,7 +117,7 @@
 				<hr class="border-background-1" />
 				<label for="not_installed" class="text-md flex flex-row items-center gap-2 p-2">
 					<Checkbox
-						checked={notInstalled}
+						checked={notInstalledParam}
 						name="not_installed"
 						id="not_installed"
 						onchange={(e) => {
@@ -97,38 +128,44 @@
 				</label>
 			</fieldset>
 			<Divider class="border-1 my-2" />
-			<FilterDropdown label="Genres">
+			<FilterDropdown label="Genres" onClear={() => {}}>
 				<p>testing</p>
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Platforms">
+			<FilterDropdown label="Platforms" onClear={() => {}}>
 				<p>testing</p>
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Publishers">
+			<FilterDropdown label="Publishers" onClear={() => {}}>
 				<p>testing</p>
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Developers">
-				{#if developers && developers.length > 0}
-					<HeaderSearchBar value={''} onChange={() => undefined} />
-					<fieldset class="h-48 overflow-y-auto">
-						{#each developers as dev}
-							<label for={`dev-${dev.Id}`} class="text-md flex flex-row items-center gap-2 p-2">
+			<FilterDropdown
+				label={m.label_filter_developers()}
+				counter={developersParam.length}
+				onClear={() => removeSearchParam('developer')}
+			>
+				<SearchBar
+					value={developerSearchFilter}
+					onChange={(v) => (developerSearchFilter = v)}
+					delay={0}
+				/>
+				{#if developerListFiltered && developerListFiltered.length > 0}
+					<FilterCheckboxFieldset>
+						{#each developerListFiltered as dev}
+							<FilterCheckboxLabel for={`dev-${dev.Id}`}>
 								<Checkbox
-									checked={false}
+									checked={developersParam.includes(dev.Id)}
 									name="developers"
 									id={`dev-${dev.Id}`}
-									onchange={(e) => {
-										setSearchParam('developers', dev.Id);
-									}}
+									onchange={(e) => handleOnChange(e, 'developer', dev.Id)}
 								/>
 								{dev.Name}
-							</label>
+							</FilterCheckboxLabel>
 						{/each}
-					</fieldset>
+					</FilterCheckboxFieldset>
 				{:else}
-					<p>No devs to show</p>
+					<p class="mt-2 text-center">{m.no_developers_found()}</p>
 				{/if}
 			</FilterDropdown>
 		</SidebarBody>

@@ -7,9 +7,8 @@ export const makeGamePageViewModel = (game?: FullGame, devs?: Developer[]) => {
 	const getGame = (): FullGame | undefined => game;
 	const getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 	const getDevelopers = (): string => {
-		if (!game || !game.Developers || !devs) return '';
-		const gameDevs = game.Developers.split(',').sort();
-		const fullDevs = devs.filter((dev) => gameDevs.includes(dev.Id));
+		if (!game || !devs) return '';
+		const fullDevs = devs.filter((dev) => game.Developers.includes(dev.Id));
 		return fullDevs.map((d) => d.Name).join(', ');
 	};
 	const getPlaytime = (): string => {

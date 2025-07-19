@@ -22,17 +22,15 @@ import {
   type Publisher,
   type GameFilters,
   platformSchema,
-  fullGameSchema,
+  fullGameRawSchema,
+  FullGame,
 } from "@playnite-insights/lib";
 import { defaultLogger } from "../services";
 import { defaultPublisherRepository } from "../repository/publisher";
 import { defaultPlatformRepository } from "../repository/platform";
 import { defaultDeveloperRepository } from "../repository/developer";
 import { defaultGenreRepository } from "../repository/genre";
-import {
-  getOrderByClause,
-  getWhereClauseAndParamsFromFilters,
-} from "./filtering-and-sorting";
+import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
 
 type PlayniteGameRepositoryDeps = {
   getDb: () => DatabaseSync;
@@ -704,6 +702,7 @@ export const makePlayniteGameRepository = (
 
   const all: PlayniteGameRepository["all"] = () => {
     const db = getDb();
+    const separator = ",";
     const query = `
       SELECT 
         pg.*, 
@@ -721,7 +720,20 @@ export const makePlayniteGameRepository = (
     try {
       const stmt = db.prepare(query);
       const result = stmt.all();
-      const games = z.optional(z.array(fullGameSchema)).parse(result);
+      const raw = z.optional(z.array(fullGameRawSchema)).parse(result);
+      const games = raw.map((g) => {
+        const devs = g.Developers ? g.Developers.split(separator) : [];
+        const publishers = g.Publishers ? g.Publishers.split(separator) : [];
+        const platforms = g.Platforms ? g.Platforms.split(separator) : [];
+        const genres = g.Genres ? g.Genres.split(separator) : [];
+        return {
+          ...g,
+          Developers: devs,
+          Publishers: publishers,
+          Platforms: platforms,
+          Genres: genres,
+        } as FullGame;
+      });
       logService.debug(`Found ${games.length} games`);
       return games;
     } catch (error) {

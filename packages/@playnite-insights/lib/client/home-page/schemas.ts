@@ -6,4 +6,5 @@ export const homePageSearchParamsKeys = {
   sortOrder: "sortOrder",
   installed: "installed",
   notInstalled: "notInstalled",
+  developer: "developer",
 } as const;

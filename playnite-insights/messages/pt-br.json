@@ -48,5 +48,7 @@
   "label_sort_order": "Ordem",
   "label_sort_by": "Ordenar por",
   "label_filter_installed": "Instalado",
-  "label_filter_not_installed": "Não instalado"
+  "label_filter_not_installed": "Não instalado",
+  "label_filter_developers": "Desenvolvedores",
+  "no_developers_found": "Nenhum desenvolvedor encontrado"
 }
