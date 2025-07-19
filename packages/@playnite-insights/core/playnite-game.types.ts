@@ -5,10 +5,7 @@ import type {
   FullGame,
   GameFilters,
   GameManifestData,
-  GamePageSize,
-  GameSorting,
   Genre,
-  HomePageData,
   Platform,
   PlayniteGame,
   Publisher,
@@ -71,21 +68,6 @@ export type PlayniteGameRepository = {
    * @deprecated Will by replaced by `all()` due to offline support
    */
   getGamesForDashPage: () => DashPageGame[];
-  /**
-   * Gets games for home page
-   * @param offset
-   * @param pageSize
-   * @param filters
-   * @param sorting
-   * @returns
-   * @deprecated Will by replaced by `all()` due to offline support
-   */
-  getGamesForHomePage: (
-    offset: number,
-    pageSize: GamePageSize,
-    filters?: GameFilters,
-    sorting?: GameSorting
-  ) => HomePageData | undefined;
   /**
    * Returns a list with all games
    */

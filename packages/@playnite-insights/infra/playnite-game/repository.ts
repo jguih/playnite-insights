@@ -707,57 +707,6 @@ export const makePlayniteGameRepository = (
     }
   };
 
-  const getGamesForHomePage = (
-    offset: number,
-    pageSize: GamePageSize,
-    filters?: GameFilters,
-    sorting?: GameSorting
-  ): HomePageData | undefined => {
-    logService.debug(
-      `Getting home page data using: ${JSON.stringify({
-        offset,
-        pageSize,
-        filters,
-        sorting,
-      })}`
-    );
-    const db = getDb();
-    let query = `
-        SELECT 
-          pg.Id,
-          pg.Name,
-          pg.CoverImage
-        FROM playnite_game pg
-      `;
-    const { where, params } = getWhereClauseAndParamsFromFilters(filters);
-    const orderBy = getOrderByClause(sorting);
-    query += where;
-    query += orderBy;
-    query += ` LIMIT ? OFFSET ?;`;
-    params.push(pageSize.toString());
-    params.push(offset.toString());
-
-    try {
-      const total = getTotal(filters);
-      const stmt = db.prepare(query);
-      const result = stmt.all(...params);
-      const games = z.optional(z.array(homePageGameSchema)).parse(result) ?? [];
-      const items = games.length;
-      const hasNextPage = offset + Number(pageSize) < total;
-      const totalPages = Math.ceil(total / Number(pageSize));
-      logService.success(
-        `Fetched game list for home page, returning games ${offset} to ${Math.min(
-          Number(pageSize) + offset,
-          total
-        )} out of ${total}`
-      );
-      return { games, offset, items, total, hasNextPage, totalPages };
-    } catch (error) {
-      logService.error("Failed to get home page data", error as Error);
-      return undefined;
-    }
-  };
-
   const all: PlayniteGameRepository["all"] = () => {
     logService.debug(`Fetching all games from database`);
     const db = getDb();
@@ -806,7 +755,6 @@ export const makePlayniteGameRepository = (
     getTotal,
     getTopMostPlayedGamesForDashPage,
     getGamesForDashPage,
-    getGamesForHomePage,
     all,
   };
 };
