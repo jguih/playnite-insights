@@ -17,6 +17,14 @@ export const playniteGameSchema = z.object({
   ContentHash: z.string(),
 });
 
+export const fullGameSchema = z.object({
+  ...playniteGameSchema.shape,
+  Developers: z.string().nullable(),
+  Publishers: z.string().nullable(),
+  Genres: z.string().nullable(),
+  Platforms: z.string().nullable(),
+});
+
 export const gameByIdSchema = z.object({
   game: z.optional(playniteGameSchema),
   developers: z.array(developerSchema).optional(),

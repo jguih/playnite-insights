@@ -6,5 +6,5 @@ export const load: PageLoad = async ({ params, fetch }) => {
 	if (!playniteGameId) {
 		throw error(400, 'Invalid game id');
 	}
-	return { promise: fetch(`/api/game/${playniteGameId}`) };
+	return { gameId: playniteGameId };
 };

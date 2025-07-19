@@ -2,6 +2,7 @@ import type {
   DashPageData,
   DashPageGame as DashPageGame,
   Developer,
+  FullGame,
   GameFilters,
   GameManifestData,
   GamePageSize,
@@ -88,5 +89,5 @@ export type PlayniteGameRepository = {
   /**
    * Returns a list with all games
    */
-  all: () => PlayniteGame[] | undefined;
+  all: () => FullGame[] | undefined;
 };

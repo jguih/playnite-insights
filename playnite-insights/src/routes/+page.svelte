@@ -25,14 +25,11 @@
 		type HomePageSearchParamKeys,
 		type HomePageGame
 	} from '@playnite-insights/lib/client/home-page';
-	import {
-		gameSortBy,
-		gameSortOrder,
-		playniteGameSchema
-	} from '@playnite-insights/lib/client/playnite-game';
+	import { gameSortBy, gameSortOrder } from '@playnite-insights/lib/client/playnite-game';
 	import { onMount } from 'svelte';
 	import { gameStore } from '$lib/stores/app-data.svelte';
-	import z from 'zod';
+	import { fetchGames } from '$lib/client/utils/playnite-game';
+	import SomethingWentWrong from '$lib/client/components/error/SomethingWentWrong.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -42,6 +39,7 @@
 	});
 	let gamesFiltered = $derived(vm.getGameList());
 	let isLoading: boolean = $state(false);
+	let isError: boolean = $state(false);
 	let pageSizeParam = $derived(data.pageSize);
 	let pageParam = $derived(Number(data.page));
 	let installedParam = $derived(data.installed);
@@ -92,24 +90,20 @@
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
 
-	const updateGameStore = async () => {
-		const origin = window.location.origin;
-		const url = `${origin}/api/game`;
-		try {
-			isLoading = true;
-			const response = await fetch(url);
-			const asJson = await response.json();
-			const games = z.optional(z.array(playniteGameSchema)).parse(asJson);
-			gameStore.raw = games;
-		} catch (error) {
-			console.error(error);
-		} finally {
-			isLoading = false;
-		}
-	};
-
 	onMount(async () => {
-		if (!gameStore.raw) updateGameStore();
+		if (!gameStore.raw) {
+			isLoading = true;
+			await fetchGames()
+				.then((games) => {
+					gameStore.raw = games;
+					isError = false;
+					isLoading = false;
+				})
+				.catch((err) => {
+					isError = true;
+					isLoading = false;
+				});
+		}
 	});
 </script>
 
@@ -174,7 +168,9 @@
 		</div>
 	</Header>
 	<Main bind:main>
-		{#if isLoading}
+		{#if isError}
+			<SomethingWentWrong />
+		{:else if isLoading}
 			<h1 class="text-lg">{m.home_title()}</h1>
 			<div class="mb-2">
 				<div class="my-[0.35rem] h-[0.875rem] w-40 animate-pulse bg-neutral-300/60"></div>

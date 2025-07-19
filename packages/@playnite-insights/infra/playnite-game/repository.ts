@@ -25,6 +25,9 @@ import {
   HomePageData,
   homePageGameSchema,
   GamePageSize,
+  FullGame,
+  platformSchema,
+  fullGameSchema,
 } from "@playnite-insights/lib";
 import { defaultLogger } from "../services";
 import { defaultPublisherRepository } from "../repository/publisher";
@@ -77,35 +80,6 @@ export const makePlayniteGameRepository = (
     } catch (error) {
       logService.error(`Failed to get total games count`, error as Error);
       return 0;
-    }
-  };
-
-  const getDevelopers = (
-    game: Pick<PlayniteGame, "Id" | "Name">
-  ): Array<Developer> | undefined => {
-    const db = getDb();
-    const query = `
-    SELECT dev.Id, dev.Name 
-    FROM playnite_game_developer pgdev
-    JOIN developer dev ON dev.Id = pgdev.DeveloperId
-    WHERE pgdev.GameId = (?)
-  `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all(game.Id);
-      const data = z.array(developerSchema).parse(result);
-      logService.debug(
-        `Developer list for ${game.Name} fetched: ${data
-          .map((d) => d.Name)
-          .join(", ")}`
-      );
-      return data;
-    } catch (error) {
-      logService.error(
-        `Failed to get developer list for ${game.Name}:`,
-        error as Error
-      );
-      return undefined;
     }
   };
 
@@ -198,6 +172,35 @@ export const makePlayniteGameRepository = (
     }
   };
 
+  const getDevelopers = (
+    game: Pick<PlayniteGame, "Id" | "Name">
+  ): Array<Developer> | undefined => {
+    const db = getDb();
+    const query = `
+    SELECT dev.Id, dev.Name 
+    FROM playnite_game_developer pgdev
+    JOIN developer dev ON dev.Id = pgdev.DeveloperId
+    WHERE pgdev.GameId = (?)
+  `;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all(game.Id);
+      const data = z.array(developerSchema).parse(result);
+      logService.debug(
+        `Developer list for ${game.Name} fetched: ${data
+          .map((d) => d.Name)
+          .join(", ")}`
+      );
+      return data;
+    } catch (error) {
+      logService.error(
+        `Failed to get developer list for ${game.Name}:`,
+        error as Error
+      );
+      return undefined;
+    }
+  };
+
   const addPlatformFor = (
     game: Pick<PlayniteGame, "Id" | "Name">,
     platform: Platform
@@ -241,6 +244,36 @@ export const makePlayniteGameRepository = (
         error as Error
       );
       return false;
+    }
+  };
+
+  const getPlatforms = (
+    game: Pick<PlayniteGame, "Id" | "Name">
+  ): Array<Platform> | undefined => {
+    const db = getDb();
+    const query = `
+    SELECT plat.*
+    FROM playnite_game_platform pgplat
+    JOIN platform plat ON plat.Id = pgplat.PlatformId
+    WHERE pgplat.GameId = (?)
+  `;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all(game.Id);
+      logService.debug(JSON.stringify(result));
+      const data = z.optional(z.array(platformSchema)).parse(result);
+      logService.debug(
+        `Platform list for ${game.Name} fetched: ${data
+          .map((d) => d.Name)
+          .join(", ")}`
+      );
+      return data;
+    } catch (error) {
+      logService.error(
+        `Failed to get platform list for ${game.Name}:`,
+        error as Error
+      );
+      return undefined;
     }
   };
 
@@ -728,11 +761,24 @@ export const makePlayniteGameRepository = (
   const all: PlayniteGameRepository["all"] = () => {
     logService.debug(`Fetching all games from database`);
     const db = getDb();
-    const query = `SELECT * FROM playnite_game pg ORDER BY Id ASC`;
+    const query = `
+      SELECT 
+        pg.*, 
+        GROUP_CONCAT(pgg.GenreId) AS Genres,
+        GROUP_CONCAT(pgp.PlatformId) as Platforms,
+        GROUP_CONCAT(pgd.DeveloperId) as Developers,
+        GROUP_CONCAT(pgpub.PublisherId) as Publishers
+      FROM playnite_game pg 
+      LEFT JOIN playnite_game_genre pgg ON pgg.GameId = pg.Id
+      LEFT JOIN playnite_game_platform pgp ON pgp.GameId = pg.Id
+      LEFT JOIN playnite_game_developer pgd ON pgd.GameId = pg.Id
+      LEFT JOIN playnite_game_publisher pgpub ON pgpub.GameId = pg.Id
+      GROUP BY pg.Id
+      ORDER BY pg.Id ASC;`;
     try {
       const stmt = db.prepare(query);
       const result = stmt.all();
-      const games = z.optional(z.array(playniteGameSchema)).parse(result);
+      const games = z.optional(z.array(fullGameSchema)).parse(result);
       return games;
     } catch (error) {
       logService.error("Failed to get home page data", error as Error);

@@ -1,4 +1,6 @@
 import { m } from '$lib/paraglide/messages';
+import { fullGameSchema } from '@playnite-insights/lib/client/playnite-game';
+import z from 'zod';
 
 export const getPlayniteGameImageUrl = (imagePath?: string | null) => {
 	if (!imagePath) return '';
@@ -18,4 +20,13 @@ export const getFormattedPlaytime = (playtime: number): string => {
 		return m.game_playtime_in_hours_and_minutes({ hours: hours, mins: mins });
 	}
 	return m.game_playtime_in_hours_and_minutes({ hours: 0, mins: 0 });
+};
+
+export const fetchGames = async () => {
+	const origin = window.location.origin;
+	const url = `${origin}/api/game`;
+	const response = await fetch(url);
+	const asJson = await response.json();
+	const games = z.optional(z.array(fullGameSchema)).parse(asJson);
+	return games;
 };
