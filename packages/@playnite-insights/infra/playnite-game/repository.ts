@@ -703,7 +703,6 @@ export const makePlayniteGameRepository = (
   };
 
   const all: PlayniteGameRepository["all"] = () => {
-    logService.debug(`Fetching all games from database`);
     const db = getDb();
     const query = `
       SELECT 
@@ -723,9 +722,10 @@ export const makePlayniteGameRepository = (
       const stmt = db.prepare(query);
       const result = stmt.all();
       const games = z.optional(z.array(fullGameSchema)).parse(result);
+      logService.debug(`Found ${games.length} games`);
       return games;
     } catch (error) {
-      logService.error("Failed to get home page data", error as Error);
+      logService.error("Failed to get all games from database", error as Error);
       return;
     }
   };
