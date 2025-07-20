@@ -6,9 +6,13 @@
 		companyStore,
 		dashStore,
 		gameStore,
+		genreStore,
 		loadCompanies,
 		loadDashData,
-		loadGames
+		loadGames,
+		loadGenres,
+		loadPlatforms,
+		platformStore
 	} from '$lib/stores/app-data.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 
@@ -17,18 +21,12 @@
 	let isLoading: boolean = $state(true);
 
 	onMount(async () => {
-		if (!gameStore.raw) {
-			isLoading = true;
-			await loadGames();
-		}
-		if (!companyStore.raw) {
-			isLoading = true;
-			await loadCompanies();
-		}
-		if (!dashStore.pageData) {
-			isLoading = true;
-			await loadDashData();
-		}
+		isLoading = true;
+		await loadGames();
+		await loadCompanies();
+		await loadDashData();
+		await loadGenres();
+		await loadPlatforms();
 		isLoading = false;
 	});
 </script>

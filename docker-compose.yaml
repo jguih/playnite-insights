@@ -18,30 +18,15 @@ services:
           target: /app/playnite-insights
           ignore:
             - node_modules/
-            - data/
         - path: ./packages
-          action: sync
+          action: sync+restart
           target: /app/packages
         - path: ./
           action: rebuild
-          target: /app/package.json
           include:
-            - package.json
-        - path: ./playnite-insights
-          action: rebuild
-          target: /app/playnite-insights/package.json
-          include:
-            - package.json
-        - path: ./playnite-insights
-          action: rebuild
-          target: /app/playnite-insights/vite.config.ts
-          include:
-            - vite.config.ts
-        - path: ./playnite-insights
-          action: rebuild
-          target: /app/playnite-insights/svelte.config.js
-          include:
-            - svelte.config.js
+            - "**/package.json"
+            - "**/vite.config.ts"
+            - "**/svelte.config.js"
     volumes:
       - playnite-insights-dev-data:/app/data
     networks:
