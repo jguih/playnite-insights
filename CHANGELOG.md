@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/jguih/playnite-insights/compare/v2.4.0...v3.0.0) (2025-07-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* publisher and developer tables were removed and their data will be merged in the new company table
+
+* feat: filter by publisher
+
+* feat: genre and platform client data loading
+
+* feat: fitler by platforms
+
+* feat: filter by genres
+
+* ui: active filters counter
+
+* ui: clear all filters button
+
+* Feat/filters (#23) ([30f3a42](https://github.com/jguih/playnite-insights/commit/30f3a42ee439ed2186e2ce0e23c19371dfd3e8ff)), closes [#23](https://github.com/jguih/playnite-insights/issues/23)
+
 ## [2.4.0](https://github.com/jguih/playnite-insights/compare/v2.3.1...v2.4.0) (2025-07-19)
 
 
