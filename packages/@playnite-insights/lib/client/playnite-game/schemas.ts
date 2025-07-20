@@ -1,5 +1,4 @@
 import z from "zod";
-import { developerSchema } from "../developer/schemas";
 
 export const playniteGameSchema = z.object({
   Id: z.string(),
@@ -31,11 +30,6 @@ export const fullGameSchema = z.object({
   Publishers: z.array(z.string()),
   Genres: z.array(z.string()),
   Platforms: z.array(z.string()),
-});
-
-export const gameByIdSchema = z.object({
-  game: z.optional(playniteGameSchema),
-  developers: z.array(developerSchema).optional(),
 });
 
 export const gameManifestDataSchema = z.array(

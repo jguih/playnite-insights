@@ -1,5 +1,13 @@
-### Get game by id
-GET {{protocol}}://{{host}}/api/developer
+### Get all companies
+GET {{protocol}}://{{host}}/api/company
+Content-Type: {{contentType}}
+
+### Get all platforms
+GET {{protocol}}://{{host}}/api/platform
+Content-Type: {{contentType}}
+
+### Get all genres
+GET {{protocol}}://{{host}}/api/genre
 Content-Type: {{contentType}}
 
 ### Get all games

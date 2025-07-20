@@ -2,7 +2,7 @@ import { services } from '$lib';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = () => {
-	const data = services.developerRepository.all();
+	const data = services.genreRepository.all();
 	if (!data) {
 		return new Response(undefined, { status: 404 });
 	}

@@ -1,21 +1,25 @@
-import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib';
-import { developerSchema, type Developer } from '@playnite-insights/lib/client/developer';
+import { platformSchema, type Platform } from '@playnite-insights/lib/client/platform';
+import { companySchema, type Company } from '@playnite-insights/lib/client/company';
+import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib/client/dash-page';
+import { genreSchema, type Genre } from '@playnite-insights/lib/client/genre';
 import { fullGameSchema, type FullGame } from '@playnite-insights/lib/client/playnite-game';
 import { error } from '@sveltejs/kit';
 import z from 'zod';
 
 export const gameStore: { raw?: FullGame[] } = $state({});
-export const devStore: { raw?: Developer[] } = $state({});
+export const companyStore: { raw?: Company[] } = $state({});
 export const dashStore: { pageData?: DashPageData } = $state({});
+export const genreStore: { raw?: Genre[] } = $state({});
+export const platformStore: { raw?: Platform[] } = $state({});
 
-export const loadDevs = async () => {
+export const loadCompanies = async () => {
 	const origin = window.location.origin;
-	const url = `${origin}/api/developer`;
+	const url = `${origin}/api/company`;
 	try {
 		const response = await fetch(url);
 		const asJson = await response.json();
-		const devs = z.optional(z.array(developerSchema)).parse(asJson);
-		devStore.raw = devs;
+		const companies = z.optional(z.array(companySchema)).parse(asJson);
+		companyStore.raw = companies;
 	} catch (err) {
 		error(500, `Failed to fetch developers: ${(err as Error).message}`);
 	}
@@ -44,5 +48,31 @@ export const loadDashData = async () => {
 		dashStore.pageData = data;
 	} catch (err) {
 		error(500, `Failed to fetch dashboard page data: ${(err as Error).message}`);
+	}
+};
+
+export const loadGenres = async () => {
+	const origin = window.location.origin;
+	const url = `${origin}/api/genre`;
+	try {
+		const response = await fetch(url);
+		const asJson = await response.json();
+		const genres = z.optional(z.array(genreSchema)).parse(asJson);
+		genreStore.raw = genres;
+	} catch (err) {
+		error(500, `Failed to fetch genres: ${(err as Error).message}`);
+	}
+};
+
+export const loadPlatforms = async () => {
+	const origin = window.location.origin;
+	const url = `${origin}/api/platform`;
+	try {
+		const response = await fetch(url);
+		const asJson = await response.json();
+		const platforms = z.optional(z.array(platformSchema)).parse(asJson);
+		platformStore.raw = platforms;
+	} catch (err) {
+		error(500, `Failed to fetch platforms: ${(err as Error).message}`);
 	}
 };

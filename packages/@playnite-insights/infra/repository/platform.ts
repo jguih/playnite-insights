@@ -135,12 +135,27 @@ export const makePlatformRepository = (
     );
   };
 
+  const all: PlatformRepository["all"] = () => {
+    const db = getDb();
+    const query = `SELECT * FROM platform ORDER BY Name ASC`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const platforms = z.optional(z.array(platformSchema)).parse(result);
+      logService.debug(`Found ${platforms.length} platforms`);
+      return platforms;
+    } catch (error) {
+      logService.error(`Failed to get platform list`, error as Error);
+    }
+  };
+
   return {
     add,
     update,
     exists,
     getById,
     hasChanges,
+    all,
   };
 };
 

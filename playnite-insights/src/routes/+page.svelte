@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, ListFilter } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -16,11 +16,10 @@
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
-	import Loading from '$lib/client/components/Loading.svelte';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import { filtersState } from '$lib/client/components/home-page/store.svelte';
 	import {
+		homePageSearchParamsFilterKeys,
 		homePageSearchParamsKeys,
 		type HomePageSearchParamKeys
 	} from '@playnite-insights/lib/client/home-page';
@@ -29,7 +28,8 @@
 		gameSortOrder,
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
-	import { devStore, gameStore } from '$lib/stores/app-data.svelte';
+	import { companyStore, gameStore, genreStore, platformStore } from '$lib/stores/app-data.svelte';
+	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -46,7 +46,11 @@
 	let sortOrderParam = $derived(data.sortOrder);
 	let queryParam = $derived(data.query);
 	let developersParam = $derived(data.developers);
+	let publishersParam = $derived(data.publishers);
+	let platformsParam = $derived(data.platforms);
+	let genresParam = $derived(data.genres);
 	let main: HTMLElement | undefined = $state();
+	$inspect(data);
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
@@ -111,6 +115,19 @@
 		}
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
+
+	const removeAllFilterParams = () => {
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set(homePageSearchParamsKeys.page, '1');
+		for (const filterParamKey of Object.values(homePageSearchParamsFilterKeys)) {
+			params.delete(filterParamKey);
+		}
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		if (main) {
+			main.scrollTop = 0;
+		}
+		goto(newUrl, { replaceState: true, keepFocus: true });
+	};
 </script>
 
 {#snippet gameCard(game: PlayniteGame)}
@@ -142,7 +159,13 @@
 	{sortByParam}
 	{sortOrderParam}
 	{developersParam}
-	developerList={devStore.raw}
+	{publishersParam}
+	{platformsParam}
+	{genresParam}
+	companyList={companyStore.raw}
+	platformList={platformStore.raw}
+	genreList={genreStore.raw}
+	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}
@@ -171,9 +194,7 @@
 				value={queryParam}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
-			<LightButton>
-				<ListFilter onclick={() => (filtersState.show = !filtersState.show)} />
-			</LightButton>
+			<FiltersButton counter={vm.getFiltersCount()} />
 		</div>
 	</Header>
 	<Main bind:main>

@@ -18,30 +18,41 @@ services:
           target: /app/playnite-insights
           ignore:
             - node_modules/
-            - data/
-        - path: ./packages
+            - build/
+        - path: ./packages/@playnite-insights/core
           action: sync
-          target: /app/packages
+          target: /app/packages/@playnite-insights/core
+          ignore:
+            - node_modules/
+            - test_results/
+        - path: ./packages/@playnite-insights/lib
+          action: sync
+          target: /app/packages/@playnite-insights/lib
+          ignore:
+            - node_modules/
+            - test_results/
+        - path: ./packages/@playnite-insights/infra
+          action: sync
+          target: /app/packages/@playnite-insights/infra
+          ignore:
+            - node_modules/
+            - test_results/
         - path: ./
           action: rebuild
-          target: /app/package.json
           include:
-            - package.json
-        - path: ./playnite-insights
-          action: rebuild
-          target: /app/playnite-insights/package.json
+            - ./package.json
+            - ./playnite-insights/package.json
+            - ./packages/@playnite-insights/core/package.json
+            - ./packages/@playnite-insights/lib/package.json
+            - ./packages/@playnite-insights/infra/package.json
+            - ./Dockerfile
+        - path: ./
+          action: restart
           include:
-            - package.json
-        - path: ./playnite-insights
-          action: rebuild
-          target: /app/playnite-insights/vite.config.ts
-          include:
-            - vite.config.ts
-        - path: ./playnite-insights
-          action: rebuild
-          target: /app/playnite-insights/svelte.config.js
-          include:
-            - svelte.config.js
+            - ./docker-compose.yaml
+            - ./playnite-insights/vite.config.ts
+            - ./playnite-insights/svelte.config.js
+            - ./.env
     volumes:
       - playnite-insights-dev-data:/app/data
     networks:

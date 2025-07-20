@@ -50,5 +50,12 @@
   "label_filter_installed": "Installed",
   "label_filter_not_installed": "Not Installed",
   "label_filter_developers": "Developers",
-  "no_developers_found": "No developers found"
+  "no_developers_found": "No developers found",
+  "label_filter_publishers": "Publishers",
+  "no_publishers_found": "No publishers found",
+  "label_filter_platforms": "Platforms",
+  "no_platforms_found": "No platforms found",
+  "label_filter_genres": "Genres",
+  "no_genres_found": "No genres found",
+  "clear_all_filters": "Clear all filters"
 }

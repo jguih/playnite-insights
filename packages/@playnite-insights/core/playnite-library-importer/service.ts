@@ -185,7 +185,9 @@ export const makePlayniteLibraryImporterService = ({
   const importMediaFiles = async (
     request: Request
   ): Promise<ValidationResult<null>> => {
-    const headers: IncomingHttpHeaders = Object.fromEntries(request.headers);
+    const headers: IncomingHttpHeaders = Object.fromEntries(
+      request.headers as unknown as Iterable<string[]>
+    );
     const bb = busboy({ headers });
     let gameId: string | null = null;
     let contentHash: string | null = null;

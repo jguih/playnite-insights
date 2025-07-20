@@ -12,12 +12,14 @@
 	import Checkbox from '../forms/Checkbox.svelte';
 	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client/home-page';
 	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
-	import { m } from '$lib/paraglide/messages';
 	import FilterDropdown from './FilterDropdown.svelte';
 	import SearchBar from '../SearchBar.svelte';
-	import type { Developer } from '@playnite-insights/lib/client/developer';
 	import FilterCheckboxFieldset from './FilterCheckboxFieldset.svelte';
 	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
+	import type { Company } from '@playnite-insights/lib/client/company';
+	import { m } from '$lib/paraglide/messages';
+	import type { Genre } from '@playnite-insights/lib/client/genre';
+	import type { Platform } from '@playnite-insights/lib/client/platform';
 
 	let {
 		setSearchParam,
@@ -28,9 +30,15 @@
 		sortOrderParam,
 		sortByParam,
 		developersParam,
+		publishersParam,
+		genresParam,
+		platformsParam,
 		renderSortOrderOptions,
 		renderSortByOptions,
-		developerList
+		companyList,
+		genreList,
+		platformList,
+		onClearAllFilters
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		appendSearchParam: (key: HomePageSearchParamKeys, value: string) => void;
@@ -40,17 +48,50 @@
 		sortOrderParam: GameSortOrder;
 		sortByParam: GameSortBy;
 		developersParam: string[];
+		publishersParam: string[];
+		genresParam: string[];
+		platformsParam: string[];
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
-		developerList?: Developer[];
+		companyList?: Company[];
+		genreList?: Genre[];
+		platformList?: Platform[];
+		onClearAllFilters: () => void;
 	} = $props();
 
 	let developerSearchFilter: string | null = $state(null);
 	let developerListFiltered = $derived.by(() => {
-		if (!developerList) return developerList;
-		if (!developerSearchFilter) return developerList;
-		return developerList.filter((d) =>
-			d.Name.toLowerCase().includes(developerSearchFilter!.toLowerCase())
+		if (!companyList) return companyList;
+		if (!developerSearchFilter) return companyList;
+		return [...companyList].filter((c) =>
+			c.Name.toLowerCase().includes((developerSearchFilter as string).toLowerCase())
+		);
+	});
+
+	let publisherSearchFilter: string | null = $state(null);
+	let publisherListFiltered = $derived.by(() => {
+		if (!companyList) return companyList;
+		if (!publisherSearchFilter) return companyList;
+		return [...companyList].filter((c) =>
+			c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase())
+		);
+	});
+
+	let platformSearchFilter: string | null = $state(null);
+	let platformListFiltered = $derived.by(() => {
+		if (!platformList) return platformList;
+		if (!platformSearchFilter) return platformList;
+		return [...platformList].filter((p) =>
+			p.Name.toLowerCase().includes((platformSearchFilter as string).toLowerCase())
+		);
+	});
+
+	let genreSearchFilter: string | null = $state(null);
+	let genreListFiltered = $derived.by(() => {
+		if (!genreList) return genreList;
+		if (!genreSearchFilter) return genreList;
+		return [...genreList].filter((p) =>
+			p.Name.toLowerCase().includes((genreSearchFilter as string).toLowerCase())
 		);
 	});
 
@@ -79,30 +120,33 @@
 			</LightButton>
 		</SidebarHeader>
 		<SidebarBody>
-			<label for="sort-order" class="text-md">
-				{m.label_sort_order()}
-				<Select
-					id="sort-order"
-					class="bg-background-2 mt-1 w-full"
-					value={sortOrderParam}
-					onchange={(e) => setSearchParam('sortOrder', e.currentTarget.value)}
-				>
-					{@render renderSortOrderOptions()}
-				</Select>
-			</label>
-			<label for="sort-by" class="text-md">
-				{m.label_sort_by()}
-				<Select
-					id="sort-by"
-					class="bg-background-2 mt-1 w-full"
-					value={sortByParam}
-					onchange={(e) => setSearchParam('sortBy', e.currentTarget.value)}
-				>
-					{@render renderSortByOptions()}
-				</Select>
-			</label>
+			<div class="flex flex-col gap-2">
+				<label for="sort-order" class="text-md">
+					{m.label_sort_order()}
+					<Select
+						id="sort-order"
+						class="bg-background-2 mt-1 w-full"
+						value={sortOrderParam}
+						onchange={(e) => setSearchParam('sortOrder', e.currentTarget.value)}
+					>
+						{@render renderSortOrderOptions()}
+					</Select>
+				</label>
+				<label for="sort-by" class="text-md">
+					{m.label_sort_by()}
+					<Select
+						id="sort-by"
+						class="bg-background-2 mt-1 w-full"
+						value={sortByParam}
+						onchange={(e) => setSearchParam('sortBy', e.currentTarget.value)}
+					>
+						{@render renderSortByOptions()}
+					</Select>
+				</label>
+			</div>
 			<Divider class="border-1 my-2" />
-			<fieldset class="bg-background-2 flex flex-col justify-center">
+			<LightButton color="primary" onclick={onClearAllFilters}>{m.clear_all_filters()}</LightButton>
+			<fieldset class="bg-background-2 mt-2 flex flex-col justify-center">
 				<label for="installed" class="text-md flex flex-row items-center gap-2 p-2">
 					<Checkbox
 						checked={installedParam}
@@ -128,16 +172,93 @@
 				</label>
 			</fieldset>
 			<Divider class="border-1 my-2" />
-			<FilterDropdown label="Genres" onClear={() => {}}>
-				<p>testing</p>
+			<FilterDropdown
+				label={m.label_filter_genres()}
+				counter={genresParam.length}
+				onClear={() => removeSearchParam('genre')}
+			>
+				<SearchBar value={genreSearchFilter} onChange={(v) => (genreSearchFilter = v)} delay={0} />
+				{#if genreListFiltered && genreListFiltered.length > 0}
+					{#key genreSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each genreListFiltered as genre}
+								<FilterCheckboxLabel for={`genre-${genre.Id}`}>
+									<Checkbox
+										checked={genresParam.includes(genre.Id)}
+										name="genres"
+										id={`genre-${genre.Id}`}
+										onchange={(e) => handleOnChange(e, 'genre', genre.Id)}
+									/>
+									{genre.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
+				{:else}
+					<p class="mt-2 text-center">{m.no_genres_found()}</p>
+				{/if}
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Platforms" onClear={() => {}}>
-				<p>testing</p>
+			<FilterDropdown
+				label={m.label_filter_platforms()}
+				counter={platformsParam.length}
+				onClear={() => removeSearchParam('platform')}
+			>
+				<SearchBar
+					value={platformSearchFilter}
+					onChange={(v) => (platformSearchFilter = v)}
+					delay={0}
+				/>
+				{#if platformListFiltered && platformListFiltered.length > 0}
+					{#key platformSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each platformListFiltered as platform}
+								<FilterCheckboxLabel for={`platform-${platform.Id}`}>
+									<Checkbox
+										checked={platformsParam.includes(platform.Id)}
+										name="platforms"
+										id={`platform-${platform.Id}`}
+										onchange={(e) => handleOnChange(e, 'platform', platform.Id)}
+									/>
+									{platform.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
+				{:else}
+					<p class="mt-2 text-center">{m.no_platforms_found()}</p>
+				{/if}
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Publishers" onClear={() => {}}>
-				<p>testing</p>
+			<FilterDropdown
+				label={m.label_filter_publishers()}
+				counter={publishersParam.length}
+				onClear={() => removeSearchParam('publisher')}
+			>
+				<SearchBar
+					value={publisherSearchFilter}
+					onChange={(v) => (publisherSearchFilter = v)}
+					delay={0}
+				/>
+				{#if publisherListFiltered && publisherListFiltered.length > 0}
+					{#key publisherSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each publisherListFiltered as publisher}
+								<FilterCheckboxLabel for={`publisher-${publisher.Id}`}>
+									<Checkbox
+										checked={publishersParam.includes(publisher.Id)}
+										name="publishers"
+										id={`publisher-${publisher.Id}`}
+										onchange={(e) => handleOnChange(e, 'publisher', publisher.Id)}
+									/>
+									{publisher.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
+				{:else}
+					<p class="mt-2 text-center">{m.no_publishers_found()}</p>
+				{/if}
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown
@@ -151,19 +272,21 @@
 					delay={0}
 				/>
 				{#if developerListFiltered && developerListFiltered.length > 0}
-					<FilterCheckboxFieldset>
-						{#each developerListFiltered as dev}
-							<FilterCheckboxLabel for={`dev-${dev.Id}`}>
-								<Checkbox
-									checked={developersParam.includes(dev.Id)}
-									name="developers"
-									id={`dev-${dev.Id}`}
-									onchange={(e) => handleOnChange(e, 'developer', dev.Id)}
-								/>
-								{dev.Name}
-							</FilterCheckboxLabel>
-						{/each}
-					</FilterCheckboxFieldset>
+					{#key developerSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each developerListFiltered as dev}
+								<FilterCheckboxLabel for={`dev-${dev.Id}`}>
+									<Checkbox
+										checked={developersParam.includes(dev.Id)}
+										name="developers"
+										id={`dev-${dev.Id}`}
+										onchange={(e) => handleOnChange(e, 'developer', dev.Id)}
+									/>
+									{dev.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
 				{:else}
 					<p class="mt-2 text-center">{m.no_developers_found()}</p>
 				{/if}

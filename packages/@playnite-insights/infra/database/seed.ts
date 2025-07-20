@@ -122,13 +122,13 @@ export const seedDb = (db: DatabaseSync, logService: LogService) => {
   }
 
   query = `
-    INSERT INTO developer
+    INSERT INTO company
       (Id, Name)
     VALUES
       (?, ?);
   `;
-  const developerStmt = db.prepare(query);
-  const developerData = [
+  const companyStmt = db.prepare(query);
+  const companyData = [
     ["dev-nintendo", "Nintendo"],
     ["dev-valve", "Valve"],
     ["dev-sony", "Sony Interactive Entertainment"],
@@ -140,32 +140,8 @@ export const seedDb = (db: DatabaseSync, logService: LogService) => {
     ["dev-bethesda", "Bethesda Softworks"],
     ["dev-ea", "Electronic Arts"],
   ];
-  for (const row of developerData) {
-    developerStmt.run(...row);
-  }
-
-  // Seed data for publisher table
-  query = `
-    INSERT INTO publisher
-      (Id, Name)
-    VALUES
-      (?, ?);
-  `;
-  const publisherStmt = db.prepare(query);
-  const publisherData = [
-    ["pub-nintendo", "Nintendo"],
-    ["pub-valve", "Valve"],
-    ["pub-sony", "Sony Interactive Entertainment"],
-    ["pub-microsoft", "Microsoft Studios"],
-    ["pub-capcom", "Capcom"],
-    ["pub-ubisoft", "Ubisoft"],
-    ["pub-squareenix", "Square Enix"],
-    ["pub-rockstar", "Rockstar Games"],
-    ["pub-bethesda", "Bethesda Softworks"],
-    ["pub-ea", "Electronic Arts"],
-  ];
-  for (const row of publisherData) {
-    publisherStmt.run(...row);
+  for (const row of companyData) {
+    companyStmt.run(...row);
   }
 
   query = `
@@ -255,7 +231,7 @@ export const seedDb = (db: DatabaseSync, logService: LogService) => {
     ...gameData.map((data) => {
       return [
         data[0],
-        developerData[Math.floor(Math.random() * developerData.length)][0],
+        companyData[Math.floor(Math.random() * companyData.length)][0],
       ];
     }),
   ];
@@ -274,7 +250,7 @@ export const seedDb = (db: DatabaseSync, logService: LogService) => {
     ...gameData.map((data) => {
       return [
         data[0],
-        publisherData[Math.floor(Math.random() * publisherData.length)][0],
+        companyData[Math.floor(Math.random() * companyData.length)][0],
       ];
     }),
   ];

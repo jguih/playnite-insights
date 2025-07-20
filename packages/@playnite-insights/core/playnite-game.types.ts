@@ -1,41 +1,37 @@
 import type {
+  Company,
   DashPageData,
   DashPageGame as DashPageGame,
-  Developer,
   FullGame,
   GameFilters,
   GameManifestData,
   Genre,
   Platform,
   PlayniteGame,
-  Publisher,
 } from "@playnite-insights/lib";
 
 export type PlayniteGameRepository = {
   add: (
     game: PlayniteGame,
-    developers?: Array<Developer>,
+    developers?: Array<Company>,
     platforms?: Array<Platform>,
     genres?: Array<Genre>,
-    publishers?: Array<Publisher>
+    publishers?: Array<Company>
   ) => boolean;
   update: (
     game: PlayniteGame,
-    developers?: Array<Developer>,
+    developers?: Array<Company>,
     platforms?: Array<Platform>,
     genres?: Array<Genre>,
-    publishers?: Array<Publisher>
+    publishers?: Array<Company>
   ) => boolean;
   remove: (gameId: string) => boolean;
   exists: (gameId: string) => boolean;
   addDeveloperFor: (
     game: Pick<PlayniteGame, "Id" | "Name">,
-    developer: Developer
+    developer: Company
   ) => boolean;
   deleteDevelopersFor: (game: Pick<PlayniteGame, "Id" | "Name">) => boolean;
-  getDevelopers: (
-    game: Pick<PlayniteGame, "Id" | "Name">
-  ) => Array<Developer> | undefined;
   addPlatformFor: (
     game: Pick<PlayniteGame, "Id" | "Name">,
     platform: Platform
@@ -48,7 +44,7 @@ export type PlayniteGameRepository = {
   deleteGenresFor: (game: Pick<PlayniteGame, "Id" | "Name">) => boolean;
   addPublisherFor: (
     game: Pick<PlayniteGame, "Id" | "Name">,
-    publisher: Publisher
+    publisher: Company
   ) => boolean;
   deletePublishersFor: (game: Pick<PlayniteGame, "Id" | "Name">) => boolean;
   getById: (id: string) => PlayniteGame | undefined;

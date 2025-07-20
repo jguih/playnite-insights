@@ -2,11 +2,10 @@ import {
 	getDb,
 	makeFileSystemService,
 	makeGenreRepository,
-	makePublisherRepository,
 	makePlatformRepository,
-	makeDeveloperRepository,
 	makePlayniteLibrarySyncRepository,
 	makePlayniteGameRepository,
+	makeCompanyRepository,
 	makeStreamUtilsService,
 	defaultLogger,
 	config
@@ -15,7 +14,6 @@ import {
 	makeLibraryManifestService,
 	makeMediaFilesService,
 	makeDashPageService,
-	makeGamePageService,
 	makePlayniteLibraryImporterService
 } from '@playnite-insights/core';
 import { getLastSixMonthsAbreviated } from '$lib/utils/date';
@@ -24,16 +22,14 @@ export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
 	const streamUtilsService = makeStreamUtilsService();
 	// Repositories
-	const publisherRepository = makePublisherRepository();
 	const platformRepository = makePlatformRepository();
-	const developerRepository = makeDeveloperRepository();
+	const companyRepository = makeCompanyRepository();
 	const genreRepository = makeGenreRepository();
 	const playniteGameRepository = makePlayniteGameRepository();
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository();
 	const repositories = {
-		publisherRepository,
 		platformRepository,
-		developerRepository,
+		companyRepository,
 		playniteGameRepository,
 		playniteLibrarySyncRepository,
 		genreRepository
@@ -60,7 +56,6 @@ export const setupServices = () => {
 		...commonDeps,
 		getLastSixMonthsAbv: getLastSixMonthsAbreviated
 	});
-	const gamePageService = makeGamePageService({ ...commonDeps });
 	const mediaFilesService = makeMediaFilesService({ ...commonDeps });
 
 	const services = {
@@ -69,7 +64,6 @@ export const setupServices = () => {
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
 		dashPage: dashPageService,
-		gamePage: gamePageService,
 		mediaFiles: mediaFilesService,
 		config
 	};

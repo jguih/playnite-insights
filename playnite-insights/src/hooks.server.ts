@@ -18,6 +18,7 @@ export const init: ServerInit = async () => {
 		MIGRATIONS_DIR: services.config.MIGRATIONS_DIR,
 		logService: services.log
 	});
+	await services.libraryManifest.write();
 };
 
 const handleParaglide: Handle = ({ event, resolve }) =>

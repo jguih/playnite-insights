@@ -9,9 +9,11 @@ const sw = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self
 
 const CACHE = `cache-${version}`;
 const GAMES_CACHE = `games-data-${version}`;
-const DEV_CACHE = `developers-data-${version}`;
+const COMPANY_CACHE = `company-data-${version}`;
 const DASH_CACHE = `dashboard-data-${version}`;
-const cacheKeysArr = [CACHE, GAMES_CACHE, DEV_CACHE, DASH_CACHE];
+const GENRE_CACHE = `genre-data-${version}`;
+const PLATFORM_CACHE = `platform-data-${version}`;
+const cacheKeysArr = [CACHE, GAMES_CACHE, COMPANY_CACHE, DASH_CACHE, GENRE_CACHE, PLATFORM_CACHE];
 
 const ASSETS = [
 	...build, // the app itself
@@ -139,8 +141,18 @@ self.addEventListener('fetch', (event) => {
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/developer')) {
-		event.respondWith(networkFirst(event.request, DEV_CACHE));
+  if (url.pathname.startsWith('/api/company')) {
+		event.respondWith(networkFirst(event.request, COMPANY_CACHE));
+		return;
+	}
+
+  if (url.pathname.startsWith('/api/genre')) {
+		event.respondWith(networkFirst(event.request, GENRE_CACHE));
+		return;
+	}
+
+  if (url.pathname.startsWith('/api/platform')) {
+		event.respondWith(networkFirst(event.request, PLATFORM_CACHE));
 		return;
 	}
 

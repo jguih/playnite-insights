@@ -101,12 +101,27 @@ export const makeGenreRepository = (
     return oldGenre.Id != newGenre.Id || oldGenre.Name != newGenre.Name;
   };
 
+  const all: GenreRepository["all"] = () => {
+    const db = getDb();
+    const query = `SELECT * FROM genre ORDER BY Name ASC`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const genres = z.optional(z.array(genreSchema)).parse(result);
+      logService.debug(`Found ${genres.length} genres`);
+      return genres;
+    } catch (error) {
+      logService.error(`Failed to get genre list`, error as Error);
+    }
+  };
+
   return {
     add,
     exists,
     update,
     getById,
     hasChanges,
+    all,
   };
 };
 

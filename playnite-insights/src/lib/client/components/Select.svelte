@@ -9,7 +9,7 @@
 
 <select
 	{...props}
-	class={`bg-background-1 active:border-primary-500 focus:border-primary-500 border-2 border-solid border-transparent p-2 text-lg text-white outline-0 ${props.class ?? ''}`}
+	class={`bg-background-1 active:border-primary-500 focus:border-primary-500 text-md border-2 border-solid border-transparent p-2 text-white outline-0 ${props.class ?? ''}`}
 	bind:value
 >
 	{#if props.children}

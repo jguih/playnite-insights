@@ -1,10 +1,9 @@
 import type {
-  DeveloperRepository,
+  CompanyRepository,
   GenreRepository,
   LogService,
   PlatformRepository,
   PlayniteGameRepository,
-  PublisherRepository,
 } from "@playnite-insights/core";
 import z from "zod";
 import type { DatabaseSync } from "node:sqlite";
@@ -12,50 +11,43 @@ import { getDb as _getDb } from "../database";
 import {
   type DashPageData,
   type DashPageGame,
-  type Developer,
-  developerSchema,
   type GameManifestData,
   type Genre,
   type Platform,
   type PlayniteGame,
   playniteGameSchema,
-  type Publisher,
   type GameFilters,
-  platformSchema,
   fullGameRawSchema,
   FullGame,
+  Company,
 } from "@playnite-insights/lib";
 import { defaultLogger } from "../services";
-import { defaultPublisherRepository } from "../repository/publisher";
 import { defaultPlatformRepository } from "../repository/platform";
-import { defaultDeveloperRepository } from "../repository/developer";
 import { defaultGenreRepository } from "../repository/genre";
 import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
+import { defaultCompanyRepository } from "../repository/company";
 
 type PlayniteGameRepositoryDeps = {
   getDb: () => DatabaseSync;
   logService: LogService;
-  publisherRepository: PublisherRepository;
   platformRepository: PlatformRepository;
-  developerRepository: DeveloperRepository;
   genreRepository: GenreRepository;
+  companyRepository: CompanyRepository;
 };
 
 export const makePlayniteGameRepository = (
   {
     getDb,
     logService,
-    publisherRepository,
     platformRepository,
-    developerRepository,
     genreRepository,
+    companyRepository,
   }: PlayniteGameRepositoryDeps = {
     getDb: _getDb,
     logService: defaultLogger,
-    publisherRepository: defaultPublisherRepository,
     platformRepository: defaultPlatformRepository,
-    developerRepository: defaultDeveloperRepository,
     genreRepository: defaultGenreRepository,
+    companyRepository: defaultCompanyRepository,
   }
 ): PlayniteGameRepository => {
   const getTotal = (filters?: GameFilters): number => {
@@ -119,7 +111,7 @@ export const makePlayniteGameRepository = (
 
   const addDeveloperFor = (
     game: Pick<PlayniteGame, "Id" | "Name">,
-    developer: Developer
+    developer: Company
   ): boolean => {
     const db = getDb();
     const query = `
@@ -162,35 +154,6 @@ export const makePlayniteGameRepository = (
         error as Error
       );
       return false;
-    }
-  };
-
-  const getDevelopers = (
-    game: Pick<PlayniteGame, "Id" | "Name">
-  ): Array<Developer> | undefined => {
-    const db = getDb();
-    const query = `
-    SELECT dev.Id, dev.Name 
-    FROM playnite_game_developer pgdev
-    JOIN developer dev ON dev.Id = pgdev.DeveloperId
-    WHERE pgdev.GameId = (?)
-  `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all(game.Id);
-      const data = z.array(developerSchema).parse(result);
-      logService.debug(
-        `Developer list for ${game.Name} fetched: ${data
-          .map((d) => d.Name)
-          .join(", ")}`
-      );
-      return data;
-    } catch (error) {
-      logService.error(
-        `Failed to get developer list for ${game.Name}:`,
-        error as Error
-      );
-      return undefined;
     }
   };
 
@@ -237,36 +200,6 @@ export const makePlayniteGameRepository = (
         error as Error
       );
       return false;
-    }
-  };
-
-  const getPlatforms = (
-    game: Pick<PlayniteGame, "Id" | "Name">
-  ): Array<Platform> | undefined => {
-    const db = getDb();
-    const query = `
-    SELECT plat.*
-    FROM playnite_game_platform pgplat
-    JOIN platform plat ON plat.Id = pgplat.PlatformId
-    WHERE pgplat.GameId = (?)
-  `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all(game.Id);
-      logService.debug(JSON.stringify(result));
-      const data = z.optional(z.array(platformSchema)).parse(result);
-      logService.debug(
-        `Platform list for ${game.Name} fetched: ${data
-          .map((d) => d.Name)
-          .join(", ")}`
-      );
-      return data;
-    } catch (error) {
-      logService.error(
-        `Failed to get platform list for ${game.Name}:`,
-        error as Error
-      );
-      return undefined;
     }
   };
 
@@ -318,7 +251,7 @@ export const makePlayniteGameRepository = (
 
   const addPublisherFor = (
     game: Pick<PlayniteGame, "Id" | "Name">,
-    publisher: Publisher
+    publisher: Company
   ): boolean => {
     const db = getDb();
     const query = `
@@ -366,10 +299,10 @@ export const makePlayniteGameRepository = (
 
   const add = (
     game: PlayniteGame,
-    developers?: Array<Developer>,
+    developers?: Array<Company>,
     platforms?: Array<Platform>,
     genres?: Array<Genre>,
-    publishers?: Array<Publisher>
+    publishers?: Array<Company>
   ): boolean => {
     const db = getDb();
     const query = `
@@ -400,11 +333,11 @@ export const makePlayniteGameRepository = (
           new Map(developers.map((dev) => [dev.Id, dev])).values()
         );
         for (const developer of uniqueDevs) {
-          if (developerRepository.exists(developer)) {
+          if (companyRepository.exists(developer)) {
             addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
             continue;
           }
-          if (developerRepository.add(developer)) {
+          if (companyRepository.add(developer)) {
             addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
           }
         }
@@ -442,11 +375,11 @@ export const makePlayniteGameRepository = (
           new Map(publishers.map((pub) => [pub.Id, pub])).values()
         );
         for (const publisher of uniquePublishers) {
-          if (publisherRepository.exists(publisher)) {
+          if (companyRepository.exists(publisher)) {
             addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
             continue;
           }
-          if (publisherRepository.add(publisher)) {
+          if (companyRepository.add(publisher)) {
             addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
           }
         }
@@ -460,10 +393,10 @@ export const makePlayniteGameRepository = (
 
   const update = (
     game: PlayniteGame,
-    developers?: Array<Developer>,
+    developers?: Array<Company>,
     platforms?: Array<Platform>,
     genres?: Array<Genre>,
-    publishers?: Array<Publisher>
+    publishers?: Array<Company>
   ) => {
     const db = getDb();
     const query = `
@@ -507,13 +440,13 @@ export const makePlayniteGameRepository = (
           new Map(developers.map((dev) => [dev.Id, dev])).values()
         );
         for (const developer of uniqueDevs) {
-          const existing = developerRepository.getById(developer.Id);
+          const existing = companyRepository.getById(developer.Id);
           if (existing) {
-            if (developerRepository.hasChanges(existing, developer)) {
-              developerRepository.update(developer);
+            if (companyRepository.hasChanges(existing, developer)) {
+              companyRepository.update(developer);
             }
           } else {
-            developerRepository.add(developer);
+            companyRepository.add(developer);
           }
           addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
         }
@@ -558,13 +491,13 @@ export const makePlayniteGameRepository = (
           new Map(publishers.map((pub) => [pub.Id, pub])).values()
         );
         for (const publisher of uniquePublishers) {
-          const existing = publisherRepository.getById(publisher.Id);
+          const existing = companyRepository.getById(publisher.Id);
           if (existing) {
-            if (publisherRepository.hasChanges(existing, publisher)) {
-              publisherRepository.update(publisher);
+            if (companyRepository.hasChanges(existing, publisher)) {
+              companyRepository.update(publisher);
             }
           } else {
-            publisherRepository.add(publisher);
+            companyRepository.add(publisher);
           }
           addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
         }
@@ -704,19 +637,30 @@ export const makePlayniteGameRepository = (
     const db = getDb();
     const separator = ",";
     const query = `
-      SELECT 
+        SELECT 
         pg.*, 
-        GROUP_CONCAT(pgg.GenreId) AS Genres,
-        GROUP_CONCAT(pgp.PlatformId) as Platforms,
-        GROUP_CONCAT(pgd.DeveloperId) as Developers,
-        GROUP_CONCAT(pgpub.PublisherId) as Publishers
-      FROM playnite_game pg 
-      LEFT JOIN playnite_game_genre pgg ON pgg.GameId = pg.Id
-      LEFT JOIN playnite_game_platform pgp ON pgp.GameId = pg.Id
-      LEFT JOIN playnite_game_developer pgd ON pgd.GameId = pg.Id
-      LEFT JOIN playnite_game_publisher pgpub ON pgpub.GameId = pg.Id
-      GROUP BY pg.Id
-      ORDER BY pg.Id ASC;`;
+        (
+          SELECT GROUP_CONCAT(GenreId)
+          FROM playnite_game_genre
+          WHERE GameId = pg.Id
+        ) AS Genres,
+        (
+          SELECT GROUP_CONCAT(PlatformId)
+          FROM playnite_game_platform
+          WHERE GameId = pg.Id
+        ) AS Platforms,
+        (
+          SELECT GROUP_CONCAT(DeveloperId)
+          FROM playnite_game_developer
+          WHERE GameId = pg.Id
+        ) AS Developers,
+        (
+          SELECT GROUP_CONCAT(PublisherId)
+          FROM playnite_game_publisher
+          WHERE GameId = pg.Id
+        ) AS Publishers
+        FROM playnite_game pg
+        ORDER BY pg.Id ASC;`;
     try {
       const stmt = db.prepare(query);
       const result = stmt.all();
@@ -758,7 +702,6 @@ export const makePlayniteGameRepository = (
     getById,
     getTotalPlaytimeSeconds,
     getManifestData,
-    getDevelopers,
     getTotal,
     getTopMostPlayedGamesForDashPage,
     getGamesForDashPage,

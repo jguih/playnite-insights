@@ -6,4 +6,5 @@ export type GenreRepository = {
   update: (genre: Genre) => boolean;
   getById: (id: string) => Genre | undefined;
   hasChanges: (oldGenre: Genre, newGenre: Genre) => boolean;
+  all: () => Genre[] | undefined;
 };
