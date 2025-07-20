@@ -18,6 +18,8 @@
 	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
 	import type { Company } from '@playnite-insights/lib/client/company';
 	import { m } from '$lib/paraglide/messages';
+	import type { Genre } from '@playnite-insights/lib/client/genre';
+	import type { Platform } from '@playnite-insights/lib/client/platform';
 
 	let {
 		setSearchParam,
@@ -29,9 +31,13 @@
 		sortByParam,
 		developersParam,
 		publishersParam,
+		genresParam,
+		platformsParam,
 		renderSortOrderOptions,
 		renderSortByOptions,
-		companyList
+		companyList,
+		genreList,
+		platformList
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		appendSearchParam: (key: HomePageSearchParamKeys, value: string) => void;
@@ -42,9 +48,13 @@
 		sortByParam: GameSortBy;
 		developersParam: string[];
 		publishersParam: string[];
+		genresParam: string[];
+		platformsParam: string[];
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
 		companyList?: Company[];
+		genreList?: Genre[];
+		platformList?: Platform[];
 	} = $props();
 
 	let developerSearchFilter: string | null = $state(null);
@@ -62,6 +72,15 @@
 		if (!publisherSearchFilter) return companyList;
 		return [...companyList].filter((c) =>
 			c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase())
+		);
+	});
+
+	let platformSearchFilter: string | null = $state(null);
+	let platformListFiltered = $derived.by(() => {
+		if (!platformList) return platformList;
+		if (!platformSearchFilter) return platformList;
+		return [...platformList].filter((p) =>
+			p.Name.toLowerCase().includes((platformSearchFilter as string).toLowerCase())
 		);
 	});
 
@@ -143,8 +162,35 @@
 				<p>W.I.P</p>
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Platforms" onClear={() => {}}>
-				<p>W.I.P</p>
+			<FilterDropdown
+				label={m.label_filter_platforms()}
+				counter={platformsParam.length}
+				onClear={() => removeSearchParam('platform')}
+			>
+				<SearchBar
+					value={platformSearchFilter}
+					onChange={(v) => (platformSearchFilter = v)}
+					delay={0}
+				/>
+				{#if platformListFiltered && platformListFiltered.length > 0}
+					{#key platformSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each platformListFiltered as platform}
+								<FilterCheckboxLabel for={`platform-${platform.Id}`}>
+									<Checkbox
+										checked={platformsParam.includes(platform.Id)}
+										name="platforms"
+										id={`platform-${platform.Id}`}
+										onchange={(e) => handleOnChange(e, 'platform', platform.Id)}
+									/>
+									{platform.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
+				{:else}
+					<p class="mt-2 text-center">{m.no_platforms_found()}</p>
+				{/if}
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown

@@ -18,15 +18,41 @@ services:
           target: /app/playnite-insights
           ignore:
             - node_modules/
-        - path: ./packages
-          action: sync+restart
-          target: /app/packages
+            - build/
+        - path: ./packages/@playnite-insights/core
+          action: sync
+          target: /app/packages/@playnite-insights/core
+          ignore:
+            - node_modules/
+            - test_results/
+        - path: ./packages/@playnite-insights/lib
+          action: sync
+          target: /app/packages/@playnite-insights/lib
+          ignore:
+            - node_modules/
+            - test_results/
+        - path: ./packages/@playnite-insights/infra
+          action: sync
+          target: /app/packages/@playnite-insights/infra
+          ignore:
+            - node_modules/
+            - test_results/
         - path: ./
           action: rebuild
           include:
-            - "**/package.json"
-            - "**/vite.config.ts"
-            - "**/svelte.config.js"
+            - ./package.json
+            - ./playnite-insights/package.json
+            - ./packages/@playnite-insights/core/package.json
+            - ./packages/@playnite-insights/lib/package.json
+            - ./packages/@playnite-insights/infra/package.json
+            - ./Dockerfile
+        - path: ./
+          action: restart
+          include:
+            - ./docker-compose.yaml
+            - ./playnite-insights/vite.config.ts
+            - ./playnite-insights/svelte.config.js
+            - ./.env
     volumes:
       - playnite-insights-dev-data:/app/data
     networks:

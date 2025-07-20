@@ -21,6 +21,7 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		const notInstalled = !data.installed && data.notInstalled;
 		const developers = data.developers;
 		const publishers = data.publishers;
+		const platforms = data.platforms;
 		if (query !== null) {
 			filtered = resolvedGames.filter((g) => g.Name?.toLowerCase().includes(query.toLowerCase()));
 		}
@@ -42,6 +43,14 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 			filtered = filtered.filter((g) => {
 				for (const gamePublisherId of g.Publishers) {
 					if (publishers.includes(gamePublisherId)) return true;
+				}
+				return false;
+			});
+		}
+		if (platforms.length > 0) {
+			filtered = filtered.filter((g) => {
+				for (const gamePlatformId of g.Platforms) {
+					if (platforms.includes(gamePlatformId)) return true;
 				}
 				return false;
 			});

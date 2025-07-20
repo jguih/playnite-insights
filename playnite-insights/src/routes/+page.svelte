@@ -29,7 +29,7 @@
 		gameSortOrder,
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
-	import { companyStore, gameStore } from '$lib/stores/app-data.svelte';
+	import { companyStore, gameStore, genreStore, platformStore } from '$lib/stores/app-data.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -47,6 +47,8 @@
 	let queryParam = $derived(data.query);
 	let developersParam = $derived(data.developers);
 	let publishersParam = $derived(data.publishers);
+	let platformsParam = $derived(data.platforms);
+	let genresParam = $derived(data.genres);
 	let main: HTMLElement | undefined = $state();
 	$inspect(data);
 
@@ -145,7 +147,11 @@
 	{sortOrderParam}
 	{developersParam}
 	{publishersParam}
+	{platformsParam}
+	{genresParam}
 	companyList={companyStore.raw}
+	platformList={platformStore.raw}
+	genreList={genreStore.raw}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}

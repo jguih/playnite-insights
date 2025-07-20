@@ -34,6 +34,8 @@ export const parseHomePageSearchParams = (params: URLSearchParams) => {
     params.get(homePageSearchParamsKeys.notInstalled) === "1";
   const developers = params.getAll(homePageSearchParamsKeys.developer);
   const publishers = params.getAll(homePageSearchParamsKeys.publisher);
+  const genres = params.getAll(homePageSearchParamsKeys.genre);
+  const platforms = params.getAll(homePageSearchParamsKeys.platform);
   // Sorting
   const _sortBy = params.get(homePageSearchParamsKeys.sortBy);
   const sortBy: GameSortBy = isValidGameSortBy(_sortBy)
@@ -53,6 +55,8 @@ export const parseHomePageSearchParams = (params: URLSearchParams) => {
     notInstalled,
     developers,
     publishers,
+    genres,
+    platforms,
     sortBy,
     sortOrder,
   };

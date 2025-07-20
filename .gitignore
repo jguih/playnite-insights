@@ -26,4 +26,4 @@ vite.config.ts.timestamp-*
 # Paraglide
 playnite-insights/src/lib/paraglide
 
-.vscode
+.vscode/settings.json

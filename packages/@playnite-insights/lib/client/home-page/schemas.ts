@@ -8,4 +8,6 @@ export const homePageSearchParamsKeys = {
   notInstalled: "notInstalled",
   developer: "developer",
   publisher: "publisher",
+  genre: "genre",
+  platform: "platform",
 } as const;
