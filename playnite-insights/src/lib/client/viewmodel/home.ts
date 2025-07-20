@@ -13,6 +13,37 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 	let resolvedGames: FullGame[] | undefined;
 	let isError: boolean = false;
 
+	const getFilterParams = () => {
+		const query = data.query;
+		const installed = data.installed;
+		const notInstalled = data.notInstalled;
+		const developers = data.developers;
+		const publishers = data.publishers;
+		const platforms = data.platforms;
+		const genres = data.genres;
+		return [query, installed, notInstalled, developers, publishers, platforms, genres];
+	};
+
+	const getFiltersCount = (): number => {
+		let counter = 0;
+		for (const filter of getFilterParams()) {
+			if (filter === null) continue;
+			if (typeof filter === 'string') {
+				counter++;
+				continue;
+			}
+			if (typeof filter === 'boolean') {
+				if (filter === true) counter++;
+				continue;
+			}
+			if (filter.length > 0) {
+				counter++;
+				continue;
+			}
+		}
+		return counter;
+	};
+
 	const applyFilters = () => {
 		if (!resolvedGames) return;
 		let filtered = [...resolvedGames];
@@ -26,10 +57,10 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		if (query !== null) {
 			filtered = resolvedGames.filter((g) => g.Name?.toLowerCase().includes(query.toLowerCase()));
 		}
-		if (installed) {
+		if (installed === true) {
 			filtered = filtered.filter((g) => +g.IsInstalled);
 		}
-		if (notInstalled) {
+		if (notInstalled === true) {
 			filtered = filtered.filter((g) => !+g.IsInstalled);
 		}
 		if (developers.length > 0) {
@@ -157,6 +188,7 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		getIsError,
 		getSortOrderLabel,
 		getSortByLabel,
-		getGameList
+		getGameList,
+		getFiltersCount
 	};
 };

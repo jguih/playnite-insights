@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, ListFilter } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -16,10 +16,8 @@
 	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
-	import Loading from '$lib/client/components/Loading.svelte';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import { filtersState } from '$lib/client/components/home-page/store.svelte';
 	import {
 		homePageSearchParamsKeys,
 		type HomePageSearchParamKeys
@@ -30,6 +28,7 @@
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
 	import { companyStore, gameStore, genreStore, platformStore } from '$lib/stores/app-data.svelte';
+	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -180,9 +179,7 @@
 				value={queryParam}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
-			<LightButton>
-				<ListFilter onclick={() => (filtersState.show = !filtersState.show)} />
-			</LightButton>
+			<FiltersButton counter={vm.getFiltersCount()} />
 		</div>
 	</Header>
 	<Main bind:main>

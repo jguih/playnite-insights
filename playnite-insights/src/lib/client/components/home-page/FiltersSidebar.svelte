@@ -118,28 +118,30 @@
 			</LightButton>
 		</SidebarHeader>
 		<SidebarBody>
-			<label for="sort-order" class="text-md">
-				{m.label_sort_order()}
-				<Select
-					id="sort-order"
-					class="bg-background-2 mt-1 w-full"
-					value={sortOrderParam}
-					onchange={(e) => setSearchParam('sortOrder', e.currentTarget.value)}
-				>
-					{@render renderSortOrderOptions()}
-				</Select>
-			</label>
-			<label for="sort-by" class="text-md">
-				{m.label_sort_by()}
-				<Select
-					id="sort-by"
-					class="bg-background-2 mt-1 w-full"
-					value={sortByParam}
-					onchange={(e) => setSearchParam('sortBy', e.currentTarget.value)}
-				>
-					{@render renderSortByOptions()}
-				</Select>
-			</label>
+			<div class="flex flex-col gap-2">
+				<label for="sort-order" class="text-md">
+					{m.label_sort_order()}
+					<Select
+						id="sort-order"
+						class="bg-background-2 mt-1 w-full"
+						value={sortOrderParam}
+						onchange={(e) => setSearchParam('sortOrder', e.currentTarget.value)}
+					>
+						{@render renderSortOrderOptions()}
+					</Select>
+				</label>
+				<label for="sort-by" class="text-md">
+					{m.label_sort_by()}
+					<Select
+						id="sort-by"
+						class="bg-background-2 mt-1 w-full"
+						value={sortByParam}
+						onchange={(e) => setSearchParam('sortBy', e.currentTarget.value)}
+					>
+						{@render renderSortByOptions()}
+					</Select>
+				</label>
+			</div>
 			<Divider class="border-1 my-2" />
 			<fieldset class="bg-background-2 flex flex-col justify-center">
 				<label for="installed" class="text-md flex flex-row items-center gap-2 p-2">
