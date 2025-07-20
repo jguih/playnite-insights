@@ -46,7 +46,9 @@
 	let sortOrderParam = $derived(data.sortOrder);
 	let queryParam = $derived(data.query);
 	let developersParam = $derived(data.developers);
+	let publishersParam = $derived(data.publishers);
 	let main: HTMLElement | undefined = $state();
+	$inspect(data);
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
@@ -142,7 +144,8 @@
 	{sortByParam}
 	{sortOrderParam}
 	{developersParam}
-	developerList={companyStore.raw}
+	{publishersParam}
+	companyList={companyStore.raw}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}

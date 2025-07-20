@@ -50,5 +50,7 @@
   "label_filter_installed": "Instalado",
   "label_filter_not_installed": "Não instalado",
   "label_filter_developers": "Desenvolvedores",
-  "no_developers_found": "Nenhum desenvolvedor encontrado"
+  "no_developers_found": "Nenhum desenvolvedor encontrado",
+  "label_filter_publishers": "Distribuidoras",
+  "no_publishers_found": "Nenhuma distribuidora encontrada"
 }

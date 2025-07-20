@@ -20,6 +20,7 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		const installed = data.installed && !data.notInstalled;
 		const notInstalled = !data.installed && data.notInstalled;
 		const developers = data.developers;
+		const publishers = data.publishers;
 		if (query !== null) {
 			filtered = resolvedGames.filter((g) => g.Name?.toLowerCase().includes(query.toLowerCase()));
 		}
@@ -33,6 +34,14 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 			filtered = filtered.filter((g) => {
 				for (const gameDevId of g.Developers) {
 					if (developers.includes(gameDevId)) return true;
+				}
+				return false;
+			});
+		}
+		if (publishers.length > 0) {
+			filtered = filtered.filter((g) => {
+				for (const gamePublisherId of g.Publishers) {
+					if (publishers.includes(gamePublisherId)) return true;
 				}
 				return false;
 			});

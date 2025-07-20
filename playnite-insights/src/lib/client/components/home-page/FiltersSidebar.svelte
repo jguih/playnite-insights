@@ -12,12 +12,12 @@
 	import Checkbox from '../forms/Checkbox.svelte';
 	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client/home-page';
 	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
-	import { m } from '$lib/paraglide/messages';
 	import FilterDropdown from './FilterDropdown.svelte';
 	import SearchBar from '../SearchBar.svelte';
-	import type { Developer } from '@playnite-insights/lib/client/developer';
 	import FilterCheckboxFieldset from './FilterCheckboxFieldset.svelte';
 	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
+	import type { Company } from '@playnite-insights/lib/client/company';
+	import { m } from '$lib/paraglide/messages';
 
 	let {
 		setSearchParam,
@@ -28,9 +28,10 @@
 		sortOrderParam,
 		sortByParam,
 		developersParam,
+		publishersParam,
 		renderSortOrderOptions,
 		renderSortByOptions,
-		developerList
+		companyList
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		appendSearchParam: (key: HomePageSearchParamKeys, value: string) => void;
@@ -40,17 +41,27 @@
 		sortOrderParam: GameSortOrder;
 		sortByParam: GameSortBy;
 		developersParam: string[];
+		publishersParam: string[];
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
-		developerList?: Developer[];
+		companyList?: Company[];
 	} = $props();
 
 	let developerSearchFilter: string | null = $state(null);
 	let developerListFiltered = $derived.by(() => {
-		if (!developerList) return developerList;
-		if (!developerSearchFilter) return developerList;
-		return developerList.filter((d) =>
-			d.Name.toLowerCase().includes(developerSearchFilter!.toLowerCase())
+		if (!companyList) return companyList;
+		if (!developerSearchFilter) return companyList;
+		return [...companyList].filter((c) =>
+			c.Name.toLowerCase().includes((developerSearchFilter as string).toLowerCase())
+		);
+	});
+
+	let publisherSearchFilter: string | null = $state(null);
+	let publisherListFiltered = $derived.by(() => {
+		if (!companyList) return companyList;
+		if (!publisherSearchFilter) return companyList;
+		return [...companyList].filter((c) =>
+			c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase())
 		);
 	});
 
@@ -129,15 +140,42 @@
 			</fieldset>
 			<Divider class="border-1 my-2" />
 			<FilterDropdown label="Genres" onClear={() => {}}>
-				<p>testing</p>
+				<p>W.I.P</p>
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown label="Platforms" onClear={() => {}}>
-				<p>testing</p>
+				<p>W.I.P</p>
 			</FilterDropdown>
 			<hr class="border-background-1" />
-			<FilterDropdown label="Publishers" onClear={() => {}}>
-				<p>testing</p>
+			<FilterDropdown
+				label={m.label_filter_publishers()}
+				counter={publishersParam.length}
+				onClear={() => removeSearchParam('publisher')}
+			>
+				<SearchBar
+					value={publisherSearchFilter}
+					onChange={(v) => (publisherSearchFilter = v)}
+					delay={0}
+				/>
+				{#if publisherListFiltered && publisherListFiltered.length > 0}
+					{#key publisherSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each publisherListFiltered as publisher}
+								<FilterCheckboxLabel for={`publisher-${publisher.Id}`}>
+									<Checkbox
+										checked={publishersParam.includes(publisher.Id)}
+										name="publishers"
+										id={`publisher-${publisher.Id}`}
+										onchange={(e) => handleOnChange(e, 'publisher', publisher.Id)}
+									/>
+									{publisher.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
+				{:else}
+					<p class="mt-2 text-center">{m.no_publishers_found()}</p>
+				{/if}
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown
@@ -151,19 +189,21 @@
 					delay={0}
 				/>
 				{#if developerListFiltered && developerListFiltered.length > 0}
-					<FilterCheckboxFieldset>
-						{#each developerListFiltered as dev}
-							<FilterCheckboxLabel for={`dev-${dev.Id}`}>
-								<Checkbox
-									checked={developersParam.includes(dev.Id)}
-									name="developers"
-									id={`dev-${dev.Id}`}
-									onchange={(e) => handleOnChange(e, 'developer', dev.Id)}
-								/>
-								{dev.Name}
-							</FilterCheckboxLabel>
-						{/each}
-					</FilterCheckboxFieldset>
+					{#key developerSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each developerListFiltered as dev}
+								<FilterCheckboxLabel for={`dev-${dev.Id}`}>
+									<Checkbox
+										checked={developersParam.includes(dev.Id)}
+										name="developers"
+										id={`dev-${dev.Id}`}
+										onchange={(e) => handleOnChange(e, 'developer', dev.Id)}
+									/>
+									{dev.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
 				{:else}
 					<p class="mt-2 text-center">{m.no_developers_found()}</p>
 				{/if}
