@@ -21,12 +21,12 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		const publishers = data.publishers;
 		const platforms = data.platforms;
 		const genres = data.genres;
-		return [query, installed, notInstalled, developers, publishers, platforms, genres];
+		return { query, installed, notInstalled, developers, publishers, platforms, genres };
 	};
 
 	const getFiltersCount = (): number => {
 		let counter = 0;
-		for (const filter of getFilterParams()) {
+		for (const filter of Object.values(getFilterParams())) {
 			if (filter === null) continue;
 			if (typeof filter === 'string') {
 				counter++;

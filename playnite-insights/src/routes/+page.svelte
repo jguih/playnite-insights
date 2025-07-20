@@ -19,6 +19,7 @@
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import {
+		homePageSearchParamsFilterKeys,
 		homePageSearchParamsKeys,
 		type HomePageSearchParamKeys
 	} from '@playnite-insights/lib/client/home-page';
@@ -114,6 +115,19 @@
 		}
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
+
+	const removeAllFilterParams = () => {
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set(homePageSearchParamsKeys.page, '1');
+		for (const filterParamKey of Object.values(homePageSearchParamsFilterKeys)) {
+			params.delete(filterParamKey);
+		}
+		const newUrl = `${page.url.pathname}?${params.toString()}`;
+		if (main) {
+			main.scrollTop = 0;
+		}
+		goto(newUrl, { replaceState: true, keepFocus: true });
+	};
 </script>
 
 {#snippet gameCard(game: PlayniteGame)}
@@ -151,6 +165,7 @@
 	companyList={companyStore.raw}
 	platformList={platformStore.raw}
 	genreList={genreStore.raw}
+	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
 		{#each gameSortOrder as sortOrder}

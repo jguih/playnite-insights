@@ -56,5 +56,6 @@
   "label_filter_platforms": "Plataformas",
   "no_platforms_found": "Nenhuma plataforma encontrada",
   "label_filter_genres": "Gêneros",
-  "no_genres_found": "Nenhum gênero encontrado"
+  "no_genres_found": "Nenhum gênero encontrado",
+  "clear_all_filters": "Limpar filtros"
 }

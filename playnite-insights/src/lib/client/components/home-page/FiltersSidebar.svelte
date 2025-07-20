@@ -37,7 +37,8 @@
 		renderSortByOptions,
 		companyList,
 		genreList,
-		platformList
+		platformList,
+		onClearAllFilters
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		appendSearchParam: (key: HomePageSearchParamKeys, value: string) => void;
@@ -55,6 +56,7 @@
 		companyList?: Company[];
 		genreList?: Genre[];
 		platformList?: Platform[];
+		onClearAllFilters: () => void;
 	} = $props();
 
 	let developerSearchFilter: string | null = $state(null);
@@ -143,7 +145,8 @@
 				</label>
 			</div>
 			<Divider class="border-1 my-2" />
-			<fieldset class="bg-background-2 flex flex-col justify-center">
+			<LightButton color="primary" onclick={onClearAllFilters}>{m.clear_all_filters()}</LightButton>
+			<fieldset class="bg-background-2 mt-2 flex flex-col justify-center">
 				<label for="installed" class="text-md flex flex-row items-center gap-2 p-2">
 					<Checkbox
 						checked={installedParam}
