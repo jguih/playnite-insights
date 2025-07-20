@@ -84,6 +84,15 @@
 		);
 	});
 
+	let genreSearchFilter: string | null = $state(null);
+	let genreListFiltered = $derived.by(() => {
+		if (!genreList) return genreList;
+		if (!genreSearchFilter) return genreList;
+		return [...genreList].filter((p) =>
+			p.Name.toLowerCase().includes((genreSearchFilter as string).toLowerCase())
+		);
+	});
+
 	const handleOnChange = (
 		event: Event & {
 			currentTarget: EventTarget & HTMLInputElement;
@@ -158,8 +167,31 @@
 				</label>
 			</fieldset>
 			<Divider class="border-1 my-2" />
-			<FilterDropdown label="Genres" onClear={() => {}}>
-				<p>W.I.P</p>
+			<FilterDropdown
+				label={m.label_filter_genres()}
+				counter={genresParam.length}
+				onClear={() => removeSearchParam('genre')}
+			>
+				<SearchBar value={genreSearchFilter} onChange={(v) => (genreSearchFilter = v)} delay={0} />
+				{#if genreListFiltered && genreListFiltered.length > 0}
+					{#key genreSearchFilter}
+						<FilterCheckboxFieldset>
+							{#each genreListFiltered as genre}
+								<FilterCheckboxLabel for={`genre-${genre.Id}`}>
+									<Checkbox
+										checked={genresParam.includes(genre.Id)}
+										name="genres"
+										id={`genre-${genre.Id}`}
+										onchange={(e) => handleOnChange(e, 'genre', genre.Id)}
+									/>
+									{genre.Name}
+								</FilterCheckboxLabel>
+							{/each}
+						</FilterCheckboxFieldset>
+					{/key}
+				{:else}
+					<p class="mt-2 text-center">{m.no_genres_found()}</p>
+				{/if}
 			</FilterDropdown>
 			<hr class="border-background-1" />
 			<FilterDropdown
