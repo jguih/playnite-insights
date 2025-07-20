@@ -59,40 +59,54 @@
 		onClearAllFilters: () => void;
 	} = $props();
 
+	const MAX_RENDER_OPTIONS = 30;
+
 	let developerSearchFilter: string | null = $state(null);
 	let developerListFiltered = $derived.by(() => {
 		if (!companyList) return companyList;
-		if (!developerSearchFilter) return companyList;
-		return [...companyList].filter((c) =>
-			c.Name.toLowerCase().includes((developerSearchFilter as string).toLowerCase())
-		);
+		let items = [...companyList];
+		if (developerSearchFilter) {
+			items = items.filter((c) =>
+				c.Name.toLowerCase().includes((developerSearchFilter as string).toLowerCase())
+			);
+		}
+		return items.slice(0, Math.min(MAX_RENDER_OPTIONS, companyList.length));
 	});
 
 	let publisherSearchFilter: string | null = $state(null);
 	let publisherListFiltered = $derived.by(() => {
 		if (!companyList) return companyList;
-		if (!publisherSearchFilter) return companyList;
-		return [...companyList].filter((c) =>
-			c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase())
-		);
+		let items = [...companyList];
+		if (publisherSearchFilter) {
+			items = items.filter((c) =>
+				c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase())
+			);
+		}
+		return items.slice(0, Math.min(MAX_RENDER_OPTIONS, companyList.length));
 	});
 
 	let platformSearchFilter: string | null = $state(null);
 	let platformListFiltered = $derived.by(() => {
 		if (!platformList) return platformList;
-		if (!platformSearchFilter) return platformList;
-		return [...platformList].filter((p) =>
-			p.Name.toLowerCase().includes((platformSearchFilter as string).toLowerCase())
-		);
+		let items = [...platformList];
+		if (platformSearchFilter) {
+			items = items.filter((p) =>
+				p.Name.toLowerCase().includes((platformSearchFilter as string).toLowerCase())
+			);
+		}
+		return items.slice(0, Math.min(MAX_RENDER_OPTIONS, platformList.length));
 	});
 
 	let genreSearchFilter: string | null = $state(null);
 	let genreListFiltered = $derived.by(() => {
 		if (!genreList) return genreList;
-		if (!genreSearchFilter) return genreList;
-		return [...genreList].filter((p) =>
-			p.Name.toLowerCase().includes((genreSearchFilter as string).toLowerCase())
-		);
+		let items = [...genreList];
+		if (genreSearchFilter) {
+			items = items.filter((p) =>
+				p.Name.toLowerCase().includes((genreSearchFilter as string).toLowerCase())
+			);
+		}
+		return items.splice(0, Math.min(MAX_RENDER_OPTIONS, genreList.length));
 	});
 
 	const handleOnChange = (
