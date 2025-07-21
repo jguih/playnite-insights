@@ -45,6 +45,7 @@ services:
             - ./packages/@playnite-insights/core/package.json
             - ./packages/@playnite-insights/lib/package.json
             - ./packages/@playnite-insights/infra/package.json
+            - ./packages/@playnite-insights/infra/migrations
             - ./Dockerfile
         - path: ./
           action: restart

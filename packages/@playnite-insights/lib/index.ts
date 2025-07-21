@@ -7,5 +7,6 @@ export * from "./client/library-manifest";
 export * from "./client/log";
 export * from "./client/playnite-library-importer";
 export * from "./client/company";
+export * from "./client/game-session";
 
 export * from "./client/types";
