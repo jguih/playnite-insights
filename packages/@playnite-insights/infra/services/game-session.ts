@@ -2,6 +2,8 @@ import { GameSessionService, LogService } from "@playnite-insights/core";
 import { defaultLogger } from "./log";
 import type { DatabaseSync } from "node:sqlite";
 import { getDb as _getDb } from "../database";
+import z from "zod";
+import { gameSessionSchema } from "@playnite-insights/lib";
 
 type GameSessionServiceDeps = {
   logService: LogService;
@@ -106,5 +108,20 @@ export const makeGameSessionService = (
     }
   };
 
-  return { exists, open, close };
+  const all: GameSessionService["all"] = () => {
+    const db = getDb();
+    const query = `SELECT * FROM game_session ORDER BY StartTime DESC`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
+      logService.debug(`Found ${sessions.length} game sessions`);
+      return sessions;
+    } catch (error) {
+      logService.error(`Failed get all game sessions`, error as Error);
+      return;
+    }
+  };
+
+  return { exists, open, close, all };
 };
