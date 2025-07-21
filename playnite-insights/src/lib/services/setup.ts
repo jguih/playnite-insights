@@ -8,7 +8,8 @@ import {
 	makeCompanyRepository,
 	makeStreamUtilsService,
 	defaultLogger,
-	config
+	config,
+	makeGameSessionService
 } from '@playnite-insights/infra';
 import {
 	makeLibraryManifestService,
@@ -57,6 +58,7 @@ export const setupServices = () => {
 		getLastSixMonthsAbv: getLastSixMonthsAbreviated
 	});
 	const mediaFilesService = makeMediaFilesService({ ...commonDeps });
+	const gameSessionService = makeGameSessionService({ ...commonDeps });
 
 	const services = {
 		...repositories,
@@ -65,6 +67,7 @@ export const setupServices = () => {
 		playniteLibraryImporter: playniteLibraryImporterService,
 		dashPage: dashPageService,
 		mediaFiles: mediaFilesService,
+		gameSession: gameSessionService,
 		config
 	};
 

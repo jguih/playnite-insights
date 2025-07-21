@@ -17,3 +17,7 @@ Content-Type: {{contentType}}
 ### Get dashboard page data
 GET {{protocol}}://{{host}}/api/dash
 Content-Type: {{contentType}}
+
+### Get all game sessions
+GET {{protocol}}://{{host}}/api/session
+Content-Type: {{contentType}}
