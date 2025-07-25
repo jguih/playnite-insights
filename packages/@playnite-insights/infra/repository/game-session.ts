@@ -1,0 +1,107 @@
+import { LogService } from "@playnite-insights/core";
+import { defaultLogger } from "../services/log";
+import type { DatabaseSync } from "node:sqlite";
+import { getDb as _getDb } from "../database";
+import z from "zod";
+import { gameSessionSchema } from "@playnite-insights/lib";
+import { type GameSessionRepository } from "../../core/game-session.types";
+
+type GameSessionRepositoryDeps = {
+  logService: LogService;
+  getDb: () => DatabaseSync;
+};
+
+export const makeGameSessionRepository = (
+  { logService, getDb }: GameSessionRepositoryDeps = {
+    logService: defaultLogger,
+    getDb: _getDb,
+  }
+): GameSessionRepository => {
+  const getById: GameSessionRepository["getById"] = (sessionId) => {
+    const db = getDb();
+    const query = `SELECT * FROM game_session WHERE SessionId = (?)`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.get(sessionId);
+      const session = z.optional(gameSessionSchema).parse(result);
+      return session;
+    } catch (error) {
+      logService.error(`Failed to get session by Id`, error as Error);
+      return;
+    }
+  };
+
+  const add: GameSessionRepository["add"] = (session) => {
+    const db = getDb();
+    const query = `
+      INSERT INTO game_session
+        (SessionId, GameId, StartTime, EndTime, Duration, Status)
+      VALUES
+        (?, ?, ?, ?, ?, ?)
+    `;
+    try {
+      const stmt = db.prepare(query);
+      stmt.run(
+        session.SessionId,
+        session.GameId,
+        session.StartTime,
+        session.EndTime,
+        session.Duration,
+        session.Status
+      );
+      logService.debug(`Created session ${session.SessionId}`);
+      return true;
+    } catch (error) {
+      logService.error(`Failed to create session ${session.SessionId}`);
+      return false;
+    }
+  };
+
+  const update: GameSessionRepository["update"] = (session) => {
+    const query = `
+        UPDATE game_session
+        SET
+          GameId = ?,
+          StartTime = ?,
+          EndTime = ?,
+          Duration = ?,
+          Status = ?
+        WHERE
+          SessionId = ?
+      `;
+    try {
+      const db = getDb();
+      const stmt = db.prepare(query);
+      stmt.run(
+        session.GameId,
+        session.StartTime,
+        session.EndTime,
+        session.Duration,
+        session.Status,
+        session.SessionId
+      );
+      logService.debug(`Updated session ${session.SessionId}`);
+      return true;
+    } catch (error) {
+      logService.error(`Failed to update session ${session.SessionId}`);
+      return false;
+    }
+  };
+
+  const all: GameSessionRepository["all"] = () => {
+    const db = getDb();
+    const query = `SELECT * FROM game_session ORDER BY StartTime DESC`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all();
+      const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
+      logService.debug(`Found ${sessions.length} sessions`);
+      return sessions;
+    } catch (error) {
+      logService.error(`Failed get all sessions`, error as Error);
+      return;
+    }
+  };
+
+  return { getById, add, update, all };
+};

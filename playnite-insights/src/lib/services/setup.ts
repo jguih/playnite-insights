@@ -9,13 +9,14 @@ import {
 	makeStreamUtilsService,
 	defaultLogger,
 	config,
-	makeGameSessionService
+	makeGameSessionRepository
 } from '@playnite-insights/infra';
 import {
 	makeLibraryManifestService,
 	makeMediaFilesService,
 	makeDashPageService,
-	makePlayniteLibraryImporterService
+	makePlayniteLibraryImporterService,
+	makeGameSessionService
 } from '@playnite-insights/core';
 import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 
@@ -28,12 +29,14 @@ export const setupServices = () => {
 	const genreRepository = makeGenreRepository();
 	const playniteGameRepository = makePlayniteGameRepository();
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository();
+	const gameSessionRepository = makeGameSessionRepository();
 	const repositories = {
 		platformRepository,
 		companyRepository,
 		playniteGameRepository,
 		playniteLibrarySyncRepository,
-		genreRepository
+		genreRepository,
+		gameSessionRepository
 	};
 	const commonDeps = {
 		getDb,

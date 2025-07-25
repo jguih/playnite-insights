@@ -1,12 +1,8 @@
-import {
-  CloseSessionCommand,
-  GameSession,
-  OpenSessionCommand,
-} from "@playnite-insights/lib";
+import type { GameSession } from "@playnite-insights/lib";
 
-export type GameSessionService = {
-  exists: (sessionId: GameSession["SessionId"]) => boolean;
-  open: (command: OpenSessionCommand) => boolean;
-  close: (command: CloseSessionCommand) => boolean;
+export type GameSessionRepository = {
+  getById: (sessionId: GameSession["SessionId"]) => GameSession | undefined;
+  add: (newSession: GameSession) => boolean;
+  update: (session: GameSession) => boolean;
   all: () => GameSession[] | undefined;
 };

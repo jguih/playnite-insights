@@ -28,6 +28,9 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
       '@types/node':
         specifier: ^24.0.14
         version: 24.0.14
