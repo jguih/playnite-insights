@@ -103,5 +103,28 @@ export const makeGameSessionRepository = (
     }
   };
 
-  return { getById, add, update, all };
+  const unlinkSessionsForGame: GameSessionRepository["unlinkSessionsForGame"] =
+    (gameId) => {
+      const db = getDb();
+      const query = `
+        UPDATE game_session
+        SET
+          GameId = NULL
+        WHERE
+          GameId = ?
+      `;
+      try {
+        const stmt = db.prepare(query);
+        stmt.run(gameId);
+        return true;
+      } catch (error) {
+        logService.error(
+          `Failed to unlink sessions for game with id ${gameId}`,
+          error as Error
+        );
+        return false;
+      }
+    };
+
+  return { getById, add, update, all, unlinkSessionsForGame };
 };

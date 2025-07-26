@@ -9,6 +9,7 @@ export const sessionStatus = {
 export const gameSessionSchema = z.object({
   SessionId: z.string(),
   GameId: z.string().nullable(),
+  GameName: z.string().nullable(),
   StartTime: z.string(),
   EndTime: z.string().nullable(),
   Duration: z.number().nullable(),

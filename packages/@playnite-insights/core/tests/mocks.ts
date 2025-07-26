@@ -8,7 +8,6 @@ import { PlayniteGameRepository } from "../playnite-game.types";
 import { LibraryManifestService } from "../library-manifest";
 import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
 import { GameSessionRepository } from "../game-session.types";
-import { GameSession } from "@playnite-insights/lib";
 
 export const makeMocks = () => {
   const logService = {
@@ -71,6 +70,7 @@ export const makeMocks = () => {
     add: vi.fn(),
     update: vi.fn(),
     all: vi.fn(),
+    unlinkSessionsForGame: vi.fn(),
   } satisfies GameSessionRepository;
 
   const playniteLibrarySyncRepository = {

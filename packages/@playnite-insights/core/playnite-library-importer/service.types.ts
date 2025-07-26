@@ -5,11 +5,13 @@ import { LogService } from "../log.types";
 import { PlayniteGameRepository } from "../playnite-game.types";
 import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
 import { StreamUtilsService } from "../stream-utils.types";
+import { GameSessionRepository } from "../game-session.types";
 
 export type PlayniteLibraryImporterServiceDeps = {
   playniteGameRepository: PlayniteGameRepository;
   libraryManifestService: LibraryManifestService;
   playniteLibrarySyncRepository: PlayniteLibrarySyncRepository;
+  gameSessionRepository: GameSessionRepository;
   fileSystemService: FileSystemService;
   streamUtilsService: StreamUtilsService;
   logService: LogService;

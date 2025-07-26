@@ -59,6 +59,7 @@ export const makeGameSessionService = ({
     const newSession: GameSession = {
       SessionId: command.SessionId,
       GameId: command.GameId,
+      GameName: existingGame.Name,
       StartTime: command.StartTime,
       Status: sessionStatus.inProgress,
       EndTime: null,
@@ -67,7 +68,7 @@ export const makeGameSessionService = ({
     const result = gameSessionRepository.add(newSession);
     if (result) {
       logService.info(
-        `Create open session ${command.SessionId} for ${existingGame.Name}`
+        `Created open session ${command.SessionId} for ${existingGame.Name}`
       );
     }
     return result;
@@ -106,10 +107,12 @@ export const makeGameSessionService = ({
       return result;
     }
 
-    if (_isValidCloseCommand(command)) {
+    const existingGame = playniteGameRepository.getById(command.GameId);
+    if (_isValidCloseCommand(command) && existingGame) {
       const newSession: GameSession = {
         SessionId: command.SessionId,
         GameId: command.GameId,
+        GameName: existingGame.Name,
         StartTime: command.StartTime,
         Status: command.Status,
         EndTime: command.EndTime,
@@ -117,15 +120,18 @@ export const makeGameSessionService = ({
       };
       const result = gameSessionRepository.add(newSession);
       if (result) {
-        logService.info(`Created closed session ${command.SessionId}`);
+        logService.info(
+          `Created closed session ${command.SessionId} for ${existingGame.Name}`
+        );
       }
       return result;
     }
 
-    if (_isValidStaleCommand(command)) {
+    if (_isValidStaleCommand(command) && existingGame) {
       const newSession: GameSession = {
         SessionId: command.SessionId,
         GameId: command.GameId,
+        GameName: existingGame.Name,
         StartTime: command.StartTime,
         Status: command.Status,
         EndTime: null,
@@ -133,12 +139,16 @@ export const makeGameSessionService = ({
       };
       const result = gameSessionRepository.add(newSession);
       if (result) {
-        logService.info(`Created stale session ${command.SessionId}`);
+        logService.info(
+          `Created stale session ${command.SessionId} for ${existingGame.Name}`
+        );
       }
       return result;
     }
 
-    logService.warning(`Attempted to close session with invalid command`);
+    logService.warning(
+      `Attempted to close session with invalid command or for non existent game`
+    );
     return false;
   };
 

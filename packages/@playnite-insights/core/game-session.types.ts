@@ -5,4 +5,5 @@ export type GameSessionRepository = {
   add: (newSession: GameSession) => boolean;
   update: (session: GameSession) => boolean;
   all: () => GameSession[] | undefined;
+  unlinkSessionsForGame: (gameId: string) => boolean;
 };
