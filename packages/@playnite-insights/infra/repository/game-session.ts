@@ -35,15 +35,16 @@ export const makeGameSessionRepository = (
     const db = getDb();
     const query = `
       INSERT INTO game_session
-        (SessionId, GameId, StartTime, EndTime, Duration, Status)
+        (SessionId, GameId, GameName, StartTime, EndTime, Duration, Status)
       VALUES
-        (?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?)
     `;
     try {
       const stmt = db.prepare(query);
       stmt.run(
         session.SessionId,
         session.GameId,
+        session.GameName,
         session.StartTime,
         session.EndTime,
         session.Duration,
@@ -62,6 +63,7 @@ export const makeGameSessionRepository = (
         UPDATE game_session
         SET
           GameId = ?,
+          GameName = ?,
           StartTime = ?,
           EndTime = ?,
           Duration = ?,
@@ -74,6 +76,7 @@ export const makeGameSessionRepository = (
       const stmt = db.prepare(query);
       stmt.run(
         session.GameId,
+        session.GameName,
         session.StartTime,
         session.EndTime,
         session.Duration,
