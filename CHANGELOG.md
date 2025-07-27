@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/jguih/playnite-insights/compare/v3.1.0...v3.1.1) (2025-07-27)
+
+
+### Bug Fixes
+
+* game session repo not persisting game name ([08e2859](https://github.com/jguih/playnite-insights/commit/08e2859f2273c00de76c077efea9c36304953a28))
+
 ## [3.1.0](https://github.com/jguih/playnite-insights/compare/v3.0.2...v3.1.0) (2025-07-27)
 
 
