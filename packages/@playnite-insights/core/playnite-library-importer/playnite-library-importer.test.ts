@@ -115,7 +115,12 @@ describe("Game Importer", () => {
       RemovedItems: ["id1"],
       UpdatedItems: [],
     };
-    vi.spyOn(deps.playniteGameRepository, "remove").mockReturnValueOnce(true);
+    deps.playniteGameRepository.getById.mockReturnValueOnce({
+      Id: "id1",
+      Name: "test-game",
+    });
+    deps.playniteGameRepository.remove.mockReturnValueOnce(true);
+    deps.gameSessionRepository.unlinkSessionsForGame.mockReturnValueOnce(true);
     // Act
     const result = await service.sync(data);
     // Assert

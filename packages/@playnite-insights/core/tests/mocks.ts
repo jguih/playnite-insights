@@ -7,6 +7,7 @@ import { StreamUtilsService } from "../stream-utils.types";
 import { PlayniteGameRepository } from "../playnite-game.types";
 import { LibraryManifestService } from "../library-manifest";
 import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import { GameSessionRepository } from "../game-session.types";
 
 export const makeMocks = () => {
   const logService = {
@@ -37,6 +38,11 @@ export const makeMocks = () => {
     readableFromWeb: vi.fn(),
   } satisfies StreamUtilsService;
 
+  const libraryManifestService = {
+    write: vi.fn(),
+    get: vi.fn(),
+  } satisfies LibraryManifestService;
+
   const playniteGameRepository = {
     add: vi.fn(),
     update: vi.fn(),
@@ -59,10 +65,13 @@ export const makeMocks = () => {
     all: vi.fn(),
   } satisfies PlayniteGameRepository;
 
-  const libraryManifestService = {
-    write: vi.fn(),
-    get: vi.fn(),
-  } satisfies LibraryManifestService;
+  const gameSessionRepository = {
+    getById: vi.fn(),
+    add: vi.fn(),
+    update: vi.fn(),
+    all: vi.fn(),
+    unlinkSessionsForGame: vi.fn(),
+  } satisfies GameSessionRepository;
 
   const playniteLibrarySyncRepository = {
     add: vi.fn(),
@@ -74,8 +83,9 @@ export const makeMocks = () => {
     logService,
     fileSystemService,
     streamUtilsService,
-    playniteGameRepository,
     libraryManifestService,
+    playniteGameRepository,
     playniteLibrarySyncRepository,
+    gameSessionRepository,
   };
 };

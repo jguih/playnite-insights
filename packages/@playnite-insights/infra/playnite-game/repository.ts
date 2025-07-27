@@ -708,3 +708,12 @@ export const makePlayniteGameRepository = (
     all,
   };
 };
+
+export const defaultPlayniteGameRepository: PlayniteGameRepository =
+  makePlayniteGameRepository({
+    getDb: _getDb,
+    logService: defaultLogger,
+    companyRepository: defaultCompanyRepository,
+    genreRepository: defaultGenreRepository,
+    platformRepository: defaultPlatformRepository,
+  });

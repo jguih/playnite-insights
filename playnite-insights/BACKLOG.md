@@ -17,17 +17,20 @@
 - Data streaming in dashboard page
 - API Integration testing
 - Data streaming in game page
+- Game filtering
+- Game sorting
 
 ## 🛠️ In Progress
 
-- Dashboard page
+- Game session
+- Fix: Orphan sessions on game delete
+- Fix: Media files being deleted even when game delete fails
 
 ## 📌 To Do
 
+- Dashboard page
 - Display game trailer in game page
 - Display related owned games in game page
-- Game filtering
-- Game sorting
 - Settings page (change language)
 
 ## 💡 Ideas

@@ -16,6 +16,7 @@ export const makePlayniteLibraryImporterService = ({
   playniteGameRepository,
   libraryManifestService,
   playniteLibrarySyncRepository,
+  gameSessionRepository,
   fileSystemService,
   streamUtilsService,
   logService,
@@ -121,21 +122,28 @@ export const makePlayniteLibraryImporterService = ({
       }
       // Games to delete
       for (const gameId of data.RemovedItems) {
-        const result = playniteGameRepository.remove(gameId);
-        if (!result) {
-          logService.error(`Failed to delete game with id ${gameId}`);
+        const game = playniteGameRepository.getById(gameId);
+        if (!game) {
+          logService.warning(
+            `Skipping deleting non existing game with id ${gameId}`
+          );
+          continue;
         }
-        logService.info(`Delete game with id ${gameId}`);
+        if (!gameSessionRepository.unlinkSessionsForGame(gameId)) continue;
+        if (!playniteGameRepository.remove(gameId)) continue;
+        logService.info(`Deleted game ${game.Name}`);
         const gameMediaFolderDir = join(FILES_DIR, gameId);
         try {
           await fileSystemService.rm(gameMediaFolderDir, {
             recursive: true,
             force: true,
           });
-          logService.info(`Deleted media folder ${gameMediaFolderDir}`);
+          logService.info(
+            `Deleted media folder ${gameMediaFolderDir} for ${game.Name}`
+          );
         } catch (error) {
           logService.error(
-            `Failed to delete media folder ${gameMediaFolderDir}`,
+            `Failed to delete media folder ${gameMediaFolderDir} for ${game.Name}`,
             error as Error
           );
         }
