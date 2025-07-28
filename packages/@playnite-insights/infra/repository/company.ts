@@ -10,12 +10,16 @@ type CompanyRepositoryDeps = {
   logService: LogService;
 };
 
+const defaultDeps: Required<CompanyRepositoryDeps> = {
+  getDb: _getDb,
+  logService: defaultLogger,
+};
+
 export const makeCompanyRepository = (
-  { getDb, logService }: CompanyRepositoryDeps = {
-    getDb: _getDb,
-    logService: defaultLogger,
-  }
+  deps: Partial<CompanyRepositoryDeps> = {}
 ): CompanyRepository => {
+  const { getDb, logService } = { ...defaultDeps, ...deps };
+
   const add = (company: Company): boolean => {
     const db = getDb();
     const query = `

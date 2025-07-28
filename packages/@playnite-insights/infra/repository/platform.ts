@@ -10,12 +10,16 @@ type PlatformRepositoryDeps = {
   logService: LogService;
 };
 
+const defaultDeps: Required<PlatformRepositoryDeps> = {
+  getDb: _getDb,
+  logService: defaultLogger,
+};
+
 export const makePlatformRepository = (
-  { getDb, logService }: PlatformRepositoryDeps = {
-    getDb: _getDb,
-    logService: defaultLogger,
-  }
+  deps: Partial<PlatformRepositoryDeps> = {}
 ): PlatformRepository => {
+  const { getDb, logService } = { ...defaultDeps, ...deps };
+
   const add = (platform: Platform): boolean => {
     const db = getDb();
     const query = `

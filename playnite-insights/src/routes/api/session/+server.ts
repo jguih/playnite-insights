@@ -7,9 +7,19 @@ export const GET: RequestHandler = async ({ url }) => {
 
 	if (url.searchParams.has('date')) {
 		const date = url.searchParams.get('date');
-		const today = new Date().toISOString().split('T')[0];
-		const isToday = date === 'today' || date === today;
-		if (isToday) sessions = services.gameSessionRepository.findAllBy({ filters: { date: today } });
+		const today = new Date();
+		const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		const end = new Date(start);
+		end.setDate(end.getDate() + 1);
+
+		services.log.debug(
+			`Fetching game sessions between ${start.toISOString()} and ${end.toISOString()}`
+		);
+
+		if (date === 'today')
+			sessions = services.gameSessionRepository.findAllBy({
+				filters: { date: { start: start.toISOString(), end: end.toISOString() } }
+			});
 	} else {
 		sessions = services.gameSessionRepository.all();
 	}

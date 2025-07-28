@@ -10,12 +10,16 @@ type GenreRepositoryDeps = {
   getDb: () => DatabaseSync;
 };
 
+const defaultDeps: Required<GenreRepositoryDeps> = {
+  getDb: _getDb,
+  logService: defaultLogger,
+};
+
 export const makeGenreRepository = (
-  { logService, getDb }: GenreRepositoryDeps = {
-    getDb: _getDb,
-    logService: defaultLogger,
-  }
+  deps: Partial<GenreRepositoryDeps> = {}
 ): GenreRepository => {
+  const { getDb, logService } = { ...defaultDeps, ...deps };
+
   const add = (genre: Genre): boolean => {
     const db = getDb();
     const query = `

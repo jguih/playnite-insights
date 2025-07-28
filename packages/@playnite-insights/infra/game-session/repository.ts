@@ -12,12 +12,16 @@ type GameSessionRepositoryDeps = {
   getDb: () => DatabaseSync;
 };
 
+const defaultDeps: Required<GameSessionRepositoryDeps> = {
+  getDb: _getDb,
+  logService: defaultLogger,
+};
+
 export const makeGameSessionRepository = (
-  { logService, getDb }: GameSessionRepositoryDeps = {
-    logService: defaultLogger,
-    getDb: _getDb,
-  }
+  deps: Partial<GameSessionRepositoryDeps> = {}
 ): GameSessionRepository => {
+  const { getDb, logService } = { ...defaultDeps, ...deps };
+
   const getById: GameSessionRepository["getById"] = (sessionId) => {
     const db = getDb();
     const query = `SELECT * FROM game_session WHERE SessionId = (?)`;

@@ -10,5 +10,8 @@ export type OpenSessionCommand = z.infer<typeof openGameSessionSchema>;
 export type CloseSessionCommand = z.infer<typeof closeGameSessionSchema>;
 
 export type GameSessionFilters = {
-  date?: string;
+  date?: {
+    start: string;
+    end: string;
+  };
 };

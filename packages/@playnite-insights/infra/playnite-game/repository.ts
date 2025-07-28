@@ -35,21 +35,25 @@ type PlayniteGameRepositoryDeps = {
   companyRepository: CompanyRepository;
 };
 
+const defaultDeps: Required<PlayniteGameRepositoryDeps> = {
+  getDb: _getDb,
+  logService: defaultLogger,
+  platformRepository: defaultPlatformRepository,
+  genreRepository: defaultGenreRepository,
+  companyRepository: defaultCompanyRepository,
+};
+
 export const makePlayniteGameRepository = (
-  {
+  deps: Partial<PlayniteGameRepositoryDeps> = {}
+): PlayniteGameRepository => {
+  const {
     getDb,
     logService,
     platformRepository,
     genreRepository,
     companyRepository,
-  }: PlayniteGameRepositoryDeps = {
-    getDb: _getDb,
-    logService: defaultLogger,
-    platformRepository: defaultPlatformRepository,
-    genreRepository: defaultGenreRepository,
-    companyRepository: defaultCompanyRepository,
-  }
-): PlayniteGameRepository => {
+  } = { ...defaultDeps, ...deps };
+
   const getTotal = (filters?: GameFilters): number => {
     const db = getDb();
     let query = `
@@ -710,10 +714,4 @@ export const makePlayniteGameRepository = (
 };
 
 export const defaultPlayniteGameRepository: PlayniteGameRepository =
-  makePlayniteGameRepository({
-    getDb: _getDb,
-    logService: defaultLogger,
-    companyRepository: defaultCompanyRepository,
-    genreRepository: defaultGenreRepository,
-    platformRepository: defaultPlatformRepository,
-  });
+  makePlayniteGameRepository();

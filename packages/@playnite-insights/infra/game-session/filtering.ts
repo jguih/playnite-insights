@@ -7,8 +7,8 @@ export const getWhereClauseAndParamsFromFilters = (
   const params: string[] = [];
 
   if (filters.date) {
-    where.push(`date(StartTime) = (?)`);
-    params.push(filters.date);
+    where.push(`StartTime >= (?) AND StartTime < (?)`);
+    params.push(filters.date.start, filters.date.end);
   }
 
   return { where: `WHERE ${where.join(" AND ")}`, params };

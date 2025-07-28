@@ -71,6 +71,7 @@ export const makeMocks = () => {
     update: vi.fn(),
     all: vi.fn(),
     unlinkSessionsForGame: vi.fn(),
+    findAllBy: vi.fn(),
   } satisfies GameSessionRepository;
 
   const playniteLibrarySyncRepository = {

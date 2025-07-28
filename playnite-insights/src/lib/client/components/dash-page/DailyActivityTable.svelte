@@ -60,6 +60,8 @@
 			if (interval) clearInterval(interval);
 		};
 	});
+
+	$inspect(tableData);
 </script>
 
 {#snippet th(text: string)}
@@ -116,7 +118,7 @@
 		</div>
 	{/if}
 	<table class="bg-background-1 min-w-full shadow">
-		<thead class="bg-background-2">
+		<thead class="bg-background-3">
 			<tr>
 				<th class="px-3 py-2 text-center">{m.recent_activity_table_col_status()}</th>
 				<th class="px-3 py-2 text-left">{m.recent_activity_table_col_game()}</th>
@@ -124,24 +126,32 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each tableData.values() as row}
-				<tr class="border-t border-gray-700">
-					<td class="px-3 py-2">
-						{#if row.status === 'in_progress'}
-							{@render greenDot()}
-						{:else}
-							{@render grayDot()}
-						{/if}
+			{#if tableData.size === 0}
+				<tr class="bg-background-2 border-t border-gray-700">
+					<td colspan="3" class="px-3 py-2 text-center">
+						{m.dash_no_data_to_show()}
 					</td>
-					<td class="px-3 py-2">{row.gameName}</td>
-					<td class="px-3 py-2">{getPlaytimeInHoursAndMinutes(row.totalPlaytime)}</td>
 				</tr>
-			{/each}
-			<!-- <tr>
+			{:else}
+				{#each tableData.values() as row, index}
+					<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''} border-t border-gray-700`}>
+						<td class="px-3 py-2">
+							{#if row.status === 'in_progress'}
+								{@render greenDot()}
+							{:else}
+								{@render grayDot()}
+							{/if}
+						</td>
+						<td class="px-3 py-2">{row.gameName}</td>
+						<td class="px-3 py-2">{getPlaytimeInHoursAndMinutes(row.totalPlaytime)}</td>
+					</tr>
+				{/each}
+				<!-- <tr>
 				<td colspan="3">
 					{@render sessionOverview()}
 				</td>
 			</tr> -->
+			{/if}
 		</tbody>
 	</table>
 </div>

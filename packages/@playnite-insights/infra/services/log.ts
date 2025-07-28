@@ -1,20 +1,23 @@
-import { LOG_LEVELS } from "@playnite-insights/lib";
+import { currentLogLevel, LOG_LEVELS } from "@playnite-insights/lib";
 import { LogService } from "@playnite-insights/core";
 import { ZodError } from "zod";
 
+export const DEFAULT_SOURCE = "General";
+
 export const makeLogService = (
-  CURRENT_LOG_LEVEL: (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS]
+  source: string = DEFAULT_SOURCE,
+  CURRENT_LOG_LEVEL: (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS] = currentLogLevel
 ): LogService => {
   const getDateTimeString = (): string => {
     const now = new Date();
-    return now.toISOString().replace("T", " ").replace("Z", "").trim();
+    return now.toISOString().trim();
   };
 
   const logError = (message: string, error?: unknown): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.error) {
       return;
     }
-    console.error(`[${getDateTimeString()}][ERROR] ${message}`);
+    console.error(`[${getDateTimeString()}][ERROR][${source}] ${message}`);
     if (error && error instanceof ZodError) {
       const formattedIssues = error.issues
         .map((i) => `- ${i.path.join(".") || "(root)"}: ${i.message}`)
@@ -31,28 +34,28 @@ export const makeLogService = (
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.warning) {
       return;
     }
-    console.warn(`[${getDateTimeString()}][WARNING] ${message}`);
+    console.warn(`[${getDateTimeString()}][WARNING][${source}] ${message}`);
   };
 
   const logDebug = (message: string): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.debug) {
       return;
     }
-    console.debug(`[${getDateTimeString()}][DEBUG] ${message}`);
+    console.debug(`[${getDateTimeString()}][DEBUG][${source}] ${message}`);
   };
 
   const logSuccess = (message: string): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.success) {
       return;
     }
-    console.log(`[${getDateTimeString()}][SUCCESS] ${message}`);
+    console.log(`[${getDateTimeString()}][SUCCESS][${source}] ${message}`);
   };
 
   const logInfo = (message: string): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.info) {
       return;
     }
-    console.info(`[${getDateTimeString()}][INFO] ${message}`);
+    console.info(`[${getDateTimeString()}][INFO][${source}] ${message}`);
   };
 
   return {
@@ -66,14 +69,4 @@ export const makeLogService = (
   };
 };
 
-export const isValidLogLevel = (
-  value: number
-): value is (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS] => {
-  const validLevels = [1000, 0, 1, 2, 3, 4];
-  return validLevels.includes(value);
-};
-
-const logLevel = Number(process.env.LOG_LEVEL);
-export const defaultLogger = makeLogService(
-  isValidLogLevel(logLevel) ? logLevel : LOG_LEVELS.info
-);
+export const defaultLogger = makeLogService(DEFAULT_SOURCE);

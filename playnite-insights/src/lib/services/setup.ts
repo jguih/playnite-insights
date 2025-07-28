@@ -7,9 +7,9 @@ import {
 	makePlayniteGameRepository,
 	makeCompanyRepository,
 	makeStreamUtilsService,
-	defaultLogger,
 	config,
-	makeGameSessionRepository
+	makeGameSessionRepository,
+	makeLogService
 } from '@playnite-insights/infra';
 import {
 	makeLibraryManifestService,
@@ -23,13 +23,24 @@ import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
 	const streamUtilsService = makeStreamUtilsService();
+	const logService = makeLogService('SvelteBackend');
 	// Repositories
-	const platformRepository = makePlatformRepository();
-	const companyRepository = makeCompanyRepository();
-	const genreRepository = makeGenreRepository();
-	const playniteGameRepository = makePlayniteGameRepository();
-	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository();
-	const gameSessionRepository = makeGameSessionRepository();
+	const platformRepository = makePlatformRepository({
+		logService: makeLogService('PlatformRepository')
+	});
+	const companyRepository = makeCompanyRepository({
+		logService: makeLogService('CompanyRepository')
+	});
+	const genreRepository = makeGenreRepository({ logService: makeLogService('GenreRepository') });
+	const playniteGameRepository = makePlayniteGameRepository({
+		logService: makeLogService('PlayniteGameRepository')
+	});
+	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
+		logService: makeLogService('PlayniteLibrarySyncRepository')
+	});
+	const gameSessionRepository = makeGameSessionRepository({
+		logService: makeLogService('GameSessionRepository')
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -40,7 +51,6 @@ export const setupServices = () => {
 	};
 	const commonDeps = {
 		getDb,
-		logService: defaultLogger,
 		fileSystemService,
 		streamUtilsService,
 		...config,
@@ -49,23 +59,32 @@ export const setupServices = () => {
 	// Services
 	const libraryManifestService = makeLibraryManifestService({
 		...commonDeps,
-		getManifestData: playniteGameRepository.getManifestData
+		getManifestData: playniteGameRepository.getManifestData,
+		logService: makeLogService('LibraryManifestService')
 	});
 	const playniteLibraryImporterService = makePlayniteLibraryImporterService({
 		...commonDeps,
 		...repositories,
-		libraryManifestService: libraryManifestService
+		libraryManifestService: libraryManifestService,
+		logService: makeLogService('PlayniteLibraryImporterService')
 	});
 	const dashPageService = makeDashPageService({
 		...commonDeps,
-		getLastSixMonthsAbv: getLastSixMonthsAbreviated
+		getLastSixMonthsAbv: getLastSixMonthsAbreviated,
+		logService: makeLogService('DashPageService')
 	});
-	const mediaFilesService = makeMediaFilesService({ ...commonDeps });
-	const gameSessionService = makeGameSessionService({ ...commonDeps });
+	const mediaFilesService = makeMediaFilesService({
+		...commonDeps,
+		logService: makeLogService('MediaFilesService')
+	});
+	const gameSessionService = makeGameSessionService({
+		...commonDeps,
+		logService: makeLogService('GameSessionService')
+	});
 
 	const services = {
 		...repositories,
-		log: defaultLogger,
+		log: logService,
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
 		dashPage: dashPageService,

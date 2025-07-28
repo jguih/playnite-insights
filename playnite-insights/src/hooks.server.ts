@@ -7,11 +7,12 @@ export const { services } = setupServices();
 
 export const init: ServerInit = async () => {
 	services.log.debug(`Server init function called`);
-	services.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+	services.log.debug(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+	services.log.debug(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
 	services.log.info(`ORIGIN: ${process.env.ORIGIN || 'undefined'}`);
 	services.log.info(`APP_NAME: ${process.env.APP_NAME}`);
-	services.log.info(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
 	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
+	services.log.info(`TZ: ${process.env.TZ}`);
 	await initDatabase({
 		fileSystemService: defaultFileSystemService,
 		DB_FILE: services.config.DB_FILE,

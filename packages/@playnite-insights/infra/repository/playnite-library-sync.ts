@@ -11,12 +11,16 @@ type PlayniteLibrarySyncRepositoryDeps = {
   logService: LogService;
 };
 
+const defaultDeps: Required<PlayniteLibrarySyncRepositoryDeps> = {
+  getDb: _getDb,
+  logService: defaultLogger,
+};
+
 export const makePlayniteLibrarySyncRepository = (
-  { getDb, logService }: PlayniteLibrarySyncRepositoryDeps = {
-    getDb: _getDb,
-    logService: defaultLogger,
-  }
+  deps: Partial<PlayniteLibrarySyncRepositoryDeps> = {}
 ): PlayniteLibrarySyncRepository => {
+  const { getDb, logService } = { ...defaultDeps, ...deps };
+
   const add = (totalPlaytimeSeconds: number, totalGames: number) => {
     const db = getDb();
     const now = new Date().toISOString();
