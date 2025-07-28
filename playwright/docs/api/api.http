@@ -21,3 +21,7 @@ Content-Type: {{contentType}}
 ### Get all game sessions
 GET {{protocol}}://{{host}}/api/session
 Content-Type: {{contentType}}
+
+### Get all game sessions for today
+GET {{protocol}}://{{host}}/api/session?date=today
+Content-Type: {{contentType}}

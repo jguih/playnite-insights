@@ -13,7 +13,18 @@ const COMPANY_CACHE = `company-data-${version}`;
 const DASH_CACHE = `dashboard-data-${version}`;
 const GENRE_CACHE = `genre-data-${version}`;
 const PLATFORM_CACHE = `platform-data-${version}`;
-const cacheKeysArr = [CACHE, GAMES_CACHE, COMPANY_CACHE, DASH_CACHE, GENRE_CACHE, PLATFORM_CACHE];
+const RECENT_SESSION_CACHE = `recent-session-data-${version}`;
+const ALL_SESSION_CACHE = `all-session-cache-${version}`;
+const cacheKeysArr = [
+  CACHE, 
+  GAMES_CACHE, 
+  COMPANY_CACHE, 
+  DASH_CACHE, 
+  GENRE_CACHE, 
+  PLATFORM_CACHE, 
+  RECENT_SESSION_CACHE, 
+  ALL_SESSION_CACHE
+];
 
 const ASSETS = [
 	...build, // the app itself
@@ -155,6 +166,20 @@ self.addEventListener('fetch', (event) => {
 		event.respondWith(networkFirst(event.request, PLATFORM_CACHE));
 		return;
 	}
+
+  if (url.pathname.startsWith('/api/session')) {
+    const date = url.searchParams.get('date');
+    
+    if (date === 'today') {
+      event.respondWith(networkFirst(event.request, RECENT_SESSION_CACHE));
+      return;
+    }
+    
+    if (!date) {
+      event.respondWith(networkFirst(event.request, ALL_SESSION_CACHE));
+      return;
+    }
+  }
 
 	event.respondWith(defaultFetchHandler(event.request, CACHE));
 });

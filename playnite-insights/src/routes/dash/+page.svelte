@@ -14,6 +14,7 @@
 	import { makeDashPageViewModel } from '$lib/client/viewmodel/dash.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import { dashStore } from '$lib/stores/app-data.svelte.js';
+	import DailyActivityTable from '$lib/client/components/dash-page/DailyActivityTable.svelte';
 
 	let vm = $derived.by(() => {
 		const pageData = dashStore?.pageData ? { ...dashStore.pageData } : undefined;
@@ -38,6 +39,11 @@
 		{/snippet}
 	</Header>
 	<Main class="flex flex-col gap-6">
+		<div>
+			<h1 class="text-2xl">{m.dash_recent_activity()}</h1>
+			<Divider class="border-1 mb-4" />
+			<DailyActivityTable />
+		</div>
 		<div>
 			<h1 class="text-2xl">Overview</h1>
 			<Divider class="border-1 mb-4" />
