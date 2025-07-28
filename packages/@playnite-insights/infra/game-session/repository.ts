@@ -5,6 +5,7 @@ import { getDb as _getDb } from "../database";
 import z from "zod";
 import { gameSessionSchema } from "@playnite-insights/lib";
 import { type GameSessionRepository } from "../../core/game-session.types";
+import { getWhereClauseAndParamsFromFilters } from "./filtering";
 
 type GameSessionRepositoryDeps = {
   logService: LogService;
@@ -129,5 +130,26 @@ export const makeGameSessionRepository = (
       }
     };
 
-  return { getById, add, update, all, unlinkSessionsForGame };
+  const findAllBy: GameSessionRepository["findAllBy"] = (args) => {
+    const db = getDb();
+    let query = `
+      SELECT * 
+      FROM game_session 
+    `;
+    const { where, params } = getWhereClauseAndParamsFromFilters(args.filters);
+    query += where;
+    query += ` ORDER BY StartTime DESC;`;
+    try {
+      const stmt = db.prepare(query);
+      const result = stmt.all(...params);
+      const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
+      logService.debug(`Found ${sessions.length} sessions`);
+      return sessions;
+    } catch (error) {
+      logService.error(`Failed get all sessions`, error as Error);
+      return;
+    }
+  };
+
+  return { getById, add, update, all, unlinkSessionsForGame, findAllBy };
 };

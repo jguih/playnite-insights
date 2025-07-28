@@ -8,3 +8,7 @@ import {
 export type GameSession = z.infer<typeof gameSessionSchema>;
 export type OpenSessionCommand = z.infer<typeof openGameSessionSchema>;
 export type CloseSessionCommand = z.infer<typeof closeGameSessionSchema>;
+
+export type GameSessionFilters = {
+  date?: string;
+};

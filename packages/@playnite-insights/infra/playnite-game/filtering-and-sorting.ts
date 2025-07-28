@@ -35,9 +35,6 @@ export const getOrderByClause = (sorting?: GameSorting): string => {
     case "IsInstalled": {
       return ` ORDER BY IsInstalled ${order}, Id ASC`;
     }
-    case "Id": {
-      return ` ORDER BY Id ${order}`;
-    }
     case "Added": {
       return ` ORDER BY Added ${order}, Id ASC`;
     }

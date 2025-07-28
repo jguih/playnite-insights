@@ -1,4 +1,4 @@
-import type { GameSession } from "@playnite-insights/lib";
+import type { GameSession, GameSessionFilters } from "@playnite-insights/lib";
 
 export type GameSessionRepository = {
   getById: (sessionId: GameSession["SessionId"]) => GameSession | undefined;
@@ -6,4 +6,7 @@ export type GameSessionRepository = {
   update: (session: GameSession) => boolean;
   all: () => GameSession[] | undefined;
   unlinkSessionsForGame: (gameId: string) => boolean;
+  findAllBy: (params: {
+    filters?: GameSessionFilters;
+  }) => GameSession[] | undefined;
 };

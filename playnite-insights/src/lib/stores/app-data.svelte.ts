@@ -3,12 +3,16 @@ import { companySchema, type Company } from '@playnite-insights/lib/client/compa
 import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib/client/dash-page';
 import { genreSchema, type Genre } from '@playnite-insights/lib/client/genre';
 import { fullGameSchema, type FullGame } from '@playnite-insights/lib/client/playnite-game';
+import { gameSessionSchema, type GameSession } from '@playnite-insights/lib/client/game-session';
 import { error } from '@sveltejs/kit';
 import z from 'zod';
 
 export const gameStore: { raw?: FullGame[] } = $state({});
 export const companyStore: { raw?: Company[] } = $state({});
 export const dashStore: { pageData?: DashPageData } = $state({});
+export const recentActivityStore: { raw?: GameSession[]; isLoading: boolean } = $state({
+	isLoading: false
+});
 export const genreStore: { raw?: Genre[] } = $state({});
 export const platformStore: { raw?: Platform[] } = $state({});
 
@@ -48,6 +52,22 @@ export const loadDashData = async () => {
 		dashStore.pageData = data;
 	} catch (err) {
 		error(500, `Failed to fetch dashboard page data: ${(err as Error).message}`);
+	}
+};
+
+export const loadRecentActivity = async () => {
+	const origin = window.location.origin;
+	const url = `${origin}/api/session?date=today`;
+	try {
+		recentActivityStore.isLoading = true;
+		const response = await fetch(url);
+		const asJson = await response.json();
+		const data = z.optional(z.array(gameSessionSchema)).parse(asJson);
+		recentActivityStore.raw = data;
+	} catch (err) {
+		console.error(err);
+	} finally {
+		recentActivityStore.isLoading = false;
 	}
 };
 

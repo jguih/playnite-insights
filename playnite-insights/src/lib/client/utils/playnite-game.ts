@@ -10,7 +10,7 @@ export const getPlaytimeInHours = (playtimeInSecs: number): string => {
 	return (playtimeInSecs / 3600).toFixed(1);
 };
 
-export const getFormattedPlaytime = (playtime: number): string => {
+export const getPlaytimeInHoursAndMinutes = (playtime: number): string => {
 	if (playtime > 0) {
 		const totalMins = Math.floor(playtime / 60);
 		const hours = Math.floor(totalMins / 60);

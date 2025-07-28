@@ -3,16 +3,12 @@
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 	import {
-		companyStore,
-		dashStore,
-		gameStore,
-		genreStore,
 		loadCompanies,
 		loadDashData,
 		loadGames,
 		loadGenres,
 		loadPlatforms,
-		platformStore
+		loadRecentActivity
 	} from '$lib/stores/app-data.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 
@@ -25,6 +21,7 @@
 		await loadGames();
 		await loadCompanies();
 		await loadDashData();
+		await loadRecentActivity();
 		await loadGenres();
 		await loadPlatforms();
 		isLoading = false;
