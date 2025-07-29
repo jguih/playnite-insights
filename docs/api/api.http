@@ -25,3 +25,26 @@ Content-Type: {{contentType}}
 ### Get all game sessions for today
 GET {{protocol}}://{{host}}/api/session?date=today
 Content-Type: {{contentType}}
+
+### Create a session
+POST {{protocol}}://{{host}}/api/session/open
+Content-Type: {{contentType}}
+
+{
+  "SessionId": "{{$uuid}}",
+  "GameId": "35ae3f82-98d6-42f9-933e-243c26b48147",
+  "StartTime": "2025-07-28T23:51:35.5476026Z"
+}
+
+### Close a session
+POST {{protocol}}://{{host}}/api/session/close
+Content-Type: {{contentType}}
+
+{
+  "SessionId": "{{$uuid}}",
+  "GameId": "35ae3f82-98d6-42f9-933e-243c26b48147",
+  "StartTime": "2025-07-28T23:51:35.5476026Z",
+  "EndTime": "2025-07-28T23:59:35.5476026Z",
+  "Duration": 200,
+  "Status": "closed"
+}

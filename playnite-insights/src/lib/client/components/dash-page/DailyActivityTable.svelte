@@ -2,11 +2,14 @@
 	import type { GameSession } from '@playnite-insights/lib/client/game-session';
 	import { loadRecentActivity, recentActivityStore } from '$lib/stores/app-data.svelte';
 	import Loading from '../Loading.svelte';
-	import { getPlaytimeInHoursAndMinutes } from '$lib/client/utils/playnite-game';
+	import {
+		getPlaytimeInHoursAndMinutes,
+		getPlaytimeInHoursMinutesAndSeconds
+	} from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 
-	let tableData = $derived.by(() => {
+	let recentActivityData = $derived.by(() => {
 		const data: Map<
 			string,
 			{
@@ -17,36 +20,62 @@
 			}
 		> = new Map();
 
-		for (const dailySession of recentActivityStore.raw ?? []) {
-			const key = dailySession.GameId ? dailySession.GameId : dailySession.GameName;
+		const sessions = recentActivityStore.raw ?? [];
+
+		for (const session of sessions) {
+			const key = session.GameId ? session.GameId : session.GameName;
 			if (key === null) continue;
+
+			const currentStatus = getActivityStateFromSession(session);
+			const duration = session.Duration ?? 0;
 
 			if (!data.has(key)) {
 				data.set(key, {
-					gameName: dailySession.GameName ?? 'Unknown',
-					status: dailySession.Status === 'in_progress' ? 'in_progress' : 'not_playing',
-					totalPlaytime: dailySession.Duration ?? 0,
-					sessions: [dailySession].sort()
+					gameName: session.GameName ?? 'Unknown',
+					status: currentStatus,
+					totalPlaytime: duration,
+					sessions: [session]
 				});
+				continue;
 			}
 
-			const value = data.get(key);
-			if (!value) continue;
-			const newValue = { ...value };
-			newValue.status =
-				newValue.status === 'in_progress'
-					? newValue.status
-					: dailySession.Status === 'in_progress'
-						? 'in_progress'
-						: 'not_playing';
-			newValue.totalPlaytime += dailySession.Duration ?? 0;
-			newValue.sessions = [...newValue.sessions, dailySession].sort();
-			data.set(key, newValue);
+			const value = data.get(key)!;
+			value.totalPlaytime += duration;
+			value.sessions.push(session);
+			if (value.status !== 'in_progress') {
+				value.status = currentStatus;
+			}
+		}
+		return data;
+	});
+	let tick: Date = $state(new Date());
+	let inProgressPlaytime = $derived.by(() => {
+		const now = tick;
+		const data: Map<string, number> = new Map();
+
+		for (const [key, activity] of recentActivityData) {
+			const status = activity.status;
+			if (status === 'not_playing') continue;
+
+			const latestSession = activity.sessions.at(0);
+			const startTime = latestSession?.StartTime;
+			if (!startTime) continue;
+
+			const totalPlaytime = activity.totalPlaytime;
+			const elapsed = (now.getTime() - new Date(startTime).getTime()) / 1000;
+
+			data.set(key, Math.floor(totalPlaytime + elapsed));
 		}
 
 		return data;
 	});
 	let interval: ReturnType<typeof setInterval> | null = $state(null);
+	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
+
+	const getActivityStateFromSession = (session: GameSession): 'in_progress' | 'not_playing' => {
+		if (session.Status === 'in_progress') return 'in_progress';
+		return 'not_playing';
+	};
 
 	onMount(() => {
 		window.addEventListener('focus', async () => {
@@ -55,13 +84,17 @@
 			interval = setInterval(loadRecentActivity, 30_000);
 		});
 		interval = setInterval(loadRecentActivity, 30_000);
+
+		tickInterval = setInterval(() => (tick = new Date()), 1000);
+
 		return () => {
 			window.removeEventListener('focus', loadRecentActivity);
 			if (interval) clearInterval(interval);
+			if (tickInterval) clearInterval(tickInterval);
 		};
 	});
 
-	$inspect(tableData);
+	$inspect(recentActivityData);
 </script>
 
 {#snippet th(text: string)}
@@ -126,24 +159,32 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#if tableData.size === 0}
+			{#if recentActivityData.size === 0}
 				<tr class="bg-background-2 border-t border-gray-700">
 					<td colspan="3" class="px-3 py-2 text-center">
 						{m.dash_no_data_to_show()}
 					</td>
 				</tr>
 			{:else}
-				{#each tableData.values() as row, index}
+				{#each recentActivityData as [key, activity], index}
 					<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''} border-t border-gray-700`}>
 						<td class="px-3 py-2">
-							{#if row.status === 'in_progress'}
+							{#if activity.status === 'in_progress'}
 								{@render greenDot()}
 							{:else}
 								{@render grayDot()}
 							{/if}
 						</td>
-						<td class="px-3 py-2">{row.gameName}</td>
-						<td class="px-3 py-2">{getPlaytimeInHoursAndMinutes(row.totalPlaytime)}</td>
+						<td class="px-3 py-2">{activity.gameName}</td>
+						{#if activity.status === 'in_progress' && inProgressPlaytime.has(key)}
+							<td class="px-3 py-2">
+								{getPlaytimeInHoursMinutesAndSeconds(inProgressPlaytime.get(key)!)}
+							</td>
+						{:else}
+							<td class="px-3 py-2">
+								{getPlaytimeInHoursMinutesAndSeconds(activity.totalPlaytime)}
+							</td>
+						{/if}
 					</tr>
 				{/each}
 				<!-- <tr>

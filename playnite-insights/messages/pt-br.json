@@ -11,6 +11,7 @@
   "game_info_added": "Adicionado",
   "game_info_playtime": "Horas Jogadas",
   "game_playtime_in_hours_and_minutes": "{hours}h {mins}m",
+  "game_playtime_in_hours_minutes_seconds": "{hours}h {mins}m {secs}s",
   "game_info_developers": "Desenvolvedores",
   "game_info_installed": "Instalado",
   "dash_games_in_library": "Jogos na biblioteca",

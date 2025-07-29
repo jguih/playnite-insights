@@ -19,3 +19,14 @@ export const getPlaytimeInHoursAndMinutes = (playtime: number): string => {
 	}
 	return m.game_playtime_in_hours_and_minutes({ hours: 0, mins: 0 });
 };
+
+export const getPlaytimeInHoursMinutesAndSeconds = (playtime: number): string => {
+	if (playtime > 0) {
+		const totalMins = Math.floor(playtime / 60);
+		const secs = playtime % 60;
+		const hours = Math.floor(totalMins / 60);
+		const mins = totalMins % 60;
+		return m.game_playtime_in_hours_minutes_seconds({ hours: hours, mins: mins, secs: secs });
+	}
+	return m.game_playtime_in_hours_minutes_seconds({ hours: 0, mins: 0, secs: 0 });
+};
