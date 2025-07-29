@@ -34,3 +34,10 @@ export const closeGameSessionSchema = z.object({
   Duration: z.number().optional().nullable(),
   Status: z.enum([sessionStatus.closed, sessionStatus.stale]),
 });
+
+export const gameSessionsDtoSchema = z.object({
+  ServerDateTimeUtc: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid ISO date string",
+  }),
+  Sessions: z.array(gameSessionSchema).optional(),
+});

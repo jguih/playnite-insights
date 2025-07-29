@@ -1,11 +1,8 @@
 <script lang="ts">
 	import type { GameSession } from '@playnite-insights/lib/client/game-session';
-	import { loadRecentActivity, recentActivityStore } from '$lib/stores/app-data.svelte';
+	import { getUtcNow, loadRecentActivity, recentActivityStore } from '$lib/stores/app-data.svelte';
 	import Loading from '../Loading.svelte';
-	import {
-		getPlaytimeInHoursAndMinutes,
-		getPlaytimeInHoursMinutesAndSeconds
-	} from '$lib/client/utils/playnite-game';
+	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 
@@ -20,7 +17,7 @@
 			}
 		> = new Map();
 
-		const sessions = recentActivityStore.raw ?? [];
+		const sessions = recentActivityStore.raw?.Sessions ?? [];
 
 		for (const session of sessions) {
 			const key = session.GameId ? session.GameId : session.GameName;
@@ -48,7 +45,9 @@
 		}
 		return data;
 	});
-	let tick: Date = $state(new Date());
+	let interval: ReturnType<typeof setInterval> | null = $state(null);
+	let tick: number = $state(getUtcNow());
+	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let inProgressPlaytime = $derived.by(() => {
 		const now = tick;
 		const data: Map<string, number> = new Map();
@@ -62,15 +61,13 @@
 			if (!startTime) continue;
 
 			const totalPlaytime = activity.totalPlaytime;
-			const elapsed = (now.getTime() - new Date(startTime).getTime()) / 1000;
+			const elapsed = (now - new Date(startTime).getTime()) / 1000;
 
 			data.set(key, Math.floor(totalPlaytime + elapsed));
 		}
 
 		return data;
 	});
-	let interval: ReturnType<typeof setInterval> | null = $state(null);
-	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
 
 	const getActivityStateFromSession = (session: GameSession): 'in_progress' | 'not_playing' => {
 		if (session.Status === 'in_progress') return 'in_progress';
@@ -85,7 +82,7 @@
 		});
 		interval = setInterval(loadRecentActivity, 30_000);
 
-		tickInterval = setInterval(() => (tick = new Date()), 1000);
+		tickInterval = setInterval(() => (tick = getUtcNow()), 1000);
 
 		return () => {
 			window.removeEventListener('focus', loadRecentActivity);

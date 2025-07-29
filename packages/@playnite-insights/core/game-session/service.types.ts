@@ -1,4 +1,5 @@
 import {
+  GameSessionsDto,
   type CloseSessionCommand,
   type GameSession,
   type OpenSessionCommand,
@@ -10,7 +11,7 @@ import type { PlayniteGameRepository } from "../playnite-game.types";
 export type GameSessionService = {
   open: (command: OpenSessionCommand) => boolean;
   close: (command: CloseSessionCommand) => boolean;
-  all: () => GameSession[] | undefined;
+  recentActivity: (date: string | null) => GameSessionsDto;
 };
 
 export type GameSessionServiceDeps = {

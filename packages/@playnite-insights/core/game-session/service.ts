@@ -152,9 +152,36 @@ export const makeGameSessionService = ({
     return false;
   };
 
-  const all: GameSessionService["all"] = () => {
-    return gameSessionRepository.all();
+  const recentActivity: GameSessionService["recentActivity"] = (date) => {
+    let sessions: GameSession[] | undefined = undefined;
+    const today = new Date();
+    const start = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+
+    logService.debug(
+      `Fetching game sessions between ${start.toISOString()} and ${end.toISOString()}`
+    );
+
+    if (date === "today") {
+      sessions = gameSessionRepository.findAllBy({
+        filters: {
+          date: { start: start.toISOString(), end: end.toISOString() },
+        },
+      });
+    } else {
+      sessions = gameSessionRepository.all();
+    }
+
+    return {
+      ServerDateTimeUtc: new Date().toISOString(),
+      Sessions: sessions,
+    };
   };
 
-  return { open, close, all };
+  return { open, close, recentActivity };
 };

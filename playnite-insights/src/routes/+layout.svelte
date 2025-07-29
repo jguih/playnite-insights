@@ -8,7 +8,8 @@
 		loadGames,
 		loadGenres,
 		loadPlatforms,
-		loadRecentActivity
+		loadRecentActivity,
+		serverUtcNowStore
 	} from '$lib/stores/app-data.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 
@@ -26,6 +27,8 @@
 		await loadPlatforms();
 		isLoading = false;
 	});
+
+	$inspect(serverUtcNowStore);
 </script>
 
 <svelte:head>

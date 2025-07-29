@@ -3,18 +3,22 @@ import { companySchema, type Company } from '@playnite-insights/lib/client/compa
 import { dashPageDataSchema, type DashPageData } from '@playnite-insights/lib/client/dash-page';
 import { genreSchema, type Genre } from '@playnite-insights/lib/client/genre';
 import { fullGameSchema, type FullGame } from '@playnite-insights/lib/client/playnite-game';
-import { gameSessionSchema, type GameSession } from '@playnite-insights/lib/client/game-session';
+import {
+	gameSessionsDtoSchema,
+	type GameSessionsDto
+} from '@playnite-insights/lib/client/game-session';
 import { error } from '@sveltejs/kit';
 import z from 'zod';
 
 export const gameStore: { raw?: FullGame[] } = $state({});
 export const companyStore: { raw?: Company[] } = $state({});
 export const dashStore: { pageData?: DashPageData } = $state({});
-export const recentActivityStore: { raw?: GameSession[]; isLoading: boolean } = $state({
+export const recentActivityStore: { raw?: GameSessionsDto; isLoading: boolean } = $state({
 	isLoading: false
 });
 export const genreStore: { raw?: Genre[] } = $state({});
 export const platformStore: { raw?: Platform[] } = $state({});
+export const serverUtcNowStore: { value?: number; syncPoint?: number } = $state({});
 
 export const loadCompanies = async () => {
 	const origin = window.location.origin;
@@ -62,13 +66,25 @@ export const loadRecentActivity = async () => {
 		recentActivityStore.isLoading = true;
 		const response = await fetch(url);
 		const asJson = await response.json();
-		const data = z.optional(z.array(gameSessionSchema)).parse(asJson);
+		const data = z.optional(gameSessionsDtoSchema).parse(asJson);
+		if (data) {
+			if (!isNaN(Date.parse(data.ServerDateTimeUtc))) {
+				serverUtcNowStore.value = new Date(data.ServerDateTimeUtc).getTime();
+				serverUtcNowStore.syncPoint = performance.now();
+			}
+		}
 		recentActivityStore.raw = data;
 	} catch (err) {
 		console.error(err);
 	} finally {
 		recentActivityStore.isLoading = false;
 	}
+};
+
+export const getUtcNow = (): number => {
+	if (!serverUtcNowStore.syncPoint || !serverUtcNowStore.value) return Date.now();
+	const elapsed = performance.now() - serverUtcNowStore.syncPoint;
+	return serverUtcNowStore.value + elapsed;
 };
 
 export const loadGenres = async () => {
