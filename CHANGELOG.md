@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/jguih/playnite-insights/compare/v3.2.1...v3.3.0) (2025-07-29)
+
+
+### Features
+
+* real time in progress session playtime ([4c04e90](https://github.com/jguih/playnite-insights/commit/4c04e90008e17e6083fb4cfc20e47381bf2e0066))
+
 ### [3.2.1](https://github.com/jguih/playnite-insights/compare/v3.2.0...v3.2.1) (2025-07-28)
 
 ## [3.2.0](https://github.com/jguih/playnite-insights/compare/v3.1.1...v3.2.0) (2025-07-28)
