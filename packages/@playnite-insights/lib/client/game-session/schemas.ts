@@ -20,13 +20,19 @@ export const gameSessionSchema = z.object({
   ]),
 });
 
+const ISODateSchema = z.string().refine((val) => !isNaN(Date.parse(val)), {
+  message: "Invalid ISO date string",
+});
+
 export const openGameSessionSchema = z.object({
+  ClientUtcNow: ISODateSchema,
   SessionId: z.string(),
   GameId: z.string(),
   StartTime: z.string(),
 });
 
 export const closeGameSessionSchema = z.object({
+  ClientUtcNow: ISODateSchema,
   SessionId: z.string(),
   GameId: z.string(),
   StartTime: z.string(),
@@ -36,8 +42,6 @@ export const closeGameSessionSchema = z.object({
 });
 
 export const gameSessionsDtoSchema = z.object({
-  ServerDateTimeUtc: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid ISO date string",
-  }),
+  ServerDateTimeUtc: ISODateSchema,
   Sessions: z.array(gameSessionSchema).optional(),
 });

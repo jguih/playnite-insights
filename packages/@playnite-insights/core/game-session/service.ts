@@ -56,11 +56,12 @@ export const makeGameSessionService = ({
       );
       return false;
     }
+    const startTime = new Date().toISOString();
     const newSession: GameSession = {
       SessionId: command.SessionId,
       GameId: command.GameId,
       GameName: existingGame.Name,
-      StartTime: command.StartTime,
+      StartTime: startTime,
       Status: sessionStatus.inProgress,
       EndTime: null,
       Duration: null,
@@ -98,7 +99,7 @@ export const makeGameSessionService = ({
         return false;
       }
       existing.Duration = command.Duration;
-      existing.EndTime = command.EndTime;
+      existing.EndTime = new Date().toISOString();
       existing.Status = command.Status;
       const result = gameSessionRepository.update(existing);
       if (result) {
@@ -108,14 +109,24 @@ export const makeGameSessionService = ({
     }
 
     const existingGame = playniteGameRepository.getById(command.GameId);
+    const clientUtcNow = new Date(command.ClientUtcNow).getTime();
+    const serverUtcNow = Date.now();
+    const driftMs = clientUtcNow - serverUtcNow;
+    const startTime = new Date(new Date(command.StartTime).getTime() - driftMs);
+
+    logService.info(
+      `Calculated time drift between client (Playnite Insights Exporter) and server: ${driftMs}ms`
+    );
+
     if (_isValidCloseCommand(command) && existingGame) {
+      const endTime = new Date(new Date(command.EndTime).getTime() - driftMs);
       const newSession: GameSession = {
         SessionId: command.SessionId,
         GameId: command.GameId,
         GameName: existingGame.Name,
-        StartTime: command.StartTime,
+        StartTime: startTime.toISOString(),
         Status: command.Status,
-        EndTime: command.EndTime,
+        EndTime: endTime.toISOString(),
         Duration: command.Duration,
       };
       const result = gameSessionRepository.add(newSession);
@@ -132,7 +143,7 @@ export const makeGameSessionService = ({
         SessionId: command.SessionId,
         GameId: command.GameId,
         GameName: existingGame.Name,
-        StartTime: command.StartTime,
+        StartTime: startTime.toISOString(),
         Status: command.Status,
         EndTime: null,
         Duration: null,
