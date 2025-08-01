@@ -81,6 +81,10 @@ export const loadRecentActivity = async () => {
 	}
 };
 
+/**
+ * Get server-accurate UTC Now
+ * @returns Number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC).
+ */
 export const getUtcNow = (): number => {
 	if (!serverUtcNowStore.syncPoint || !serverUtcNowStore.value) return Date.now();
 	const elapsed = performance.now() - serverUtcNowStore.syncPoint;

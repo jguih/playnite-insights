@@ -28,6 +28,9 @@
   "recent_activity_table_col_status": "Status",
   "recent_activity_table_col_game": "Game",
   "recent_activity_table_col_total_playtime": "Total playtime",
+  "recent_activity_table_col_session_start_time": "Start Time",
+  "recent_activity_table_col_session_end_time": "End Time",
+  "recent_activity_table_col_session_duration": "Duration",
   "month_january": "January",
   "month_february": "February",
   "month_march": "March",
@@ -62,5 +65,8 @@
   "no_platforms_found": "No platforms found",
   "label_filter_genres": "Genres",
   "no_genres_found": "No genres found",
-  "clear_all_filters": "Clear all filters"
+  "clear_all_filters": "Clear all filters",
+  "session_status_in_progress": "In Progress",
+  "session_status_closed": "Closed",
+  "session_status_stale": "Stale"
 }

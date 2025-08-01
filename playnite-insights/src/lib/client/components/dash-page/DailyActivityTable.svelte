@@ -1,12 +1,15 @@
 <script lang="ts">
-	import type { GameSession } from '@playnite-insights/lib/client/game-session';
+	import type { GameSession, GameSessionStatus } from '@playnite-insights/lib/client/game-session';
 	import { getUtcNow, loadRecentActivity, recentActivityStore } from '$lib/stores/app-data.svelte';
 	import Loading from '../Loading.svelte';
-	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
+	import {
+		getPlaytimeInHoursAndMinutes,
+		getPlaytimeInHoursMinutesAndSeconds
+	} from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 
-	let recentActivityData = $derived.by(() => {
+	let recentActivityList = $derived.by(() => {
 		const data: Map<
 			string,
 			{
@@ -45,33 +48,65 @@
 		}
 		return data;
 	});
+	let inProgressActivity = $derived.by(() => {
+		for (const [_, activity] of recentActivityList) {
+			if (activity.status === 'in_progress') return activity;
+		}
+	});
+	let inProgressActivityPlaytime = $derived.by(() => {
+		const now = tick;
+		if (!inProgressActivity) return;
+		const latestSession = inProgressActivity.sessions.at(0);
+		const startTime = latestSession?.StartTime;
+		if (!startTime) return;
+		const totalPlaytime = inProgressActivity.totalPlaytime;
+		const elapsed = (now - new Date(startTime).getTime()) / 1000;
+		return Math.floor(totalPlaytime + elapsed);
+	});
+	let inProgressSessionPlaytime = $derived.by(() => {
+		const now = tick;
+		if (!inProgressActivity) return;
+		const session = inProgressActivity.sessions.at(0);
+		const startTime = session?.StartTime;
+		if (!startTime) return;
+		const elapsed = (now - new Date(startTime).getTime()) / 1000;
+		return Math.floor(elapsed);
+	});
 	let interval: ReturnType<typeof setInterval> | null = $state(null);
 	let tick: number = $state(getUtcNow());
 	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
-	let inProgressPlaytime = $derived.by(() => {
-		const now = tick;
-		const data: Map<string, number> = new Map();
-
-		for (const [key, activity] of recentActivityData) {
-			const status = activity.status;
-			if (status === 'not_playing') continue;
-
-			const latestSession = activity.sessions.at(0);
-			const startTime = latestSession?.StartTime;
-			if (!startTime) continue;
-
-			const totalPlaytime = activity.totalPlaytime;
-			const elapsed = (now - new Date(startTime).getTime()) / 1000;
-
-			data.set(key, Math.floor(totalPlaytime + elapsed));
-		}
-
-		return data;
-	});
+	let expandedActivitySessions = $state(new Set<string>());
 
 	const getActivityStateFromSession = (session: GameSession): 'in_progress' | 'not_playing' => {
 		if (session.Status === 'in_progress') return 'in_progress';
 		return 'not_playing';
+	};
+
+	const toggleExpandActivitySessions = (key: string) => {
+		const newSet = new Set(expandedActivitySessions);
+		if (expandedActivitySessions.has(key)) {
+			newSet.delete(key);
+			expandedActivitySessions = newSet;
+		} else {
+			newSet.add(key);
+			expandedActivitySessions = newSet;
+		}
+	};
+
+	const getSessionDateTimeText = (dateTime?: string | null) => {
+		if (dateTime && !isNaN(Date.parse(dateTime))) return new Date(dateTime).toLocaleString();
+		return '-';
+	};
+
+	const getSessionStatusText = (status: GameSessionStatus) => {
+		switch (status) {
+			case 'in_progress':
+				return m.session_status_in_progress();
+			case 'closed':
+				return m.session_status_closed();
+			case 'stale':
+				return m.session_status_stale();
+		}
 	};
 
 	onMount(() => {
@@ -91,16 +126,9 @@
 		};
 	});
 
-	$inspect(recentActivityData);
+	$inspect(recentActivityList);
+	$inspect(expandedActivitySessions);
 </script>
-
-{#snippet th(text: string)}
-	<th class="px-3 py-2 text-center">{text}</th>
-{/snippet}
-
-{#snippet td(text: string)}
-	<td class="px-3 py-2">{text}</td>
-{/snippet}
 
 {#snippet greenDot()}
 	<span class="relative mx-auto flex h-2 w-2">
@@ -116,32 +144,7 @@
 	</span>
 {/snippet}
 
-{#snippet sessionOverview()}
-	<div class="p-2">
-		<table>
-			<thead class="text-gray-500">
-				<tr>
-					{@render th('Status')}
-					{@render th('Game')}
-					{@render th('Start Time')}
-					{@render th('End Time')}
-					{@render th('Duration')}
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="border-t border-gray-700">
-					{@render td('In Progress')}
-					{@render td('Palworld')}
-					{@render td(new Date().toLocaleString())}
-					{@render td(new Date().toLocaleString())}
-					{@render td('1h 30m')}
-				</tr>
-			</tbody>
-		</table>
-	</div>
-{/snippet}
-
-<div class="relative overflow-x-auto">
+<div class="relative block overflow-x-auto whitespace-nowrap">
 	{#if recentActivityStore.isLoading}
 		<div class="z-2 absolute inset-0 flex h-full w-full flex-col justify-center bg-gray-400/20">
 			<Loading />
@@ -150,21 +153,24 @@
 	<table class="bg-background-1 min-w-full shadow">
 		<thead class="bg-background-3">
 			<tr>
-				<th class="px-3 py-2 text-center">{m.recent_activity_table_col_status()}</th>
+				<th class="px-3 py-2 text-left">{m.recent_activity_table_col_status()}</th>
 				<th class="px-3 py-2 text-left">{m.recent_activity_table_col_game()}</th>
 				<th class="px-3 py-2 text-left">{m.recent_activity_table_col_total_playtime()}</th>
 			</tr>
 		</thead>
 		<tbody>
-			{#if recentActivityData.size === 0}
+			{#if recentActivityList.size === 0}
 				<tr class="bg-background-2 border-t border-gray-700">
 					<td colspan="3" class="px-3 py-2 text-center">
 						{m.dash_no_data_to_show()}
 					</td>
 				</tr>
 			{:else}
-				{#each recentActivityData as [key, activity], index}
-					<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''} border-t border-gray-700`}>
+				{#each recentActivityList as [key, activity], index}
+					<tr
+						class={`${index % 2 === 0 ? 'bg-background-2' : ''} border-t border-gray-700`}
+						onclick={() => toggleExpandActivitySessions(key)}
+					>
 						<td class="px-3 py-2">
 							{#if activity.status === 'in_progress'}
 								{@render greenDot()}
@@ -173,9 +179,9 @@
 							{/if}
 						</td>
 						<td class="px-3 py-2">{activity.gameName}</td>
-						{#if activity.status === 'in_progress' && inProgressPlaytime.has(key)}
+						{#if activity.status === 'in_progress' && inProgressActivityPlaytime}
 							<td class="px-3 py-2">
-								{getPlaytimeInHoursMinutesAndSeconds(inProgressPlaytime.get(key)!)}
+								{getPlaytimeInHoursMinutesAndSeconds(inProgressActivityPlaytime)}
 							</td>
 						{:else}
 							<td class="px-3 py-2">
@@ -183,12 +189,51 @@
 							</td>
 						{/if}
 					</tr>
+					{#if expandedActivitySessions.has(key)}
+						<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''}`}>
+							<td colspan="3" class="p-2">
+								<table class="opacity-80">
+									<thead>
+										<tr>
+											<th class="px-3 py-2 text-left">{m.recent_activity_table_col_status()}</th>
+											<th class="px-3 py-2 text-left">
+												{m.recent_activity_table_col_session_start_time()}
+											</th>
+											<th class="px-3 py-2 text-left">
+												{m.recent_activity_table_col_session_end_time()}
+											</th>
+											<th class="px-3 py-2 text-left">
+												{m.recent_activity_table_col_session_duration()}
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each activity.sessions as session}
+											<tr>
+												{#if session.Status === 'in_progress'}
+													<td class="px-3 py-2 text-green-500">
+														{getSessionStatusText(session.Status)}
+													</td>
+												{:else}
+													<td class="px-3 py-2">{getSessionStatusText(session.Status)}</td>
+												{/if}
+												<td class="px-3 py-2">{getSessionDateTimeText(session.StartTime)}</td>
+												<td class="px-3 py-2">{getSessionDateTimeText(session.EndTime)}</td>
+												<td class="px-3 py-2">
+													{#if session.Status === 'in_progress' && inProgressSessionPlaytime}
+														{getPlaytimeInHoursMinutesAndSeconds(inProgressSessionPlaytime)}
+													{:else}
+														{getPlaytimeInHoursMinutesAndSeconds(session.Duration ?? 0)}
+													{/if}
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					{/if}
 				{/each}
-				<!-- <tr>
-				<td colspan="3">
-					{@render sessionOverview()}
-				</td>
-			</tr> -->
 			{/if}
 		</tbody>
 	</table>

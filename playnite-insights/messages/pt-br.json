@@ -28,6 +28,9 @@
   "recent_activity_table_col_status": "Status",
   "recent_activity_table_col_game": "Jogo",
   "recent_activity_table_col_total_playtime": "Tempo jogado",
+  "recent_activity_table_col_session_start_time": "Início",
+  "recent_activity_table_col_session_end_time": "Fim",
+  "recent_activity_table_col_session_duration": "Duração",
   "month_january": "Janeiro",
   "month_february": "Fevereiro",
   "month_march": "Março",
@@ -62,5 +65,8 @@
   "no_platforms_found": "Nenhuma plataforma encontrada",
   "label_filter_genres": "Gêneros",
   "no_genres_found": "Nenhum gênero encontrado",
-  "clear_all_filters": "Limpar filtros"
+  "clear_all_filters": "Limpar filtros",
+  "session_status_in_progress": "Em Progresso",
+  "session_status_closed": "Terminada",
+  "session_status_stale": "Abandonada"
 }
