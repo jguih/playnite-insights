@@ -85,16 +85,19 @@ export const makePlayniteLibrarySyncRepository = (
         FROM playnite_library_sync
         WHERE Timestamp >= datetime('now', '-6 months')
         GROUP BY yearMonth
-        ORDER BY yearMonth;
+        ORDER BY yearMonth DESC;
       `;
     try {
       const stmt = getDb().prepare(query);
       const result = stmt.all();
-      const data: number[] = [];
+      const data: number[] = new Array(6).fill(0);
+      let i = 5;
       for (const entry of result) {
         const value = entry.totalGamesOwned as number;
-        data.push(value);
+        data[i] = value;
+        i--;
       }
+
       logService.debug(
         `Successfully queried total games owned over last 6 months: ${JSON.stringify(
           data

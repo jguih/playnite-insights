@@ -7,7 +7,7 @@ services:
       target: dev
     container_name: app-dev
     environment:
-      TZ: 'America/Sao_Paulo'
+      TZ: "America/Sao_Paulo"
       LOG_LEVEL: 0 # debug
       ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
       # Careful! When true it will delete current database and insert test data
@@ -77,7 +77,7 @@ services:
     environment:
       ORIGIN: ${ORIGIN_STAGE} # make sure there's no trailing slash
       TEST_DATA: true
-      TZ: 'America/Sao_Paulo'
+      TZ: "America/Sao_Paulo"
 
   app-playwright:
     build:
@@ -109,7 +109,7 @@ services:
     environment:
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
       APP_NAME: "Playnite Insights"
-      TZ: 'America/Sao_Paulo'
+      TZ: "America/Sao_Paulo"
     volumes:
       - playnite-insights-prod-data:/app/data
     networks:
