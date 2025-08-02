@@ -20,7 +20,7 @@
   "dash_total_playtime": "Total jogado",
   "dash_playtime_summary_out_of": "de",
   "dash_playtime_summary_games_played": "jogos jogados",
-  "dash_games_owned_over_last_n_months": "Jogos adquiridos nos últimos {value} meses",
+  "dash_games_owned_over_last_n_months": "Jogos na biblioteca nos últimos {value} meses",
   "dash_no_data_to_show": "Sem dados para mostrar",
   "dash_chart_label_games_owned": "Jogos adquiridos",
   "dash_last_time_played": "Jogado pela última vez em {value}",
