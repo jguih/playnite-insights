@@ -5,20 +5,21 @@ export const makeDashPageService = ({
   logService,
   playniteLibrarySyncRepository,
   playniteGameRepository,
+  gameSessionRepository,
   getLastSixMonthsAbv,
 }: DashPageServiceDeps): DashPageService => {
   const getPageData = (): DashPageData => {
-    const data = playniteGameRepository.getGamesForDashPage();
-    const total = data.length;
+    const games = playniteGameRepository.getGamesForDashPage();
+    const total = games.length;
     const isInstalled =
-      data.length > 0 ? data.filter((g) => Boolean(g.IsInstalled)).length : 0;
+      games.length > 0 ? games.filter((g) => Boolean(g.IsInstalled)).length : 0;
     const notInstalled = total - isInstalled;
     const totalPlaytime =
-      data.length > 0
-        ? data.map((g) => g.Playtime).reduce((prev, current) => prev + current)
+      games.length > 0
+        ? games.map((g) => g.Playtime).reduce((prev, current) => prev + current)
         : 0;
     const notPlayed =
-      data.length > 0 ? data.filter((g) => g.Playtime === 0).length : 0;
+      games.length > 0 ? games.filter((g) => g.Playtime === 0).length : 0;
     const played = total - notPlayed;
     const top10MostPlayedGames =
       playniteGameRepository.getTopMostPlayedGamesForDashPage(10);
@@ -43,9 +44,21 @@ export const makeDashPageService = ({
         },
       },
     };
-    logService.success(
-      `Fetched all the data for dashboard page without issues`
-    );
+
+    const now = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const sessions =
+      gameSessionRepository.findAllBy({
+        filters: {
+          date: {
+            start: sevenDaysAgo.toISOString(),
+            end: now.toISOString(),
+          },
+        },
+      }) ?? [];
+
     return {
       total,
       isInstalled,
@@ -55,6 +68,7 @@ export const makeDashPageService = ({
       played,
       charts,
       topMostPlayedGames: top10MostPlayedGames,
+      gameSessionsFromLast7Days: sessions,
     };
   };
 

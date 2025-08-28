@@ -1,5 +1,6 @@
 import z from "zod";
 import { playniteGameSchema } from "../playnite-game/schemas";
+import { gameSessionSchema } from "../game-session/schemas";
 
 export const dashPageDataSchema = z.object({
   total: z.number(),
@@ -27,6 +28,7 @@ export const dashPageDataSchema = z.object({
       LastActivity: playniteGameSchema.shape.LastActivity,
     })
   ),
+  gameSessionsFromLast7Days: z.array(gameSessionSchema),
 });
 
 export const dashPageGameSchema = z.object({

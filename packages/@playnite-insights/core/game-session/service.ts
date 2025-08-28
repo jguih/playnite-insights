@@ -1,6 +1,7 @@
 import {
   type CloseSessionCommand,
   type GameSession,
+  GameSessionFilters,
   sessionStatus,
 } from "@playnite-insights/lib";
 import { GameSessionService, GameSessionServiceDeps } from "./service.types";
@@ -179,11 +180,16 @@ export const makeGameSessionService = ({
     );
 
     if (date === "today") {
-      sessions = gameSessionRepository.findAllBy({
-        filters: {
-          date: { start: start.toISOString(), end: end.toISOString() },
-        },
-      });
+      const filters: GameSessionFilters = {
+        startTime: [
+          {
+            op: "overlaps",
+            start: start.toISOString(),
+            end: end.toISOString(),
+          },
+        ],
+      };
+      sessions = gameSessionRepository.findAllBy({ filters });
     } else {
       sessions = gameSessionRepository.all();
     }

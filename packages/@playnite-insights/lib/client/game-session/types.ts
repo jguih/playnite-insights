@@ -14,9 +14,13 @@ export type GameSessionsDto = z.infer<typeof gameSessionsDtoSchema>;
 export type OpenSessionCommand = z.infer<typeof openGameSessionSchema>;
 export type CloseSessionCommand = z.infer<typeof closeGameSessionSchema>;
 
+export type DateFilter =
+  | { op: "between"; start: string; end: string }
+  | { op: "gte"; value: string }
+  | { op: "lte"; value: string }
+  | { op: "eq"; value: string }
+  | { op: "overlaps"; start: string; end: string };
+
 export type GameSessionFilters = {
-  date?: {
-    start: string;
-    end: string;
-  };
+  startTime?: DateFilter[];
 };
