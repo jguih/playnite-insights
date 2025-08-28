@@ -2,10 +2,7 @@
 	import type { GameSession, GameSessionStatus } from '@playnite-insights/lib/client/game-session';
 	import { getUtcNow, loadRecentActivity, recentActivityStore } from '$lib/stores/app-data.svelte';
 	import Loading from '../Loading.svelte';
-	import {
-		getPlaytimeInHoursAndMinutes,
-		getPlaytimeInHoursMinutesAndSeconds
-	} from '$lib/client/utils/playnite-game';
+	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 
@@ -144,7 +141,7 @@
 	</span>
 {/snippet}
 
-<div class="relative block overflow-x-auto whitespace-nowrap">
+<div class="relative block overflow-x-auto">
 	{#if recentActivityStore.isLoading}
 		<div class="z-2 absolute inset-0 flex h-full w-full flex-col justify-center bg-gray-400/20">
 			<Loading />
@@ -168,7 +165,7 @@
 			{:else}
 				{#each recentActivityList as [key, activity], index}
 					<tr
-						class={`${index % 2 === 0 ? 'bg-background-2' : ''} border-t border-gray-700`}
+						class={`${index % 2 === 0 ? 'bg-background-2' : ''} w-full border-t border-gray-700`}
 						onclick={() => toggleExpandActivitySessions(key)}
 					>
 						<td class="px-3 py-2">
@@ -190,7 +187,7 @@
 						{/if}
 					</tr>
 					{#if expandedActivitySessions.has(key)}
-						<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''}`}>
+						<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''} whitespace-nowrap`}>
 							<td colspan="3" class="p-2">
 								<table class="opacity-80">
 									<thead>
