@@ -15,7 +15,11 @@ RUN pnpm run -r build
 RUN pnpm deploy --filter=playnite-insights /prod/playnite-insights
 RUN pnpm deploy --filter=@playnite-insights/infra /prod/infra
 
-FROM base AS dev
+FROM node:24.3 AS dev
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
 WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='development'
@@ -29,9 +33,6 @@ COPY ./packages/@playnite-insights/infra/migrations ./infra/migrations
 EXPOSE 3000
 
 CMD [ "sleep", "infinity" ]
-# USER playnite-insights
-
-# ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "dev" ]
 
 FROM base AS vitest
 WORKDIR /app
