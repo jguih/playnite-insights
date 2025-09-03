@@ -6,7 +6,7 @@
 
 <a
 	{...props}
-	class={`hover:border-primary-500 hover:text-primary-500 focus:border-primary-500 active:border-primary-500 cursor-pointer border-2 border-solid border-transparent p-1 outline-0 ${props.class ?? ''}`}
+	class={`hover:text-primary-500 active:text-primary-700 cursor-pointer p-1 ${props.class ?? ''}`}
 >
 	{#if props.children}
 		{@render props.children()}

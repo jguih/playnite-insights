@@ -1,18 +1,23 @@
 <script lang="ts">
 	import { Settings } from '@lucide/svelte';
-	import SelectedAnchor from '../anchors/SelectedAnchor.svelte';
-	import BaseAnchor from '../anchors/BaseAnchor.svelte';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
+	import { bottomNavIconSize } from './common';
+	import BottomNavAnchor from '../anchors/BottomNavAnchor.svelte';
+	import Text from './Text.svelte';
+	import { m } from '$lib/paraglide/messages';
 
 	let { selected, ...props }: HTMLAnchorAttributes & { selected?: boolean } = $props();
+	const href="/settings"
 </script>
 
 {#if selected}
-	<SelectedAnchor href="/settings" {...props}>
-		<Settings />
-	</SelectedAnchor>
+	<BottomNavAnchor selected href={href} {...props}>
+		<Settings size={bottomNavIconSize}/>
+		<Text>{m.bottom_nav_label_settings()}</Text>
+	</BottomNavAnchor>
 {:else}
-	<BaseAnchor href="/settings" {...props}>
-		<Settings />
-	</BaseAnchor>
+	<BottomNavAnchor href={href} {...props}>
+		<Settings size={bottomNavIconSize}/>
+		<Text>{m.bottom_nav_label_settings()}</Text>
+	</BottomNavAnchor>
 {/if}

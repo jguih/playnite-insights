@@ -68,5 +68,8 @@
   "clear_all_filters": "Limpar filtros",
   "session_status_in_progress": "Em Progresso",
   "session_status_closed": "Terminada",
-  "session_status_stale": "Abandonada"
+  "session_status_stale": "Abandonada",
+  "bottom_nav_label_dash": "Dashboard",
+  "bottom_nav_label_home": "Início",
+  "bottom_nav_label_settings": "Configurações"
 }

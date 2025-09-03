@@ -68,5 +68,8 @@
   "clear_all_filters": "Clear all filters",
   "session_status_in_progress": "In Progress",
   "session_status_closed": "Closed",
-  "session_status_stale": "Stale"
+  "session_status_stale": "Stale",
+  "bottom_nav_label_dash": "Dashboard",
+  "bottom_nav_label_home": "Home",
+  "bottom_nav_label_settings": "Settings"
 }
