@@ -52,10 +52,13 @@ export const makeDashPageService = ({
     const sessions =
       gameSessionRepository.findAllBy({
         filters: {
-          date: {
-            start: sevenDaysAgo.toISOString(),
-            end: now.toISOString(),
-          },
+          startTime: [
+            {
+              op: "between",
+              start: sevenDaysAgo.toISOString(),
+              end: now.toISOString(),
+            },
+          ],
         },
       }) ?? [];
 

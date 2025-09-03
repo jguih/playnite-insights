@@ -10,12 +10,6 @@ WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm test:unit
 
-FROM base AS dev-deps
-COPY . /usr/src/app
-WORKDIR /usr/src/app
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
-RUN pnpm test:unit
-
 FROM deps AS build
 RUN pnpm run -r build
 RUN pnpm deploy --filter=playnite-insights /prod/playnite-insights
@@ -28,18 +22,16 @@ ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights (Dev)'
 
-RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p ./data/files ./data/tmp
-RUN chown -R playnite-insights:playnite-insights ./data
-COPY --from=dev-deps --chown=playnite-insights:playnite-insights /usr/src/app .
-COPY --from=dev-deps --chown=playnite-insights:playnite-insights /usr/src/app/playnite-insights/static/placeholder ./data/files/placeholder
-COPY --from=dev-deps --chown=playnite-insights:playnite-insights /usr/src/app/packages/@playnite-insights/infra/migrations ./infra/migrations
+COPY ./playnite-insights/static/placeholder ./data/files/placeholder
+COPY ./packages/@playnite-insights/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 
-USER playnite-insights
+CMD [ "sleep", "infinity" ]
+# USER playnite-insights
 
-ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "dev" ]
+# ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "dev" ]
 
 FROM base AS vitest
 WORKDIR /app
