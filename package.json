@@ -11,7 +11,6 @@
   ],
   "scripts": {
     "dev": "pnpm --filter playnite-insights run dev",
-    "dev:build": "COMPOSE_BAKE=true docker compose build app-dev",
     "prod": "docker compose up -d --build --force-recreate app-prod",
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",

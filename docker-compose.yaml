@@ -1,65 +1,6 @@
 name: playnite-insights-app
 
 services:
-  # app-dev:
-  #   build:
-  #     context: .
-  #     target: dev
-  #   container_name: app-dev
-  #   environment:
-  #     TZ: "America/Sao_Paulo"
-  #     LOG_LEVEL: 0 # debug
-  #     ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
-  #     # Careful! When true it will delete current database and insert test data
-  #     # TEST_DATA: true
-  #   develop:
-  #     watch:
-  #       - path: ./playnite-insights
-  #         action: sync
-  #         target: /app/playnite-insights
-  #         ignore:
-  #           - node_modules/
-  #           - build/
-  #       - path: ./packages/@playnite-insights/core
-  #         action: sync
-  #         target: /app/packages/@playnite-insights/core
-  #         ignore:
-  #           - node_modules/
-  #           - test_results/
-  #       - path: ./packages/@playnite-insights/lib
-  #         action: sync
-  #         target: /app/packages/@playnite-insights/lib
-  #         ignore:
-  #           - node_modules/
-  #           - test_results/
-  #       - path: ./packages/@playnite-insights/infra
-  #         action: sync
-  #         target: /app/packages/@playnite-insights/infra
-  #         ignore:
-  #           - node_modules/
-  #           - test_results/
-  #       - path: ./
-  #         action: rebuild
-  #         include:
-  #           - ./package.json
-  #           - ./playnite-insights/package.json
-  #           - ./packages/@playnite-insights/core/package.json
-  #           - ./packages/@playnite-insights/lib/package.json
-  #           - ./packages/@playnite-insights/infra/package.json
-  #           - ./packages/@playnite-insights/infra/migrations
-  #           - ./Dockerfile
-  #       - path: ./
-  #         action: restart
-  #         include:
-  #           - ./docker-compose.yaml
-  #           - ./playnite-insights/vite.config.ts
-  #           - ./playnite-insights/svelte.config.js
-  #           - ./.env
-  #   volumes:
-  #     - playnite-insights-dev-data:/app/data
-  #   networks:
-  #     - services-ipv6
-
   app-vitest:
     build:
       context: .

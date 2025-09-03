@@ -26,11 +26,16 @@
 
 ## 🛠️ In Progress
 
+- Bottom nav improvements
+
 ## 📌 To Do
 
 - Display game trailer in game page
 - Display related owned games in game page
 - Settings page (change language)
+- Active session page:
+    - Display current game being played
+    - Allow user to manage notes linked to the current session
 
 ## 💡 Ideas
 
