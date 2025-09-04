@@ -37,7 +37,7 @@
 
 <main
 	{...props}
-	class={`absolute ${bottomNav ? 'bottom-[4.4rem]' : 'bottom-0'} left-0 right-0 top-[3.4rem] overflow-y-auto overflow-x-hidden p-4 pb-12 ${
+	class={`absolute ${bottomNav ? 'bottom-[var(--bottom-nav-height)]' : 'bottom-0'} left-0 right-0 top-[var(--header-height)] overflow-y-auto overflow-x-hidden p-4 ${
 		props?.class ?? ''
 	}`}
 	bind:this={main}

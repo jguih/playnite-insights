@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight, Gamepad } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -30,6 +30,8 @@
 	} from '@playnite-insights/lib/client/playnite-game';
 	import { companyStore, gameStore, genreStore, platformStore } from '$lib/stores/app-data.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
+	import FloatingContainer from '$lib/client/components/FloatingContainer.svelte';
+	import BaseAnchor from '$lib/client/components/anchors/BaseAnchor.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -260,6 +262,23 @@
 				<ChevronRight />
 			</LightButton>
 		</nav>
+		<FloatingContainer class="left-0 w-full p-2">
+			<BaseAnchor
+				class="bg-background-1 flex w-full items-center justify-start gap-4 p-2 shadow-lg"
+			>
+				<img
+					src={vm.getImageURL('placeholder\\cover.png')}
+					alt={`placeholder image`}
+					loading="lazy"
+					class="h-13 object-cover"
+				/>
+				<div class="leading-5">
+					<p class="text-md">Sessão ativa</p>
+					<p class="text-md font-semibold">Grim Dawn</p>
+				</div>
+				<ChevronRight class="ml-auto size-6" />
+			</BaseAnchor>
+		</FloatingContainer>
 	</Main>
 
 	<BottomNav>

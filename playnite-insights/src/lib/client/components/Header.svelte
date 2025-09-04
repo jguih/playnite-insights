@@ -6,7 +6,7 @@
 </script>
 
 <div
-	class="bg-background-1 z-1000 fixed left-0 right-0 top-0 flex h-[3.4rem] flex-row items-center gap-2 px-4 py-2 shadow-lg"
+	class="bg-background-1 z-1000 fixed left-0 right-0 top-0 flex h-[var(--header-height)] flex-row items-center gap-2 px-4 py-2 shadow-lg"
 >
 	<div class="flex flex-row items-center gap-2">
 		{#if action}
