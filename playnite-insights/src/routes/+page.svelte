@@ -287,7 +287,7 @@
 						class="h-13 max-w-13 truncate object-cover"
 					/>
 					<div class="leading-5">
-						<p class="text-md">Sessão ativa</p>
+						<p class="text-md">{m.label_ongoing_session()}</p>
 						<p class="text-md font-semibold">{inProgressGame.Name}</p>
 					</div>
 					<ChevronRight class="ml-auto size-6" />

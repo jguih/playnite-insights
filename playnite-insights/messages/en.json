@@ -71,5 +71,6 @@
   "session_status_stale": "Stale",
   "bottom_nav_label_dash": "Dashboard",
   "bottom_nav_label_home": "Home",
-  "bottom_nav_label_settings": "Settings"
+  "bottom_nav_label_settings": "Settings",
+  "label_ongoing_session": "Ongoing session"
 }
