@@ -1,57 +1,14 @@
 <script lang="ts">
-	import type { GameSession, GameSessionStatus } from '@playnite-insights/lib/client/game-session';
-	import { getUtcNow, loadRecentActivity, recentActivityStore } from '$lib/stores/app-data.svelte';
+	import type { GameSessionStatus } from '@playnite-insights/lib/client/game-session';
+	import { getUtcNow, recentActivitySignal } from '$lib/stores/AppData.svelte';
 	import Loading from '../Loading.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 
-	let recentActivityList = $derived.by(() => {
-		const data: Map<
-			string,
-			{
-				status: 'in_progress' | 'not_playing';
-				gameName: string;
-				totalPlaytime: number;
-				sessions: GameSession[];
-			}
-		> = new Map();
-
-		const sessions = recentActivityStore.raw?.Sessions ?? [];
-
-		for (const session of sessions) {
-			const key = session.GameId ? session.GameId : session.GameName;
-			if (key === null) continue;
-
-			const currentStatus = getActivityStateFromSession(session);
-			const duration = session.Duration ?? 0;
-
-			if (!data.has(key)) {
-				data.set(key, {
-					gameName: session.GameName ?? 'Unknown',
-					status: currentStatus,
-					totalPlaytime: duration,
-					sessions: [session]
-				});
-				continue;
-			}
-
-			const value = data.get(key)!;
-			value.totalPlaytime += duration;
-			value.sessions.push(session);
-			if (value.status !== 'in_progress') {
-				value.status = currentStatus;
-			}
-		}
-		return data;
-	});
-	let inProgressActivity = $derived.by(() => {
-		for (const [_, activity] of recentActivityList) {
-			if (activity.status === 'in_progress') return activity;
-		}
-	});
 	let inProgressActivityPlaytime = $derived.by(() => {
 		const now = tick;
+		const inProgressActivity = recentActivitySignal.inProgressActivity;
 		if (!inProgressActivity) return;
 		const latestSession = inProgressActivity.sessions.at(0);
 		const startTime = latestSession?.StartTime;
@@ -62,6 +19,7 @@
 	});
 	let inProgressSessionPlaytime = $derived.by(() => {
 		const now = tick;
+		const inProgressActivity = recentActivitySignal.inProgressActivity;
 		if (!inProgressActivity) return;
 		const session = inProgressActivity.sessions.at(0);
 		const startTime = session?.StartTime;
@@ -69,15 +27,9 @@
 		const elapsed = (now - new Date(startTime).getTime()) / 1000;
 		return Math.floor(elapsed);
 	});
-	let interval: ReturnType<typeof setInterval> | null = $state(null);
 	let tick: number = $state(getUtcNow());
 	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let expandedActivitySessions = $state(new Set<string>());
-
-	const getActivityStateFromSession = (session: GameSession): 'in_progress' | 'not_playing' => {
-		if (session.Status === 'in_progress') return 'in_progress';
-		return 'not_playing';
-	};
 
 	const toggleExpandActivitySessions = (key: string) => {
 		const newSet = new Set(expandedActivitySessions);
@@ -107,24 +59,11 @@
 	};
 
 	onMount(() => {
-		window.addEventListener('focus', async () => {
-			if (interval) clearInterval(interval);
-			await loadRecentActivity();
-			interval = setInterval(loadRecentActivity, 30_000);
-		});
-		interval = setInterval(loadRecentActivity, 30_000);
-
 		tickInterval = setInterval(() => (tick = getUtcNow()), 1000);
-
 		return () => {
-			window.removeEventListener('focus', loadRecentActivity);
-			if (interval) clearInterval(interval);
 			if (tickInterval) clearInterval(tickInterval);
 		};
 	});
-
-	$inspect(recentActivityList);
-	$inspect(expandedActivitySessions);
 </script>
 
 {#snippet greenDot()}
@@ -142,7 +81,7 @@
 {/snippet}
 
 <div class="relative block overflow-x-auto">
-	{#if recentActivityStore.isLoading}
+	{#if recentActivitySignal.isLoading}
 		<div class="z-2 absolute inset-0 flex h-full w-full flex-col justify-center bg-gray-400/20">
 			<Loading />
 		</div>
@@ -156,14 +95,14 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#if recentActivityList.size === 0}
+			{#if !recentActivitySignal.recentActivityMap || recentActivitySignal.recentActivityMap.size === 0}
 				<tr class="bg-background-2 border-t border-gray-700">
 					<td colspan="3" class="px-3 py-2 text-center">
 						{m.dash_no_data_to_show()}
 					</td>
 				</tr>
 			{:else}
-				{#each recentActivityList as [key, activity], index}
+				{#each recentActivitySignal.recentActivityMap as [key, activity], index}
 					<tr
 						class={`${index % 2 === 0 ? 'bg-background-2' : ''} w-full border-t border-gray-700`}
 						onclick={() => toggleExpandActivitySessions(key)}

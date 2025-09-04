@@ -6,14 +6,14 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import { makeGamePageViewModel } from '$lib/client/viewmodel/game.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { companyStore, gameStore } from '$lib/stores/app-data.svelte.js';
+	import { companyStore, gamesSignal } from '$lib/stores/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
 
 	let { data } = $props();
 	const vm = $derived.by(() => {
-		const games = gameStore.raw ? [...gameStore.raw] : undefined;
+		const gameList = gamesSignal.raw ? [...gamesSignal.raw] : undefined;
 		const companies = companyStore.raw ? [...companyStore.raw] : undefined;
-		const game = games?.find((g) => g.Id === data.gameId);
+		const game = gameList?.find((g) => g.Id === data.gameId);
 		return makeGamePageViewModel(game, companies);
 	});
 	let game = $derived(vm.getGame());

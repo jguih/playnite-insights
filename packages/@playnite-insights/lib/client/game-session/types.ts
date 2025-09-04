@@ -13,6 +13,13 @@ export type GameSessionStatus =
 export type GameSessionsDto = z.infer<typeof gameSessionsDtoSchema>;
 export type OpenSessionCommand = z.infer<typeof openGameSessionSchema>;
 export type CloseSessionCommand = z.infer<typeof closeGameSessionSchema>;
+export type GameActivity = {
+  status: "in_progress" | "not_playing";
+  gameName: string;
+  gameId: string;
+  totalPlaytime: number;
+  sessions: GameSession[];
+};
 
 export type DateFilter =
   | { op: "between"; start: string; end: string }

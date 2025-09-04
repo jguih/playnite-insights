@@ -28,16 +28,22 @@
 		gameSortOrder,
 		type PlayniteGame
 	} from '@playnite-insights/lib/client/playnite-game';
-	import { companyStore, gameStore, genreStore, platformStore } from '$lib/stores/app-data.svelte';
+	import {
+		companyStore,
+		gamesSignal,
+		genreStore,
+		platformStore,
+		recentActivitySignal
+	} from '$lib/stores/AppData.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
-	import FloatingContainer from '$lib/client/components/FloatingContainer.svelte';
 	import BaseAnchor from '$lib/client/components/anchors/BaseAnchor.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
-		const games = gameStore.raw ? [...gameStore.raw] : undefined;
+		const games = gamesSignal;
+		const gameList = games.raw ? [...games.raw] : undefined;
 		const params = { ...data };
-		return makeHomePageViewModel(games, params);
+		return makeHomePageViewModel(gameList, params);
 	});
 	let gamesFiltered = $derived(vm.getGameList());
 	let pageSizeParam = $derived(data.pageSize);
@@ -52,7 +58,14 @@
 	let platformsParam = $derived(data.platforms);
 	let genresParam = $derived(data.genres);
 	let main: HTMLElement | undefined = $state();
-	$inspect(data);
+	let inProgressGame = $derived.by(() => {
+		const activity = recentActivitySignal.inProgressActivity;
+		const games = gamesSignal.raw ?? [];
+		if (!activity) return null;
+		return games.find((g) => g.Id === activity.gameId) ?? null;
+	});
+	$inspect(recentActivitySignal);
+	$inspect(inProgressGame);
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
@@ -262,23 +275,25 @@
 				<ChevronRight />
 			</LightButton>
 		</nav>
-		<FloatingContainer class="left-0 w-full p-2">
-			<BaseAnchor
-				class="bg-background-1 flex w-full items-center justify-start gap-4 p-2 shadow-lg"
-			>
-				<img
-					src={vm.getImageURL('placeholder\\cover.png')}
-					alt={`placeholder image`}
-					loading="lazy"
-					class="h-13 object-cover"
-				/>
-				<div class="leading-5">
-					<p class="text-md">Sessão ativa</p>
-					<p class="text-md font-semibold">Grim Dawn</p>
-				</div>
-				<ChevronRight class="ml-auto size-6" />
-			</BaseAnchor>
-		</FloatingContainer>
+		{#if inProgressGame}
+			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
+				<BaseAnchor
+					class="bg-background-1 flex w-full items-center justify-start gap-4 p-2 shadow-lg"
+				>
+					<img
+						src={vm.getImageURL(inProgressGame.CoverImage)}
+						alt={`${inProgressGame.Name} cover image`}
+						loading="lazy"
+						class="h-13 max-w-13 truncate object-cover"
+					/>
+					<div class="leading-5">
+						<p class="text-md">Sessão ativa</p>
+						<p class="text-md font-semibold">{inProgressGame.Name}</p>
+					</div>
+					<ChevronRight class="ml-auto size-6" />
+				</BaseAnchor>
+			</div>
+		{/if}
 	</Main>
 
 	<BottomNav>
