@@ -279,6 +279,7 @@
 			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
 				<BaseAnchor
 					class="bg-background-1 flex w-full items-center justify-start gap-4 p-2 shadow-lg"
+					href={`/game/${inProgressGame.Id}`}
 				>
 					<img
 						src={vm.getImageURL(inProgressGame.CoverImage)}
