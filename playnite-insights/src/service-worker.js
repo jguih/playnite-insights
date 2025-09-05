@@ -143,27 +143,27 @@ self.addEventListener('fetch', (event) => {
 	const url = new URL(event.request.url);
 
 	if (url.pathname.startsWith('/api/game')) {
-		event.respondWith(networkFirst(event.request, GAMES_CACHE));
+		event.respondWith(staleWhileRevalidate(event.request, GAMES_CACHE));
 		return;
 	}
 
   if (url.pathname.startsWith('/api/dash')) {
-		event.respondWith(networkFirst(event.request, DASH_CACHE));
+		event.respondWith(staleWhileRevalidate(event.request, DASH_CACHE));
 		return;
 	}
 
   if (url.pathname.startsWith('/api/company')) {
-		event.respondWith(networkFirst(event.request, COMPANY_CACHE));
+		event.respondWith(staleWhileRevalidate(event.request, COMPANY_CACHE));
 		return;
 	}
 
   if (url.pathname.startsWith('/api/genre')) {
-		event.respondWith(networkFirst(event.request, GENRE_CACHE));
+		event.respondWith(staleWhileRevalidate(event.request, GENRE_CACHE));
 		return;
 	}
 
   if (url.pathname.startsWith('/api/platform')) {
-		event.respondWith(networkFirst(event.request, PLATFORM_CACHE));
+		event.respondWith(staleWhileRevalidate(event.request, PLATFORM_CACHE));
 		return;
 	}
 
@@ -171,12 +171,12 @@ self.addEventListener('fetch', (event) => {
     const date = url.searchParams.get('date');
     
     if (date === 'today') {
-      event.respondWith(networkFirst(event.request, RECENT_SESSION_CACHE));
+      event.respondWith(staleWhileRevalidate(event.request, RECENT_SESSION_CACHE));
       return;
     }
     
     if (!date) {
-      event.respondWith(networkFirst(event.request, ALL_SESSION_CACHE));
+      event.respondWith(staleWhileRevalidate(event.request, ALL_SESSION_CACHE));
       return;
     }
   }
