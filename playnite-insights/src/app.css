@@ -2,27 +2,88 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  --color-primary-50: hsl(198, 100%, 97%);
-  --color-primary-100: hsl(198, 100%, 94%);
-  --color-primary-200: hsl(198, 100%, 87%);
-  --color-primary-300: hsl(198, 100%, 77%);
-  --color-primary-400: hsl(198, 100%, 72%);
-  --color-primary-500: hsl(198, 100%, 67%);
-  --color-primary-600: hsl(198, 100%, 50%);
-  --color-primary-700: hsl(198, 100%, 42%);
-  --color-primary-800: hsl(198, 100%, 34%);
-  --color-primary-900: hsl(198, 100%, 26%);
-  --color-primary-950: hsl(198, 100%, 18%);
+  /* Colors Pallet */
+  --pl-color-primary-50: hsl(198, 100%, 97%);
+  --pl-color-primary-100: hsl(198, 100%, 94%);
+  --pl-color-primary-200: hsl(198, 100%, 87%);
+  --pl-color-primary-300: hsl(198, 100%, 77%);
+  --pl-color-primary-400: hsl(198, 100%, 72%);
+  --pl-color-primary-500: hsl(198, 100%, 67%);
+  --pl-color-primary-600: hsl(198, 100%, 50%);
+  --pl-color-primary-700: hsl(198, 100%, 42%);
+  --pl-color-primary-800: hsl(198, 100%, 34%);
+  --pl-color-primary-900: hsl(198, 100%, 26%);
+  --pl-color-primary-950: hsl(198, 100%, 18%);
 
-  --color-background: hsl(228, 48%, 10%);
-  --color-background-1: hsl(228, 48%, 15%);
-  --color-background-2: hsl(228, 48%, 18%);
-  --color-background-3: hsl(228, 48%, 22%);
+  --pl-color-background: hsl(228, 48%, 10%);
+  --pl-color-background-1: hsl(228, 48%, 15%);
+  --pl-color-background-2: hsl(228, 48%, 18%);
+  --pl-color-background-3: hsl(228, 48%, 22%);
+
+  --pl-color-foreground: white;
 
   --bottom-nav-height: 4.4rem;
   --header-height: 3.4rem;
+
+  /* BEGIN: Dark Theme */
+  --color-background: var(--pl-color-background);
+  --color-background-1: var(--pl-color-background-1);
+  --color-background-2: var(--pl-color-background-2);
+  --color-background-3: var(--pl-color-background-3);
+  --color-foreground: var(--color-neutral-50);
+  --shadow: var(--shadow-lg);
+  /* Primary variant */
+  --color-primary: var(--pl-color-primary-600);
+  --color-on-primary: var(--color-foreground);
+  --color-primary-hover-bg: var(--pl-color-primary-700);
+  --color-primary-hover-border: var(--pl-color-primary-700);
+  --color-primary-active-bg: var(--pl-color-primary-800);
+  --color-primary-active-border: var(--pl-color-primary-700);
+  --color-primary-on-active-bg: var(--color-neutral-200);
+  --color-primary-disabled-bg: var(--pl-color-primary-800);
+  --color-primary-on-disabled-bg: var(--pl-color-primary-400);
+  /* Primary light variant */
+  --color-primary-light-bg: transparent;
+  --color-primary-light-fg: var(--color-neutral-50);
+  --color-primary-light-hover-bg: rgba(255,255,255,0.02);
+  --color-primary-light-hover-fg: var(--pl-color-primary-500);
+  --color-primary-light-active-bg: rgba(255,255,255,0.02);
+  --color-primary-light-active-fg: var(--pl-color-primary-700);
+  --color-primary-light-disabled-bg: var(--color-neutral-800);
+  --color-primary-light-disabled-fg: var(--color-neutral-400);
+  /* END: Dark Theme */
+}
+
+[data-theme="dark"] {
+  /* BEGIN: Dark Theme */
+  --color-background: var(--pl-color-background);
+  --color-background-1: var(--pl-color-background-1);
+  --color-background-2: var(--pl-color-background-2);
+  --color-background-3: var(--pl-color-background-3);
+  --color-foreground: var(--color-neutral-50);
+  --shadow: var(--shadow-lg);
+  /* Primary variant */
+  --color-primary: var(--pl-color-primary-600);
+  --color-on-primary: var(--color-foreground);
+  --color-primary-hover-bg: var(--pl-color-primary-700);
+  --color-primary-hover-border: var(--pl-color-primary-700);
+  --color-primary-active-bg: var(--pl-color-primary-800);
+  --color-primary-active-border: var(--pl-color-primary-700);
+  --color-primary-on-active-bg: var(--color-neutral-200);
+  --color-primary-disabled-bg: var(--pl-color-primary-800);
+  --color-primary-on-disabled-bg: var(--pl-color-primary-400);
+  /* Primary light variant */
+  --color-primary-light-bg: transparent;
+  --color-primary-light-fg: var(--color-neutral-50);
+  --color-primary-light-hover-bg: rgba(255,255,255,0.02);
+  --color-primary-light-hover-fg: var(--pl-color-primary-500);
+  --color-primary-light-active-bg: rgba(255,255,255,0.02);
+  --color-primary-light-active-fg: var(--pl-color-primary-700);
+  --color-primary-light-disabled-bg: var(--color-neutral-800);
+  --color-primary-light-disabled-fg: var(--color-neutral-400);
+  /* END: Dark Theme */
 }
 
 body {
-  @apply text-white bg-background overflow-hidden;
+  @apply text-foreground bg-background overflow-hidden;
 }

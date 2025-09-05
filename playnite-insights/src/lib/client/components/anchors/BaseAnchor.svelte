@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { HTMLAnchorAttributes } from 'svelte/elements';
 	import { fade } from 'svelte/transition';
+	import type { BaseAnchorProps } from './types';
 
-	let props: HTMLAnchorAttributes = $props();
+	let props: BaseAnchorProps = $props();
 </script>
 
 <a
 	{...props}
-	class={`hover:text-primary-500 active:text-primary-700 cursor-pointer p-1 ${props.class ?? ''}`}
+	class={['cursor-pointer p-1', props.class]}
 	transition:fade={{ duration: 150 }}
 >
 	{#if props.children}

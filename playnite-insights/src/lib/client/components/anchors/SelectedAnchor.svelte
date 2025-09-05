@@ -5,7 +5,7 @@
 	let props: HTMLAnchorAttributes = $props();
 </script>
 
-<BaseAnchor {...props} class={`text-primary-500 ${props.class ?? ''}`}>
+<BaseAnchor {...props} class={`text-primary-light-active-fg ${props.class ?? ''}`}>
 	{#if props.children}
 		{@render props.children()}
 	{/if}

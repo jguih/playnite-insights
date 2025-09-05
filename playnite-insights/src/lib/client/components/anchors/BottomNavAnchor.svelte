@@ -1,12 +1,15 @@
 <script lang="ts">
-	import type { HTMLAnchorAttributes } from 'svelte/elements';
-	import BaseAnchor from './BaseAnchor.svelte';
+	import LightAnchor from './LightAnchor.svelte';
+	import type { LightAnchorProps } from './types';
 
-	let {selected, ...props}: {selected?: boolean} & HTMLAnchorAttributes = $props();
+	let props: LightAnchorProps = $props();
 </script>
 
-<BaseAnchor {...props} class={`flex flex-col items-center w-22 grow-0 ${selected && 'text-primary-500'} ${props.class ?? ''}`}>
+<LightAnchor
+	{...props}
+	class={['w-22 flex grow-0 flex-col items-center', props.class]}
+>
 	{#if props.children}
 		{@render props.children()}
 	{/if}
-</BaseAnchor>
+</LightAnchor>
