@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import type { SidebarProps } from './types';
+	import type { BottomSheetProps } from './types';
 
-	let { width = 80, ...props }: SidebarProps = $props();
+	let { height = 80, ...props }: BottomSheetProps = $props();
 	let showChildren = $state(false);
 
 	onMount(async () => {
@@ -15,12 +15,12 @@
 <aside
 	{...props}
 	class={[
-		'bg-background-1 z-1002 fixed left-0 right-0 top-0 h-full max-w-full overflow-y-hidden shadow-xl',
+		'bg-background-1 z-1002 fixed bottom-0 right-0 max-h-full w-full overflow-y-hidden shadow',
 		props.class,
 	]}
-	style:width={`${width}dvw`}
+	style:height={`${height}dvh`}
 	role="presentation"
-	transition:fly={{ x: `-${width}dvw`, duration: 150 }}
+	transition:fly={{ y: `${height}dvh`, duration: 150 }}
 >
 	{#if props.children && showChildren}
 		{@render props.children()}

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import NoteEditor from '$lib/client/components/current-session-page/NoteEditor.svelte';
+	import { openNoteEditor } from '$lib/client/components/current-session-page/Lib.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
@@ -7,10 +9,11 @@
 	import { getInProgressSessionPlaytime } from '$lib/client/utils/game-session';
 	import {
 		getPlayniteGameImageUrl,
-		getPlaytimeInHoursMinutesAndSeconds
+		getPlaytimeInHoursMinutesAndSeconds,
 	} from '$lib/client/utils/playnite-game';
 	import { gamesSignal, getUtcNow, recentActivitySignal } from '$lib/stores/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
+	import { type Note } from '@playnite-insights/lib/client/notes';
 	import { onMount } from 'svelte';
 
 	let inProgressGame = $derived.by(() => {
@@ -30,13 +33,7 @@
 		const inProgressActivity = recentActivitySignal.inProgressActivity;
 		return inProgressActivity?.sessions.length;
 	});
-	let notes = [
-		{ title: 'Título', content: 'Content', createdAt: new Date().toLocaleString() },
-		{ title: 'Título2', content: 'Content', createdAt: new Date().toLocaleString() },
-		{ title: 'Título3', content: 'Content', createdAt: new Date().toLocaleString() },
-		{ title: 'Título4', content: 'Content', createdAt: new Date().toLocaleString() },
-		{ title: 'Título5', content: 'Content', createdAt: new Date().toLocaleString() }
-	];
+	let notes: Note[] = [];
 
 	onMount(() => {
 		tickInterval = setInterval(() => (tick = getUtcNow()), 1000);
@@ -46,14 +43,15 @@
 	});
 </script>
 
-{#snippet noteCard(note)}
+{#snippet noteCard(note: Note)}
 	<li class="bg-background-1 mb-2 p-4">
-		<p class="text-lg font-semibold">{note.title}</p>
-		<p class="text-md mb-2">{note.content}</p>
-		<p class="text-sm opacity-70">{note.createdAt}</p>
+		<p class="text-lg font-semibold">{note.Title}</p>
+		<p class="text-md mb-2">{note.Content}</p>
+		<p class="text-sm opacity-70">{note.CreatedAt}</p>
 	</li>
 {/snippet}
 
+<NoteEditor />
 <BaseAppLayout>
 	<Header>
 		{#snippet action()}
@@ -99,6 +97,7 @@
 				<h1 class="text-xl">Links</h1>
 				<Divider class="border-1 mb-4" />
 			</section>
+			<LightButton onclick={() => openNoteEditor()}>Criar Nota</LightButton>
 		{/if}
 	</Main>
 </BaseAppLayout>

@@ -5,6 +5,7 @@
 </script>
 
 <input
+	{...props}
 	class={['m-0 w-full p-0 outline-0', props.class]}
 	bind:value
 />

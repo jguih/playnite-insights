@@ -24,6 +24,7 @@
     "./client/log": "./client/log/index.ts",
     "./client/game-session": "./client/game-session/index.ts",
     "./client/types": "./client/types/index.ts",
-    "./client/company": "./client/company/index.ts"
+    "./client/company": "./client/company/index.ts",
+    "./client/notes": "./client/notes/index.ts"
   }
 }
