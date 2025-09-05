@@ -5,7 +5,9 @@
 </script>
 
 <div
-	class="bg-background-1 z-1000 fixed bottom-0 left-0 right-0 flex h-[var(--bottom-nav-height)] flex-row items-center justify-between gap-4 p-4 shadow-lg"
+	class={[
+		'bg-background-1 z-1000 fixed bottom-0 left-0 right-0 flex h-[var(--bottom-nav-height)] flex-row items-center justify-between gap-4 p-4 shadow',
+	]}
 >
 	{#if children}
 		{@render children()}

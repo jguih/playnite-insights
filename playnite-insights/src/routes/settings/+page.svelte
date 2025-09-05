@@ -10,9 +10,6 @@
 	import { ArrowLeft, ChevronDown } from '@lucide/svelte';
 	import { getLocale, locales, setLocale } from '$lib/paraglide/runtime';
 	import { m } from '$lib/paraglide/messages';
-	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
-	import Dropdown from '$lib/client/components/dropdown/Dropdown.svelte';
-	import DropdownBody from '$lib/client/components/dropdown/DropdownBody.svelte';
 
 	let currentLocale = $derived(getLocale());
 </script>
@@ -30,9 +27,12 @@
 			{#each locales as locale}
 				<li>
 					{#if currentLocale === locale}
-						<SelectedButton onclick={() => setLocale(locale)}>
+						<LightButton
+							onclick={() => setLocale(locale)}
+							selected
+						>
 							{m.language_name({}, { locale: locale })}
-						</SelectedButton>
+						</LightButton>
 					{:else}
 						<LightButton onclick={() => setLocale(locale)}>
 							{m.language_name({}, { locale: locale })}

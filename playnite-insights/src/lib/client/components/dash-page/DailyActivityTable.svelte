@@ -7,7 +7,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import {
 		getInProgressActivityPlaytime,
-		getInProgressSessionPlaytime
+		getInProgressSessionPlaytime,
 	} from '$lib/client/utils/game-session';
 
 	let inProgressActivityPlaytime = $derived.by(() => {
@@ -69,13 +69,13 @@
 
 {#snippet grayDot()}
 	<span class="relative mx-auto flex h-2 w-2">
-		<span class="relative h-2 w-2 rounded-full bg-gray-500"></span>
+		<span class="relative h-2 w-2 rounded-full bg-neutral-500"></span>
 	</span>
 {/snippet}
 
 <div class="relative block overflow-x-auto">
 	{#if recentActivitySignal.isLoading}
-		<div class="z-2 absolute inset-0 flex h-full w-full flex-col justify-center bg-gray-400/20">
+		<div class="z-2 absolute inset-0 flex h-full w-full flex-col justify-center bg-neutral-400/20">
 			<Loading />
 		</div>
 	{/if}
@@ -89,15 +89,18 @@
 		</thead>
 		<tbody>
 			{#if !recentActivitySignal.recentActivityMap || recentActivitySignal.recentActivityMap.size === 0}
-				<tr class="bg-background-2 border-t border-gray-700">
-					<td colspan="3" class="px-3 py-2 text-center">
+				<tr class="bg-background-2 border-t border-neutral-800">
+					<td
+						colspan="3"
+						class="px-3 py-2 text-center"
+					>
 						{m.dash_no_data_to_show()}
 					</td>
 				</tr>
 			{:else}
 				{#each recentActivitySignal.recentActivityMap as [key, activity], index}
 					<tr
-						class={`${index % 2 === 0 ? 'bg-background-2' : ''} w-full border-t border-gray-700`}
+						class={`${index % 2 === 0 ? 'bg-background-2' : ''} w-full border-t border-neutral-800`}
 						onclick={() => toggleExpandActivitySessions(key)}
 					>
 						<td class="px-3 py-2">
@@ -120,7 +123,10 @@
 					</tr>
 					{#if expandedActivitySessions.has(key)}
 						<tr class={`${index % 2 === 0 ? 'bg-background-2' : ''} whitespace-nowrap`}>
-							<td colspan="3" class="p-2">
+							<td
+								colspan="3"
+								class="p-2"
+							>
 								<table class="opacity-80">
 									<thead>
 										<tr>

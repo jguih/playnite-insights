@@ -29,7 +29,7 @@
 	beforeNavigate(() => {
 		if (main && restoreScroll) {
 			mainScrollPosition[pathname] = {
-				scrollTop: main.scrollTop
+				scrollTop: main.scrollTop,
 			};
 		}
 	});
@@ -37,9 +37,11 @@
 
 <main
 	{...props}
-	class={`absolute ${bottomNav ? 'bottom-[var(--bottom-nav-height)]' : 'bottom-0'} left-0 right-0 top-[var(--header-height)] overflow-y-auto overflow-x-hidden p-4 ${
-		props?.class ?? ''
-	}`}
+	class={[
+		'absolute left-0 right-0 top-[var(--header-height)] overflow-y-auto overflow-x-hidden p-4',
+		bottomNav ? 'bottom-[var(--bottom-nav-height)]' : 'bottom-0',
+		props.class,
+	]}
 	bind:this={main}
 >
 	{#if props.children}

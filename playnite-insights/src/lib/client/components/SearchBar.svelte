@@ -5,9 +5,9 @@
 		ChangeEventHandler,
 		EventHandler,
 		FocusEventHandler,
-		HTMLInputAttributes
+		HTMLInputAttributes,
 	} from 'svelte/elements';
-	import SearchBarButton from './buttons/SearchBarButton.svelte';
+	import LightButton from './buttons/LightButton.svelte';
 
 	let {
 		value = $bindable(),
@@ -59,9 +59,9 @@
 	class={`bg-background-2 hover:border-primary-500 focus-within:border-primary-700 active-within:border-primary-700 flex w-full grow flex-row items-center justify-center gap-2 border-2 border-solid border-transparent p-1`}
 	onsubmit={handleSubmit}
 >
-	<SearchBarButton>
+	<LightButton class="p-0!">
 		<Search class="h-5 w-5 opacity-80" />
-	</SearchBarButton>
+	</LightButton>
 	<input
 		{...props}
 		class={`bg-background-2 m-0 w-full p-0 outline-0 ${props.class ?? ''}`}
@@ -71,7 +71,12 @@
 		placeholder={m.home_search_bar_placeholder()}
 		onblur={handleOnBlur}
 	/>
-	<SearchBarButton button={clearBtn} onclick={handleOnClear} type="button">
+	<LightButton
+		button={clearBtn}
+		onclick={handleOnClear}
+		type="button"
+		class="p-0!"
+	>
 		<XIcon class="h-5 w-5 opacity-80" />
-	</SearchBarButton>
+	</LightButton>
 </form>

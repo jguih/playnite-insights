@@ -67,7 +67,7 @@
 				></div>
 			</div>
 		</div>
-		<div class="bg-background-1 shadow-md">
+		<div class="bg-background-1 shadow">
 			<h1 class="text-md truncate px-3 pt-4 font-semibold">
 				{m.dash_games_owned_over_last_n_months({ value: 6 })}
 			</h1>
@@ -76,8 +76,8 @@
 					series={{
 						bar: {
 							data: vm.getCharts().totalGamesOwnedOverLast6Months.series.bar.data,
-							label: m.dash_chart_label_games_owned()
-						}
+							label: m.dash_chart_label_games_owned(),
+						},
 					}}
 					xAxis={vm.getCharts().totalGamesOwnedOverLast6Months.xAxis}
 				/>
@@ -94,7 +94,13 @@
 				<ul class="mb-6 grid list-none grid-cols-1 gap-1 p-0">
 					{#each vm.getTop10MostPlayedGames() as game}
 						<li
-							class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 border-4 border-solid border-transparent p-0 shadow-md outline-0"
+							class={[
+								'border-background-1 border-4 border-solid',
+								'hover:border-primary-hover-bg',
+								'active:border-primary-active-bg',
+								'focus:border-primary-active-bg',
+								'm-0 p-0 shadow outline-0',
+							]}
 						>
 							<a href={`/game/${game.Id}`}>
 								<div class="bg-background-1 flex flex-row gap-3 p-4">
@@ -108,7 +114,7 @@
 										<div>
 											<h2 class="text-xl font-semibold">{game.Name}</h2>
 											<p class=" mt-1 text-lg">
-												<span class="text-primary-500 font-semibold">
+												<span class="text-primary-bg font-semibold">
 													{vm.getPlaytime(game.Playtime)}
 												</span>
 											</p>
@@ -117,7 +123,7 @@
 											{m.dash_last_time_played({
 												value: game.LastActivity
 													? new Date(game.LastActivity).toLocaleDateString()
-													: '-'
+													: '-',
 											})}
 										</p>
 									</div>

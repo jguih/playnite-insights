@@ -8,10 +8,11 @@
 <BaseAnchor
 	{...props}
 	class={[
+		'bg-primary-light-bg',
+		selected ? 'text-primary-bg' : 'text-primary-light-fg',
 		'active:text-primary-light-active-fg active:bg-primary-light-active-bg',
 		'hover:text-primary-light-hover-fg hover:bg-primary-light-hover-bg',
-		selected && 'text-primary-light-active-fg',
-		!selected && 'text-primary-light-fg',
+		'focus:ring-primary-light-active-fg focus:ring-2',
 		props.class,
 	]}
 >

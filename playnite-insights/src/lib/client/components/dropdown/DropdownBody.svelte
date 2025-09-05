@@ -5,7 +5,11 @@
 	let { ...props }: HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div {...props} transition:fade={{ duration: 100 }} class={`p-2 ${props.class ?? ''}`}>
+<div
+	{...props}
+	transition:fade={{ duration: 100 }}
+	class={['p-2', props.class]}
+>
 	{#if props.children}
 		{@render props.children()}
 	{/if}

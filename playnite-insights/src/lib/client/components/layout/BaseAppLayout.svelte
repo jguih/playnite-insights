@@ -6,7 +6,7 @@
 
 <div
 	{...props}
-	class={`relative h-full w-full overflow-y-hidden ${props.class ?? ''}`}
+	class={['relative h-full w-full overflow-y-hidden', props.class]}
 >
 	{#if props.children}
 		{@render props.children()}

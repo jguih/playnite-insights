@@ -1,14 +1,30 @@
 <script lang="ts">
 	import BaseButton from './BaseButton.svelte';
-	import type { BaseButtonProps } from './types';
+	import type { LightButtonProps } from './types';
 
-	let { color = 'neutral', ...props }: BaseButtonProps = $props();
-	const textColor = `${color === 'primary' ? 'text-primary-400' : 'text-white'}`;
+	let { color = 'primary', selected, ...props }: LightButtonProps = $props();
 </script>
 
 <BaseButton
 	{...props}
-	class={`active:text-primary-700 focus:ring-primary-500 hover:text-primary-500  ${textColor} border-transparent p-1 focus:ring-2 ${props.class ?? ''}`}
+	class={[
+		color === 'primary' && [
+			selected ? 'text-primary-bg' : 'text-primary-light-fg',
+			'bg-primary-light-bg',
+			'hover:text-primary-light-hover-fg hover:bg-primary-light-hover-bg',
+			'active:text-primary-light-active-fg active:bg-primary-light-active-bg',
+			'focus:ring-primary-light-active-fg focus:ring-2',
+		],
+		color === 'neutral' && [
+			selected ? 'text-neutral-light-active-fg' : 'text-neutral-light-fg',
+			'bg-neutral-light-bg',
+			'hover:text-neutral-light-hover-fg hover:bg-neutral-light-hover-bg',
+			'active:text-neutral-light-active-fg active:bg-neutral-light-active-bg',
+			'focus:ring-neutral-light-active-fg focus:ring-2',
+		],
+		'p-1',
+		props.class,
+	]}
 >
 	{#if props.children}
 		{@render props.children()}

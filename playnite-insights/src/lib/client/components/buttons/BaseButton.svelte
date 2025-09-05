@@ -6,12 +6,16 @@
 		justify = 'center',
 		...props
 	}: BaseButtonProps = $props();
-	const justifyClass = justify === 'center' ? 'justify-center' : 'justify-between';
 </script>
 
 <button
 	{...props}
-	class={`disabled:hover:border-primary-950 disabled:hover:text-primary-950 m-0 flex cursor-pointer flex-row items-center ${justifyClass} gap-1 p-0 outline-0 disabled:text-neutral-500 ${props.class ?? ''}`}
+	class={[
+		'm-0 flex cursor-pointer flex-row items-center gap-1 outline-0',
+		justify === 'center' && 'justify-center',
+		justify === 'between' && 'justify-between',
+		props.class,
+	]}
 	bind:this={button}
 >
 	{#if props.children}

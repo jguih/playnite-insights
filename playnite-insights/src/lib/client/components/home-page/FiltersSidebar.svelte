@@ -7,7 +7,7 @@
 	import SidebarHeader from '../sidebar/SidebarHeader.svelte';
 	import { filtersState } from './store.svelte';
 	import Divider from '../Divider.svelte';
-	import Select from '../Select.svelte';
+	import Select from '../forms/Select.svelte';
 	import type { Snippet } from 'svelte';
 	import Checkbox from '../forms/Checkbox.svelte';
 	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client/home-page';
@@ -38,7 +38,7 @@
 		companyList,
 		genreList,
 		platformList,
-		onClearAllFilters
+		onClearAllFilters,
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
 		appendSearchParam: (key: HomePageSearchParamKeys, value: string) => void;
@@ -67,7 +67,7 @@
 		let items = [...companyList];
 		if (developerSearchFilter) {
 			items = items.filter((c) =>
-				c.Name.toLowerCase().includes((developerSearchFilter as string).toLowerCase())
+				c.Name.toLowerCase().includes((developerSearchFilter as string).toLowerCase()),
 			);
 		}
 		return items.slice(0, Math.min(MAX_RENDER_OPTIONS, companyList.length));
@@ -79,7 +79,7 @@
 		let items = [...companyList];
 		if (publisherSearchFilter) {
 			items = items.filter((c) =>
-				c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase())
+				c.Name.toLowerCase().includes((publisherSearchFilter as string).toLowerCase()),
 			);
 		}
 		return items.slice(0, Math.min(MAX_RENDER_OPTIONS, companyList.length));
@@ -91,7 +91,7 @@
 		let items = [...platformList];
 		if (platformSearchFilter) {
 			items = items.filter((p) =>
-				p.Name.toLowerCase().includes((platformSearchFilter as string).toLowerCase())
+				p.Name.toLowerCase().includes((platformSearchFilter as string).toLowerCase()),
 			);
 		}
 		return items.slice(0, Math.min(MAX_RENDER_OPTIONS, platformList.length));
@@ -103,7 +103,7 @@
 		let items = [...genreList];
 		if (genreSearchFilter) {
 			items = items.filter((p) =>
-				p.Name.toLowerCase().includes((genreSearchFilter as string).toLowerCase())
+				p.Name.toLowerCase().includes((genreSearchFilter as string).toLowerCase()),
 			);
 		}
 		return items.splice(0, Math.min(MAX_RENDER_OPTIONS, genreList.length));
@@ -114,7 +114,7 @@
 			currentTarget: EventTarget & HTMLInputElement;
 		},
 		key: HomePageSearchParamKeys,
-		value: string
+		value: string,
 	) => {
 		if (event.currentTarget.checked) {
 			appendSearchParam(key, value);
@@ -129,28 +129,38 @@
 	<Sidebar width={80}>
 		<SidebarHeader>
 			<h1 class="text-xl">{m.filters_title()}</h1>
-			<LightButton class="opacity-80" onclick={() => (filtersState.show = !filtersState.show)}>
+			<LightButton
+				class={['opacity-80']}
+				color="neutral"
+				onclick={() => (filtersState.show = !filtersState.show)}
+			>
 				<XIcon />
 			</LightButton>
 		</SidebarHeader>
 		<SidebarBody>
 			<div class="flex flex-col gap-2">
-				<label for="sort-order" class="text-md">
+				<label
+					for="sort-order"
+					class="text-md"
+				>
 					{m.label_sort_order()}
 					<Select
 						id="sort-order"
-						class="bg-background-2 mt-1 w-full"
+						class={['bg-background-2! mt-1 w-full']}
 						value={sortOrderParam}
 						onchange={(e) => setSearchParam('sortOrder', e.currentTarget.value)}
 					>
 						{@render renderSortOrderOptions()}
 					</Select>
 				</label>
-				<label for="sort-by" class="text-md">
+				<label
+					for="sort-by"
+					class="text-md"
+				>
 					{m.label_sort_by()}
 					<Select
 						id="sort-by"
-						class="bg-background-2 mt-1 w-full"
+						class={['bg-background-2! mt-1 w-full']}
 						value={sortByParam}
 						onchange={(e) => setSearchParam('sortBy', e.currentTarget.value)}
 					>
@@ -158,10 +168,17 @@
 					</Select>
 				</label>
 			</div>
-			<Divider class="border-1 my-2" />
-			<LightButton color="primary" onclick={onClearAllFilters}>{m.clear_all_filters()}</LightButton>
+			<Divider class={['border-1 my-2']} />
+			<LightButton
+				color="primary"
+				selected
+				onclick={onClearAllFilters}>{m.clear_all_filters()}</LightButton
+			>
 			<fieldset class="bg-background-2 mt-2 flex flex-col justify-center">
-				<label for="installed" class="text-md flex flex-row items-center gap-2 p-2">
+				<label
+					for="installed"
+					class="text-md flex flex-row items-center gap-2 p-2"
+				>
 					<Checkbox
 						checked={installedParam}
 						name="installed"
@@ -173,7 +190,10 @@
 					{m.label_filter_installed()}
 				</label>
 				<hr class="border-background-1" />
-				<label for="not_installed" class="text-md flex flex-row items-center gap-2 p-2">
+				<label
+					for="not_installed"
+					class="text-md flex flex-row items-center gap-2 p-2"
+				>
 					<Checkbox
 						checked={notInstalledParam}
 						name="not_installed"
@@ -185,13 +205,17 @@
 					{m.label_filter_not_installed()}
 				</label>
 			</fieldset>
-			<Divider class="border-1 my-2" />
+			<Divider class={['border-1 my-2']} />
 			<FilterDropdown
 				label={m.label_filter_genres()}
 				counter={genresParam.length}
 				onClear={() => removeSearchParam('genre')}
 			>
-				<SearchBar value={genreSearchFilter} onChange={(v) => (genreSearchFilter = v)} delay={0} />
+				<SearchBar
+					value={genreSearchFilter}
+					onChange={(v) => (genreSearchFilter = v)}
+					delay={0}
+				/>
 				{#if genreListFiltered && genreListFiltered.length > 0}
 					{#key genreSearchFilter}
 						<FilterCheckboxFieldset>

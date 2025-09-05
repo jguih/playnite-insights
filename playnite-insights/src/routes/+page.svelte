@@ -5,7 +5,7 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import { ChevronLeft, ChevronRight, Gamepad } from '@lucide/svelte';
 	import type { PageProps } from './$types';
-	import Select from '$lib/client/components/Select.svelte';
+	import Select from '$lib/client/components/forms/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { goto } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages.js';
@@ -13,7 +13,6 @@
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import SearchBar from '$lib/client/components/SearchBar.svelte';
-	import SelectedButton from '$lib/client/components/buttons/SelectedButton.svelte';
 	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
@@ -21,22 +20,22 @@
 	import {
 		homePageSearchParamsFilterKeys,
 		homePageSearchParamsKeys,
-		type HomePageSearchParamKeys
+		type HomePageSearchParamKeys,
 	} from '@playnite-insights/lib/client/home-page';
 	import {
 		gameSortBy,
 		gameSortOrder,
-		type PlayniteGame
+		type PlayniteGame,
 	} from '@playnite-insights/lib/client/playnite-game';
 	import {
 		companyStore,
 		gamesSignal,
 		genreStore,
 		platformStore,
-		recentActivitySignal
+		recentActivitySignal,
 	} from '$lib/stores/AppData.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
-	import BaseAnchor from '$lib/client/components/anchors/BaseAnchor.svelte';
+	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -147,7 +146,13 @@
 
 {#snippet gameCard(game: PlayniteGame)}
 	<li
-		class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 border-background-1 m-0 aspect-[1/1.6] border-4 border-solid p-0 shadow-md outline-0"
+		class={[
+			'm-0 aspect-[1/1.6] p-0 shadow outline-0',
+			'border-background-1 border-4 border-solid',
+			'hover:border-primary-light-hover-fg',
+			'active:border-primary-light-active-fg',
+			'focus:border-primary-light-active-fg',
+		]}
 	>
 		<a href={`/game/${game.Id}`}>
 			<img
@@ -196,7 +201,10 @@
 <BaseAppLayout>
 	<Header>
 		{#snippet action()}
-			<a class="" href={`/?${page.url.searchParams.toString()}`}>
+			<a
+				class=""
+				href={`/?${page.url.searchParams.toString()}`}
+			>
 				<img
 					src="/app-icon.png"
 					class="aspect-auto h-8 w-10 rounded-md object-contain"
@@ -223,14 +231,21 @@
 					{m.home_showing_games_counter({
 						count1: vm.getGameCountFrom(),
 						count2: vm.getGameCountTo(),
-						totalCount: vm.getTotalGamesCount()
+						totalCount: vm.getTotalGamesCount(),
 					})}
 				</p>
 			{/if}
 		</div>
-		<label for="page_size" class="text-md mb-2 flex items-center justify-end gap-2">
+		<label
+			for="page_size"
+			class="text-md mb-2 flex items-center justify-end gap-2"
+		>
 			{m.home_label_items_per_page()}
-			<Select onchange={handleOnPageSizeChange} value={pageSizeParam} id="page_size">
+			<Select
+				onchange={handleOnPageSizeChange}
+				value={pageSizeParam}
+				id="page_size"
+			>
 				{#each vm.getPageSizeList() as option}
 					<option value={option}>{option}</option>
 				{/each}
@@ -250,7 +265,10 @@
 		{/key}
 
 		<nav class="mt-4 flex flex-row justify-center gap-2">
-			<LightButton disabled={pageParam <= 1} onclick={() => handleOnPageChange(pageParam - 1)}>
+			<LightButton
+				disabled={pageParam <= 1}
+				onclick={() => handleOnPageChange(pageParam - 1)}
+			>
 				<ChevronLeft />
 			</LightButton>
 
@@ -259,9 +277,12 @@
 					{pageParam - 1}
 				</LightButton>
 			{/if}
-			<SelectedButton onclick={() => handleOnPageChange(pageParam)}>
+			<LightButton
+				onclick={() => handleOnPageChange(pageParam)}
+				selected
+			>
 				{pageParam}
-			</SelectedButton>
+			</LightButton>
 			{#if pageParam < vm.getTotalPages()}
 				<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
 					{pageParam + 1}
@@ -277,8 +298,8 @@
 		</nav>
 		{#if inProgressGame}
 			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
-				<BaseAnchor
-					class="bg-background-1 flex w-full items-center justify-start gap-4 p-2 shadow-lg"
+				<LightAnchor
+					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
 					href={`/session/current`}
 				>
 					<img
@@ -292,7 +313,7 @@
 						<p class="text-md font-semibold">{inProgressGame.Name}</p>
 					</div>
 					<ChevronRight class="ml-auto size-6" />
-				</BaseAnchor>
+				</LightAnchor>
 			</div>
 		{/if}
 	</Main>
