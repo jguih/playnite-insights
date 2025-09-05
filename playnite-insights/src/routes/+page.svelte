@@ -315,6 +315,7 @@
 					<ChevronRight class="ml-auto size-6" />
 				</LightAnchor>
 			</div>
+			<div class="pb-20"></div>
 		{/if}
 	</Main>
 

@@ -91,7 +91,7 @@
 			<h1 class="text-2xl">Top 10</h1>
 			<Divider class="border-1 mb-4" />
 			{#if vm.getTop10MostPlayedGames()}
-				<ul class="mb-6 grid list-none grid-cols-1 gap-1 p-0">
+				<ul class="mb-6 grid list-none grid-cols-1 gap-4 p-0">
 					{#each vm.getTop10MostPlayedGames() as game}
 						<li
 							class={[
@@ -103,7 +103,7 @@
 							]}
 						>
 							<a href={`/game/${game.Id}`}>
-								<div class="bg-background-1 flex flex-row gap-3 p-4">
+								<div class="bg-background-1 flex flex-row gap-3 p-2">
 									<img
 										src={getPlayniteGameImageUrl(game.CoverImage)}
 										alt={`${game.Name} cover image`}
