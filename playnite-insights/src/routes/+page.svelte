@@ -245,6 +245,7 @@
 				onchange={handleOnPageSizeChange}
 				value={pageSizeParam}
 				id="page_size"
+				class={['bg-background-1!']}
 			>
 				{#each vm.getPageSizeList() as option}
 					<option value={option}>{option}</option>

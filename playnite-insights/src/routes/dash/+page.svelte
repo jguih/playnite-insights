@@ -53,16 +53,16 @@
 			{@render infoSection(m.dash_total_playtime(), vm.getTotalPlaytime())}
 			<div class="flex flex-row justify-between">
 				<small class="text-sm">
-					<span class="text-primary-500">{vm.getPlayed()}</span>
+					<span class="text-primary-bg">{vm.getPlayed()}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
-					<span class="text-primary-500 font-semibold">{vm.getTotal()}</span>
+					<span class="text-primary-bg font-semibold">{vm.getTotal()}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
 				</small>
 				<p class="text-md">{vm.getTotalPlayedPercent()}%</p>
 			</div>
 			<div class="bg-background-1 mt-1 h-3 w-full rounded-sm">
 				<div
-					class="bg-primary-500 h-3 rounded-sm"
+					class="bg-primary-bg h-3 rounded-sm"
 					style="width: {vm.getTotalPlayedPercent()}%"
 				></div>
 			</div>
