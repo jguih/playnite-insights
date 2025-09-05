@@ -5,27 +5,20 @@
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
+	import {
+		getInProgressActivityPlaytime,
+		getInProgressSessionPlaytime
+	} from '$lib/client/utils/game-session';
 
 	let inProgressActivityPlaytime = $derived.by(() => {
 		const now = tick;
 		const inProgressActivity = recentActivitySignal.inProgressActivity;
-		if (!inProgressActivity) return;
-		const latestSession = inProgressActivity.sessions.at(0);
-		const startTime = latestSession?.StartTime;
-		if (!startTime) return;
-		const totalPlaytime = inProgressActivity.totalPlaytime;
-		const elapsed = (now - new Date(startTime).getTime()) / 1000;
-		return Math.floor(totalPlaytime + elapsed);
+		return getInProgressActivityPlaytime({ inProgressActivity, now });
 	});
 	let inProgressSessionPlaytime = $derived.by(() => {
 		const now = tick;
 		const inProgressActivity = recentActivitySignal.inProgressActivity;
-		if (!inProgressActivity) return;
-		const session = inProgressActivity.sessions.at(0);
-		const startTime = session?.StartTime;
-		if (!startTime) return;
-		const elapsed = (now - new Date(startTime).getTime()) / 1000;
-		return Math.floor(elapsed);
+		return getInProgressSessionPlaytime({ inProgressActivity, now });
 	});
 	let tick: number = $state(getUtcNow());
 	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);

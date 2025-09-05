@@ -97,7 +97,7 @@
 							class="hover:border-primary-500 active:border-primary-500 focus:border-primary-500 m-0 border-4 border-solid border-transparent p-0 shadow-md outline-0"
 						>
 							<a href={`/game/${game.Id}`}>
-								<div class="bg-background-1 flex flex-row gap-3 px-3 py-3">
+								<div class="bg-background-1 flex flex-row gap-3 p-4">
 									<img
 										src={getPlayniteGameImageUrl(game.CoverImage)}
 										alt={`${game.Name} cover image`}
