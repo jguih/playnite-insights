@@ -7,7 +7,7 @@
 
 <div
 	class={[
-		'bg-background-1 z-1000 fixed left-0 right-0 top-0 flex h-[var(--header-height)] flex-row items-center gap-2 px-4 py-2 shadow',
+		'bg-background-1 fixed top-0 right-0 left-0 z-1000 flex h-[var(--header-height)] flex-row items-center gap-2 px-4 py-2 shadow',
 	]}
 >
 	<div class="flex flex-row items-center gap-2">

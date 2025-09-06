@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { services } from '$lib';
 
-export const GET: RequestHandler = ({ params }) => {
+export const GET: RequestHandler = () => {
 	const data = services.playniteGameRepository.all();
 	if (!data) {
 		return new Response(undefined, { status: 404 });

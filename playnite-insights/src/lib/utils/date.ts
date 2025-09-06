@@ -12,7 +12,7 @@ const monthNames = [
 	m.month_september(),
 	m.month_october(),
 	m.month_november(),
-	m.month_december()
+	m.month_december(),
 ];
 
 /**

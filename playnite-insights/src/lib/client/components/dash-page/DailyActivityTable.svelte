@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GameSessionStatus } from '@playnite-insights/lib/client/game-session';
+	import type { GameSessionStatus } from '@playnite-insights/lib/client';
 	import {
 		gameSignal,
 		recentGameSessionSignal,
@@ -88,7 +88,7 @@
 					</td>
 				</tr>
 			{:else}
-				{#each vm.recentActivityMap as [key, activity], index}
+				{#each vm.recentActivityMap as [key, activity], index (key)}
 					<tr
 						class={`${index % 2 === 0 ? 'bg-background-2' : ''} w-full border-t border-neutral-800`}
 						onclick={() => toggleExpandActivitySessions(key)}
@@ -133,7 +133,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										{#each activity.sessions as session}
+										{#each activity.sessions as session (session.SessionId)}
 											<tr>
 												{#if session.Status === 'in_progress'}
 													<td class="text-success-light-fg px-3 py-2">

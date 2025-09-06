@@ -6,7 +6,7 @@ import {
   PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
 import { makePlayniteLibraryImporterService } from "./service";
-import { SyncGameListCommand } from "@playnite-insights/lib";
+import { SyncGameListCommand } from "@playnite-insights/lib/client";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 

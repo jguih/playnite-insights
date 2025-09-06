@@ -1,4 +1,4 @@
-import type { FullGame } from '@playnite-insights/lib/client/playnite-game';
+import type { FullGame } from '@playnite-insights/lib/client';
 import type { CompanySignal, GamesSignal } from '../app-state/AppData.types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';

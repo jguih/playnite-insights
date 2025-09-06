@@ -7,7 +7,7 @@
 <div
 	{...props}
 	class={[
-		'border-background-2 border-b-1 flex flex-row items-center justify-between gap-2 p-3',
+		'border-background-2 flex flex-row items-center justify-between gap-2 border-b-1 p-3',
 		props.class,
 	]}
 >

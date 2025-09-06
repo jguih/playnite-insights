@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { LogService } from "../log.types";
-import { LOG_LEVELS } from "@playnite-insights/lib/client/log";
+import { LOG_LEVELS } from "@playnite-insights/lib/client";
 import { FileSystemService } from "../file-system.types";
 import { constants } from "fs/promises";
 import { StreamUtilsService } from "../stream-utils.types";

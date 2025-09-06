@@ -1,41 +1,39 @@
 <script lang="ts">
-	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
-	import BottomNav from '$lib/client/components/BottomNav.svelte';
-	import Header from '$lib/client/components/Header.svelte';
-	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
-	import type { PageProps } from './$types';
-	import Select from '$lib/client/components/forms/Select.svelte';
-	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { goto } from '$app/navigation';
-	import { m } from '$lib/paraglide/messages.js';
-	import Home from '$lib/client/components/bottom-nav/Home.svelte';
-	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
-	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
-	import SearchBar from '$lib/client/components/SearchBar.svelte';
-	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { page } from '$app/state';
-	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
-	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import {
-		homePageSearchParamsFilterKeys,
-		homePageSearchParamsKeys,
-		type HomePageSearchParamKeys,
-	} from '@playnite-insights/lib/client/home-page';
-	import {
-		gameSortBy,
-		gameSortOrder,
-		type PlayniteGame,
-	} from '@playnite-insights/lib/client/playnite-game';
 	import {
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
-	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
+	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
+	import Home from '$lib/client/components/bottom-nav/Home.svelte';
+	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
+	import BottomNav from '$lib/client/components/BottomNav.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import Select from '$lib/client/components/forms/Select.svelte';
+	import Header from '$lib/client/components/Header.svelte';
+	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
+	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
+	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
+	import Main from '$lib/client/components/Main.svelte';
+	import SearchBar from '$lib/client/components/SearchBar.svelte';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
+	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+	import {
+		gameSortBy,
+		gameSortOrder,
+		homePageSearchParamsFilterKeys,
+		homePageSearchParamsKeys,
+		type HomePageSearchParamKeys,
+		type PlayniteGame,
+	} from '@playnite-insights/lib/client';
+	import type { HTMLSelectAttributes } from 'svelte/elements';
+	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
@@ -160,7 +158,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -183,12 +181,12 @@
 	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
-		{#each gameSortOrder as sortOrder}
+		{#each gameSortOrder as sortOrder (sortOrder)}
 			<option value={sortOrder}>{vm.getSortOrderLabel(sortOrder)}</option>
 		{/each}
 	{/snippet}
 	{#snippet renderSortByOptions()}
-		{#each gameSortBy as sortBy}
+		{#each gameSortBy as sortBy (sortBy)}
 			<option value={sortBy}>{vm.getSortByLabel(sortBy)}</option>
 		{/each}
 	{/snippet}
@@ -242,7 +240,7 @@
 				id="page_size"
 				class={['bg-background-1!']}
 			>
-				{#each vm.getPageSizeList() as option}
+				{#each vm.getPageSizeList() as option (option)}
 					<option value={option}>{option}</option>
 				{/each}
 			</Select>
@@ -251,7 +249,7 @@
 		{#key pageParam}
 			{#if gamesFiltered}
 				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-					{#each gamesFiltered as game}
+					{#each gamesFiltered as game (game.Id)}
 						{@render gameCard(game)}
 					{/each}
 				</ul>
@@ -293,7 +291,7 @@
 			</LightButton>
 		</nav>
 		{#if recentActivityVm.inProgressGame}
-			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
+			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-1000 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
 					href={`/game/${recentActivityVm.inProgressGame.Id}/activity`}

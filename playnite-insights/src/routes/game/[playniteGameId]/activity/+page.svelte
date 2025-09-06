@@ -16,12 +16,11 @@
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
-	import { type Note } from '@playnite-insights/lib/client/notes';
+	import { type Note } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 
-	const { data } = $props();
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const vm = new RecentActivityViewModel({
 		gameSignal: gameSignal,
@@ -40,8 +39,6 @@
 			vm.clearTickInterval();
 		};
 	});
-
-	$inspect(vm.inProgressGame);
 </script>
 
 {#snippet noteCard(note: Note)}
@@ -87,8 +84,8 @@
 			</div>
 			<section class="mb-6">
 				<h1 class="text-xl font-semibold">Notas</h1>
-				<Divider class="border-1 mb-4" />
-				{#each notes as note}
+				<Divider class="mb-4 border-1" />
+				{#each notes as note (note.Id)}
 					<ul class="">
 						{@render noteCard(note)}
 					</ul>
@@ -96,7 +93,7 @@
 			</section>
 			<section class="mb-6 font-semibold">
 				<h1 class="text-xl">Links</h1>
-				<Divider class="border-1 mb-4" />
+				<Divider class="mb-4 border-1" />
 			</section>
 			<LightButton onclick={() => openNoteEditor()}>Criar Nota</LightButton>
 		{/if}

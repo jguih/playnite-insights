@@ -8,7 +8,7 @@ import type {
   Genre,
   Platform,
   PlayniteGame,
-} from "@playnite-insights/lib";
+} from "@playnite-insights/lib/client";
 
 export type PlayniteGameRepository = {
   add: (

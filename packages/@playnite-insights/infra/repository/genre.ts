@@ -1,7 +1,7 @@
 import z from "zod";
 import type { DatabaseSync } from "node:sqlite";
 import type { GenreRepository, LogService } from "@playnite-insights/core";
-import { type Genre, genreSchema } from "@playnite-insights/lib";
+import { type Genre, genreSchema } from "@playnite-insights/lib/client";
 import { getDb as _getDb } from "../database";
 import { defaultLogger } from "../services/log";
 
@@ -112,7 +112,7 @@ export const makeGenreRepository = (
       const stmt = db.prepare(query);
       const result = stmt.all();
       const genres = z.optional(z.array(genreSchema)).parse(result);
-      logService.debug(`Found ${genres.length} genres`);
+      logService.debug(`Found ${genres?.length ?? 0} genres`);
       return genres;
     } catch (error) {
       logService.error(`Failed to get genre list`, error as Error);

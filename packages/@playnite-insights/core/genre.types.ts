@@ -1,4 +1,4 @@
-import { type Genre } from "@playnite-insights/lib";
+import { type Genre } from "@playnite-insights/lib/client";
 
 export type GenreRepository = {
   add: (genre: Genre) => boolean;

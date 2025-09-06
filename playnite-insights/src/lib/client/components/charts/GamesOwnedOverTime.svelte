@@ -12,33 +12,33 @@
 	const id = 'chart-games-owned-over-time';
 	var option: ComposeOption<BarSeriesOption> = $derived({
 		title: {
-			show: false
+			show: false,
 		},
 		tooltip: {},
 		grid: {
 			top: '8%',
 			left: '15%',
-			bottom: '12%'
+			bottom: '12%',
 		},
 		xAxis: {
 			data: xAxis.data,
 			axisLabel: {
-				color: 'white'
-			}
+				color: 'white',
+			},
 		},
 		yAxis: {
 			axisLabel: {
-				color: 'white'
-			}
+				color: 'white',
+			},
 		},
 		series: [
 			{
 				name: series.bar.label,
 				type: 'bar',
 				data: series.bar.data,
-				color: ['hsl(198, 100%, 67%)']
-			}
-		]
+				color: ['hsl(198, 100%, 67%)'],
+			},
+		],
 	});
 
 	onMount(() => {
@@ -49,4 +49,7 @@
 	});
 </script>
 
-<div {id} class="h-[350px] w-full"></div>
+<div
+	{id}
+	class="h-[350px] w-full"
+></div>

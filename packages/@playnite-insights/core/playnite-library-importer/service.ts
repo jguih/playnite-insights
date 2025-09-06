@@ -1,14 +1,14 @@
 import { join } from "path";
 import type { IncomingHttpHeaders } from "http";
-import {
+import type {
   PlayniteGame,
   SyncGameListCommand,
   ValidationResult,
-} from "@playnite-insights/lib";
+} from "@playnite-insights/lib/client";
 import { ReadableStream } from "stream/web";
 import {
-  PlayniteLibraryImporterService,
-  PlayniteLibraryImporterServiceDeps,
+  type PlayniteLibraryImporterService,
+  type PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
 import busboy from "busboy";
 

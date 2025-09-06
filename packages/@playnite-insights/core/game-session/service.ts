@@ -1,10 +1,13 @@
 import {
   type CloseSessionCommand,
   type GameSession,
-  GameSessionFilters,
+  type GameSessionFilters,
   sessionStatus,
-} from "@playnite-insights/lib";
-import { GameSessionService, GameSessionServiceDeps } from "./service.types";
+} from "@playnite-insights/lib/client";
+import {
+  type GameSessionService,
+  type GameSessionServiceDeps,
+} from "./service.types";
 
 export const makeGameSessionService = ({
   logService,

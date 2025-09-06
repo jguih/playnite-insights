@@ -7,7 +7,7 @@
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ArrowLeft, ChevronDown } from '@lucide/svelte';
+	import { ArrowLeft } from '@lucide/svelte';
 	import { getLocale, locales, setLocale } from '$lib/paraglide/runtime';
 	import { m } from '$lib/paraglide/messages';
 
@@ -24,7 +24,7 @@
 	</Header>
 	<Main>
 		<ul>
-			{#each locales as locale}
+			{#each locales as locale (locale)}
 				<li>
 					{#if currentLocale === locale}
 						<LightButton

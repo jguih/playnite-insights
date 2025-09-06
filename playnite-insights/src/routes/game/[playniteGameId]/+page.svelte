@@ -15,7 +15,6 @@
 		gamesSignal: gameSignal,
 		companySignal: companySignal,
 	});
-	$inspect(vm.game);
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -42,7 +41,7 @@
 				alt={`${vm.game.Name} background image`}
 				class="aspect-3/2 w-full"
 			/>
-			<div class="mb-4 mt-4 flex flex-col">
+			<div class="mt-4 mb-4 flex flex-col">
 				{@render infoSection(m.game_info_release_date(), vm.getReleaseDate())}
 				{@render infoSection(m.game_info_added(), vm.getAdded())}
 				{@render infoSection(m.game_info_playtime(), vm.getPlaytime())}
@@ -54,6 +53,7 @@
 			</div>
 			<div>
 				{#if vm.game.Description}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html vm.game.Description}
 				{/if}
 			</div>

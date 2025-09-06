@@ -1,4 +1,7 @@
-import { GameFilters, GameSorting } from "@playnite-insights/lib";
+import {
+  type GameFilters,
+  type GameSorting,
+} from "@playnite-insights/lib/client";
 
 export const getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
   const where: string[] = [];

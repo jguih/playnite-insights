@@ -3,7 +3,7 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 import {
   libraryManifestSchema,
   type SyncGameListCommand,
-} from "@playnite-insights/lib";
+} from "@playnite-insights/lib/client";
 
 const createGame = (id: string): SyncGameListCommand["AddedItems"][number] => {
   return {

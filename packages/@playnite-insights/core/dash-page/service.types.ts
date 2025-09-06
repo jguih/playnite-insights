@@ -1,8 +1,8 @@
-import { DashPageData } from "@playnite-insights/lib";
-import { LogService } from "../log.types";
-import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
-import { PlayniteGameRepository } from "../playnite-game.types";
-import { GameSessionRepository } from "../game-session.types";
+import type { DashPageData } from "@playnite-insights/lib/client";
+import type { LogService } from "../log.types";
+import type { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import type { PlayniteGameRepository } from "../playnite-game.types";
+import type { GameSessionRepository } from "../game-session.types";
 
 export type DashPageServiceDeps = {
   logService: LogService;

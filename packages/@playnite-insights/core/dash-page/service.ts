@@ -1,4 +1,4 @@
-import type { DashPageData } from "@playnite-insights/lib";
+import type { DashPageData } from "@playnite-insights/lib/client";
 import type { DashPageService, DashPageServiceDeps } from "./service.types";
 
 export const makeDashPageService = ({

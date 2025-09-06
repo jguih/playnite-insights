@@ -9,12 +9,12 @@ export default defineConfig({
 		sveltekit(),
 		paraglideVitePlugin({
 			project: './project.inlang',
-			outdir: './src/lib/paraglide'
-		})
+			outdir: './src/lib/paraglide',
+		}),
 	],
 	server: {
 		port: 3000,
-		allowedHosts: true
+		allowedHosts: true,
 	},
 	test: {
 		reporters: ['default', ['json', { outputFile: 'test-results/unit-results.json' }]],
@@ -25,9 +25,9 @@ export default defineConfig({
 					name: 'unit',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/e2e/**', 'src/**/*.svelte.{test,spec}.{js,ts}']
-				}
-			}
-		]
-	}
+					exclude: ['src/e2e/**', 'src/**/*.svelte.{test,spec}.{js,ts}'],
+				},
+			},
+		],
+	},
 });

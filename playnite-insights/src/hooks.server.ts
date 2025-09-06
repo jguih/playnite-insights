@@ -17,7 +17,7 @@ export const init: ServerInit = async () => {
 		fileSystemService: defaultFileSystemService,
 		DB_FILE: services.config.DB_FILE,
 		MIGRATIONS_DIR: services.config.MIGRATIONS_DIR,
-		logService: services.log
+		logService: services.log,
 	});
 	await services.libraryManifest.write();
 };
@@ -27,7 +27,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 		event.request = request;
 
 		return resolve(event, {
-			transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
+			transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale),
 		});
 	});
 
@@ -40,8 +40,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 				headers: {
 					'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
 					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Headers': '*'
-				}
+					'Access-Control-Allow-Headers': '*',
+				},
 			});
 		}
 	}

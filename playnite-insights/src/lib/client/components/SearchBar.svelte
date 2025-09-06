@@ -49,7 +49,7 @@
 		input.blur();
 	};
 
-	const handleOnClear: EventHandler<MouseEvent> = (e) => {
+	const handleOnClear: EventHandler<MouseEvent> = () => {
 		onChange(null);
 		clearBtn?.blur();
 	};

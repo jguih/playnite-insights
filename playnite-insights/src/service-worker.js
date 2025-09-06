@@ -5,6 +5,7 @@
 
 import { build, files, version } from '$service-worker';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sw = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self));
 
 const CACHE = `cache-${version}`;
@@ -23,12 +24,12 @@ const cacheKeysArr = [
 	GENRE_CACHE,
 	PLATFORM_CACHE,
 	RECENT_SESSION_CACHE,
-	ALL_SESSION_CACHE
+	ALL_SESSION_CACHE,
 ];
 
 const ASSETS = [
 	...build, // the app itself
-	...files  // everything in `static`
+	...files, // everything in `static`
 ];
 
 self.addEventListener('install', (event) => {
@@ -53,8 +54,8 @@ self.addEventListener('activate', (event) => {
 });
 
 /**
- * 
- * @param {object} message 
+ *
+ * @param {object} message
  */
 function notifyClients(message) {
 	clients.matchAll().then((clients) => {
@@ -65,39 +66,42 @@ function notifyClients(message) {
 }
 
 /**
- * 
- * @param {Request} request 
+ *
+ * @param {Request} request
  * @param {string} cacheName
  * @param {object} updateMessage
  */
 async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 'UNKNOWN' }) {
 	const cache = await caches.open(cacheName);
 	const cachedResponse = await cache.match(request);
-	const cachedETag = cachedResponse?.headers.get("ETag");
+	const cachedETag = cachedResponse?.headers.get('ETag');
 
 	const fetchAndUpdate = fetch(request)
 		.then((networkResponse) => {
 			if (networkResponse.ok) {
 				cache.put(request, networkResponse.clone());
 			}
-			const networkETag = networkResponse.headers.get("ETag");
+			const networkETag = networkResponse.headers.get('ETag');
 			if (!cachedResponse || (cachedETag && networkETag && cachedETag !== networkETag)) {
 				notifyClients(updateMessage);
 			}
 			return networkResponse;
 		})
 		.catch(() => {
-			return cachedResponse || new Response(null, { status: 503, statusText: 'Service Unavailable' });
+			return (
+				cachedResponse || new Response(null, { status: 503, statusText: 'Service Unavailable' })
+			);
 		});
 
 	return cachedResponse || fetchAndUpdate;
 }
 
 /**
- * @param {Request} request 
- * @param {string} cacheName 
- * @returns 
+ * @param {Request} request
+ * @param {string} cacheName
+ * @returns
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function networkFirst(request, cacheName) {
 	const cache = await caches.open(cacheName);
 
@@ -107,7 +111,7 @@ async function networkFirst(request, cacheName) {
 			cache.put(request, networkResponse.clone());
 		}
 		return networkResponse;
-	} catch (error) {
+	} catch {
 		// Network failed, try to return from cache
 		const cachedResponse = await cache.match(request);
 		if (cachedResponse) {
@@ -115,12 +119,12 @@ async function networkFirst(request, cacheName) {
 		}
 
 		console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
-		return new Response("Network error and no cache available", { status: 503 });
+		return new Response('Network error and no cache available', { status: 503 });
 	}
 }
 
 /**
- * @param {Request} request 
+ * @param {Request} request
  * @param {string} cacheName
  */
 async function defaultFetchHandler(request, cacheName) {
@@ -143,10 +147,9 @@ async function defaultFetchHandler(request, cacheName) {
 		if (fallback) return fallback;
 
 		console.warn(`SW failed to fetch and found no cache for ${event.request.url}`, err);
-		return new Response("Network error and no cache available", { status: 503 });
+		return new Response('Network error and no cache available', { status: 503 });
 	}
 }
-
 
 self.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
@@ -179,7 +182,9 @@ self.addEventListener('fetch', (event) => {
 	}
 
 	if (url.pathname.startsWith('/api/session/recent')) {
-		event.respondWith(staleWhileRevalidate(event.request, RECENT_SESSION_CACHE, { type: "RECENT_SESSION_UPDATE" }));
+		event.respondWith(
+			staleWhileRevalidate(event.request, RECENT_SESSION_CACHE, { type: 'RECENT_SESSION_UPDATE' }),
+		);
 		return;
 	}
 

@@ -15,7 +15,7 @@
 	{#if counter}
 		<div
 			class={[
-				'bg-primary-bg text-primary-fg absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-xs',
+				'bg-primary-bg text-primary-fg absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full text-xs',
 			]}
 			transition:scale={{ duration: 150 }}
 		>

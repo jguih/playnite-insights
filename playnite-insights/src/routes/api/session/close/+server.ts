@@ -1,5 +1,5 @@
 import { services } from '$lib';
-import { closeGameSessionSchema } from '@playnite-insights/lib';
+import { closeGameSessionSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {

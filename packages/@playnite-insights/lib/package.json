@@ -10,22 +10,6 @@
   },
   "exports": {
     ".": "./index.ts",
-    "./client/home-page": "./client/home-page/index.ts",
-    "./client/playnite-game": "./client/playnite-game/index.ts",
-    "./client/game-page": "./client/game-page/index.ts",
-    "./client/dash-page": "./client/dash-page/index.ts",
-    "./client/genre": "./client/genre/index.ts",
-    "./client/platform": "./client/platform/index.ts",
-    "./client/publisher": "./client/publisher/index.ts",
-    "./client/developer": "./client/developer/index.ts",
-    "./client/library-manifest": "./client/library-manifest/index.ts",
-    "./client/schemas": "./client/schemas/index.ts",
-    "./client/playnite-library-importer": "./client/playnite-library-importer/index.ts",
-    "./client/log": "./client/log/index.ts",
-    "./client/game-session": "./client/game-session/index.ts",
-    "./client/types": "./client/types/index.ts",
-    "./client/company": "./client/company/index.ts",
-    "./client/notes": "./client/notes/index.ts",
-    "./client/time": "./client/time/index.ts"
+    "./client": "./client/index.ts"
   }
 }

@@ -1,7 +1,9 @@
-import type { FullGame } from '@playnite-insights/lib/client/playnite-game';
-import type { GetRecentSessionsResponse } from '@playnite-insights/lib/client/game-session';
-import type { Company } from '@playnite-insights/lib/client/company';
-import type { DashPageData } from '@playnite-insights/lib';
+import type {
+	Company,
+	DashPageData,
+	FullGame,
+	GetRecentSessionsResponse,
+} from '@playnite-insights/lib/client';
 
 export type GamesSignal = { raw: FullGame[] | null };
 export type CompanySignal = { raw: Company[] | null };

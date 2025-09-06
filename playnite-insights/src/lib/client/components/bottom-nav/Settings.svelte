@@ -7,17 +7,24 @@
 	import { m } from '$lib/paraglide/messages';
 
 	let { selected, ...props }: HTMLAnchorAttributes & { selected?: boolean } = $props();
-	const href="/settings"
+	const href = '/settings';
 </script>
 
 {#if selected}
-	<BottomNavAnchor selected href={href} {...props}>
-		<Settings size={bottomNavIconSize}/>
+	<BottomNavAnchor
+		selected
+		{href}
+		{...props}
+	>
+		<Settings size={bottomNavIconSize} />
 		<Text>{m.bottom_nav_label_settings()}</Text>
 	</BottomNavAnchor>
 {:else}
-	<BottomNavAnchor href={href} {...props}>
-		<Settings size={bottomNavIconSize}/>
+	<BottomNavAnchor
+		{href}
+		{...props}
+	>
+		<Settings size={bottomNavIconSize} />
 		<Text>{m.bottom_nav_label_settings()}</Text>
 	</BottomNavAnchor>
 {/if}

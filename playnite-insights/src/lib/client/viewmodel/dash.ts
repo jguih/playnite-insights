@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { type DashPageData } from '@playnite-insights/lib/client/dash-page';
+import { type DashPageData } from '@playnite-insights/lib/client';
 import { getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
 export const makeDashPageViewModel = (pageData?: DashPageData) => {
@@ -20,7 +20,7 @@ export const makeDashPageViewModel = (pageData?: DashPageData) => {
 			? pageData.charts
 			: {
 					totalGamesOwnedOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
-					totalPlaytimeOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } }
+					totalPlaytimeOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
 				};
 	const getPlayed = (): number => pageData?.played ?? 0;
 	const getTop10MostPlayedGames = (): DashPageData['topMostPlayedGames'] =>
@@ -35,6 +35,6 @@ export const makeDashPageViewModel = (pageData?: DashPageData) => {
 		getTotalPlayedPercent,
 		getCharts,
 		getPlayed,
-		getTop10MostPlayedGames
+		getTop10MostPlayedGames,
 	};
 };

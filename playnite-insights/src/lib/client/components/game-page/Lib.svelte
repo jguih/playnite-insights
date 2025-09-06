@@ -3,7 +3,7 @@
 	module
 >
 	import { pushState } from '$app/navigation';
-	import type { Note } from '@playnite-insights/lib/client/notes';
+	import type { Note } from '@playnite-insights/lib/client';
 
 	export const openNoteEditor = () => {
 		pushState('', { bottomSheet: true });

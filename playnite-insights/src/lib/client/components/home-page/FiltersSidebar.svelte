@@ -1,23 +1,26 @@
 <script lang="ts">
+	import { companySignal, genreSignal, platformSignal } from '$lib/client/app-state/AppData.svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { XIcon } from '@lucide/svelte';
+	import type {
+		GameSortBy,
+		GameSortOrder,
+		HomePageSearchParamKeys,
+	} from '@playnite-insights/lib/client';
+	import type { Snippet } from 'svelte';
 	import LightButton from '../buttons/LightButton.svelte';
+	import Divider from '../Divider.svelte';
+	import Checkbox from '../forms/Checkbox.svelte';
+	import Select from '../forms/Select.svelte';
+	import SearchBar from '../SearchBar.svelte';
 	import Backdrop from '../sidebar/Backdrop.svelte';
 	import Sidebar from '../sidebar/Sidebar.svelte';
 	import SidebarBody from '../sidebar/SidebarBody.svelte';
 	import SidebarHeader from '../sidebar/SidebarHeader.svelte';
-	import { filtersState } from './store.svelte';
-	import Divider from '../Divider.svelte';
-	import Select from '../forms/Select.svelte';
-	import type { Snippet } from 'svelte';
-	import Checkbox from '../forms/Checkbox.svelte';
-	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client/home-page';
-	import type { GameSortBy, GameSortOrder } from '@playnite-insights/lib/client/playnite-game';
-	import FilterDropdown from './FilterDropdown.svelte';
-	import SearchBar from '../SearchBar.svelte';
 	import FilterCheckboxFieldset from './FilterCheckboxFieldset.svelte';
 	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
-	import { m } from '$lib/paraglide/messages';
-	import { companySignal, genreSignal, platformSignal } from '$lib/client/app-state/AppData.svelte';
+	import FilterDropdown from './FilterDropdown.svelte';
+	import { filtersState } from './store.svelte';
 
 	const {
 		setSearchParam,
@@ -164,7 +167,7 @@
 					</Select>
 				</label>
 			</div>
-			<Divider class={['border-1 my-2']} />
+			<Divider class={['my-2 border-1']} />
 			<LightButton
 				color="primary"
 				selected
@@ -201,7 +204,7 @@
 					{m.label_filter_not_installed()}
 				</label>
 			</fieldset>
-			<Divider class={['border-1 my-2']} />
+			<Divider class={['my-2 border-1']} />
 			<FilterDropdown
 				label={m.label_filter_genres()}
 				counter={genresParam.length}
@@ -215,7 +218,7 @@
 				{#if genreListFiltered && genreListFiltered.length > 0}
 					{#key genreSearchFilter}
 						<FilterCheckboxFieldset>
-							{#each genreListFiltered as genre}
+							{#each genreListFiltered as genre (genre.Id)}
 								<FilterCheckboxLabel for={`genre-${genre.Id}`}>
 									<Checkbox
 										checked={genresParam.includes(genre.Id)}
@@ -246,7 +249,7 @@
 				{#if platformListFiltered && platformListFiltered.length > 0}
 					{#key platformSearchFilter}
 						<FilterCheckboxFieldset>
-							{#each platformListFiltered as platform}
+							{#each platformListFiltered as platform (platform.Id)}
 								<FilterCheckboxLabel for={`platform-${platform.Id}`}>
 									<Checkbox
 										checked={platformsParam.includes(platform.Id)}
@@ -277,7 +280,7 @@
 				{#if publisherListFiltered && publisherListFiltered.length > 0}
 					{#key publisherSearchFilter}
 						<FilterCheckboxFieldset>
-							{#each publisherListFiltered as publisher}
+							{#each publisherListFiltered as publisher (publisher.Id)}
 								<FilterCheckboxLabel for={`publisher-${publisher.Id}`}>
 									<Checkbox
 										checked={publishersParam.includes(publisher.Id)}
@@ -308,7 +311,7 @@
 				{#if developerListFiltered && developerListFiltered.length > 0}
 					{#key developerSearchFilter}
 						<FilterCheckboxFieldset>
-							{#each developerListFiltered as dev}
+							{#each developerListFiltered as dev (dev.Id)}
 								<FilterCheckboxLabel for={`dev-${dev.Id}`}>
 									<Checkbox
 										checked={developersParam.includes(dev.Id)}

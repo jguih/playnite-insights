@@ -20,7 +20,11 @@
 	});
 </script>
 
-<div bind:this={container} {...props} class={`w-fit ${props.class ?? ''}`}>
+<div
+	bind:this={container}
+	{...props}
+	class={`w-fit ${props.class ?? ''}`}
+>
 	{@render button({ onclick: () => (show = !show), show })}
 	{#if body}
 		{#if show}

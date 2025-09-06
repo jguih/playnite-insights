@@ -1,5 +1,5 @@
 import { join } from "path";
-import { MediaFilesService, MediaFilesServiceDeps } from "./service.types";
+import type { MediaFilesService, MediaFilesServiceDeps } from "./service.types";
 
 export const makeMediaFilesService = ({
   logService,

@@ -3,7 +3,7 @@ import type {
   LibraryManifestServiceDeps,
   LibraryManifestService,
 } from "./service.types";
-import { type PlayniteLibraryManifest } from "@playnite-insights/lib";
+import { type PlayniteLibraryManifest } from "@playnite-insights/lib/client";
 
 export const makeLibraryManifestService = ({
   getManifestData,

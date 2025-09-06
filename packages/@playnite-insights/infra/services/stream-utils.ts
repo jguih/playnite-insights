@@ -1,4 +1,4 @@
-import { StreamUtilsService } from "@playnite-insights/core";
+import { type StreamUtilsService } from "@playnite-insights/core";
 import * as fs from "fs";
 import * as stream from "stream";
 import * as streamAsync from "stream/promises";

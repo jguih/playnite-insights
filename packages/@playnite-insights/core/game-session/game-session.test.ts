@@ -9,7 +9,7 @@ import type {
   CloseSessionCommand,
   GameSession,
   OpenSessionCommand,
-} from "@playnite-insights/lib";
+} from "@playnite-insights/lib/client";
 import { faker } from "@faker-js/faker";
 
 vi.mock("$lib/infrastructure/database", () => ({}));

@@ -2,15 +2,19 @@
 	lang="ts"
 	module
 >
-	import { platformSchema, type Platform } from '@playnite-insights/lib/client/platform';
-	import { companySchema } from '@playnite-insights/lib/client/company';
-	import { dashPageDataSchema } from '@playnite-insights/lib/client/dash-page';
-	import { genreSchema, type Genre } from '@playnite-insights/lib/client/genre';
-	import { fullGameSchema } from '@playnite-insights/lib/client/playnite-game';
-	import { getRecentSessionsResponseSchema } from '@playnite-insights/lib/client/game-session';
+	import {
+		companySchema,
+		dashPageDataSchema,
+		fullGameSchema,
+		genreSchema,
+		getRecentSessionsResponseSchema,
+		getServerTimeResponseSchema,
+		platformSchema,
+		type Genre,
+		type Platform,
+	} from '@playnite-insights/lib/client';
 	import { error } from '@sveltejs/kit';
 	import z from 'zod';
-	import { getServerTimeResponseSchema } from '@playnite-insights/lib/client/time';
 	import type {
 		CompanySignal,
 		DashSignal,
@@ -113,7 +117,6 @@
 			serverTimeSignal.syncPoint = performance.now();
 		} catch (err) {
 			console.error(err);
-		} finally {
 		}
 	};
 

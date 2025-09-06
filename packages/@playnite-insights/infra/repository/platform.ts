@@ -1,4 +1,4 @@
-import { platformSchema, type Platform } from "@playnite-insights/lib";
+import { platformSchema, type Platform } from "@playnite-insights/lib/client";
 import type { LogService, PlatformRepository } from "@playnite-insights/core";
 import type { DatabaseSync } from "node:sqlite";
 import z from "zod";
@@ -146,7 +146,7 @@ export const makePlatformRepository = (
       const stmt = db.prepare(query);
       const result = stmt.all();
       const platforms = z.optional(z.array(platformSchema)).parse(result);
-      logService.debug(`Found ${platforms.length} platforms`);
+      logService.debug(`Found ${platforms?.length ?? 0} platforms`);
       return platforms;
     } catch (error) {
       logService.error(`Failed to get platform list`, error as Error);

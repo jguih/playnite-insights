@@ -15,9 +15,11 @@
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",
     "test:unit": "pnpm --filter \"@playnite-insights*\" run test",
-    "release": "standard-version"
+    "release": "standard-version",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "standard-version": "^9.5.0"
   }
 }

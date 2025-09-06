@@ -1,5 +1,5 @@
 import type { CompanyRepository, LogService } from "@playnite-insights/core";
-import { companySchema, type Company } from "@playnite-insights/lib";
+import { companySchema, type Company } from "@playnite-insights/lib/client";
 import type { DatabaseSync } from "node:sqlite";
 import { getDb as _getDb } from "../database";
 import { defaultLogger } from "../services";
@@ -114,9 +114,9 @@ export const makeCompanyRepository = (
     try {
       const stmt = db.prepare(query);
       const result = stmt.all();
-      const companys = z.optional(z.array(companySchema)).parse(result);
-      logService.debug(`Found ${companys.length} companies`);
-      return companys;
+      const companies = z.optional(z.array(companySchema)).parse(result);
+      logService.debug(`Found ${companies?.length ?? 0} companies`);
+      return companies;
     } catch (error) {
       logService.error(`Failed to get company list`, error as Error);
     }

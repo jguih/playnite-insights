@@ -20,7 +20,7 @@ export const GET: RequestHandler = async ({ request }) => {
 			});
 		}
 		return new Response(null, { status: 404 });
-	} catch (err) {
+	} catch {
 		return new Response(null, { status: 500 });
 	}
 };

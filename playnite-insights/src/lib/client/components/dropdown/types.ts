@@ -14,7 +14,7 @@ export type DropdownProps = {
 				 * Dropdown body show state. When `true` the body is shown.
 				 */
 				show: boolean;
-			}
+			},
 		]
 	>;
 	hideOnClickOutside?: boolean;

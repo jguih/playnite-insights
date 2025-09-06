@@ -18,9 +18,9 @@ import {
   playniteGameSchema,
   type GameFilters,
   fullGameRawSchema,
-  FullGame,
-  Company,
-} from "@playnite-insights/lib";
+  type FullGame,
+  type Company,
+} from "@playnite-insights/lib/client";
 import { defaultLogger } from "../services";
 import { defaultPlatformRepository } from "../repository/platform";
 import { defaultGenreRepository } from "../repository/genre";
@@ -622,7 +622,7 @@ export const makePlayniteGameRepository = (
       for (const entry of result) {
         data.push({
           Id: entry.Id as string,
-          IsInstalled: entry.IsInstalled as number | null,
+          IsInstalled: (entry.IsInstalled as number | null) ?? 0,
           Playtime: entry.Playtime as number,
         });
       }
@@ -669,7 +669,7 @@ export const makePlayniteGameRepository = (
       const stmt = db.prepare(query);
       const result = stmt.all();
       const raw = z.optional(z.array(fullGameRawSchema)).parse(result);
-      const games = raw.map((g) => {
+      const games = raw?.map((g) => {
         const devs = g.Developers ? g.Developers.split(separator) : [];
         const publishers = g.Publishers ? g.Publishers.split(separator) : [];
         const platforms = g.Platforms ? g.Platforms.split(separator) : [];
@@ -682,7 +682,7 @@ export const makePlayniteGameRepository = (
           Genres: genres,
         } as FullGame;
       });
-      logService.debug(`Found ${games.length} games`);
+      logService.debug(`Found ${games?.length ?? 0} games`);
       return games;
     } catch (error) {
       logService.error("Failed to get all games from database", error as Error);

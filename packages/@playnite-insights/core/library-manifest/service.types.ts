@@ -1,10 +1,10 @@
 import {
-  PlayniteLibraryManifest,
+  type PlayniteLibraryManifest,
   type ValidationResult,
-} from "@playnite-insights/lib";
-import { PlayniteGameRepository } from "../playnite-game.types";
-import { FileSystemService } from "../file-system.types";
-import { LogService } from "../log.types";
+} from "@playnite-insights/lib/client";
+import type { PlayniteGameRepository } from "../playnite-game.types";
+import type { FileSystemService } from "../file-system.types";
+import type { LogService } from "../log.types";
 
 export type LibraryManifestServiceDeps = {
   getManifestData: PlayniteGameRepository["getManifestData"];

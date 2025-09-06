@@ -41,12 +41,12 @@
 	<Main class="flex flex-col gap-6">
 		<div>
 			<h1 class="text-2xl">{m.dash_recent_activity()}</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			<DailyActivityTable />
 		</div>
 		<div>
 			<h1 class="text-2xl">Overview</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			{@render infoSection(m.dash_games_in_library(), vm.getTotal())}
 			{@render infoSection(m.dash_intalled(), vm.getIsInstalled())}
 			{@render infoSection(m.dash_not_installed(), vm.getNotInstalled())}
@@ -89,10 +89,10 @@
 		</div>
 		<div>
 			<h1 class="text-2xl">Top 10</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			{#if vm.getTop10MostPlayedGames()}
 				<ul class="mb-6 grid list-none grid-cols-1 gap-4 p-0">
-					{#each vm.getTop10MostPlayedGames() as game}
+					{#each vm.getTop10MostPlayedGames() as game (game.Id)}
 						<li
 							class={[
 								'border-background-1 border-4 border-solid',

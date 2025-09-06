@@ -3,15 +3,15 @@ import {
 	type FullGame,
 	type GamePageSizes,
 	type GameSortBy,
-	type GameSortOrder
-} from '@playnite-insights/lib/client/playnite-game';
+	type GameSortOrder,
+} from '@playnite-insights/lib/client';
 import type { PageProps } from '../../../routes/$types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
 
 export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageProps['data']) => {
 	let resolvedGames: FullGame[] | undefined;
-	let isError: boolean = false;
+	const isError: boolean = false;
 
 	const getFilterParams = () => {
 		const query = data.query;
@@ -100,7 +100,7 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 
 	const applySorting = () => {
 		if (!resolvedGames) return;
-		let sorted = [...resolvedGames];
+		const sorted = [...resolvedGames];
 		const sortBy = data.sortBy;
 		const sortOrder = data.sortOrder;
 		const multiplier = sortOrder === 'asc' ? 1 : -1;
@@ -189,6 +189,6 @@ export const makeHomePageViewModel = (games: FullGame[] | undefined, data: PageP
 		getSortOrderLabel,
 		getSortByLabel,
 		getGameList,
-		getFiltersCount
+		getFiltersCount,
 	};
 };

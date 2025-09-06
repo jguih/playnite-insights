@@ -1,4 +1,7 @@
-import type { GameSession, GameSessionFilters } from "@playnite-insights/lib";
+import type {
+  GameSession,
+  GameSessionFilters,
+} from "@playnite-insights/lib/client";
 
 export type GameSessionRepository = {
   getById: (sessionId: GameSession["SessionId"]) => GameSession | undefined;

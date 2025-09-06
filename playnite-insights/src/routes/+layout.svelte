@@ -10,7 +10,6 @@
 		loadPlatforms,
 		loadRecentGameSessions,
 		loadServerTime,
-		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 
@@ -77,8 +76,6 @@
 			if (serverTimeInterval) clearInterval(serverTimeInterval);
 		};
 	});
-
-	$inspect(serverTimeSignal);
 </script>
 
 <svelte:head>

@@ -1,5 +1,5 @@
-import { FileSystemService } from "../file-system.types";
-import { LogService } from "../log.types";
+import type { FileSystemService } from "../file-system.types";
+import type { LogService } from "../log.types";
 
 export type MediaFilesServiceDeps = {
   fileSystemService: FileSystemService;

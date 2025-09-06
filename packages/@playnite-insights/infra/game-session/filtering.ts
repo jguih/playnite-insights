@@ -1,4 +1,4 @@
-import { GameSessionFilters } from "@playnite-insights/lib";
+import type { GameSessionFilters } from "@playnite-insights/lib/client";
 
 export const getWhereClauseAndParamsFromFilters = (
   filters?: GameSessionFilters
@@ -6,7 +6,7 @@ export const getWhereClauseAndParamsFromFilters = (
   const where: string[] = [];
   const params: string[] = [];
 
-  if (filters.startTime) {
+  if (filters?.startTime) {
     for (const startTimeFilter of filters.startTime) {
       switch (startTimeFilter.op) {
         case "between": {

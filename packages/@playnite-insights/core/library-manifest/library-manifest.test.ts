@@ -3,7 +3,7 @@ import { LibraryManifestService } from "./service.types";
 import { makeLibraryManifestService } from "./service";
 import { makeMocks } from "../tests/mocks";
 import { join } from "path";
-import { PlayniteLibraryManifest } from "@playnite-insights/lib";
+import { PlayniteLibraryManifest } from "@playnite-insights/lib/client";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 

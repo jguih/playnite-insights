@@ -1,16 +1,14 @@
-import { redirect } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
-import {
-	homePageSearchParamsKeys as paramKeys,
-	parseHomePageSearchParams
-} from '@playnite-insights/lib/client/home-page';
 import {
 	gamePageSizes,
 	gameSortBy,
-	gameSortOrder
-} from '@playnite-insights/lib/client/playnite-game';
+	gameSortOrder,
+	homePageSearchParamsKeys as paramKeys,
+	parseHomePageSearchParams,
+} from '@playnite-insights/lib/client';
+import { redirect } from '@sveltejs/kit';
+import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ url, fetch }) => {
+export const load: PageLoad = ({ url }) => {
 	const params = new URLSearchParams(url.searchParams);
 	let changed = false;
 	if (!params.has(paramKeys.page)) {
@@ -35,6 +33,6 @@ export const load: PageLoad = ({ url, fetch }) => {
 	const parsedValues = parseHomePageSearchParams(params);
 
 	return {
-		...parsedValues
+		...parsedValues,
 	};
 };
