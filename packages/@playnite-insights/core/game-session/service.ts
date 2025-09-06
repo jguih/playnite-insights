@@ -93,6 +93,13 @@ export const makeGameSessionService = ({
         existing.Status = sessionStatus.stale;
         return gameSessionRepository.update(existing);
       }
+      if (_isValidStaleCommand(command)) {
+        logService.info(
+          `Marking existing in progress session (ID: ${existing.SessionId}) as stale`
+        );
+        existing.Status = command.Status;
+        return gameSessionRepository.update(existing);
+      }
       if (!_isValidCloseCommand(command)) {
         logService.warning(
           `Attempted to close session with invalid command. Duration and EndTime needs to be valid`

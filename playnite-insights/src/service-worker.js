@@ -73,7 +73,7 @@ function notifyClients(message) {
 async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 'UNKNOWN' }) {
 	const cache = await caches.open(cacheName);
 	const cachedResponse = await cache.match(request);
-	const cachedETag = cachedResponse.headers.get("ETag");
+	const cachedETag = cachedResponse?.headers.get("ETag");
 
 	const fetchAndUpdate = fetch(request)
 		.then((networkResponse) => {

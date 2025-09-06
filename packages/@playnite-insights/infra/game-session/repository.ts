@@ -103,7 +103,7 @@ export const makeGameSessionRepository = (
       const stmt = db.prepare(query);
       const result = stmt.all();
       const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
-      logService.debug(`Found ${sessions.length} sessions`);
+      logService.debug(`Found ${sessions?.length ?? 0} sessions`);
       return sessions;
     } catch (error) {
       logService.error(`Failed get all sessions`, error as Error);
@@ -147,7 +147,7 @@ export const makeGameSessionRepository = (
       const stmt = db.prepare(query);
       const result = stmt.all(...params);
       const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
-      logService.debug(`Found ${sessions.length} sessions`);
+      logService.debug(`Found ${sessions?.length ?? 0} sessions`);
       return sessions;
     } catch (error) {
       logService.error(`Failed get all sessions`, error as Error);

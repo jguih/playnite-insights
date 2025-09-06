@@ -16,12 +16,10 @@
 	import SearchBar from '../SearchBar.svelte';
 	import FilterCheckboxFieldset from './FilterCheckboxFieldset.svelte';
 	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
-	import type { Company } from '@playnite-insights/lib/client/company';
 	import { m } from '$lib/paraglide/messages';
-	import type { Genre } from '@playnite-insights/lib/client/genre';
-	import type { Platform } from '@playnite-insights/lib/client/platform';
+	import { companySignal, genreSignal, platformSignal } from '$lib/client/app-state/AppData.svelte';
 
-	let {
+	const {
 		setSearchParam,
 		appendSearchParam,
 		removeSearchParam,
@@ -35,9 +33,6 @@
 		platformsParam,
 		renderSortOrderOptions,
 		renderSortByOptions,
-		companyList,
-		genreList,
-		platformList,
 		onClearAllFilters,
 	}: {
 		setSearchParam: (key: HomePageSearchParamKeys, value: string | boolean) => void;
@@ -53,13 +48,14 @@
 		platformsParam: string[];
 		renderSortOrderOptions: Snippet;
 		renderSortByOptions: Snippet;
-		companyList?: Company[];
-		genreList?: Genre[];
-		platformList?: Platform[];
 		onClearAllFilters: () => void;
 	} = $props();
 
 	const MAX_RENDER_OPTIONS = 30;
+
+	const companyList = $derived(companySignal.raw);
+	const platformList = $derived(platformSignal.raw);
+	const genreList = $derived(genreSignal.raw);
 
 	let developerSearchFilter: string | null = $state(null);
 	let developerListFiltered = $derived.by(() => {

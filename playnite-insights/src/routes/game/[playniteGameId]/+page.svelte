@@ -4,20 +4,18 @@
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { makeGamePageViewModel } from '$lib/client/viewmodel/game.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { companyStore, gamesSignal } from '$lib/client/app-state/AppData.svelte';
+	import { companySignal, gameSignal } from '$lib/client/app-state/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
+	import { GamePageViewModel } from '$lib/client/viewmodel/gamePageViewModel.svelte.js';
 
-	let { data } = $props();
-	const vm = $derived.by(() => {
-		const gameList = gamesSignal.raw ? [...gamesSignal.raw] : undefined;
-		const companies = companyStore.raw ? [...companyStore.raw] : undefined;
-		const game = gameList?.find((g) => g.Id === data.gameId);
-		return makeGamePageViewModel(game, companies);
+	const { data } = $props();
+	const vm = new GamePageViewModel({
+		getGameId: () => data.gameId,
+		gamesSignal: gameSignal,
+		companySignal: companySignal,
 	});
-	let game = $derived(vm.getGame());
-	$inspect(game);
+	$inspect(vm.game);
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -37,11 +35,11 @@
 		{/snippet}
 	</Header>
 	<Main bottomNav={false}>
-		{#if game}
-			<h2 class="mb-4 text-2xl font-semibold">{game.Name}</h2>
+		{#if vm.game}
+			<h2 class="mb-4 text-2xl font-semibold">{vm.game.Name}</h2>
 			<img
-				src={vm.getImageURL(game.BackgroundImage)}
-				alt={`${game.Name} background image`}
+				src={vm.getBackgroundImageUrl()}
+				alt={`${vm.game.Name} background image`}
 				class="aspect-3/2 w-full"
 			/>
 			<div class="mb-4 mt-4 flex flex-col">
@@ -50,18 +48,18 @@
 				{@render infoSection(m.game_info_playtime(), vm.getPlaytime())}
 				{@render infoSection(m.game_info_developers(), vm.getDevelopers())}
 				{@render infoSection(m.game_info_installed(), vm.getInstalled())}
-				{#if Boolean(game.IsInstalled)}
-					{@render infoSection(m.game_info_install_directory(), game.InstallDirectory ?? '')}
+				{#if Boolean(vm.game.IsInstalled)}
+					{@render infoSection(m.game_info_install_directory(), vm.game.InstallDirectory ?? '')}
 				{/if}
 			</div>
 			<div>
-				{#if game.Description}
-					{@html game.Description}
+				{#if vm.game.Description}
+					{@html vm.game.Description}
 				{/if}
 			</div>
 			<img
-				src={vm.getImageURL(game.Icon)}
-				alt={`${game.Name} icon`}
+				src={vm.getIconImageUrl()}
+				alt={`${vm.game.Name} icon`}
 				class="mt-4 aspect-square h-fit w-12 grow-0"
 			/>
 		{/if}

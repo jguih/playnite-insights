@@ -8,7 +8,7 @@
 		loadGames,
 		loadGenres,
 		loadPlatforms,
-		loadRecentActivity,
+		loadRecentGameSessions,
 		loadServerTime,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
@@ -18,16 +18,19 @@
 	let appName = $derived(data.appName);
 	let isLoading: boolean = $state(true);
 	const refetchInterval = {
-		recentActivity: 5_000,
+		recentGameSession: 5_000,
 		serverTime: 60_000,
 	};
-	let recentActivityInterval: ReturnType<typeof setInterval> | null = $state(null);
+	let recentGameSessionInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let serverTimeInterval: ReturnType<typeof setInterval> | null = $state(null);
 
 	const handleFocus = () => {
-		if (recentActivityInterval) clearInterval(recentActivityInterval);
-		loadRecentActivity().then(() => {
-			recentActivityInterval = setInterval(loadRecentActivity, refetchInterval.recentActivity);
+		if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
+		loadRecentGameSessions().then(() => {
+			recentGameSessionInterval = setInterval(
+				loadRecentGameSessions,
+				refetchInterval.recentGameSession,
+			);
 		});
 		if (serverTimeInterval) clearInterval(serverTimeInterval);
 		loadServerTime().then(() => {
@@ -41,7 +44,7 @@
 			const type = event.data.type;
 			if (type === 'RECENT_SESSION_UPDATE') {
 				console.debug('Re-fetching recent activity');
-				loadRecentActivity();
+				loadRecentGameSessions();
 			}
 		}
 	};
@@ -52,14 +55,17 @@
 			await loadGames();
 			await loadCompanies();
 			await loadDashData();
-			await loadRecentActivity();
+			await loadRecentGameSessions();
 			await loadGenres();
 			await loadPlatforms();
 			await loadServerTime();
 			isLoading = false;
 		})();
 
-		recentActivityInterval = setInterval(loadRecentActivity, refetchInterval.recentActivity);
+		recentGameSessionInterval = setInterval(
+			loadRecentGameSessions,
+			refetchInterval.recentGameSession,
+		);
 		serverTimeInterval = setInterval(loadServerTime, refetchInterval.serverTime);
 
 		navigator.serviceWorker?.addEventListener('message', handleMessage);
@@ -67,7 +73,7 @@
 		return () => {
 			window.removeEventListener('focus', handleFocus);
 			navigator.serviceWorker?.removeEventListener('message', handleMessage);
-			if (recentActivityInterval) clearInterval(recentActivityInterval);
+			if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
 			if (serverTimeInterval) clearInterval(serverTimeInterval);
 		};
 	});

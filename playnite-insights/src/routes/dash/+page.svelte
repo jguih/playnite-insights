@@ -13,11 +13,11 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import { makeDashPageViewModel } from '$lib/client/viewmodel/dash.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import { dashStore } from '$lib/client/app-state/AppData.svelte';
+	import { dashSignal } from '$lib/client/app-state/AppData.svelte';
 	import DailyActivityTable from '$lib/client/components/dash-page/DailyActivityTable.svelte';
 
 	let vm = $derived.by(() => {
-		const pageData = dashStore?.pageData ? { ...dashStore.pageData } : undefined;
+		const pageData = dashSignal?.pageData ? { ...dashSignal.pageData } : undefined;
 		return makeDashPageViewModel(pageData);
 	});
 </script>

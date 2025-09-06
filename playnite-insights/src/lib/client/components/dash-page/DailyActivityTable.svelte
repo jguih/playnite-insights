@@ -1,26 +1,22 @@
 <script lang="ts">
 	import type { GameSessionStatus } from '@playnite-insights/lib/client/game-session';
-	import { getUtcNow, recentActivitySignal } from '$lib/client/app-state/AppData.svelte';
+	import {
+		gameSignal,
+		recentGameSessionSignal,
+		serverTimeSignal,
+	} from '$lib/client/app-state/AppData.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
-	import {
-		getInProgressActivityPlaytime,
-		getInProgressSessionPlaytime,
-	} from '$lib/client/utils/game-session';
+	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
+	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 
-	let inProgressActivityPlaytime = $derived.by(() => {
-		const now = tick;
-		const inProgressActivity = recentActivitySignal.inProgressActivity;
-		return getInProgressActivityPlaytime({ inProgressActivity, now });
+	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
+	const vm = new RecentActivityViewModel({
+		gameSignal: gameSignal,
+		recentGameSessionSignal: recentGameSessionSignal,
+		dateTimeHandler: dateTimeHandler,
 	});
-	let inProgressSessionPlaytime = $derived.by(() => {
-		const now = tick;
-		const inProgressActivity = recentActivitySignal.inProgressActivity;
-		return getInProgressSessionPlaytime({ inProgressActivity, now });
-	});
-	let tick: number = $state(getUtcNow());
-	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let expandedActivitySessions = $state(new Set<string>());
 
 	const toggleExpandActivitySessions = (key: string) => {
@@ -51,9 +47,9 @@
 	};
 
 	onMount(() => {
-		tickInterval = setInterval(() => (tick = getUtcNow()), 1000);
+		vm.setTickInterval();
 		return () => {
-			if (tickInterval) clearInterval(tickInterval);
+			vm.clearTickInterval();
 		};
 	});
 </script>
@@ -82,7 +78,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#if !recentActivitySignal.recentActivityMap || recentActivitySignal.recentActivityMap.size === 0}
+			{#if vm.recentActivityMap.size === 0}
 				<tr class="bg-background-2 border-t border-neutral-800">
 					<td
 						colspan="3"
@@ -92,7 +88,7 @@
 					</td>
 				</tr>
 			{:else}
-				{#each recentActivitySignal.recentActivityMap as [key, activity], index}
+				{#each vm.recentActivityMap as [key, activity], index}
 					<tr
 						class={`${index % 2 === 0 ? 'bg-background-2' : ''} w-full border-t border-neutral-800`}
 						onclick={() => toggleExpandActivitySessions(key)}
@@ -105,9 +101,9 @@
 							{/if}
 						</td>
 						<td class="px-3 py-2">{activity.gameName}</td>
-						{#if activity.status === 'in_progress' && inProgressActivityPlaytime}
+						{#if activity.status === 'in_progress' && vm.inProgressActivityPlaytime}
 							<td class="px-3 py-2">
-								{getPlaytimeInHoursMinutesAndSeconds(inProgressActivityPlaytime)}
+								{getPlaytimeInHoursMinutesAndSeconds(vm.inProgressActivityPlaytime)}
 							</td>
 						{:else}
 							<td class="px-3 py-2">
@@ -140,7 +136,11 @@
 										{#each activity.sessions as session}
 											<tr>
 												{#if session.Status === 'in_progress'}
-													<td class="px-3 py-2 text-green-500">
+													<td class="text-success-light-fg px-3 py-2">
+														{getSessionStatusText(session.Status)}
+													</td>
+												{:else if session.Status === 'stale'}
+													<td class="text-warning-light-fg px-3 py-2">
 														{getSessionStatusText(session.Status)}
 													</td>
 												{:else}
@@ -149,8 +149,8 @@
 												<td class="px-3 py-2">{getSessionDateTimeText(session.StartTime)}</td>
 												<td class="px-3 py-2">{getSessionDateTimeText(session.EndTime)}</td>
 												<td class="px-3 py-2">
-													{#if session.Status === 'in_progress' && inProgressSessionPlaytime}
-														{getPlaytimeInHoursMinutesAndSeconds(inProgressSessionPlaytime)}
+													{#if session.Status === 'in_progress' && vm.inProgressSessionPlaytime}
+														{getPlaytimeInHoursMinutesAndSeconds(vm.inProgressSessionPlaytime)}
 													{:else}
 														{getPlaytimeInHoursMinutesAndSeconds(session.Duration ?? 0)}
 													{/if}

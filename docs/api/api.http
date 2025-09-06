@@ -23,7 +23,7 @@ GET {{protocol}}://{{host}}/api/session
 Content-Type: {{contentType}}
 
 ### Get all game sessions for today
-GET {{protocol}}://{{host}}/api/session?date=today
+GET {{protocol}}://{{host}}/api/session/recent
 Content-Type: {{contentType}}
 
 ### Create a session

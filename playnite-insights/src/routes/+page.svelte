@@ -3,7 +3,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ChevronLeft, ChevronRight, Gamepad } from '@lucide/svelte';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Select from '$lib/client/components/forms/Select.svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
@@ -28,18 +28,18 @@
 		type PlayniteGame,
 	} from '@playnite-insights/lib/client/playnite-game';
 	import {
-		companyStore,
-		gamesSignal,
-		genreStore,
-		platformStore,
-		recentActivitySignal,
+		gameSignal,
+		recentGameSessionSignal,
+		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
+	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
+	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 
 	let { data }: PageProps = $props();
 	let vm = $derived.by(() => {
-		const games = gamesSignal;
+		const games = gameSignal;
 		const gameList = games.raw ? [...games.raw] : undefined;
 		const params = { ...data };
 		return makeHomePageViewModel(gameList, params);
@@ -57,14 +57,12 @@
 	let platformsParam = $derived(data.platforms);
 	let genresParam = $derived(data.genres);
 	let main: HTMLElement | undefined = $state();
-	let inProgressGame = $derived.by(() => {
-		const activity = recentActivitySignal.inProgressActivity;
-		const games = gamesSignal.raw ?? [];
-		if (!activity) return null;
-		return games.find((g) => g.Id === activity.gameId) ?? null;
+	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
+	const recentActivityVm = new RecentActivityViewModel({
+		gameSignal: gameSignal,
+		recentGameSessionSignal: recentGameSessionSignal,
+		dateTimeHandler: dateTimeHandler,
 	});
-	$inspect(recentActivitySignal);
-	$inspect(inProgressGame);
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
@@ -182,9 +180,6 @@
 	{publishersParam}
 	{platformsParam}
 	{genresParam}
-	companyList={companyStore.raw}
-	platformList={platformStore.raw}
-	genreList={genreStore.raw}
 	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
@@ -297,21 +292,21 @@
 				<ChevronRight />
 			</LightButton>
 		</nav>
-		{#if inProgressGame}
+		{#if recentActivityVm.inProgressGame}
 			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
-					href={`/game/${inProgressGame.Id}/activity`}
+					href={`/game/${recentActivityVm.inProgressGame.Id}/activity`}
 				>
 					<img
-						src={vm.getImageURL(inProgressGame.CoverImage)}
-						alt={`${inProgressGame.Name} cover image`}
+						src={vm.getImageURL(recentActivityVm.inProgressGame.CoverImage)}
+						alt={`${recentActivityVm.inProgressGame.Name} cover image`}
 						loading="lazy"
 						class="h-13 max-w-13 truncate object-cover"
 					/>
 					<div class="leading-5">
 						<p class="text-md">{m.label_ongoing_session()}</p>
-						<p class="text-md font-semibold">{inProgressGame.Name}</p>
+						<p class="text-md font-semibold">{recentActivityVm.inProgressGame.Name}</p>
 					</div>
 					<ChevronRight class="ml-auto size-6" />
 				</LightAnchor>

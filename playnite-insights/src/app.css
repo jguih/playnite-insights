@@ -59,6 +59,15 @@
   --color-neutral-light-active-fg: var(--color-neutral-300);
   --color-neutral-light-disabled-bg: var(--color-neutral-800);
   --color-neutral-light-disabled-fg: var(--color-neutral-400);
+  /* Success variant */
+  --color-success-bg: var(--color-green-500);
+  --color-success-fg: var(--color-neutral-950);
+  /* Success light variant */
+  --color-success-light-bg: transparent;
+  --color-success-light-fg: var(--color-green-500);
+  /* Warning light variant */
+  --color-warning-light-bg: transparent;
+  --color-warning-light-fg: var(--color-yellow-600);
   /* END: Dark Theme */
 }
 
@@ -97,6 +106,15 @@
   --color-neutral-light-active-fg: var(--color-neutral-100);
   --color-neutral-light-disabled-bg: var(--color-neutral-800);
   --color-neutral-light-disabled-fg: var(--color-neutral-400);
+  /* Success variant */
+  --color-success-bg: var(--color-green-500);
+  --color-success-fg: var(--color-neutral-950);
+  /* Success light variant */
+  --color-success-light-bg: transparent;
+  --color-success-light-fg: var(--color-green-500);
+  /* Warning light variant */
+  --color-warning-light-bg: transparent;
+  --color-warning-light-fg: var(--color-yellow-600);
   /* END: Dark Theme */
 }
 

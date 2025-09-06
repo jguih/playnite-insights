@@ -6,45 +6,42 @@
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { getInProgressSessionPlaytime } from '$lib/client/utils/game-session';
 	import {
 		getPlayniteGameImageUrl,
 		getPlaytimeInHoursMinutesAndSeconds,
 	} from '$lib/client/utils/playnite-game';
 	import {
-		gamesSignal,
-		getUtcNow,
-		recentActivitySignal,
+		gameSignal,
+		recentGameSessionSignal,
+		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
 	import { type Note } from '@playnite-insights/lib/client/notes';
 	import { onMount } from 'svelte';
+	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
+	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 
-	let inProgressGame = $derived.by(() => {
-		const activity = recentActivitySignal.inProgressActivity;
-		const games = gamesSignal.raw ?? [];
-		if (!activity) return null;
-		return games.find((g) => g.Id === activity.gameId) ?? null;
+	const { data } = $props();
+	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
+	const vm = new RecentActivityViewModel({
+		gameSignal: gameSignal,
+		recentGameSessionSignal: recentGameSessionSignal,
+		dateTimeHandler: dateTimeHandler,
 	});
-	let tick: number = $state(getUtcNow());
-	let tickInterval: ReturnType<typeof setInterval> | null = $state(null);
-	let inProgressSessionPlaytime = $derived.by(() => {
-		const now = tick;
-		const inProgressActivity = recentActivitySignal.inProgressActivity;
-		return getInProgressSessionPlaytime({ inProgressActivity, now });
-	});
-	let sessionsToday = $derived.by(() => {
-		const inProgressActivity = recentActivitySignal.inProgressActivity;
+	const sessionsToday = $derived.by(() => {
+		const inProgressActivity = vm.inProgressActivity;
 		return inProgressActivity?.sessions.length;
 	});
 	let notes: Note[] = [];
 
 	onMount(() => {
-		tickInterval = setInterval(() => (tick = getUtcNow()), 1000);
+		vm.setTickInterval();
 		return () => {
-			if (tickInterval) clearInterval(tickInterval);
+			vm.clearTickInterval();
 		};
 	});
+
+	$inspect(vm.inProgressGame);
 </script>
 
 {#snippet noteCard(note: Note)}
@@ -65,13 +62,13 @@
 		{/snippet}
 	</Header>
 	<Main bottomNav={false}>
-		{#if !inProgressGame || !inProgressSessionPlaytime || !sessionsToday}
+		{#if !vm.inProgressGame || !vm.inProgressSessionPlaytime || !sessionsToday}
 			<p>No active session</p>
 		{:else}
 			<div class="mb-6 flex flex-row gap-4">
 				<img
-					src={getPlayniteGameImageUrl(inProgressGame.CoverImage)}
-					alt={`${inProgressGame.Name} cover image`}
+					src={getPlayniteGameImageUrl(vm.inProgressGame.CoverImage)}
+					alt={`${vm.inProgressGame.Name} cover image`}
 					loading="lazy"
 					class="h-7/8 w-26 object-cover"
 				/>
@@ -79,11 +76,11 @@
 					<p>
 						Você está jogando
 						<br />
-						<span class="text-3xl font-bold">{inProgressGame.Name}</span>
+						<span class="text-3xl font-bold">{vm.inProgressGame.Name}</span>
 					</p>
 					<Divider />
 					<p class="text-2xl">
-						{getPlaytimeInHoursMinutesAndSeconds(inProgressSessionPlaytime)}
+						{getPlaytimeInHoursMinutesAndSeconds(vm.inProgressSessionPlaytime)}
 					</p>
 					<small class="text-sm opacity-70">{sessionsToday} sessões hoje</small>
 				</div>
