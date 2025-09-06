@@ -6,7 +6,7 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import { makeGamePageViewModel } from '$lib/client/viewmodel/game.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { companyStore, gamesSignal } from '$lib/stores/AppData.svelte';
+	import { companyStore, gamesSignal } from '$lib/client/app-state/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
 
 	let { data } = $props();

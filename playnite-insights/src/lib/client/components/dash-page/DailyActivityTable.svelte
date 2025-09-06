@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { GameSessionStatus } from '@playnite-insights/lib/client/game-session';
-	import { getUtcNow, recentActivitySignal } from '$lib/stores/AppData.svelte';
+	import { getUtcNow, recentActivitySignal } from '$lib/client/app-state/AppData.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';

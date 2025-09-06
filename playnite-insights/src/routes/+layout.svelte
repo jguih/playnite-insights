@@ -11,7 +11,7 @@
 		loadRecentActivity,
 		loadServerTime,
 		serverTimeSignal,
-	} from '$lib/stores/AppData.svelte';
+	} from '$lib/client/app-state/AppData.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 
 	let { children, data }: { children: Snippet } & LayoutProps = $props();

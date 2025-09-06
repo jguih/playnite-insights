@@ -11,7 +11,11 @@
 		getPlayniteGameImageUrl,
 		getPlaytimeInHoursMinutesAndSeconds,
 	} from '$lib/client/utils/playnite-game';
-	import { gamesSignal, getUtcNow, recentActivitySignal } from '$lib/stores/AppData.svelte';
+	import {
+		gamesSignal,
+		getUtcNow,
+		recentActivitySignal,
+	} from '$lib/client/app-state/AppData.svelte';
 	import { ArrowLeft } from '@lucide/svelte';
 	import { type Note } from '@playnite-insights/lib/client/notes';
 	import { onMount } from 'svelte';

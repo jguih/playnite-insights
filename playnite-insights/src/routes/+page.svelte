@@ -33,7 +33,7 @@
 		genreStore,
 		platformStore,
 		recentActivitySignal,
-	} from '$lib/stores/AppData.svelte';
+	} from '$lib/client/app-state/AppData.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 

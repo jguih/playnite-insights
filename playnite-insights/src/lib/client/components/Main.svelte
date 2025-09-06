@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { mainScrollPosition } from '$lib/stores/main-scroll-position.svelte';
+	import { mainScrollPosition } from '$lib/client/app-state/MainScrollPosition.svelte';
 	import { onMount } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
