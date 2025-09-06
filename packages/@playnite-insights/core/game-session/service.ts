@@ -164,7 +164,7 @@ export const makeGameSessionService = ({
     return false;
   };
 
-  const recentActivity: GameSessionService["recentActivity"] = (date) => {
+  const getRecent: GameSessionService["getRecent"] = () => {
     let sessions: GameSession[] | undefined = undefined;
     const today = new Date();
     const start = new Date(
@@ -179,26 +179,19 @@ export const makeGameSessionService = ({
       `Fetching game sessions between ${start.toISOString()} and ${end.toISOString()}`
     );
 
-    if (date === "today") {
-      const filters: GameSessionFilters = {
-        startTime: [
-          {
-            op: "overlaps",
-            start: start.toISOString(),
-            end: end.toISOString(),
-          },
-        ],
-      };
-      sessions = gameSessionRepository.findAllBy({ filters });
-    } else {
-      sessions = gameSessionRepository.all();
-    }
-
-    return {
-      ServerDateTimeUtc: new Date().toISOString(),
-      Sessions: sessions,
+    const filters: GameSessionFilters = {
+      startTime: [
+        {
+          op: "overlaps",
+          start: start.toISOString(),
+          end: end.toISOString(),
+        },
+      ],
     };
+    sessions = gameSessionRepository.findAllBy({ filters });
+
+    return sessions;
   };
 
-  return { open, close, recentActivity };
+  return { open, close, getRecent };
 };

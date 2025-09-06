@@ -1,4 +1,5 @@
 import z from "zod";
+import { ISODateSchema } from "../schemas";
 
 export const sessionStatus = {
   inProgress: "in_progress",
@@ -20,10 +21,6 @@ export const gameSessionSchema = z.object({
   ]),
 });
 
-const ISODateSchema = z.string().refine((val) => !isNaN(Date.parse(val)), {
-  message: "Invalid ISO date string",
-});
-
 export const openGameSessionSchema = z.object({
   ClientUtcNow: ISODateSchema,
   SessionId: z.string(),
@@ -41,7 +38,6 @@ export const closeGameSessionSchema = z.object({
   Status: z.enum([sessionStatus.closed, sessionStatus.stale]),
 });
 
-export const gameSessionsDtoSchema = z.object({
-  ServerDateTimeUtc: ISODateSchema,
-  Sessions: z.array(gameSessionSchema).optional(),
-});
+export const getRecentSessionsResponseSchema = z
+  .array(gameSessionSchema)
+  .optional();

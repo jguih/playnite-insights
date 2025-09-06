@@ -5,7 +5,7 @@
 	import { page } from '$app/state';
 	import BaseInput from '../forms/BaseInput.svelte';
 	import BaseTextarea from '../forms/BaseTextarea.svelte';
-	import { currentNoteValues } from './Lib.svelte';
+	import { currentNoteSignal } from './Lib.svelte';
 
 	const closeNoteEditor = () => {
 		history.back();
@@ -21,12 +21,12 @@
 					type="text"
 					placeholder="Título"
 					class={['py-2 text-2xl font-semibold']}
-					bind:value={currentNoteValues.Title}
+					bind:value={currentNoteSignal.Title}
 				/>
 				<BaseTextarea
 					placeholder="Nota"
 					class={['grow resize-none']}
-					bind:value={currentNoteValues.Content}
+					bind:value={currentNoteSignal.Content}
 				></BaseTextarea>
 			</form>
 		</SidebarBody>

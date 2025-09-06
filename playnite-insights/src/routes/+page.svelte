@@ -301,7 +301,7 @@
 			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
-					href={`/session/current`}
+					href={`/game/${inProgressGame.Id}/activity`}
 				>
 					<img
 						src={vm.getImageURL(inProgressGame.CoverImage)}

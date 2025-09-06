@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import NoteEditor from '$lib/client/components/current-session-page/NoteEditor.svelte';
-	import { openNoteEditor } from '$lib/client/components/current-session-page/Lib.svelte';
+	import NoteEditor from '$lib/client/components/game-page/NoteEditor.svelte';
+	import { openNoteEditor } from '$lib/client/components/game-page/Lib.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';

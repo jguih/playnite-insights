@@ -1,4 +1,7 @@
-<script lang="ts" module>
+<script
+	lang="ts"
+	module
+>
 	/**
 	 * DO NOT use $derived.by in this file, in fact do not use it outside a component, ever.
 	 * It'll 100% break shit.
@@ -9,16 +12,17 @@
 	import { genreSchema, type Genre } from '@playnite-insights/lib/client/genre';
 	import { fullGameSchema, type FullGame } from '@playnite-insights/lib/client/playnite-game';
 	import {
-		gameSessionsDtoSchema,
+		getRecentSessionsResponseSchema,
 		type GameActivity,
 		type GameSession,
-		type GameSessionsDto
+		type GetRecentSessionsResponse,
 	} from '@playnite-insights/lib/client/game-session';
 	import { error } from '@sveltejs/kit';
 	import z from 'zod';
+	import { getServerTimeResponseSchema } from '@playnite-insights/lib/client/time';
 
 	type RecentActivitySignal = {
-		raw: GameSessionsDto | null;
+		raw: GetRecentSessionsResponse | null;
 		isLoading: boolean;
 		recentActivityMap: Map<string, GameActivity> | null;
 		inProgressActivity: GameActivity | null;
@@ -31,11 +35,11 @@
 		isLoading: false,
 		raw: null,
 		recentActivityMap: null,
-		inProgressActivity: null
+		inProgressActivity: null,
 	});
 	export const genreStore: { raw?: Genre[] } = $state({});
 	export const platformStore: { raw?: Platform[] } = $state({});
-	export const serverUtcNowStore: { value?: number; syncPoint?: number } = $state({});
+	export const serverTimeSignal: { utcNow?: number; syncPoint?: number } = $state({});
 
 	export const loadCompanies = async () => {
 		const origin = window.location.origin;
@@ -78,17 +82,13 @@
 
 	export const loadRecentActivity = async () => {
 		const origin = window.location.origin;
-		const url = `${origin}/api/session?date=today`;
+		const url = `${origin}/api/session/recent`;
 		try {
 			recentActivitySignal.isLoading = true;
 			const response = await fetch(url);
 			const asJson = await response.json();
-			const data = z.optional(gameSessionsDtoSchema).parse(asJson);
+			const data = z.optional(getRecentSessionsResponseSchema).parse(asJson);
 			if (data) {
-				if (!isNaN(Date.parse(data.ServerDateTimeUtc))) {
-					serverUtcNowStore.value = new Date(data.ServerDateTimeUtc).getTime();
-					serverUtcNowStore.syncPoint = performance.now();
-				}
 				const activitiesMap = toGameActivityMap(data);
 				let inProgressActivity = null;
 				for (const [, activity] of activitiesMap) {
@@ -108,14 +108,34 @@
 		}
 	};
 
+	export const loadServerTime = async () => {
+		const origin = window.location.origin;
+		const url = `${origin}/api/time/now`;
+		try {
+			recentActivitySignal.isLoading = true;
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error('Failed to fetch server time');
+			}
+			const asJson = await response.json();
+			const data = getServerTimeResponseSchema.parse(asJson);
+			serverTimeSignal.utcNow = new Date(data.utcNow).getTime();
+			serverTimeSignal.syncPoint = performance.now();
+		} catch (err) {
+			console.error(err);
+		} finally {
+			recentActivitySignal.isLoading = false;
+		}
+	};
+
 	/**
 	 * Get server-accurate UTC Now
 	 * @returns Number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC).
 	 */
 	export const getUtcNow = (): number => {
-		if (!serverUtcNowStore.syncPoint || !serverUtcNowStore.value) return Date.now();
-		const elapsed = performance.now() - serverUtcNowStore.syncPoint;
-		return serverUtcNowStore.value + elapsed;
+		if (!serverTimeSignal.syncPoint || !serverTimeSignal.utcNow) return Date.now();
+		const elapsed = performance.now() - serverTimeSignal.syncPoint;
+		return serverTimeSignal.utcNow + elapsed;
 	};
 
 	export const loadGenres = async () => {
@@ -144,10 +164,9 @@
 		}
 	};
 
-	const toGameActivityMap = (sessionsDto: GameSessionsDto) => {
+	const toGameActivityMap = (response: GetRecentSessionsResponse) => {
 		const data: Map<string, GameActivity> = new Map();
-
-		const sessions = sessionsDto.Sessions ?? [];
+		const sessions = response ?? [];
 
 		for (const session of sessions) {
 			const key = session.GameId ? session.GameId : session.GameName;
@@ -162,7 +181,7 @@
 					gameId: session.GameId ?? '',
 					status: currentStatus,
 					totalPlaytime: duration,
-					sessions: [session]
+					sessions: [session],
 				});
 				continue;
 			}

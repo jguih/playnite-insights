@@ -13,8 +13,12 @@
 		history.back();
 	};
 
-	export const currentNoteValues = $state<Pick<Note, 'Title' | 'Content'>>({
+	export const currentNoteSignal = $state<Note>({
+		Id: '',
 		Title: '',
-		Content: '',
+		Content: null,
+		ImagePath: null,
+		CreatedAt: '',
+		LastUpdatedAt: '',
 	});
 </script>

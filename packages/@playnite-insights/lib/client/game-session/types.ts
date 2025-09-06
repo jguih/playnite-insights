@@ -2,7 +2,7 @@ import z from "zod";
 import {
   closeGameSessionSchema,
   gameSessionSchema,
-  gameSessionsDtoSchema,
+  getRecentSessionsResponseSchema,
   openGameSessionSchema,
   sessionStatus,
 } from "./schemas";
@@ -10,7 +10,9 @@ import {
 export type GameSession = z.infer<typeof gameSessionSchema>;
 export type GameSessionStatus =
   (typeof sessionStatus)[keyof typeof sessionStatus];
-export type GameSessionsDto = z.infer<typeof gameSessionsDtoSchema>;
+export type GetRecentSessionsResponse = z.infer<
+  typeof getRecentSessionsResponseSchema
+>;
 export type OpenSessionCommand = z.infer<typeof openGameSessionSchema>;
 export type CloseSessionCommand = z.infer<typeof closeGameSessionSchema>;
 export type GameActivity = {
