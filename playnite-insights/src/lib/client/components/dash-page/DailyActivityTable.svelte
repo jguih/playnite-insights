@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { GameSessionStatus } from '@playnite-insights/lib/client/game-session';
 	import { getUtcNow, recentActivitySignal } from '$lib/stores/AppData.svelte';
-	import Loading from '../Loading.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
@@ -74,11 +73,6 @@
 {/snippet}
 
 <div class="relative block overflow-x-auto">
-	{#if recentActivitySignal.isLoading}
-		<div class="z-2 absolute inset-0 flex h-full w-full flex-col justify-center bg-neutral-400/20">
-			<Loading />
-		</div>
-	{/if}
 	<table class="bg-background-1 min-w-full shadow">
 		<thead class="bg-background-3">
 			<tr>

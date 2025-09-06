@@ -35,6 +35,17 @@
 		});
 	};
 
+	const handleMessage = (event: MessageEvent) => {
+		console.debug('Message from sw: ', event);
+		if (event.data && Object.hasOwn(event.data, 'type')) {
+			const type = event.data.type;
+			if (type === 'RECENT_SESSION_UPDATE') {
+				console.debug('Re-fetching recent activity');
+				loadRecentActivity();
+			}
+		}
+	};
+
 	onMount(() => {
 		(async () => {
 			isLoading = true;
@@ -51,9 +62,11 @@
 		recentActivityInterval = setInterval(loadRecentActivity, refetchInterval.recentActivity);
 		serverTimeInterval = setInterval(loadServerTime, refetchInterval.serverTime);
 
+		navigator.serviceWorker?.addEventListener('message', handleMessage);
 		window.addEventListener('focus', handleFocus);
 		return () => {
 			window.removeEventListener('focus', handleFocus);
+			navigator.serviceWorker?.removeEventListener('message', handleMessage);
 			if (recentActivityInterval) clearInterval(recentActivityInterval);
 			if (serverTimeInterval) clearInterval(serverTimeInterval);
 		};

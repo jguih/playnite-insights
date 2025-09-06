@@ -22,7 +22,8 @@
         "svelte.svelte-vscode",
         "ms-vscode.vscode-typescript-next",
         "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "humao.rest-client"
       ]
     }
   },

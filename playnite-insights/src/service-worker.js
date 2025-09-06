@@ -16,14 +16,14 @@ const PLATFORM_CACHE = `platform-data-${version}`;
 const RECENT_SESSION_CACHE = `recent-session-data-${version}`;
 const ALL_SESSION_CACHE = `all-session-cache-${version}`;
 const cacheKeysArr = [
-  CACHE, 
-  GAMES_CACHE, 
-  COMPANY_CACHE, 
-  DASH_CACHE, 
-  GENRE_CACHE, 
-  PLATFORM_CACHE, 
-  RECENT_SESSION_CACHE, 
-  ALL_SESSION_CACHE
+	CACHE,
+	GAMES_CACHE,
+	COMPANY_CACHE,
+	DASH_CACHE,
+	GENRE_CACHE,
+	PLATFORM_CACHE,
+	RECENT_SESSION_CACHE,
+	ALL_SESSION_CACHE
 ];
 
 const ASSETS = [
@@ -54,32 +54,43 @@ self.addEventListener('activate', (event) => {
 
 /**
  * 
+ * @param {object} message 
+ */
+function notifyClients(message) {
+	clients.matchAll().then((clients) => {
+		clients.forEach((client) => {
+			client.postMessage(message);
+		});
+	});
+}
+
+/**
+ * 
  * @param {Request} request 
  * @param {string} cacheName
+ * @param {object} updateMessage
  */
-async function staleWhileRevalidate(request, cacheName) {
+async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 'UNKNOWN' }) {
 	const cache = await caches.open(cacheName);
 	const cachedResponse = await cache.match(request);
+	const cachedETag = cachedResponse.headers.get("ETag");
 
-	// Start revalidation in the background
 	const fetchAndUpdate = fetch(request)
 		.then((networkResponse) => {
 			if (networkResponse.ok) {
 				cache.put(request, networkResponse.clone());
 			}
+			const networkETag = networkResponse.headers.get("ETag");
+			if (!cachedResponse || (cachedETag && networkETag && cachedETag !== networkETag)) {
+				notifyClients(updateMessage);
+			}
 			return networkResponse;
 		})
 		.catch(() => {
-			// Ignore fetch errors
+			return cachedResponse || new Response(null, { status: 503, statusText: 'Service Unavailable' });
 		});
 
-	// Respond with cache if available
-	if (cachedResponse) {
-		return cachedResponse;
-	}
-
-	// Else, wait for the network
-	return fetchAndUpdate;
+	return cachedResponse || fetchAndUpdate;
 }
 
 /**
@@ -103,7 +114,7 @@ async function networkFirst(request, cacheName) {
 			return cachedResponse;
 		}
 
-    console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
+		console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
 		return new Response("Network error and no cache available", { status: 503 });
 	}
 }
@@ -130,7 +141,7 @@ async function defaultFetchHandler(request, cacheName) {
 	} catch (err) {
 		const fallback = await cache.match(request);
 		if (fallback) return fallback;
-    
+
 		console.warn(`SW failed to fetch and found no cache for ${event.request.url}`, err);
 		return new Response("Network error and no cache available", { status: 503 });
 	}
@@ -147,39 +158,30 @@ self.addEventListener('fetch', (event) => {
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/dash')) {
+	if (url.pathname.startsWith('/api/dash')) {
 		event.respondWith(staleWhileRevalidate(event.request, DASH_CACHE));
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/company')) {
+	if (url.pathname.startsWith('/api/company')) {
 		event.respondWith(staleWhileRevalidate(event.request, COMPANY_CACHE));
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/genre')) {
+	if (url.pathname.startsWith('/api/genre')) {
 		event.respondWith(staleWhileRevalidate(event.request, GENRE_CACHE));
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/platform')) {
+	if (url.pathname.startsWith('/api/platform')) {
 		event.respondWith(staleWhileRevalidate(event.request, PLATFORM_CACHE));
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/session')) {
-    const date = url.searchParams.get('date');
-    
-    if (date === 'today') {
-      event.respondWith(staleWhileRevalidate(event.request, RECENT_SESSION_CACHE));
-      return;
-    }
-    
-    if (!date) {
-      event.respondWith(staleWhileRevalidate(event.request, ALL_SESSION_CACHE));
-      return;
-    }
-  }
+	if (url.pathname.startsWith('/api/session/recent')) {
+		event.respondWith(staleWhileRevalidate(event.request, RECENT_SESSION_CACHE, { type: "RECENT_SESSION_UPDATE" }));
+		return;
+	}
 
 	event.respondWith(defaultFetchHandler(event.request, CACHE));
 });
