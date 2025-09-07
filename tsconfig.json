@@ -12,7 +12,12 @@
       ],
       "@playnite-insights/infra": [
         "./packages/@playnite-insights/infra"
+      ],
+      "@playnite-insights/testing": [
+        "./packages/@playnite-insights/testing"
       ]
     },
+    "strict": true,
+    "strictNullChecks": true
   }
 }

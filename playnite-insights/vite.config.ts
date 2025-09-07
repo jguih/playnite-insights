@@ -1,6 +1,6 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
-import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -12,20 +12,17 @@ export default defineConfig({
 			outdir: './src/lib/paraglide',
 		}),
 	],
-	server: {
-		port: 3000,
-		allowedHosts: true,
-	},
+	server: { port: 3000, allowedHosts: true },
+	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {
-		reporters: ['default', ['json', { outputFile: 'test-results/unit-results.json' }]],
+		expect: { requireAssertions: true },
 		projects: [
 			{
 				extends: './vite.config.ts',
 				test: {
-					name: 'unit',
+					name: 'server',
 					environment: 'node',
-					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/e2e/**', 'src/**/*.svelte.{test,spec}.{js,ts}'],
+					include: ['src/**/*.{test,spec}.{js,ts}', 'src/**/*.svelte.{test,spec}.{js,ts}'],
 				},
 			},
 		],

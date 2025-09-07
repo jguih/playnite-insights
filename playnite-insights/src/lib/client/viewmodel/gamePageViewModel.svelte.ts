@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import type { FullGame } from '@playnite-insights/lib/client';
 import type { CompanySignal, GameSignal } from '../app-state/AppData.types';
-import { getPlayniteGameImageUrl } from '../utils/playnite-game';
+import { getPlayniteGameImageUrl, getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
 type GamePageViewModelProps = {
 	getGameId: () => string;
@@ -61,14 +61,7 @@ export class GamePageViewModel {
 	};
 
 	getPlaytime = (): string => {
-		if (this.#game?.Playtime && this.#game.Playtime > 0) {
-			const playtime = this.#game.Playtime; // In seconds
-			const totalMins = Math.floor(playtime / 60);
-			const hours = Math.floor(totalMins / 60);
-			const mins = totalMins % 60;
-			return m.game_playtime_in_hours_and_minutes({ hours: hours, mins: mins });
-		}
-		return m.game_playtime_in_hours_and_minutes({ hours: 0, mins: 0 });
+		return getPlaytimeInHoursAndMinutes(this.#game?.Playtime ?? 0);
 	};
 
 	getDevelopers = (): string => {

@@ -6,6 +6,21 @@ export type DashPageViewModelProps = {
 	dashSignal: DashSignal;
 };
 
+export const defaultPageData: DashPageData = {
+	totalGamesInLibrary: 0,
+	totalPlaytimeSeconds: 0,
+	played: 0,
+	notPlayed: 0,
+	notInstalled: 0,
+	isInstalled: 0,
+	topMostPlayedGames: [],
+	gameSessionsFromLast7Days: [],
+	charts: {
+		totalGamesOwnedOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
+		totalPlaytimeOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
+	},
+};
+
 export class DashPageViewModel {
 	#data: DashPageData;
 
@@ -13,20 +28,7 @@ export class DashPageViewModel {
 		this.#data = $derived.by(() => {
 			const pageData = dashSignal.pageData;
 			if (pageData) return pageData;
-			return {
-				total: 0,
-				totalPlaytime: 0,
-				played: 0,
-				notPlayed: 0,
-				notInstalled: 0,
-				isInstalled: 0,
-				topMostPlayedGames: [],
-				gameSessionsFromLast7Days: [],
-				charts: {
-					totalGamesOwnedOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
-					totalPlaytimeOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
-				},
-			};
+			return defaultPageData;
 		});
 	}
 
@@ -36,14 +38,14 @@ export class DashPageViewModel {
 
 	get playedPercentage(): number {
 		const pageData = this.#data;
-		return pageData && pageData.total > 0
-			? Math.floor((pageData.played * 100) / pageData.total)
+		return pageData && pageData.totalGamesInLibrary > 0
+			? Math.floor((pageData.played * 100) / pageData.totalGamesInLibrary)
 			: 0;
 	}
 
 	get totalPlaytime(): string {
 		const pageData = this.#data;
-		return getPlaytimeInHoursAndMinutes(pageData.totalPlaytime);
+		return getPlaytimeInHoursAndMinutes(pageData.totalPlaytimeSeconds);
 	}
 
 	getPlaytime = (playtime: number): string => getPlaytimeInHoursAndMinutes(playtime);

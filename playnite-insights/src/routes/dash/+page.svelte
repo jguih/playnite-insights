@@ -94,7 +94,7 @@
 							class={[
 								'border-background-1 border-4 border-solid',
 								'hover:border-primary-hover-bg',
-								'active:border-primary-active-bg',
+								'atotalGamesInLibrary:border-primary-active-bg',
 								'focus:border-primary-active-bg',
 								'm-0 p-0 shadow outline-0',
 							]}
@@ -113,6 +113,7 @@
 											<p class=" mt-1 text-lg">
 												<span class="text-primary-bg font-semibold">
 													{vm.getPlaytime(game.Playtime)}
+													totalGamesInLibraryspan>
 												</span>
 											</p>
 										</div>

@@ -1,5 +1,5 @@
 {
-  "name": "@playnite-insights/lib",
+  "name": "@playnite-insights/testing",
   "private": true,
   "version": "1.0.0",
   "main": "./index.ts",
@@ -8,10 +8,11 @@
     "@types/node": "^24.0.14"
   },
   "dependencies": {
-    "zod": "^3.25.76"
+    "@faker-js/faker": "^9.9.0",
+    "zod": "^3.25.76",
+    "@playnite-insights/lib": "workspace:*"
   },
   "exports": {
-    ".": "./index.ts",
-    "./client": "./client/index.ts"
+    ".": "./index.ts"
   }
 }

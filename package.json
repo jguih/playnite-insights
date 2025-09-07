@@ -7,19 +7,29 @@
     "playwright",
     "packages/@playnite-insights/lib",
     "packages/@playnite-insights/infra",
-    "packages/@playnite-insights/core"
+    "packages/@playnite-insights/core",
+    "packages/@playnite-insights/testing"
   ],
   "scripts": {
     "dev": "pnpm --filter playnite-insights run dev",
     "prod": "docker compose up -d --build --force-recreate app-prod",
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",
-    "test:unit": "pnpm --filter \"@playnite-insights*\" run test",
+    "test:unit": "pnpm --filter \"@playnite-insights*\" run test && pnpm -filter playnite-insights test:unit",
     "release": "standard-version",
     "prepare": "husky"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "standard-version": "^9.5.0"
+  },
+  "files": [
+    "build",
+    "package.json"
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

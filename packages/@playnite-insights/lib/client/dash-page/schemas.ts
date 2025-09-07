@@ -1,12 +1,12 @@
 import z from "zod";
-import { playniteGameSchema } from "../playnite-game/schemas";
 import { gameSessionSchema } from "../game-session/schemas";
+import { playniteGameSchema } from "../playnite-game/schemas";
 
 export const dashPageDataSchema = z.object({
-  total: z.number(),
+  totalGamesInLibrary: z.number(),
   isInstalled: z.number(),
   notInstalled: z.number(),
-  totalPlaytime: z.number(),
+  totalPlaytimeSeconds: z.number(),
   notPlayed: z.number(),
   played: z.number(),
   charts: z.object({

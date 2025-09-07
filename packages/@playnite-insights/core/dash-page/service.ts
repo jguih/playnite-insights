@@ -63,10 +63,10 @@ export const makeDashPageService = ({
       }) ?? [];
 
     return {
-      total,
+      totalGamesInLibrary: total,
       isInstalled,
       notInstalled,
-      totalPlaytime,
+      totalPlaytimeSeconds: totalPlaytime,
       notPlayed,
       played,
       charts,
