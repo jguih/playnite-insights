@@ -85,7 +85,7 @@
 	--color-primary-hover-bg: var(--pl-color-primary-700);
 	--color-primary-hover-fg: var(--pl-color-primary-100);
 	--color-primary-active-bg: var(--pl-color-primary-800);
-	--color-primary-active-fg: var(--pl-color-primary-400);
+	--color-primary-active-fg: var(--color-foreground);
 	--color-primary-disabled-bg: var(--color-neutral-800);
 	--color-primary-disabled-fg: var(--color-neutral-400);
 	/* Primary light variant */
@@ -95,7 +95,7 @@
 	--color-primary-light-hover-fg: var(--pl-color-primary-500);
 	--color-primary-light-active-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-active-fg: var(--pl-color-primary-700);
-	--color-primary-light-disabled-bg: var(--color-neutral-800);
+	--color-primary-light-disabled-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-disabled-fg: var(--color-neutral-400);
 	/* Neutral light variant */
 	--color-neutral-light-bg: transparent;

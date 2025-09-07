@@ -5,7 +5,7 @@ import type {
 	GetRecentSessionsResponse,
 } from '@playnite-insights/lib/client';
 
-export type GamesSignal = { raw: FullGame[] | null };
+export type GameSignal = { raw: FullGame[] | null };
 export type CompanySignal = { raw: Company[] | null };
 export type DashSignal = { pageData: DashPageData | null };
 export type ServerTimeSignal = { utcNow: number | null; syncPoint: number | null };

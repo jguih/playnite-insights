@@ -1,11 +1,11 @@
-import type { FullGame } from '@playnite-insights/lib/client';
-import type { CompanySignal, GamesSignal } from '../app-state/AppData.types';
-import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
+import type { FullGame } from '@playnite-insights/lib/client';
+import type { CompanySignal, GameSignal } from '../app-state/AppData.types';
+import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 
 type GamePageViewModelProps = {
 	getGameId: () => string;
-	gamesSignal: GamesSignal;
+	gamesSignal: GameSignal;
 	companySignal: CompanySignal;
 };
 

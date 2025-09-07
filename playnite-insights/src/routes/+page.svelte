@@ -12,6 +12,7 @@
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import Select from '$lib/client/components/forms/Select.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
@@ -20,7 +21,7 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import SearchBar from '$lib/client/components/SearchBar.svelte';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
-	import { makeHomePageViewModel } from '$lib/client/viewmodel/home';
+	import { HomePageViewModel } from '$lib/client/viewmodel/homePageViewModel.svelte';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
@@ -36,24 +37,6 @@
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-	let vm = $derived.by(() => {
-		const games = gameSignal;
-		const gameList = games.raw ? [...games.raw] : undefined;
-		const params = { ...data };
-		return makeHomePageViewModel(gameList, params);
-	});
-	let gamesFiltered = $derived(vm.getGameList());
-	let pageSizeParam = $derived(data.pageSize);
-	let pageParam = $derived(Number(data.page));
-	let installedParam = $derived(data.installed);
-	let notInstalledParam = $derived(data.notInstalled);
-	let sortByParam = $derived(data.sortBy);
-	let sortOrderParam = $derived(data.sortOrder);
-	let queryParam = $derived(data.query);
-	let developersParam = $derived(data.developers);
-	let publishersParam = $derived(data.publishers);
-	let platformsParam = $derived(data.platforms);
-	let genresParam = $derived(data.genres);
 	let main: HTMLElement | undefined = $state();
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const recentActivityVm = new RecentActivityViewModel({
@@ -61,6 +44,7 @@
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
 	});
+	const vm = new HomePageViewModel({ getPageData: () => data, gameSignal: gameSignal });
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
@@ -158,7 +142,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -170,14 +154,14 @@
 	{setSearchParam}
 	{appendSearchParam}
 	{removeSearchParam}
-	{installedParam}
-	{notInstalledParam}
-	{sortByParam}
-	{sortOrderParam}
-	{developersParam}
-	{publishersParam}
-	{platformsParam}
-	{genresParam}
+	installedParam={vm.filter.installed}
+	notInstalledParam={vm.filter.notInstalled}
+	sortByParam={vm.sort.by}
+	sortOrderParam={vm.sort.order}
+	developersParam={vm.filter.developers}
+	publishersParam={vm.filter.publishers}
+	platformsParam={vm.filter.platforms}
+	genresParam={vm.filter.genres}
 	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
@@ -207,24 +191,24 @@
 		{/snippet}
 		<div class="flex flex-row items-center gap-2">
 			<SearchBar
-				value={queryParam}
+				value={vm.filter.query}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
-			<FiltersButton counter={vm.getFiltersCount()} />
+			<FiltersButton counter={vm.filtersCount} />
 		</div>
 	</Header>
 	<Main bind:main>
 		<h1 class="text-lg">{m.home_title()}</h1>
 		<div class="mb-2">
-			{#if vm.getTotalGamesCount() === 0}
+			{#if vm.totalGamesCount === 0}
 				<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
 			{/if}
-			{#if vm.getTotalGamesCount() > 0}
+			{#if vm.totalGamesCount > 0}
 				<p class="text-sm text-neutral-300/60">
 					{m.home_showing_games_counter({
-						count1: vm.getGameCountFrom(),
-						count2: vm.getGameCountTo(),
-						totalCount: vm.getTotalGamesCount(),
+						count1: vm.gamesCountFrom,
+						count2: vm.gamesCountTo,
+						totalCount: vm.totalGamesCount,
 					})}
 				</p>
 			{/if}
@@ -236,20 +220,20 @@
 			{m.home_label_items_per_page()}
 			<Select
 				onchange={handleOnPageSizeChange}
-				value={pageSizeParam}
+				value={vm.pagination.pageSize}
 				id="page_size"
 				class={['bg-background-1!']}
 			>
-				{#each vm.getPageSizeList() as option (option)}
+				{#each vm.pageSizes as option (option)}
 					<option value={option}>{option}</option>
 				{/each}
 			</Select>
 		</label>
 
-		{#key pageParam}
-			{#if gamesFiltered}
+		{#key vm.pagination.currentPage}
+			{#if vm.games}
 				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-					{#each gamesFiltered as game (game.Id)}
+					{#each vm.games as game (game.Id)}
 						{@render gameCard(game)}
 					{/each}
 				</ul>
@@ -260,38 +244,43 @@
 
 		<nav class="mt-4 flex flex-row justify-center gap-2">
 			<LightButton
-				disabled={pageParam <= 1}
-				onclick={() => handleOnPageChange(pageParam - 1)}
+				disabled={vm.pagination.currentPage <= 1}
+				onclick={() => handleOnPageChange(vm.pagination.currentPage - 1)}
+				class={['px-2 py-1']}
+				aria-label="previous page"
 			>
 				<ChevronLeft />
 			</LightButton>
-
-			{#if pageParam > 1}
-				<LightButton onclick={() => handleOnPageChange(pageParam - 1)}>
-					{pageParam - 1}
-				</LightButton>
-			{/if}
+			{#each vm.pagination.pages as page (page)}
+				{#if page === null}
+					<span class="px-2">…</span>
+				{:else if page === vm.pagination.currentPage}
+					<SolidButton
+						selected
+						class={['px-2 py-1']}
+					>
+						{page}
+					</SolidButton>
+				{:else}
+					<LightButton
+						onclick={() => handleOnPageChange(page)}
+						class={['px-2 py-1']}
+					>
+						{page}</LightButton
+					>
+				{/if}
+			{/each}
 			<LightButton
-				onclick={() => handleOnPageChange(pageParam)}
-				selected
-			>
-				{pageParam}
-			</LightButton>
-			{#if pageParam < vm.getTotalPages()}
-				<LightButton onclick={() => handleOnPageChange(pageParam + 1)}>
-					{pageParam + 1}
-				</LightButton>
-			{/if}
-
-			<LightButton
-				onclick={() => handleOnPageChange(pageParam + 1)}
-				disabled={pageParam >= vm.getTotalPages()}
+				onclick={() => handleOnPageChange(vm.pagination.currentPage + 1)}
+				disabled={vm.pagination.currentPage >= vm.pagination.totalPages}
+				class={['px-2 py-1']}
+				aria-label="next page"
 			>
 				<ChevronRight />
 			</LightButton>
 		</nav>
 		{#if recentActivityVm.inProgressGame}
-			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-1000 w-full p-2">
+			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
 					href={`/game/${recentActivityVm.inProgressGame.Id}/activity`}

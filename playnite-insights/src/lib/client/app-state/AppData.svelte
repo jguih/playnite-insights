@@ -18,14 +18,14 @@
 	import type {
 		CompanySignal,
 		DashSignal,
-		GamesSignal,
+		GameSignal,
 		RecentGameSessionSignal,
 		ServerTimeSignal,
 	} from './AppData.types';
 
 	export const companySignal = $state<CompanySignal>({ raw: null });
 	export const dashSignal = $state<DashSignal>({ pageData: null });
-	export const gameSignal = $state<GamesSignal>({ raw: null });
+	export const gameSignal = $state<GameSignal>({ raw: null });
 	export const recentGameSessionSignal = $state<RecentGameSessionSignal>({
 		raw: null,
 		isLoading: false,

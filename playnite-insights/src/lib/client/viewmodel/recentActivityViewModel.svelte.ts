@@ -1,9 +1,9 @@
 import type { FullGame, GameActivity, GameSession } from '@playnite-insights/lib/client';
-import type { GamesSignal, RecentGameSessionSignal } from '../app-state/AppData.types';
+import type { GameSignal, RecentGameSessionSignal } from '../app-state/AppData.types';
 import type { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 
 export type RecentActivityViewModelProps = {
-	gameSignal: GamesSignal;
+	gameSignal: GameSignal;
 	recentGameSessionSignal: RecentGameSessionSignal;
 	dateTimeHandler: DateTimeHandler;
 };
