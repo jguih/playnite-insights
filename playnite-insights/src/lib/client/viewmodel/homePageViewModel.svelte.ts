@@ -100,8 +100,8 @@ export class HomePageViewModel {
 		const data = this.#getPageData();
 		let filtered = [...games];
 		const query = data.query;
-		const installed = data.installed && !data.notInstalled;
-		const notInstalled = !data.installed && data.notInstalled;
+		const installed = data.installed;
+		const notInstalled = data.notInstalled;
 		const developers = data.developers;
 		const publishers = data.publishers;
 		const platforms = data.platforms;
@@ -109,11 +109,11 @@ export class HomePageViewModel {
 		if (query !== null) {
 			filtered = games.filter((g) => g.Name?.toLowerCase().includes(query.toLowerCase()));
 		}
-		if (installed === true) {
-			filtered = filtered.filter((g) => +g.IsInstalled);
+		if (installed === true && notInstalled === false) {
+			filtered = filtered.filter((g) => g.IsInstalled);
 		}
-		if (notInstalled === true) {
-			filtered = filtered.filter((g) => !+g.IsInstalled);
+		if (notInstalled === true && installed === false) {
+			filtered = filtered.filter((g) => !g.IsInstalled);
 		}
 		if (developers.length > 0) {
 			filtered = filtered.filter((g) => {

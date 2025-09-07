@@ -2,10 +2,9 @@ import {
   type GamePageSize,
   type GameSortBy,
   type GameSortOrder,
+  gamePageSizes,
   gameSortBy,
-  isValidGamePageSize,
-  isValidGameSortBy,
-  isValidGameSortOrder,
+  gameSortOrder,
 } from "../playnite-game";
 import { homePageSearchParamsKeys } from "./schemas";
 
@@ -18,6 +17,29 @@ export const isValidPage = (value: string | null) => {
   );
 };
 
+export const isValidGameSortBy = (
+  value: string | null
+): value is GameSortBy => {
+  return gameSortBy.includes(value as GameSortBy);
+};
+
+export const isValidGameSortOrder = (
+  value: string | null
+): value is GameSortOrder => {
+  return gameSortOrder.includes(value as GameSortOrder);
+};
+
+export const isValidGamePageSize = (
+  value: string | null
+): value is GamePageSize => {
+  if (!value) return false;
+  return (
+    Number.isFinite(Number(value)) &&
+    Number.isInteger(Number(value)) &&
+    gamePageSizes.includes(value as GamePageSize)
+  );
+};
+
 export const parseHomePageSearchParams = (params: URLSearchParams) => {
   // Pagination
   const _pageSize = params.get(homePageSearchParamsKeys.pageSize);
@@ -26,7 +48,6 @@ export const parseHomePageSearchParams = (params: URLSearchParams) => {
     : "100";
   const _page = params.get(homePageSearchParamsKeys.page);
   const page: string = _page && isValidPage(_page) ? _page : "1";
-  const offset: number = (Number(page) - 1) * Number(pageSize);
   // Filtering
   const query = params.get(homePageSearchParamsKeys.query);
   const installed = params.get(homePageSearchParamsKeys.installed) === "1";
@@ -49,7 +70,6 @@ export const parseHomePageSearchParams = (params: URLSearchParams) => {
   return {
     pageSize,
     page,
-    offset,
     query,
     installed,
     notInstalled,

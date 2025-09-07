@@ -116,6 +116,9 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.31.0
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
       '@playnite-insights/testing':
         specifier: workspace:*
         version: link:../packages/@playnite-insights/testing

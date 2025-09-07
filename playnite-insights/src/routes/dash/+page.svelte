@@ -44,7 +44,7 @@
 		<div>
 			<h1 class="text-2xl">Overview</h1>
 			<Divider class="border-1 mb-4" />
-			{@render infoSection(m.dash_games_in_library(), vm.data.total)}
+			{@render infoSection(m.dash_games_in_library(), vm.data.totalGamesInLibrary)}
 			{@render infoSection(m.dash_intalled(), vm.data.isInstalled)}
 			{@render infoSection(m.dash_not_installed(), vm.data.notInstalled)}
 			{@render infoSection(m.dash_total_playtime(), vm.totalPlaytime)}
@@ -52,7 +52,7 @@
 				<small class="text-sm">
 					<span class="text-primary-bg">{vm.data.played}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
-					<span class="text-primary-bg font-semibold">{vm.data.total}</span>
+					<span class="text-primary-bg font-semibold">{vm.data.totalGamesInLibrary}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
 				</small>
 				<p class="text-md">{vm.playedPercentage}%</p>
@@ -113,7 +113,6 @@
 											<p class=" mt-1 text-lg">
 												<span class="text-primary-bg font-semibold">
 													{vm.getPlaytime(game.Playtime)}
-													totalGamesInLibraryspan>
 												</span>
 											</p>
 										</div>
