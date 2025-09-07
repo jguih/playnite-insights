@@ -1,25 +1,22 @@
 <script lang="ts">
+	import { dashSignal } from '$lib/client/app-state/AppData.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import GamesOwnedOverTime from '$lib/client/components/charts/GamesOwnedOverTime.svelte';
+	import DailyActivityTable from '$lib/client/components/dash-page/DailyActivityTable.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
-	import Main from '$lib/client/components/Main.svelte';
-	import { m } from '$lib/paraglide/messages.js';
-	import { getPlayniteGameImageUrl } from '$lib/client/utils/playnite-game.js';
-	import { ArrowLeft } from '@lucide/svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
-	import { makeDashPageViewModel } from '$lib/client/viewmodel/dash.js';
-	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import { dashSignal } from '$lib/client/app-state/AppData.svelte';
-	import DailyActivityTable from '$lib/client/components/dash-page/DailyActivityTable.svelte';
+	import Main from '$lib/client/components/Main.svelte';
+	import { getPlayniteGameImageUrl } from '$lib/client/utils/playnite-game.js';
+	import { DashPageViewModel } from '$lib/client/viewmodel/dashPageViewModel.svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import { ArrowLeft } from '@lucide/svelte';
 
-	let vm = $derived.by(() => {
-		const pageData = dashSignal?.pageData ? { ...dashSignal.pageData } : undefined;
-		return makeDashPageViewModel(pageData);
-	});
+	const vm = new DashPageViewModel({ dashSignal: dashSignal });
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -41,29 +38,29 @@
 	<Main class="flex flex-col gap-6">
 		<div>
 			<h1 class="text-2xl">{m.dash_recent_activity()}</h1>
-			<Divider class="mb-4 border-1" />
+			<Divider class="border-1 mb-4" />
 			<DailyActivityTable />
 		</div>
 		<div>
 			<h1 class="text-2xl">Overview</h1>
-			<Divider class="mb-4 border-1" />
-			{@render infoSection(m.dash_games_in_library(), vm.getTotal())}
-			{@render infoSection(m.dash_intalled(), vm.getIsInstalled())}
-			{@render infoSection(m.dash_not_installed(), vm.getNotInstalled())}
-			{@render infoSection(m.dash_total_playtime(), vm.getTotalPlaytime())}
+			<Divider class="border-1 mb-4" />
+			{@render infoSection(m.dash_games_in_library(), vm.data.total)}
+			{@render infoSection(m.dash_intalled(), vm.data.isInstalled)}
+			{@render infoSection(m.dash_not_installed(), vm.data.notInstalled)}
+			{@render infoSection(m.dash_total_playtime(), vm.totalPlaytime)}
 			<div class="flex flex-row justify-between">
 				<small class="text-sm">
-					<span class="text-primary-bg">{vm.getPlayed()}</span>
+					<span class="text-primary-bg">{vm.data.played}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
-					<span class="text-primary-bg font-semibold">{vm.getTotal()}</span>
+					<span class="text-primary-bg font-semibold">{vm.data.total}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
 				</small>
-				<p class="text-md">{vm.getTotalPlayedPercent()}%</p>
+				<p class="text-md">{vm.playedPercentage}%</p>
 			</div>
 			<div class="bg-background-1 mt-1 h-3 w-full rounded-sm">
 				<div
 					class="bg-primary-bg h-3 rounded-sm"
-					style="width: {vm.getTotalPlayedPercent()}%"
+					style="width: {vm.playedPercentage}%"
 				></div>
 			</div>
 		</div>
@@ -71,15 +68,15 @@
 			<h1 class="text-md truncate px-3 pt-4 font-semibold">
 				{m.dash_games_owned_over_last_n_months({ value: 6 })}
 			</h1>
-			{#if vm.getCharts().totalGamesOwnedOverLast6Months}
+			{#if vm.data.charts.totalGamesOwnedOverLast6Months}
 				<GamesOwnedOverTime
 					series={{
 						bar: {
-							data: vm.getCharts().totalGamesOwnedOverLast6Months.series.bar.data,
+							data: vm.data.charts.totalGamesOwnedOverLast6Months.series.bar.data,
 							label: m.dash_chart_label_games_owned(),
 						},
 					}}
-					xAxis={vm.getCharts().totalGamesOwnedOverLast6Months.xAxis}
+					xAxis={vm.data.charts.totalGamesOwnedOverLast6Months.xAxis}
 				/>
 			{:else}
 				<div>
@@ -89,10 +86,10 @@
 		</div>
 		<div>
 			<h1 class="text-2xl">Top 10</h1>
-			<Divider class="mb-4 border-1" />
-			{#if vm.getTop10MostPlayedGames()}
+			<Divider class="border-1 mb-4" />
+			{#if vm.data.topMostPlayedGames}
 				<ul class="mb-6 grid list-none grid-cols-1 gap-4 p-0">
-					{#each vm.getTop10MostPlayedGames() as game (game.Id)}
+					{#each vm.data.topMostPlayedGames as game (game.Id)}
 						<li
 							class={[
 								'border-background-1 border-4 border-solid',
