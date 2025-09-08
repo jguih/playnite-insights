@@ -1,8 +1,8 @@
-import type { GetServerTimeResponse } from '@playnite-insights/lib/client';
+import type { GetServerUtcNowResponse } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async () => {
-	const data: GetServerTimeResponse = {
+	const data: GetServerUtcNowResponse = {
 		utcNow: new Date().toISOString(),
 	};
 	return json(data);

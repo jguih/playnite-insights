@@ -1,4 +1,4 @@
-import type { PlayniteLibraryMetrics } from "@playnite-insights/lib/client";
+import type { GetPlayniteLibraryMetricsResponse } from "@playnite-insights/lib/client";
 import type {
   PlayniteLibraryService,
   PlayniteLibraryServiceDeps,
@@ -7,19 +7,26 @@ import type {
 export const makePlayniteLibraryService = ({
   logService,
   playniteLibrarySyncRepository,
-  getLastSixMonthsAbv,
 }: PlayniteLibraryServiceDeps): PlayniteLibraryService => {
   const getLibraryMetrics: PlayniteLibraryService["getLibraryMetrics"] = () => {
-    const last6Months = getLastSixMonthsAbv();
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0–11
+
     const gamesOwned =
       playniteLibrarySyncRepository.getGamesOwnedLastNMonths(6);
     const gamesOwnedLast6Months = gamesOwned.map((n, i) => {
+      const offset = gamesOwned.length - 1 - i;
+      const monthIndex = (currentMonth - offset + 12) % 12;
       return {
         count: n,
-        month: last6Months[i],
-      } as PlayniteLibraryMetrics["gamesOwnedLast6Months"][number];
+        monthIndex: monthIndex,
+      } as GetPlayniteLibraryMetricsResponse["gamesOwnedLast6Months"][number];
     });
-    logService.debug(`Found metrics for playnite game library`);
+    logService.debug(
+      `Found metrics for playnite game library: \ngamesOwnedLast6Months: ${JSON.stringify(
+        gamesOwnedLast6Months
+      )}`
+    );
 
     return {
       gamesOwnedLast6Months,

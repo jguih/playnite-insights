@@ -8,23 +8,37 @@ import { build, files, version } from '$service-worker';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sw = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self));
 
-const CACHE = `cache-${version}`;
-const GAMES_CACHE = `games-data-${version}`;
-const COMPANY_CACHE = `company-data-${version}`;
-const DASH_CACHE = `dashboard-data-${version}`;
-const GENRE_CACHE = `genre-data-${version}`;
-const PLATFORM_CACHE = `platform-data-${version}`;
-const RECENT_SESSION_CACHE = `recent-session-data-${version}`;
-const ALL_SESSION_CACHE = `all-session-cache-${version}`;
-const cacheKeysArr = [
-	CACHE,
-	GAMES_CACHE,
-	COMPANY_CACHE,
-	DASH_CACHE,
-	GENRE_CACHE,
-	PLATFORM_CACHE,
-	RECENT_SESSION_CACHE,
-	ALL_SESSION_CACHE,
+/**
+ * @param {string} name
+ */
+const cacheKey = (name) => `${name}-data-${version}`;
+
+const CacheKeys = {
+	APP: cacheKey('app'),
+	GAMES: cacheKey('games'),
+	COMPANY: cacheKey('company'),
+	DASHBOARD: cacheKey('dashboard'),
+	GENRE: cacheKey('genre'),
+	PLATFORM: cacheKey('platform'),
+	RECENT_SESSION: cacheKey('recent-session'),
+	LIBRARY_METRICS: cacheKey('library-metrics'),
+	GAME_IMAGES: cacheKey('game-images'),
+};
+
+const cacheKeysArr = Object.values(CacheKeys);
+
+/**
+ * @var {[string, string, { type?: string }?]} apiRoutes
+ */
+const apiRoutes = [
+	['/api/game', CacheKeys.GAMES],
+	['/api/dash', CacheKeys.DASHBOARD],
+	['/api/company', CacheKeys.COMPANY],
+	['/api/genre', CacheKeys.GENRE],
+	['/api/platform', CacheKeys.PLATFORM],
+	['/api/session/recent', CacheKeys.RECENT_SESSION, { type: 'RECENT_SESSION_UPDATE' }],
+	['/api/library/metrics', CacheKeys.LIBRARY_METRICS, { type: 'LIBRARY_METRICS_UPDATE' }],
+	['/api/assets/image', CacheKeys.GAME_IMAGES, { type: 'GAME_IMAGES_UPDATE' }],
 ];
 
 const ASSETS = [
@@ -35,7 +49,7 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
 	// Create a new cache and add all files to it
 	async function addFilesToCache() {
-		const cache = await caches.open(CACHE);
+		const cache = await caches.open(CacheKeys.APP);
 		await cache.addAll(ASSETS);
 	}
 
@@ -156,37 +170,12 @@ self.addEventListener('fetch', (event) => {
 
 	const url = new URL(event.request.url);
 
-	if (url.pathname.startsWith('/api/game')) {
-		event.respondWith(staleWhileRevalidate(event.request, GAMES_CACHE));
-		return;
+	for (const [prefix, cacheKey, options] of apiRoutes) {
+		if (url.pathname.startsWith(prefix)) {
+			event.respondWith(staleWhileRevalidate(event.request, cacheKey, options));
+			return;
+		}
 	}
 
-	if (url.pathname.startsWith('/api/dash')) {
-		event.respondWith(staleWhileRevalidate(event.request, DASH_CACHE));
-		return;
-	}
-
-	if (url.pathname.startsWith('/api/company')) {
-		event.respondWith(staleWhileRevalidate(event.request, COMPANY_CACHE));
-		return;
-	}
-
-	if (url.pathname.startsWith('/api/genre')) {
-		event.respondWith(staleWhileRevalidate(event.request, GENRE_CACHE));
-		return;
-	}
-
-	if (url.pathname.startsWith('/api/platform')) {
-		event.respondWith(staleWhileRevalidate(event.request, PLATFORM_CACHE));
-		return;
-	}
-
-	if (url.pathname.startsWith('/api/session/recent')) {
-		event.respondWith(
-			staleWhileRevalidate(event.request, RECENT_SESSION_CACHE, { type: 'RECENT_SESSION_UPDATE' }),
-		);
-		return;
-	}
-
-	event.respondWith(defaultFetchHandler(event.request, CACHE));
+	event.respondWith(defaultFetchHandler(event.request, CacheKeys.APP));
 });

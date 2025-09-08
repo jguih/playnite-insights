@@ -37,7 +37,3 @@ export const closeGameSessionSchema = z.object({
   Duration: z.number().optional().nullable(),
   Status: z.enum([sessionStatus.closed, sessionStatus.stale]),
 });
-
-export const getRecentSessionsResponseSchema = z
-  .array(gameSessionSchema)
-  .optional();

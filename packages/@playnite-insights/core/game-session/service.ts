@@ -200,7 +200,9 @@ export const makeGameSessionService = ({
     };
     sessions = gameSessionRepository.findAllBy({ filters });
 
-    return sessions;
+    logService.debug(`Found ${sessions?.length ?? 0} sessions`);
+
+    return sessions ?? null;
   };
 
   return { open, close, getRecent };

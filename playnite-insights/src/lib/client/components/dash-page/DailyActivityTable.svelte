@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { GameSessionStatus } from '@playnite-insights/lib/client';
 	import {
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
-	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
-	import { onMount } from 'svelte';
-	import { m } from '$lib/paraglide/messages';
-	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
+	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
+	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
+	import { m } from '$lib/paraglide/messages';
+	import type { GameSessionStatus } from '@playnite-insights/lib/client';
+	import { onMount } from 'svelte';
 
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const vm = new RecentActivityViewModel({

@@ -38,7 +38,7 @@ describe('HomePageViewModel', () => {
 		games.push(game);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -62,7 +62,7 @@ describe('HomePageViewModel', () => {
 			const games: FullGame[] = factory.getGames(gamesCount);
 			const vm = new HomePageViewModel({
 				getPageData: () => data,
-				gameSignal: { raw: games },
+				gameSignal: { raw: games, isLoading: false },
 			});
 			// Act
 			const filteredGames = vm.games;
@@ -87,7 +87,7 @@ describe('HomePageViewModel', () => {
 			games.push(gameUnderTest);
 			const vm = new HomePageViewModel({
 				getPageData: () => data,
-				gameSignal: { raw: games },
+				gameSignal: { raw: games, isLoading: false },
 			});
 			// Act
 			const filteredGames = vm.games;
@@ -151,7 +151,7 @@ describe('HomePageViewModel', () => {
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -215,7 +215,7 @@ describe('HomePageViewModel', () => {
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -279,7 +279,7 @@ describe('HomePageViewModel', () => {
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -343,7 +343,7 @@ describe('HomePageViewModel', () => {
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -371,7 +371,7 @@ describe('HomePageViewModel', () => {
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -393,7 +393,7 @@ describe('HomePageViewModel', () => {
 		const gameIds = games.map((g) => g.Id);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameSignal: { raw: games },
+			gameSignal: { raw: games, isLoading: false },
 		});
 		// Act
 		const paginatedGames = vm.games;

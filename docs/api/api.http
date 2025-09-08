@@ -14,10 +14,6 @@ Content-Type: {{contentType}}
 GET {{protocol}}://{{host}}/api/game
 Content-Type: {{contentType}}
 
-### Get dashboard page data
-GET {{protocol}}://{{host}}/api/dash
-Content-Type: {{contentType}}
-
 ### Get library metrics
 GET {{protocol}}://{{host}}/api/library/metrics
 Content-Type: {{contentType}}

@@ -1,4 +1,3 @@
-import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 import {
 	makeGameSessionService,
 	makeLibraryManifestService,
@@ -78,7 +77,6 @@ export const setupServices = () => {
 	});
 	const playniteLibraryService = makePlayniteLibraryService({
 		...commonDeps,
-		getLastSixMonthsAbv: getLastSixMonthsAbreviated,
 		logService: makeLogService('PlayniteLibraryService'),
 	});
 

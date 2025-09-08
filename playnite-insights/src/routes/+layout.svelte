@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		httpClientSignal,
 		loadCompanies,
 		loadGames,
 		loadGenres,
@@ -9,6 +10,7 @@
 		loadServerTime,
 	} from '$lib/client/app-state/AppData.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
+	import { FetchClient } from '$lib/client/fetch-client/fetchClient';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
@@ -49,6 +51,8 @@
 	};
 
 	onMount(() => {
+		httpClientSignal.client = new FetchClient({ url: window.location.origin });
+
 		(async () => {
 			isLoading = true;
 			await loadGames();

@@ -1,25 +1,25 @@
 <script lang="ts">
-	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
-	import NoteEditor from '$lib/client/components/game-page/NoteEditor.svelte';
-	import { openNoteEditor } from '$lib/client/components/game-page/Lib.svelte';
-	import Divider from '$lib/client/components/Divider.svelte';
-	import Header from '$lib/client/components/Header.svelte';
-	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
-	import Main from '$lib/client/components/Main.svelte';
-	import {
-		getPlayniteGameImageUrl,
-		getPlaytimeInHoursMinutesAndSeconds,
-	} from '$lib/client/utils/playnite-game';
 	import {
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import Divider from '$lib/client/components/Divider.svelte';
+	import { openNoteEditor } from '$lib/client/components/game-page/Lib.svelte';
+	import NoteEditor from '$lib/client/components/game-page/NoteEditor.svelte';
+	import Header from '$lib/client/components/Header.svelte';
+	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
+	import Main from '$lib/client/components/Main.svelte';
+	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
+	import {
+		getPlayniteGameImageUrl,
+		getPlaytimeInHoursMinutesAndSeconds,
+	} from '$lib/client/utils/playnite-game';
+	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
 	import { ArrowLeft } from '@lucide/svelte';
 	import { type Note } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
-	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
-	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const vm = new RecentActivityViewModel({
