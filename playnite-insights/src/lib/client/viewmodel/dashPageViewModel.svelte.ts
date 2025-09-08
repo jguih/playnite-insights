@@ -1,10 +1,10 @@
-import type { DashPageData, FullGame } from '@playnite-insights/lib/client';
-import type { DashSignal, GameSignal } from '../app-state/AppData.types';
+import type { FullGame, PlayniteLibraryMetrics } from '@playnite-insights/lib/client';
+import type { GameSignal, LibraryMetricsSignal } from '../app-state/AppData.types';
 import { getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
 export type DashPageViewModelProps = {
-	dashSignal: DashSignal;
 	gameSignal: GameSignal;
+	libraryMetricsSignal: LibraryMetricsSignal;
 };
 
 export type DashPageLibraryMetrics = {
@@ -15,36 +15,17 @@ export type DashPageLibraryMetrics = {
 	notInstalled: number;
 	isInstalled: number;
 	topMostPlayedGames: FullGame[];
-};
-
-export const defaultPageData: DashPageData = {
-	totalGamesInLibrary: 0,
-	totalPlaytimeSeconds: 0,
-	played: 0,
-	notPlayed: 0,
-	notInstalled: 0,
-	isInstalled: 0,
-	topMostPlayedGames: [],
-	gameSessionsFromLast7Days: [],
-	charts: {
-		totalGamesOwnedOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
-		totalPlaytimeOverLast6Months: { xAxis: { data: [] }, series: { bar: { data: [] } } },
-	},
+	gamesOwnedLast6Months: PlayniteLibraryMetrics['gamesOwnedLast6Months'] | null;
 };
 
 export class DashPageViewModel {
-	#data: DashPageData;
 	#gameSignal: GameSignal;
+	#libraryMetricsSignal: LibraryMetricsSignal;
 	#libraryMetrics: DashPageLibraryMetrics;
 
-	constructor({ dashSignal, gameSignal }: DashPageViewModelProps) {
+	constructor({ gameSignal, libraryMetricsSignal }: DashPageViewModelProps) {
 		this.#gameSignal = gameSignal;
-
-		this.#data = $derived.by(() => {
-			const pageData = dashSignal.pageData;
-			if (pageData) return pageData;
-			return defaultPageData;
-		});
+		this.#libraryMetricsSignal = libraryMetricsSignal;
 
 		this.#libraryMetrics = $derived.by(() => {
 			return this.getLibraryMetrics();
@@ -53,6 +34,7 @@ export class DashPageViewModel {
 
 	private getLibraryMetrics = (): DashPageLibraryMetrics => {
 		const games = this.#gameSignal?.raw ?? [];
+		const libraryMetrics = this.#libraryMetricsSignal.raw;
 		const totalGamesInLibrary = games.length;
 		const totalPlaytimeSeconds = games.reduce((prev, current) => prev + current.Playtime, 0);
 		const played = games.filter((g) => g.Playtime > 0).length;
@@ -60,6 +42,7 @@ export class DashPageViewModel {
 		const notInstalled = games.filter((g) => !g.IsInstalled).length;
 		const isInstalled = games.length - notInstalled;
 		const topMostPlayedGames = [...games].sort((a, b) => b.Playtime - a.Playtime).slice(0, 10);
+		const gamesOwnedLast6Months = libraryMetrics?.gamesOwnedLast6Months ?? null;
 		return {
 			played,
 			notPlayed,
@@ -68,15 +51,12 @@ export class DashPageViewModel {
 			topMostPlayedGames,
 			totalGamesInLibrary,
 			totalPlaytimeSeconds,
+			gamesOwnedLast6Months,
 		};
 	};
 
 	get libraryMetrics() {
 		return this.#libraryMetrics;
-	}
-
-	get data(): DashPageData {
-		return this.#data;
 	}
 
 	get playedPercentage(): number {

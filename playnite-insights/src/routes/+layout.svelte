@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { onMount, type Snippet } from 'svelte';
-	import '../app.css';
-	import type { LayoutProps } from './$types';
 	import {
 		loadCompanies,
-		loadDashData,
 		loadGames,
 		loadGenres,
+		loadLibraryMetrics,
 		loadPlatforms,
 		loadRecentGameSessions,
 		loadServerTime,
 	} from '$lib/client/app-state/AppData.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import '../app.css';
+	import type { LayoutProps } from './$types';
 
 	let { children, data }: { children: Snippet } & LayoutProps = $props();
 	let appName = $derived(data.appName);
@@ -53,11 +53,11 @@
 			isLoading = true;
 			await loadGames();
 			await loadCompanies();
-			await loadDashData();
 			await loadRecentGameSessions();
 			await loadGenres();
 			await loadPlatforms();
 			await loadServerTime();
+			await loadLibraryMetrics();
 			isLoading = false;
 		})();
 

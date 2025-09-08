@@ -5,27 +5,25 @@ import type {
   PlatformRepository,
   PlayniteGameRepository,
 } from "@playnite-insights/core";
-import z from "zod";
-import type { DatabaseSync } from "node:sqlite";
-import { getDb as _getDb } from "../database";
 import {
-  type DashPageData,
-  type DashPageGame,
+  fullGameRawSchema,
+  playniteGameSchema,
+  type Company,
+  type FullGame,
+  type GameFilters,
   type GameManifestData,
   type Genre,
   type Platform,
   type PlayniteGame,
-  playniteGameSchema,
-  type GameFilters,
-  fullGameRawSchema,
-  type FullGame,
-  type Company,
 } from "@playnite-insights/lib/client";
-import { defaultLogger } from "../services";
-import { defaultPlatformRepository } from "../repository/platform";
-import { defaultGenreRepository } from "../repository/genre";
-import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
+import type { DatabaseSync } from "node:sqlite";
+import z from "zod";
+import { getDb as _getDb } from "../database";
 import { defaultCompanyRepository } from "../repository/company";
+import { defaultGenreRepository } from "../repository/genre";
+import { defaultPlatformRepository } from "../repository/platform";
+import { defaultLogger } from "../services";
+import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
 
 type PlayniteGameRepositoryDeps = {
   getDb: () => DatabaseSync;
@@ -575,68 +573,6 @@ export const makePlayniteGameRepository = (
     }
   };
 
-  const getTopMostPlayedGamesForDashPage = (
-    total: number
-  ): DashPageData["topMostPlayedGames"] => {
-    const db = getDb();
-    const query = `
-      SELECT Id, Name, Playtime, CoverImage, LastActivity
-      FROM playnite_game
-      ORDER BY Playtime DESC
-      LIMIT ?;
-    `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all(total);
-      const data: DashPageData["topMostPlayedGames"] = [];
-      for (const entry of result) {
-        const value: DashPageData["topMostPlayedGames"][number] = {
-          Id: entry.Id as string,
-          Name: entry.Name as string | null,
-          Playtime: entry.Playtime as number,
-          CoverImage: entry.CoverImage as string | null,
-          LastActivity: entry.LastActivity as string | null,
-        };
-        data.push(value);
-      }
-      logService.debug(
-        `Found top ${total} most played games, returning ${data?.length} games`
-      );
-      return data;
-    } catch (error) {
-      logService.error(`Failed to get top most played games`, error as Error);
-      return [];
-    }
-  };
-
-  const getGamesForDashPage = (): DashPageGame[] => {
-    const db = getDb();
-    const query = `
-      SELECT Id, IsInstalled, Playtime
-      FROM playnite_game;
-    `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all();
-      const data: Array<DashPageGame> = [];
-      for (const entry of result) {
-        data.push({
-          Id: entry.Id as string,
-          IsInstalled: (entry.IsInstalled as number | null) ?? 0,
-          Playtime: entry.Playtime as number,
-        });
-      }
-      logService.debug(`Found ${data.length} games for dashboard page`);
-      return data;
-    } catch (error) {
-      logService.error(
-        `Failed to get games for dashboard page`,
-        error as Error
-      );
-      return [];
-    }
-  };
-
   const all: PlayniteGameRepository["all"] = () => {
     const db = getDb();
     const separator = ",";
@@ -707,8 +643,6 @@ export const makePlayniteGameRepository = (
     getTotalPlaytimeSeconds,
     getManifestData,
     getTotal,
-    getTopMostPlayedGamesForDashPage,
-    getGamesForDashPage,
     all,
   };
 };

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dashSignal, gameSignal } from '$lib/client/app-state/AppData.svelte';
+	import { gameSignal, libraryMetricsSignal } from '$lib/client/app-state/AppData.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -16,7 +16,10 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { ArrowLeft } from '@lucide/svelte';
 
-	const vm = new DashPageViewModel({ dashSignal: dashSignal, gameSignal: gameSignal });
+	const vm = new DashPageViewModel({
+		gameSignal: gameSignal,
+		libraryMetricsSignal: libraryMetricsSignal,
+	});
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -38,12 +41,12 @@
 	<Main class="flex flex-col gap-6">
 		<div>
 			<h1 class="text-2xl">{m.dash_recent_activity()}</h1>
-			<Divider class="mb-4 border-1" />
+			<Divider class="border-1 mb-4" />
 			<DailyActivityTable />
 		</div>
 		<div>
 			<h1 class="text-2xl">Overview</h1>
-			<Divider class="mb-4 border-1" />
+			<Divider class="border-1 mb-4" />
 			{@render infoSection(m.dash_games_in_library(), vm.libraryMetrics.totalGamesInLibrary)}
 			{@render infoSection(m.dash_intalled(), vm.libraryMetrics.isInstalled)}
 			{@render infoSection(m.dash_not_installed(), vm.libraryMetrics.notInstalled)}
@@ -68,15 +71,15 @@
 			<h1 class="text-md truncate px-3 pt-4 font-semibold">
 				{m.dash_games_owned_over_last_n_months({ value: 6 })}
 			</h1>
-			{#if vm.data.charts.totalGamesOwnedOverLast6Months}
+			{#if vm.libraryMetrics.gamesOwnedLast6Months}
 				<GamesOwnedOverTime
 					series={{
 						bar: {
-							data: vm.data.charts.totalGamesOwnedOverLast6Months.series.bar.data,
+							data: vm.libraryMetrics.gamesOwnedLast6Months.map((d) => d.count),
 							label: m.dash_chart_label_games_owned(),
 						},
 					}}
-					xAxis={vm.data.charts.totalGamesOwnedOverLast6Months.xAxis}
+					xAxis={{ data: vm.libraryMetrics.gamesOwnedLast6Months.map((d) => d.month) }}
 				/>
 			{:else}
 				<div>
@@ -86,7 +89,7 @@
 		</div>
 		<div>
 			<h1 class="text-2xl">Top 10</h1>
-			<Divider class="mb-4 border-1" />
+			<Divider class="border-1 mb-4" />
 			{#if vm.libraryMetrics.topMostPlayedGames.length > 0}
 				<ul class="mb-6 grid list-none grid-cols-1 gap-4 p-0">
 					{#each vm.libraryMetrics.topMostPlayedGames as game (game.Id)}

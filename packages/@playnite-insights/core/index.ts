@@ -1,5 +1,4 @@
 export * from "./company.types";
-export * from "./dash-page";
 export * from "./file-system.types";
 export * from "./game-session";
 export * from "./game-session/service.types";

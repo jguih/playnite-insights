@@ -1,7 +1,5 @@
 import type {
   Company,
-  DashPageData,
-  DashPageGame as DashPageGame,
   FullGame,
   GameFilters,
   GameManifestData,
@@ -51,18 +49,6 @@ export type PlayniteGameRepository = {
   getManifestData: () => GameManifestData | undefined;
   getTotal: (filters?: GameFilters) => number;
   getTotalPlaytimeSeconds: () => number | undefined;
-  /**
-   * Gets the top `total` games for dashboard page
-   * @param total Number of games to return
-   * @returns
-   */
-  getTopMostPlayedGamesForDashPage: (
-    total: number
-  ) => DashPageData["topMostPlayedGames"];
-  /**
-   * Gets games for dashboard page
-   */
-  getGamesForDashPage: () => DashPageGame[];
   /**
    * Returns a list with all games
    */

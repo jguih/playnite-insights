@@ -1,5 +1,4 @@
 export * from "./company";
-export * from "./dash-page";
 export * from "./game-session";
 export * from "./genre";
 export * from "./home-page";

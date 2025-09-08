@@ -1,6 +1,5 @@
 import { getLastSixMonthsAbreviated } from '$lib/utils/date';
 import {
-	makeDashPageService,
 	makeGameSessionService,
 	makeLibraryManifestService,
 	makeMediaFilesService,
@@ -69,11 +68,6 @@ export const setupServices = () => {
 		libraryManifestService: libraryManifestService,
 		logService: makeLogService('PlayniteLibraryImporterService'),
 	});
-	const dashPageService = makeDashPageService({
-		...commonDeps,
-		getLastSixMonthsAbv: getLastSixMonthsAbreviated,
-		logService: makeLogService('DashPageService'),
-	});
 	const mediaFilesService = makeMediaFilesService({
 		...commonDeps,
 		logService: makeLogService('MediaFilesService'),
@@ -93,7 +87,6 @@ export const setupServices = () => {
 		log: logService,
 		libraryManifest: libraryManifestService,
 		playniteLibraryImporter: playniteLibraryImporterService,
-		dashPage: dashPageService,
 		mediaFiles: mediaFilesService,
 		gameSession: gameSessionService,
 		playniteLibrary: playniteLibraryService,

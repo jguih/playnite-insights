@@ -4,12 +4,12 @@
 >
 	import {
 		companySchema,
-		dashPageDataSchema,
 		fullGameSchema,
 		genreSchema,
 		getRecentSessionsResponseSchema,
 		getServerTimeResponseSchema,
 		platformSchema,
+		playniteLibraryMetricsSchema,
 		type Genre,
 		type Platform,
 	} from '@playnite-insights/lib/client';
@@ -17,14 +17,13 @@
 	import z from 'zod';
 	import type {
 		CompanySignal,
-		DashSignal,
 		GameSignal,
+		LibraryMetricsSignal,
 		RecentGameSessionSignal,
 		ServerTimeSignal,
 	} from './AppData.types';
 
 	export const companySignal = $state<CompanySignal>({ raw: null });
-	export const dashSignal = $state<DashSignal>({ pageData: null });
 	export const gameSignal = $state<GameSignal>({ raw: null });
 	export const recentGameSessionSignal = $state<RecentGameSessionSignal>({
 		raw: null,
@@ -33,6 +32,26 @@
 	export const genreSignal: { raw?: Genre[] } = $state({});
 	export const platformSignal: { raw?: Platform[] } = $state({});
 	export const serverTimeSignal = $state<ServerTimeSignal>({ syncPoint: null, utcNow: null });
+	export const libraryMetricsSignal = $state<LibraryMetricsSignal>({ raw: null, isLoading: false });
+
+	export const loadLibraryMetrics = async () => {
+		const origin = window.location.origin;
+		const url = `${origin}/api/library/metrics`;
+		try {
+			libraryMetricsSignal.isLoading = true;
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error('Failed to fetch library metrics');
+			}
+			const asJson = await response.json();
+			const metrics = z.optional(playniteLibraryMetricsSchema).parse(asJson);
+			if (metrics) libraryMetricsSignal.raw = metrics;
+		} catch (err) {
+			error(500, `${(err as Error).message}`);
+		} finally {
+			libraryMetricsSignal.isLoading = false;
+		}
+	};
 
 	export const loadCompanies = async () => {
 		const origin = window.location.origin;
@@ -63,22 +82,6 @@
 			if (games) gameSignal.raw = games;
 		} catch (err) {
 			error(500, `Failed to fetch games: ${(err as Error).message}`);
-		}
-	};
-
-	export const loadDashData = async () => {
-		const origin = window.location.origin;
-		const url = `${origin}/api/dash`;
-		try {
-			const response = await fetch(url);
-			if (!response.ok) {
-				throw new Error('Failed to fetch dash data');
-			}
-			const asJson = await response.json();
-			const data = z.optional(dashPageDataSchema).parse(asJson);
-			if (data) dashSignal.pageData = data;
-		} catch (err) {
-			error(500, `Failed to fetch dashboard page data: ${(err as Error).message}`);
 		}
 	};
 
