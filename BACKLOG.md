@@ -23,19 +23,20 @@
 - Fix: Orphan sessions on game delete
 - Fix: Media files being deleted even when game delete fails
 - Dashboard page
+- Bottom nav improvements
 
 ## 🛠️ In Progress
 
-- Bottom nav improvements
+- Active session page:
+  - Display current game being played
+  - Allow user to manage notes linked to the current session
 
 ## 📌 To Do
 
+- Image caching limit
 - Display game trailer in game page
 - Display related owned games in game page
 - Settings page (change language)
-- Active session page:
-    - Display current game being played
-    - Allow user to manage notes linked to the current session
 
 ## 💡 Ideas
 

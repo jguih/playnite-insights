@@ -17,7 +17,6 @@ const CacheKeys = {
 	APP: cacheKey('app'),
 	GAMES: cacheKey('games'),
 	COMPANY: cacheKey('company'),
-	DASHBOARD: cacheKey('dashboard'),
 	GENRE: cacheKey('genre'),
 	PLATFORM: cacheKey('platform'),
 	RECENT_SESSION: cacheKey('recent-session'),
@@ -31,11 +30,10 @@ const cacheKeysArr = Object.values(CacheKeys);
  * @var {[string, string, { type?: string }?]} apiRoutes
  */
 const apiRoutes = [
-	['/api/game', CacheKeys.GAMES],
-	['/api/dash', CacheKeys.DASHBOARD],
-	['/api/company', CacheKeys.COMPANY],
-	['/api/genre', CacheKeys.GENRE],
-	['/api/platform', CacheKeys.PLATFORM],
+	['/api/game', CacheKeys.GAMES, { type: 'GAMES_UPDATE' }],
+	['/api/company', CacheKeys.COMPANY, { type: 'COMPANY_UPDATE' }],
+	['/api/genre', CacheKeys.GENRE, { type: 'GENRE_UPDATE' }],
+	['/api/platform', CacheKeys.PLATFORM, { type: 'PLATFORM_UPDATE' }],
 	['/api/session/recent', CacheKeys.RECENT_SESSION, { type: 'RECENT_SESSION_UPDATE' }],
 	['/api/library/metrics', CacheKeys.LIBRARY_METRICS, { type: 'LIBRARY_METRICS_UPDATE' }],
 	['/api/assets/image', CacheKeys.GAME_IMAGES, { type: 'GAME_IMAGES_UPDATE' }],

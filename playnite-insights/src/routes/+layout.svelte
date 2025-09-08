@@ -25,27 +25,54 @@
 	let recentGameSessionInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let serverTimeInterval: ReturnType<typeof setInterval> | null = $state(null);
 
+	const loadAllAppData = () => {
+		return Promise.all([
+			loadGames(),
+			loadCompanies(),
+			loadRecentGameSessions(),
+			loadGenres(),
+			loadPlatforms(),
+			loadServerTime(),
+			loadLibraryMetrics(),
+		]);
+	};
+
 	const handleFocus = () => {
-		if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
-		loadRecentGameSessions().then(() => {
-			recentGameSessionInterval = setInterval(
-				loadRecentGameSessions,
-				refetchInterval.recentGameSession,
-			);
-		});
 		if (serverTimeInterval) clearInterval(serverTimeInterval);
-		loadServerTime().then(() => {
-			serverTimeInterval = setInterval(loadServerTime, refetchInterval.serverTime);
+		if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
+		loadAllAppData().then(() => {
+			serverTimeInterval = setInterval(loadAllAppData, 60_000);
+			recentGameSessionInterval = setInterval(loadRecentGameSessions, 5_000);
 		});
 	};
 
 	const handleMessage = (event: MessageEvent) => {
-		console.debug('Message from sw: ', event);
-		if (event.data && Object.hasOwn(event.data, 'type')) {
-			const type = event.data.type;
-			if (type === 'RECENT_SESSION_UPDATE') {
-				console.debug('Re-fetching recent activity');
+		if (!event.data || !Object.hasOwn(event.data, 'type')) return;
+		const type = event.data.type;
+		switch (type) {
+			case 'GAMES_UPDATE': {
+				loadGames();
+				break;
+			}
+			case 'COMPANY_UPDATE': {
+				loadCompanies();
+				break;
+			}
+			case 'RECENT_SESSION_UPDATE': {
 				loadRecentGameSessions();
+				break;
+			}
+			case 'GENRE_UPDATE': {
+				loadGenres();
+				break;
+			}
+			case 'PLATFORM_UPDATE': {
+				loadPlatforms();
+				break;
+			}
+			case 'LIBRARY_METRICS_UPDATE': {
+				loadLibraryMetrics();
+				break;
 			}
 		}
 	};
@@ -55,13 +82,7 @@
 
 		(async () => {
 			isLoading = true;
-			await loadGames();
-			await loadCompanies();
-			await loadRecentGameSessions();
-			await loadGenres();
-			await loadPlatforms();
-			await loadServerTime();
-			await loadLibraryMetrics();
+			await loadAllAppData();
 			isLoading = false;
 		})();
 
