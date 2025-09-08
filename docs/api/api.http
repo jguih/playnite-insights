@@ -18,6 +18,10 @@ Content-Type: {{contentType}}
 GET {{protocol}}://{{host}}/api/dash
 Content-Type: {{contentType}}
 
+### Get library metrics
+GET {{protocol}}://{{host}}/api/library/metrics
+Content-Type: {{contentType}}
+
 ### Get all game sessions
 GET {{protocol}}://{{host}}/api/session
 Content-Type: {{contentType}}

@@ -391,16 +391,16 @@ describe('HomePageViewModel', () => {
 		const gamesUnderTest: FullGame[] = factory.getGames(30);
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest]);
 		const gameIds = games.map((g) => g.Id);
-		const uniqueIds = new Set(gameIds);
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
 			gameSignal: { raw: games },
 		});
 		// Act
 		const paginatedGames = vm.games;
+		const uniquePaginatedGames = new Set(paginatedGames?.map((g) => g.Id));
 		// Assert
 		expect(paginatedGames?.length).toBeLessThanOrEqual(Number(data.pageSize));
 		expect(paginatedGames?.every((g) => gameIds.includes(g.Id)));
-		expect(uniqueIds.size).toBe(gameIds.length);
+		expect(uniquePaginatedGames.size).toBe(paginatedGames?.length);
 	});
 });

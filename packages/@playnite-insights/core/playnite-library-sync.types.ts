@@ -15,5 +15,5 @@ export type PlayniteLibrarySyncRepository = {
    *
    * @returns An array with 0 to 6 numbers representing total games owned over the last 6 months.
    */
-  getTotalGamesOwnedOverLast6Months: () => number[];
+  getGamesOwnedLastNMonths: (n?: number) => number[];
 };

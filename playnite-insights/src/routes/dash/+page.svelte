@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dashSignal } from '$lib/client/app-state/AppData.svelte';
+	import { dashSignal, gameSignal } from '$lib/client/app-state/AppData.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -16,7 +16,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { ArrowLeft } from '@lucide/svelte';
 
-	const vm = new DashPageViewModel({ dashSignal: dashSignal });
+	const vm = new DashPageViewModel({ dashSignal: dashSignal, gameSignal: gameSignal });
 </script>
 
 {#snippet infoSection(label: string, value: string | number)}
@@ -38,21 +38,21 @@
 	<Main class="flex flex-col gap-6">
 		<div>
 			<h1 class="text-2xl">{m.dash_recent_activity()}</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			<DailyActivityTable />
 		</div>
 		<div>
 			<h1 class="text-2xl">Overview</h1>
-			<Divider class="border-1 mb-4" />
-			{@render infoSection(m.dash_games_in_library(), vm.data.totalGamesInLibrary)}
-			{@render infoSection(m.dash_intalled(), vm.data.isInstalled)}
-			{@render infoSection(m.dash_not_installed(), vm.data.notInstalled)}
+			<Divider class="mb-4 border-1" />
+			{@render infoSection(m.dash_games_in_library(), vm.libraryMetrics.totalGamesInLibrary)}
+			{@render infoSection(m.dash_intalled(), vm.libraryMetrics.isInstalled)}
+			{@render infoSection(m.dash_not_installed(), vm.libraryMetrics.notInstalled)}
 			{@render infoSection(m.dash_total_playtime(), vm.totalPlaytime)}
 			<div class="flex flex-row justify-between">
 				<small class="text-sm">
-					<span class="text-primary-bg">{vm.data.played}</span>
+					<span class="text-primary-bg">{vm.libraryMetrics.played}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_out_of()}</span>
-					<span class="text-primary-bg font-semibold">{vm.data.totalGamesInLibrary}</span>
+					<span class="text-primary-bg font-semibold">{vm.libraryMetrics.totalGamesInLibrary}</span>
 					<span class="opacity-70">{m.dash_playtime_summary_games_played()}</span>
 				</small>
 				<p class="text-md">{vm.playedPercentage}%</p>
@@ -86,10 +86,10 @@
 		</div>
 		<div>
 			<h1 class="text-2xl">Top 10</h1>
-			<Divider class="border-1 mb-4" />
-			{#if vm.data.topMostPlayedGames}
+			<Divider class="mb-4 border-1" />
+			{#if vm.libraryMetrics.topMostPlayedGames.length > 0}
 				<ul class="mb-6 grid list-none grid-cols-1 gap-4 p-0">
-					{#each vm.data.topMostPlayedGames as game (game.Id)}
+					{#each vm.libraryMetrics.topMostPlayedGames as game (game.Id)}
 						<li
 							class={[
 								'border-background-1 border-4 border-solid',

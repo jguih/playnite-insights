@@ -79,43 +79,44 @@ export const makePlayniteLibrarySyncRepository = (
     }
   };
 
-  const getTotalGamesOwnedOverLast6Months = (): number[] => {
-    const query = `
+  const getGamesOwnedLastNMonths: PlayniteLibrarySyncRepository["getGamesOwnedLastNMonths"] =
+    (n = 6) => {
+      const query = `
         SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
         FROM playnite_library_sync
-        WHERE Timestamp >= datetime('now', '-6 months')
+        WHERE Timestamp >= datetime('now', ?)
         GROUP BY yearMonth
         ORDER BY yearMonth DESC;
       `;
-    try {
-      const stmt = getDb().prepare(query);
-      const result = stmt.all();
-      const data: number[] = new Array(6).fill(0);
-      let i = 5;
-      for (const entry of result) {
-        const value = entry.totalGamesOwned as number;
-        data[i] = value;
-        i--;
-      }
+      try {
+        const stmt = getDb().prepare(query);
+        const result = stmt.all(`-${n} months`);
+        const data: number[] = new Array(6).fill(0);
+        let i = 5;
+        for (const entry of result) {
+          const value = entry.totalGamesOwned as number;
+          data[i] = value;
+          i--;
+        }
 
-      logService.debug(
-        `Successfully queried total games owned over last 6 months: ${JSON.stringify(
-          data
-        )}`
-      );
-      return data;
-    } catch (error) {
-      logService.error(
-        "Failed to get total games owned over last 6 months",
-        error as Error
-      );
-      return [];
-    }
-  };
+        logService.debug(
+          `Successfully queried total games owned over last 6 months: ${JSON.stringify(
+            data
+          )}`
+        );
+        return data;
+      } catch (error) {
+        logService.error(
+          "Failed to get total games owned over last 6 months",
+          error as Error
+        );
+        return [];
+      }
+    };
 
   return {
     add,
-    getTotalGamesOwnedOverLast6Months,
+    getGamesOwnedLastNMonths,
     getTotalPlaytimeOverLast6Months,
   };
 };

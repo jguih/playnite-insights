@@ -1,13 +1,13 @@
-import { vi } from "vitest";
-import { LogService } from "../log.types";
 import { LOG_LEVELS } from "@playnite-insights/lib/client";
-import { FileSystemService } from "../file-system.types";
 import { constants } from "fs/promises";
-import { StreamUtilsService } from "../stream-utils.types";
-import { PlayniteGameRepository } from "../playnite-game.types";
-import { LibraryManifestService } from "../library-manifest";
-import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import { vi } from "vitest";
+import { FileSystemService } from "../file-system.types";
 import { GameSessionRepository } from "../game-session.types";
+import { LibraryManifestService } from "../library-manifest";
+import { LogService } from "../log.types";
+import { PlayniteGameRepository } from "../playnite-game.types";
+import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import { StreamUtilsService } from "../stream-utils.types";
 
 export const makeMocks = () => {
   const logService = {
@@ -77,7 +77,7 @@ export const makeMocks = () => {
   const playniteLibrarySyncRepository = {
     add: vi.fn(),
     getTotalPlaytimeOverLast6Months: vi.fn(),
-    getTotalGamesOwnedOverLast6Months: vi.fn(),
+    getGamesOwnedLastNMonths: vi.fn(),
   } satisfies PlayniteLibrarySyncRepository;
 
   return {

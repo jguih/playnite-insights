@@ -28,7 +28,7 @@ export const makeDashPageService = ({
       .getTotalPlaytimeOverLast6Months()
       .map((p) => Math.ceil(p / 3600));
     const totalGamesOwnedOverLast6Months =
-      playniteLibrarySyncRepository.getTotalGamesOwnedOverLast6Months();
+      playniteLibrarySyncRepository.getGamesOwnedLastNMonths();
 
     const charts: DashPageData["charts"] = {
       totalPlaytimeOverLast6Months: {
