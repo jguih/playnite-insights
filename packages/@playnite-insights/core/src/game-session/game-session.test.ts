@@ -1,16 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type {
-  GameSessionService,
-  GameSessionServiceDeps,
-} from "./service.types";
-import { makeMocks } from "../tests/mocks";
-import { makeGameSessionService } from "./service";
+import { faker } from "@faker-js/faker";
 import type {
   CloseSessionCommand,
   GameSession,
   OpenSessionCommand,
 } from "@playnite-insights/lib/client";
-import { faker } from "@faker-js/faker";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { makeMocks } from "../../tests/mocks";
+import { makeGameSessionService } from "./service";
+import type {
+  GameSessionService,
+  GameSessionServiceDeps,
+} from "./service.types";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 

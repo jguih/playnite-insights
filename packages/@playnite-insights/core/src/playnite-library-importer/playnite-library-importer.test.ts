@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { SyncGameListCommand } from "@playnite-insights/lib/client";
 import { join } from "path";
-import { makeMocks } from "../tests/mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { makeMocks } from "../../tests/mocks";
+import { makePlayniteLibraryImporterService } from "./service";
 import {
   PlayniteLibraryImporterService,
   PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
-import { makePlayniteLibraryImporterService } from "./service";
-import { SyncGameListCommand } from "@playnite-insights/lib/client";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 

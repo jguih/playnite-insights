@@ -1,6 +1,6 @@
 import type { GetPlayniteLibraryMetricsResponse } from "@playnite-insights/lib/client";
-import type { LogService } from "../log.types";
-import type { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
+import type { PlayniteLibrarySyncRepository } from "../types";
+import type { LogService } from "../types/log.types";
 
 export type PlayniteLibraryServiceDeps = {
   logService: LogService;

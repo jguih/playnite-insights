@@ -18,12 +18,8 @@
 	let { children, data }: { children: Snippet } & LayoutProps = $props();
 	let appName = $derived(data.appName);
 	let isLoading: boolean = $state(true);
-	const refetchInterval = {
-		recentGameSession: 5_000,
-		serverTime: 60_000,
-	};
 	let recentGameSessionInterval: ReturnType<typeof setInterval> | null = $state(null);
-	let serverTimeInterval: ReturnType<typeof setInterval> | null = $state(null);
+	let appDataInterval: ReturnType<typeof setInterval> | null = $state(null);
 
 	const loadAllAppData = () => {
 		return Promise.all([
@@ -38,10 +34,10 @@
 	};
 
 	const handleFocus = () => {
-		if (serverTimeInterval) clearInterval(serverTimeInterval);
+		if (appDataInterval) clearInterval(appDataInterval);
 		if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
 		loadAllAppData().then(() => {
-			serverTimeInterval = setInterval(loadAllAppData, 60_000);
+			appDataInterval = setInterval(loadAllAppData, 60_000);
 			recentGameSessionInterval = setInterval(loadRecentGameSessions, 5_000);
 		});
 	};
@@ -86,11 +82,8 @@
 			isLoading = false;
 		})();
 
-		recentGameSessionInterval = setInterval(
-			loadRecentGameSessions,
-			refetchInterval.recentGameSession,
-		);
-		serverTimeInterval = setInterval(loadServerTime, refetchInterval.serverTime);
+		recentGameSessionInterval = setInterval(loadRecentGameSessions, 5_000);
+		appDataInterval = setInterval(loadAllAppData, 60_000);
 
 		navigator.serviceWorker?.addEventListener('message', handleMessage);
 		window.addEventListener('focus', handleFocus);
@@ -98,7 +91,7 @@
 			window.removeEventListener('focus', handleFocus);
 			navigator.serviceWorker?.removeEventListener('message', handleMessage);
 			if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
-			if (serverTimeInterval) clearInterval(serverTimeInterval);
+			if (appDataInterval) clearInterval(appDataInterval);
 		};
 	});
 </script>

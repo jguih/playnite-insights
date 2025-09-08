@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LibraryManifestService } from "./service.types";
-import { makeLibraryManifestService } from "./service";
-import { makeMocks } from "../tests/mocks";
-import { join } from "path";
 import { PlayniteLibraryManifest } from "@playnite-insights/lib/client";
+import { join } from "path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { makeMocks } from "../../tests/mocks";
+import { makeLibraryManifestService } from "./service";
+import { LibraryManifestService } from "./service.types";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 
