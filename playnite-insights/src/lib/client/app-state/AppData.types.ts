@@ -21,3 +21,4 @@ export type LibraryMetricsSignal = {
 };
 export type GenreSignal = { raw: GetAllGenresResponse | null; isLoading: boolean };
 export type PlatformSignal = { raw: GetAllPlatformsResponse | null; isLoading: boolean };
+export type IndexedDbSignal = { db: IDBDatabase | null };

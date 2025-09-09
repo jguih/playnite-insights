@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		httpClientSignal,
+		indexedDbSignal,
 		loadCompanies,
 		loadGames,
 		loadGenres,
@@ -10,6 +11,11 @@
 		loadServerTime,
 	} from '$lib/client/app-state/AppData.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
+	import {
+		INDEXEDDB_CURRENT_VERSION,
+		INDEXEDDB_NAME,
+		openIndexedDB,
+	} from '$lib/client/db/indexeddb';
 	import { FetchClient } from '$lib/client/fetch-client/fetchClient';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
@@ -76,11 +82,16 @@
 	onMount(() => {
 		httpClientSignal.client = new FetchClient({ url: window.location.origin });
 
-		(async () => {
-			isLoading = true;
-			await loadAllAppData();
-			isLoading = false;
-		})();
+		openIndexedDB({ dbName: INDEXEDDB_NAME, version: INDEXEDDB_CURRENT_VERSION }).then((db) => {
+			db.onversionchange = () => {
+				db.close();
+				console.warn('Database is outdated, please reload the app');
+			};
+			indexedDbSignal.db = db;
+		});
+
+		isLoading = true;
+		loadAllAppData().then(() => (isLoading = false));
 
 		recentGameSessionInterval = setInterval(loadRecentGameSessions, 5_000);
 		appDataInterval = setInterval(loadAllAppData, 60_000);
