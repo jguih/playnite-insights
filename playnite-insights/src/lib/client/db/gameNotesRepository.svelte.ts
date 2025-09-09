@@ -5,7 +5,7 @@ import {
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
 import type { IndexedDbSignal } from '../app-state/AppData.types';
-import { runRequest, runTransactionMultiple } from './indexeddb';
+import { runRequest, runTransaction } from './indexeddb';
 
 export type GameNotesRepositoryDeps = {
 	indexedDbSignal: IndexedDbSignal;
@@ -28,7 +28,7 @@ export class GameNoteRepository {
 		if (!db) return null;
 
 		try {
-			const key = await runTransactionMultiple(
+			const key = await runTransaction(
 				db,
 				['gameNotes', 'syncQueue'],
 				'readwrite',
@@ -52,10 +52,13 @@ export class GameNoteRepository {
 		const parseResult = gameNoteSchema.safeParse(note);
 		if (!parseResult.success) return false;
 		const db = this.#indexedDbSignal.db;
-		if (!db) return false;
+		if (!db) {
+			console.warn('db is not defined');
+			return false;
+		}
 
 		try {
-			await runTransactionMultiple(
+			await runTransaction(
 				db,
 				['gameNotes', 'syncQueue'],
 				'readwrite',
@@ -101,6 +104,27 @@ export class GameNoteRepository {
 		} catch (err) {
 			console.error('Failed to update note and queue item', err);
 			return false;
+		}
+	};
+
+	getAsync = async (props: Partial<Pick<GameNote, 'Id'>>): Promise<GameNote | null> => {
+		const db = this.#indexedDbSignal.db;
+		if (!db) return null;
+
+		try {
+			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx, storeNames }) => {
+				const notesStore = tx.objectStore(storeNames.gameNotes);
+
+				if (props.Id) {
+					const note = await runRequest<GameNote | undefined>(notesStore.get(props.Id));
+					return note ?? null;
+				}
+
+				return null;
+			});
+		} catch (err) {
+			console.error('Failed to find note', err);
+			return null;
 		}
 	};
 }

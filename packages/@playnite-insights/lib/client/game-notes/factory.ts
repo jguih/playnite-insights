@@ -14,7 +14,11 @@ export class GameNoteFactory {
       CreatedAt: new Date().toISOString(),
       LastUpdatedAt: new Date().toISOString(),
       DeletedAt: null,
-      ...props,
+      Title: props.Title,
+      Content: props.Content,
+      GameId: props.GameId,
+      ImagePath: props.ImagePath,
+      SessionId: props.SessionId,
     };
   };
 }

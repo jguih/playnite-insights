@@ -15,7 +15,7 @@
     "prod": "docker compose up -d --build --force-recreate app-prod",
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",
-    "test:unit": "pnpm --filter \"@playnite-insights*\" run test && pnpm -filter playnite-insights test:unit",
+    "test:unit": "pnpm -r run test:unit",
     "release": "standard-version",
     "prepare": "husky"
   },

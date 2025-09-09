@@ -14,7 +14,7 @@
 	import {
 		INDEXEDDB_CURRENT_VERSION,
 		INDEXEDDB_NAME,
-		openIndexedDB,
+		openIndexedDbAsync,
 	} from '$lib/client/db/indexeddb';
 	import { FetchClient } from '$lib/client/fetch-client/fetchClient';
 	import { onMount, type Snippet } from 'svelte';
@@ -82,13 +82,15 @@
 	onMount(() => {
 		httpClientSignal.client = new FetchClient({ url: window.location.origin });
 
-		openIndexedDB({ dbName: INDEXEDDB_NAME, version: INDEXEDDB_CURRENT_VERSION }).then((db) => {
-			db.onversionchange = () => {
-				db.close();
-				console.warn('Database is outdated, please reload the app');
-			};
-			indexedDbSignal.db = db;
-		});
+		openIndexedDbAsync({ dbName: INDEXEDDB_NAME, version: INDEXEDDB_CURRENT_VERSION }).then(
+			(db) => {
+				db.onversionchange = () => {
+					db.close();
+					console.warn('Database is outdated, please reload the app');
+				};
+				indexedDbSignal.db = db;
+			},
+		);
 
 		isLoading = true;
 		loadAllAppData().then(() => (isLoading = false));

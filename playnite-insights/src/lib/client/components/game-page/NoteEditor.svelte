@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { factory, indexedDbSignal } from '$lib/client/app-state/AppData.svelte';
-	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository';
+	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
 	import BaseInput from '../forms/BaseInput.svelte';
 	import BaseTextarea from '../forms/BaseTextarea.svelte';
 	import Backdrop from '../sidebar/Backdrop.svelte';
