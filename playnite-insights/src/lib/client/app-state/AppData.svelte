@@ -3,6 +3,7 @@
 	module
 >
 	import {
+		GameNoteFactory,
 		getAllCompaniesResponseSchema,
 		getAllGamesResponseSchema,
 		getAllGenresResponseSchema,
@@ -10,6 +11,7 @@
 		getPlayniteLibraryMetricsResponseSchema,
 		getRecentSessionsResponseSchema,
 		getServerUtcNowResponseSchema,
+		SyncQueueFactory,
 	} from '@playnite-insights/lib/client';
 	import type { FetchClient } from '../fetch-client/fetchClient';
 	import { JsonStrategy } from '../fetch-client/jsonStrategy';
@@ -40,6 +42,11 @@
 		isLoading: false,
 	});
 	export const libraryMetricsSignal = $state<LibraryMetricsSignal>({ raw: null, isLoading: false });
+
+	export const factory = {
+		syncQueue: new SyncQueueFactory(),
+		gameNote: new GameNoteFactory(),
+	};
 
 	export const loadLibraryMetrics = async () => {
 		const client = httpClientSignal.client;

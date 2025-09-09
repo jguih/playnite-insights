@@ -18,7 +18,7 @@
 	} from '$lib/client/utils/playnite-game';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
 	import { ArrowLeft } from '@lucide/svelte';
-	import { type Note } from '@playnite-insights/lib/client';
+	import { type GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
@@ -31,7 +31,7 @@
 		const inProgressActivity = vm.inProgressActivity;
 		return inProgressActivity?.sessions.length;
 	});
-	let notes: Note[] = [];
+	let notes: GameNote[] = [];
 
 	onMount(() => {
 		vm.setTickInterval();
@@ -41,7 +41,7 @@
 	});
 </script>
 
-{#snippet noteCard(note: Note)}
+{#snippet noteCard(note: GameNote)}
 	<li class="bg-background-1 mb-2 p-4">
 		<p class="text-lg font-semibold">{note.Title}</p>
 		<p class="text-md mb-2">{note.Content}</p>
@@ -84,7 +84,7 @@
 			</div>
 			<section class="mb-6">
 				<h1 class="text-xl font-semibold">Notas</h1>
-				<Divider class="mb-4 border-1" />
+				<Divider class="border-1 mb-4" />
 				{#each notes as note (note.Id)}
 					<ul class="">
 						{@render noteCard(note)}
@@ -93,7 +93,7 @@
 			</section>
 			<section class="mb-6 font-semibold">
 				<h1 class="text-xl">Links</h1>
-				<Divider class="mb-4 border-1" />
+				<Divider class="border-1 mb-4" />
 			</section>
 			<LightButton onclick={() => openNoteEditor()}>Criar Nota</LightButton>
 		{/if}

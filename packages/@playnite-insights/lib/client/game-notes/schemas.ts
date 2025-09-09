@@ -8,6 +8,7 @@ export const gameNoteSchema = z.object({
   ImagePath: z.string().nullable(),
   GameId: z.string().nullable(),
   SessionId: z.string().nullable(),
+  DeletedAt: ISODateSchema.nullable(),
   CreatedAt: ISODateSchema,
   LastUpdatedAt: ISODateSchema,
 });

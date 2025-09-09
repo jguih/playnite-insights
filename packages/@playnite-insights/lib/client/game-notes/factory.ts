@@ -13,6 +13,7 @@ export class GameNoteFactory {
       Id: `tmp-${crypto.randomUUID()}`,
       CreatedAt: new Date().toISOString(),
       LastUpdatedAt: new Date().toISOString(),
+      DeletedAt: null,
       ...props,
     };
   };

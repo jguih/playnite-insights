@@ -1,14 +1,30 @@
 <script lang="ts">
-	import Backdrop from '../sidebar/Backdrop.svelte';
-	import SidebarBody from '../sidebar/SidebarBody.svelte';
-	import BottomSheet from '../sidebar/BottomSheet.svelte';
 	import { page } from '$app/state';
+	import { factory, indexedDbSignal } from '$lib/client/app-state/AppData.svelte';
+	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository';
 	import BaseInput from '../forms/BaseInput.svelte';
 	import BaseTextarea from '../forms/BaseTextarea.svelte';
-	import { currentNoteSignal } from './Lib.svelte';
+	import Backdrop from '../sidebar/Backdrop.svelte';
+	import BottomSheet from '../sidebar/BottomSheet.svelte';
+	import SidebarBody from '../sidebar/SidebarBody.svelte';
+	import { closeNoteEditor, currentNoteSignal } from './Lib.svelte';
 
-	const closeNoteEditor = () => {
-		history.back();
+	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
+	const delay = 2_000;
+
+	const repo = new GameNoteRepository({
+		indexedDbSignal: indexedDbSignal,
+		syncQueueFactory: factory.syncQueue,
+	});
+
+	const handleOnChange = () => {
+		if (timeout) {
+			clearTimeout(timeout);
+		}
+		timeout = setTimeout(async () => {
+			const note = { ...currentNoteSignal };
+			await repo.putAsync({ note });
+		}, delay);
 	};
 </script>
 
@@ -22,11 +38,13 @@
 					placeholder="Título"
 					class={['py-2 text-2xl font-semibold']}
 					bind:value={currentNoteSignal.Title}
+					oninput={handleOnChange}
 				/>
 				<BaseTextarea
 					placeholder="Nota"
 					class={['grow resize-none']}
 					bind:value={currentNoteSignal.Content}
+					oninput={handleOnChange}
 				></BaseTextarea>
 			</form>
 		</SidebarBody>
