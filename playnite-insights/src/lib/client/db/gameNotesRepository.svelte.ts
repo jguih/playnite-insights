@@ -138,6 +138,22 @@ export class GameNoteRepository implements IGameNotesRepository {
 		}
 	};
 
+	getAllAsync: IGameNotesRepository['getAllAsync'] = async () => {
+		const db = this.#indexedDbSignal.db;
+		if (!db) return [];
+
+		try {
+			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
+				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
+				const notes = await runRequest<GameNote[]>(notesStore.getAll());
+				return notes;
+			});
+		} catch (err) {
+			console.error('Failed to find note', err);
+			return [];
+		}
+	};
+
 	static defineSchema = ({
 		db,
 	}: {

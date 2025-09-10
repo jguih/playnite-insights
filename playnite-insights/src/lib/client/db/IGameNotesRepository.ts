@@ -7,4 +7,5 @@ export interface IGameNotesRepository {
 	addAsync: (props: { note: GameNote }) => Promise<string | null>;
 	putAsync: (props: { note: GameNote }) => Promise<boolean>;
 	getAsync: (props: GetAsyncArgs) => Promise<GameNote | null>;
+	getAllAsync: () => Promise<GameNote[]>;
 }
