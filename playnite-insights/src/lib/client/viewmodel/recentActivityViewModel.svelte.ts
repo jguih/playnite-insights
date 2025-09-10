@@ -16,6 +16,7 @@ export class RecentActivityViewModel {
 	#sessionsForToday: GameSession[];
 	#inProgressGame: FullGame | null;
 	#inProgressActivity: GameActivity | null;
+	#inProgressSession: GameSession | null;
 	#recentActivityMap: Map<string, GameActivity>;
 	#inProgressSessionPlaytime: number | null;
 	#inProgressActivityPlaytime: number | null;
@@ -63,6 +64,14 @@ export class RecentActivityViewModel {
 					return activity;
 				}
 			}
+			return null;
+		});
+
+		this.#inProgressSession = $derived.by(() => {
+			const inProgressActivity = this.#inProgressActivity;
+			if (!inProgressActivity) return null;
+			const latestSession = inProgressActivity.sessions.at(0) ?? null;
+			if (latestSession && latestSession.Status === 'in_progress') return latestSession;
 			return null;
 		});
 
@@ -127,7 +136,7 @@ export class RecentActivityViewModel {
 	private getInProgressSessionPlaytime = (): number | null => {
 		const now = this.#tick;
 		if (!this.#inProgressActivity) return null;
-		const session = this.#inProgressActivity.sessions.at(0);
+		const session = this.#inProgressSession;
 		const startTime = session?.StartTime;
 		if (!startTime) return null;
 		const elapsed = (now - new Date(startTime).getTime()) / 1000;
@@ -148,6 +157,10 @@ export class RecentActivityViewModel {
 
 	get inProgressActivity() {
 		return this.#inProgressActivity;
+	}
+
+	get inProgressSession() {
+		return this.#inProgressSession;
 	}
 
 	get tick() {

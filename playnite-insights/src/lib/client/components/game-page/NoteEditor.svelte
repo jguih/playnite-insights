@@ -2,19 +2,34 @@
 	import { page } from '$app/state';
 	import { factory, indexedDbSignal } from '$lib/client/app-state/AppData.svelte';
 	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
+	import type { GameNote } from '@playnite-insights/lib/client';
 	import BaseInput from '../forms/BaseInput.svelte';
 	import BaseTextarea from '../forms/BaseTextarea.svelte';
 	import Backdrop from '../sidebar/Backdrop.svelte';
 	import BottomSheet from '../sidebar/BottomSheet.svelte';
 	import SidebarBody from '../sidebar/SidebarBody.svelte';
-	import { closeNoteEditor, currentNoteSignal } from './Lib.svelte';
+	import { closeNoteEditor } from './Lib.svelte';
 
+	const props: { gameId: GameNote['GameId'] | null; sessionId: GameNote['SessionId'] | null } =
+		$props();
 	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 	const delay = 2_000;
-
 	const repo = new GameNoteRepository({
 		indexedDbSignal: indexedDbSignal,
 		syncQueueFactory: factory.syncQueue,
+	});
+
+	const currentNoteSignal = $derived.by(() => {
+		const gameId = props.gameId;
+		const sessionId = props.sessionId;
+		const note = factory.gameNote.create({
+			Title: null,
+			Content: null,
+			ImagePath: null,
+			GameId: gameId,
+			SessionId: sessionId,
+		});
+		return note;
 	});
 
 	const handleOnChange = () => {

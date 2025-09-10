@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		companySignal,
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
@@ -16,27 +17,44 @@
 		getPlayniteGameImageUrl,
 		getPlaytimeInHoursMinutesAndSeconds,
 	} from '$lib/client/utils/playnite-game';
+	import { GamePageViewModel } from '$lib/client/viewmodel/gamePageViewModel.svelte';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 	import { ArrowLeft } from '@lucide/svelte';
 	import { type GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
+	const { data } = $props();
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
-	const vm = new RecentActivityViewModel({
+	const vm = new GamePageViewModel({
+		getGameId: () => data.gameId,
+		gamesSignal: gameSignal,
+		companySignal: companySignal,
+	});
+	const activityVm = new RecentActivityViewModel({
 		gameSignal: gameSignal,
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
 	});
-	const sessionsToday = $derived.by(() => {
-		const inProgressActivity = vm.inProgressActivity;
+	const isThisGameActive = $derived.by(() => {
+		const inProgressActivity = activityVm.inProgressActivity;
+		return inProgressActivity?.gameId === data.gameId;
+	});
+	const activeSessionForThisGame = $derived.by(() => {
+		if (!isThisGameActive) return null;
+		const session = activityVm.inProgressSession;
+		return session;
+	});
+	const todaySessionsCount = $derived.by(() => {
+		const inProgressActivity = activityVm.inProgressActivity;
 		return inProgressActivity?.sessions.length;
 	});
 	let notes: GameNote[] = [];
 
 	onMount(() => {
-		vm.setTickInterval();
+		activityVm.setTickInterval();
 		return () => {
-			vm.clearTickInterval();
+			activityVm.clearTickInterval();
 		};
 	});
 </script>
@@ -49,7 +67,10 @@
 	</li>
 {/snippet}
 
-<NoteEditor />
+<NoteEditor
+	gameId={data.gameId}
+	sessionId={activeSessionForThisGame?.SessionId ?? null}
+/>
 <BaseAppLayout>
 	<Header>
 		{#snippet action()}
@@ -59,31 +80,40 @@
 		{/snippet}
 	</Header>
 	<Main bottomNav={false}>
-		{#if !vm.inProgressGame || !vm.inProgressSessionPlaytime || !sessionsToday}
-			<p>No active session</p>
-		{:else}
+		{#if vm.game}
 			<div class="mb-6 flex flex-row gap-4">
 				<img
-					src={getPlayniteGameImageUrl(vm.inProgressGame.CoverImage)}
-					alt={`${vm.inProgressGame.Name} cover image`}
+					src={getPlayniteGameImageUrl(vm.game.CoverImage)}
+					alt={`${vm.game.Name} cover image`}
 					loading="lazy"
 					class="h-7/8 w-26 object-cover"
 				/>
 				<div class="grow-1">
-					<p>
-						Você está jogando
-						<br />
-						<span class="text-3xl font-bold">{vm.inProgressGame.Name}</span>
-					</p>
-					<Divider />
-					<p class="text-2xl">
-						{getPlaytimeInHoursMinutesAndSeconds(vm.inProgressSessionPlaytime)}
-					</p>
-					<small class="text-sm opacity-70">{sessionsToday} sessões hoje</small>
+					{#if isThisGameActive}
+						<p>
+							{m.game_journal_you_are_playing()}
+							<br />
+							<span class="text-3xl font-bold">{vm.game.Name}</span>
+						</p>
+						<Divider />
+						<p class="text-2xl">
+							{getPlaytimeInHoursMinutesAndSeconds(activityVm.inProgressSessionPlaytime!)}
+						</p>
+					{:else}
+						<p class="text-3xl font-bold">{vm.game.Name}</p>
+						<Divider />
+					{/if}
+					<small class="text-sm opacity-70">
+						{#if todaySessionsCount === 1}
+							{m.game_journal_sessions_today_singular({ count: todaySessionsCount })}
+						{:else}
+							{m.game_journal_sessions_today_plural({ count: todaySessionsCount! })}
+						{/if}
+					</small>
 				</div>
 			</div>
 			<section class="mb-6">
-				<h1 class="text-xl font-semibold">Notas</h1>
+				<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
 				<Divider class="border-1 mb-4" />
 				{#each notes as note (note.Id)}
 					<ul class="">
@@ -92,10 +122,10 @@
 				{/each}
 			</section>
 			<section class="mb-6 font-semibold">
-				<h1 class="text-xl">Links</h1>
+				<h1 class="text-xl">{m.game_journal_title_links()}</h1>
 				<Divider class="border-1 mb-4" />
 			</section>
-			<LightButton onclick={() => openNoteEditor()}>Criar Nota</LightButton>
+			<LightButton onclick={() => openNoteEditor()}>{m.game_journal_label_add_note()}</LightButton>
 		{/if}
 	</Main>
 </BaseAppLayout>
