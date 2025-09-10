@@ -13,7 +13,7 @@
 		handleClose: () => void | Promise<void>;
 	} = $props();
 	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
-	const delay = 2_000;
+	const delay = 1_000;
 
 	const handleOnChange = () => {
 		if (timeout) {

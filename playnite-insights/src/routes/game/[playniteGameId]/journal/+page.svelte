@@ -7,6 +7,7 @@
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
+	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import { GameNoteEditor } from '$lib/client/components/game-page/journal/gameNoteEditor.svelte.js';
@@ -14,6 +15,7 @@
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
+	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
 	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte.js';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 	import {
@@ -73,7 +75,11 @@
 			const notes = await notesRepo.getAllAsync({ filterBy: 'byGameId', GameId: gameId });
 			notesSignal.notes = notes;
 		} catch (err) {
-			console.error('failed to fetch notes', err);
+			if (err instanceof IndexedDBNotInitializedError) {
+				toast.error({ message: 'Database not ready, please refresh the app' });
+			} else if (err instanceof Error) {
+				toast.error({ title: 'Failed to load game notes', message: err.message });
+			}
 		} finally {
 			notesSignal.isLoading = false;
 		}

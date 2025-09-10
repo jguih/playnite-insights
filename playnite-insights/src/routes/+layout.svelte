@@ -11,6 +11,7 @@
 		loadServerTime,
 	} from '$lib/client/app-state/AppData.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
+	import Toast from '$lib/client/components/Toast.svelte';
 	import {
 		INDEXEDDB_CURRENT_VERSION,
 		INDEXEDDB_NAME,
@@ -118,6 +119,7 @@
 	/>
 </svelte:head>
 
+<Toast />
 {#if isLoading}
 	<Loading />
 {:else}

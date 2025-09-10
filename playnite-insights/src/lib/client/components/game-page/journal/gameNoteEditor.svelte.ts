@@ -1,4 +1,6 @@
 import { pushState } from '$app/navigation';
+import { toast } from '$lib/client/app-state/toast.svelte';
+import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized';
 import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
 import type { GameNote, GameNoteFactory } from '@playnite-insights/lib/client';
 
@@ -14,13 +16,15 @@ export class GameNoteEditor {
 	constructor({ gameNoteFactory: factory, gameNoteRepository }: GameNoteEditorDeps) {
 		this.#noteRepository = gameNoteRepository;
 
-		this.#currentNote = factory.create({
-			Title: null,
-			Content: null,
-			ImagePath: null,
-			GameId: null,
-			SessionId: null,
-		});
+		this.#currentNote = $state(
+			factory.create({
+				Title: null,
+				Content: null,
+				ImagePath: null,
+				GameId: null,
+				SessionId: null,
+			}),
+		);
 	}
 
 	saveAsync = async ({
@@ -36,7 +40,11 @@ export class GameNoteEditor {
 		try {
 			await this.#noteRepository.putAsync({ note });
 		} catch (err) {
-			console.error('failed to save note', err);
+			if (err instanceof IndexedDBNotInitializedError) {
+				toast.error({ message: 'Database not ready, please refresh the app' });
+			} else if (err instanceof Error) {
+				toast.error({ title: 'Failed to save game note', message: err.message });
+			}
 		}
 	};
 

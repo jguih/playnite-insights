@@ -1,8 +1,8 @@
 import {
-  gameNoteSchema,
-  SyncQueueFactory,
-  type GameNote,
-  type SyncQueueItem,
+	gameNoteSchema,
+	SyncQueueFactory,
+	type GameNote,
+	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
 import type { IGameNotesRepository } from './IGameNotesRepository';
 import { runRequest, runTransaction } from './indexeddb';
@@ -122,16 +122,25 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		return this.withDb(async (db) => {
 			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
+				let notes: GameNote[] = [];
 
 				switch (props.filterBy) {
 					case 'byGameId': {
 						const index = notesStore.index(GameNoteRepository.INDEX.byGameId);
-						const notes = await runRequest<GameNote[]>(index.getAll(props.GameId));
-						return notes;
+						notes = await runRequest<GameNote[]>(index.getAll(props.GameId));
+						break;
 					}
 					default:
-						return await runRequest<GameNote[]>(notesStore.getAll());
+						notes = await runRequest<GameNote[]>(notesStore.getAll());
+						break;
 				}
+
+				return notes.sort((a, b) => {
+					if (a.Title == null && b.Title == null) return 0;
+					if (a.Title == null) return -1;
+					if (b.Title == null) return 1;
+					return a.Title?.localeCompare(b.Title);
+				});
 			});
 		});
 	};
