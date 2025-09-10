@@ -2,6 +2,7 @@ import { pushState } from '$app/navigation';
 import { toast } from '$lib/client/app-state/toast.svelte';
 import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized';
 import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
+import { m } from '$lib/paraglide/messages';
 import type { GameNote, GameNoteFactory } from '@playnite-insights/lib/client';
 
 export type GameNoteEditorDeps = {
@@ -41,9 +42,9 @@ export class GameNoteEditor {
 			await this.#noteRepository.putAsync({ note });
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
-				toast.error({ message: 'Database not ready, please refresh the app' });
+				toast.error({ message: m.error_db_not_ready() });
 			} else if (err instanceof Error) {
-				toast.error({ title: 'Failed to save game note', message: err.message });
+				toast.error({ title: m.error_save_game_note(), message: err.message });
 			}
 		}
 	};

@@ -6,7 +6,7 @@
 		indexedDbSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
-	} from '$lib/client/app-state/AppData.svelte';
+	} from '$lib/client/app-state/AppData.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
@@ -76,9 +76,9 @@
 			notesSignal.notes = notes;
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
-				toast.error({ message: 'Database not ready, please refresh the app' });
+				toast.error({ message: m.error_db_not_ready() });
 			} else if (err instanceof Error) {
-				toast.error({ title: 'Failed to load game notes', message: err.message });
+				toast.error({ title: m.error_load_local_game_notes(), message: err.message });
 			}
 		} finally {
 			notesSignal.isLoading = false;

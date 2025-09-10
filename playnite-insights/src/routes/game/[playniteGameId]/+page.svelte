@@ -1,13 +1,13 @@
 <script lang="ts">
+	import { companySignal, gameSignal } from '$lib/client/app-state/AppData.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { m } from '$lib/paraglide/messages.js';
-	import { companySignal, gameSignal } from '$lib/client/app-state/AppData.svelte';
-	import { ArrowLeft } from '@lucide/svelte';
 	import { GamePageViewModel } from '$lib/client/viewmodel/gamePageViewModel.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
+	import { ArrowLeft } from '@lucide/svelte';
 
 	const { data } = $props();
 	const vm = new GamePageViewModel({
@@ -41,7 +41,7 @@
 				alt={`${vm.game.Name} background image`}
 				class="aspect-3/2 w-full"
 			/>
-			<div class="mt-4 mb-4 flex flex-col">
+			<div class="mb-4 mt-4 flex flex-col">
 				{@render infoSection(m.game_info_release_date(), vm.getReleaseDate())}
 				{@render infoSection(m.game_info_added(), vm.getAdded())}
 				{@render infoSection(m.game_info_playtime(), vm.getPlaytime())}

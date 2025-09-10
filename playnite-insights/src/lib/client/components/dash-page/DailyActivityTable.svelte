@@ -3,7 +3,7 @@
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
-	} from '$lib/client/app-state/AppData.svelte';
+	} from '$lib/client/app-state/AppData.svelte.js';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';

@@ -9,7 +9,7 @@
 		loadPlatforms,
 		loadRecentGameSessions,
 		loadServerTime,
-	} from '$lib/client/app-state/AppData.svelte';
+	} from '$lib/client/app-state/AppData.svelte.js';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
 	import {

@@ -29,7 +29,7 @@ export class JsonStrategy<Output> implements IFetchClientStrategy<Output> {
 
 		if (!response.ok) {
 			throw new FetchClientStrategyError({
-				message: 'Request failed with response body',
+				message: `Request failed with code ${status}`,
 				statusCode: status,
 				data: originalJson,
 			});
@@ -44,6 +44,7 @@ export class JsonStrategy<Output> implements IFetchClientStrategy<Output> {
 		throw new FetchClientStrategyError({
 			message: 'Request succeded, but response body failed to parse using schema',
 			statusCode: status,
+			data: zodResult.error.format(),
 		});
 	}
 }

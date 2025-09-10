@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { companySignal, genreSignal, platformSignal } from '$lib/client/app-state/AppData.svelte';
+	import {
+		companySignal,
+		genreSignal,
+		platformSignal,
+	} from '$lib/client/app-state/AppData.svelte.js';
 	import { m } from '$lib/paraglide/messages';
 	import { XIcon } from '@lucide/svelte';
 	import type {
@@ -167,7 +171,7 @@
 					</Select>
 				</label>
 			</div>
-			<Divider class={['my-2 border-1']} />
+			<Divider class={['border-1 my-2']} />
 			<LightButton
 				color="primary"
 				selected
@@ -204,7 +208,7 @@
 					{m.label_filter_not_installed()}
 				</label>
 			</fieldset>
-			<Divider class={['my-2 border-1']} />
+			<Divider class={['border-1 my-2']} />
 			<FilterDropdown
 				label={m.label_filter_genres()}
 				counter={genresParam.length}

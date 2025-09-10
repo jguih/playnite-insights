@@ -1,14 +1,6 @@
-import { FetchClientStrategyError } from './fetchClientStrategyError';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { FetchClientStrategyError } from './fetchClientStrategyError';
 import type { HttpGetProps } from './types';
-
-export type FetchClientResponse<T> = {
-	success: boolean;
-	statusCode: number | null;
-	data: T | null;
-	error: {
-		message: string;
-	} | null;
-};
 
 export class FetchClient {
 	#url: string;
@@ -16,45 +8,6 @@ export class FetchClient {
 	constructor({ url }: { url: string }) {
 		this.#url = url;
 	}
-
-	private parseError = <T>(error: unknown): FetchClientResponse<T> => {
-		if (error instanceof FetchClientStrategyError) {
-			return {
-				success: false,
-				statusCode: error.statusCode,
-				data: null,
-				error: {
-					message: error.message,
-				},
-			};
-		}
-		if (error instanceof TypeError) {
-			return {
-				success: false,
-				statusCode: null,
-				data: null,
-				error: {
-					message: error.message,
-				},
-			};
-		}
-		if (error instanceof Error) {
-			return {
-				success: false,
-				statusCode: null,
-				data: null,
-				error: {
-					message: error.message,
-				},
-			};
-		}
-		return {
-			success: false,
-			statusCode: null,
-			data: null,
-			error: null,
-		};
-	};
 
 	private safeJoinUrlAndEndpoint = (url: string, endpoint?: string) => {
 		if (!endpoint) return url;
@@ -65,34 +18,22 @@ export class FetchClient {
 		return `${parsedApiUrl}${parsedEndpoint}`;
 	};
 
+	/**
+	 * @throws {FetchClientStrategyError} Error indicating strategy failure
+	 * @throws {TypeError} If a network error occurs (e.g., failed to fetch)
+	 * @throws {HttpError} If the response status is not ok
+	 */
 	httpGetAsync = async <Output>({
 		endpoint,
 		strategy,
 		...props
-	}: HttpGetProps<Output>): Promise<FetchClientResponse<Output>> => {
+	}: HttpGetProps<Output>): Promise<Output | null> => {
 		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
-		try {
-			const response = await fetch(parsedUrl, {
-				...props,
-				method: 'GET',
-			});
-			const result = await strategy.handleAsync(response);
-			if (result) {
-				return {
-					success: true,
-					data: result,
-					statusCode: response.status,
-					error: null,
-				};
-			}
-			return {
-				success: true,
-				data: null,
-				statusCode: response.status,
-				error: null,
-			};
-		} catch (error) {
-			return this.parseError<Output>(error);
-		}
+		const response = await fetch(parsedUrl, {
+			...props,
+			method: 'GET',
+		});
+		const result = await strategy.handleAsync(response);
+		return result;
 	};
 }

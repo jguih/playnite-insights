@@ -5,7 +5,7 @@
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
-	} from '$lib/client/app-state/AppData.svelte';
+	} from '$lib/client/app-state/AppData.svelte.js';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
