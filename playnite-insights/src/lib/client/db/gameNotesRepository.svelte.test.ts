@@ -61,7 +61,7 @@ describe('GameNotesRepository', () => {
 		});
 		// Act
 		const result = await notesRepo.putAsync({ note });
-		const existingNote = await notesRepo.getAsync({ Id: note.Id });
+		const existingNote = await notesRepo.getAsync({ filterBy: 'Id', Id: note.Id });
 		const existingQueueItem = await syncQueueRepo.getAsync({
 			filterBy: SyncQueueRepository.FILTER_BY.Entity_PayloadId_Status_Type,
 			Entity: 'gameNote',

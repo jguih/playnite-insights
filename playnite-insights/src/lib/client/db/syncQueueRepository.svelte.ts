@@ -1,19 +1,13 @@
-import type { GameNote, SyncQueueItem } from '@playnite-insights/lib/client';
+import type { SyncQueueItem } from '@playnite-insights/lib/client';
 import type { IndexedDbSignal } from '../app-state/AppData.types';
 import { runRequest, runTransaction } from './indexeddb';
+import type { ISyncQueueRepository } from './ISyncQueueRepository';
 
 export type SyncQueueRepositoryDeps = {
 	indexedDbSignal: IndexedDbSignal;
 };
 
-export type GetAsyncArgs =
-	| ({ filterBy: typeof SyncQueueRepository.FILTER_BY.Id } & Pick<SyncQueueItem, 'Id'>)
-	| ({ filterBy: typeof SyncQueueRepository.FILTER_BY.Entity_PayloadId_Status_Type } & (Pick<
-			SyncQueueItem,
-			'Entity' | 'Status' | 'Type'
-	  > & { PayloadId: GameNote['Id'] }));
-
-export class SyncQueueRepository {
+export class SyncQueueRepository implements ISyncQueueRepository {
 	#indexedDbSignal: SyncQueueRepositoryDeps['indexedDbSignal'];
 
 	static STORE_NAME = 'syncQueue' as const;
@@ -34,7 +28,7 @@ export class SyncQueueRepository {
 		this.#indexedDbSignal = indexedDbSignal;
 	}
 
-	getAsync = async (props: GetAsyncArgs): Promise<SyncQueueItem | null> => {
+	getAsync: ISyncQueueRepository['getAsync'] = async (props) => {
 		const db = this.#indexedDbSignal.db;
 		if (!db) return null;
 
@@ -77,7 +71,7 @@ export class SyncQueueRepository {
 		db: IDBDatabase;
 		tx: IDBTransaction;
 		oldVersion: number;
-		newVersion: number|null;
+		newVersion: number | null;
 	}) {
 		if (!db.objectStoreNames.contains(this.STORE_NAME)) {
 			const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'Id' });
