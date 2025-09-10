@@ -12,13 +12,15 @@ export class RecentActivityViewModel {
 	#gameSignal: RecentActivityViewModelProps['gameSignal'];
 	#recentGameSessionSignal: RecentActivityViewModelProps['recentGameSessionSignal'];
 	#dateTimeHandler: RecentActivityViewModelProps['dateTimeHandler'];
+
+	#sessionsForToday: GameSession[];
 	#inProgressGame: FullGame | null;
 	#inProgressActivity: GameActivity | null;
 	#recentActivityMap: Map<string, GameActivity>;
-	#tick: number;
-	#tickInterval: ReturnType<typeof setInterval> | null;
 	#inProgressSessionPlaytime: number | null;
 	#inProgressActivityPlaytime: number | null;
+	#tick: number;
+	#tickInterval: ReturnType<typeof setInterval> | null;
 
 	constructor({
 		gameSignal,
@@ -31,8 +33,26 @@ export class RecentActivityViewModel {
 		this.#tick = $state(dateTimeHandler.getUtcNow());
 		this.#tickInterval = $state(null);
 
-		this.#recentActivityMap = $derived.by(() => {
+		this.#sessionsForToday = $derived.by(() => {
+			/**
+			 * @var sessions contains game sessions for the last 7 days
+			 */
 			const sessions = this.#recentGameSessionSignal.raw ?? [];
+			const now = new Date();
+			const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+			const todayEnd = new Date(todayStart);
+			todayEnd.setDate(todayStart.getDate() + 1);
+
+			return sessions.filter((session) => {
+				const start = new Date(session.StartTime);
+				const end = session.EndTime ? new Date(session.EndTime) : new Date();
+
+				return start < todayEnd && end >= todayStart;
+			});
+		});
+
+		this.#recentActivityMap = $derived.by(() => {
+			const sessions = this.#sessionsForToday;
 			return this.buildRecentActivityMap(sessions);
 		});
 

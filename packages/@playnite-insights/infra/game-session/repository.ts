@@ -1,10 +1,12 @@
-import type { LogService } from "@playnite-insights/core";
-import { defaultLogger } from "../services/log";
-import type { DatabaseSync } from "node:sqlite";
-import { getDb as _getDb } from "../database";
-import z from "zod";
+import type {
+  GameSessionRepository,
+  LogService,
+} from "@playnite-insights/core";
 import { gameSessionSchema } from "@playnite-insights/lib/client";
-import { type GameSessionRepository } from "../../core/game-session.types";
+import type { DatabaseSync } from "node:sqlite";
+import z from "zod";
+import { getDb as _getDb } from "../database";
+import { defaultLogger } from "../services/log";
 import { getWhereClauseAndParamsFromFilters } from "./filtering";
 
 type GameSessionRepositoryDeps = {

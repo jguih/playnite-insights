@@ -177,13 +177,13 @@ export const makeGameSessionService = ({
   const getRecent: GameSessionService["getRecent"] = () => {
     let sessions: GameSession[] | undefined = undefined;
     const today = new Date();
-    const start = new Date(
+    const end = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate()
     );
-    const end = new Date(start);
-    end.setDate(end.getDate() + 1);
+    const start = new Date(end);
+    start.setDate(end.getDate() - 7);
 
     logService.debug(
       `Fetching game sessions between ${start.toISOString()} and ${end.toISOString()}`

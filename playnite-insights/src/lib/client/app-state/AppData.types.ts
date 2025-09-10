@@ -14,7 +14,13 @@ export type ServerTimeSignal = {
 	syncPoint: number | null;
 	isLoading: boolean;
 };
-export type RecentGameSessionSignal = { raw: GetRecentSessionsResponse | null; isLoading: boolean };
+export type RecentGameSessionSignal = {
+	/**
+	 * Constains all game sessions that overlaps the last 7 days
+	 */
+	raw: GetRecentSessionsResponse | null;
+	isLoading: boolean;
+};
 export type LibraryMetricsSignal = {
 	raw: GetPlayniteLibraryMetricsResponse | null;
 	isLoading: boolean;

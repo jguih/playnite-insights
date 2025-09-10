@@ -90,6 +90,9 @@
 		gameSignal.isLoading = false;
 	};
 
+	/**
+	 * Loads all game sessions that overlaps the last 7 days
+	 */
 	export const loadRecentGameSessions = async () => {
 		const client = httpClientSignal.client;
 		if (!client) return;

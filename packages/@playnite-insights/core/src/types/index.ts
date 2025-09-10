@@ -1,5 +1,6 @@
 export type * from "./company.types";
 export type * from "./file-system.types";
+export type * from "./game-session.types";
 export type * from "./genre.types";
 export type * from "./log.types";
 export type * from "./platform.types";
