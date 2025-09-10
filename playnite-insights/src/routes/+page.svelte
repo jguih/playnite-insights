@@ -142,7 +142,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -280,10 +280,10 @@
 			</LightButton>
 		</nav>
 		{#if recentActivityVm.inProgressGame}
-			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-1000 w-full p-2">
+			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
-					href={`/game/${recentActivityVm.inProgressGame.Id}/activity`}
+					href={`/game/${recentActivityVm.inProgressGame.Id}/journal`}
 				>
 					<img
 						src={vm.getImageURL(recentActivityVm.inProgressGame.CoverImage)}
