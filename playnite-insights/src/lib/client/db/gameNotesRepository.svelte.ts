@@ -6,6 +6,7 @@ import {
 } from '@playnite-insights/lib/client';
 import type { IndexedDbSignal } from '../app-state/AppData.types';
 import { runRequest, runTransaction } from './indexeddb';
+import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 export type GameNotesRepositoryDeps = {
 	indexedDbSignal: IndexedDbSignal;
@@ -15,6 +16,13 @@ export type GameNotesRepositoryDeps = {
 export class GameNoteRepository {
 	#indexedDbSignal: GameNotesRepositoryDeps['indexedDbSignal'];
 	#syncQueueFactory: SyncQueueFactory;
+
+	static STORE_NAME = 'gameNotes' as const;
+
+	static INDEX = {
+		byGameId: 'byGameId',
+		bySessionId: 'bySessionId',
+	} as const;
 
 	constructor({ indexedDbSignal, syncQueueFactory }: GameNotesRepositoryDeps) {
 		this.#indexedDbSignal = indexedDbSignal;
@@ -32,9 +40,9 @@ export class GameNoteRepository {
 				db,
 				['gameNotes', 'syncQueue'],
 				'readwrite',
-				async ({ tx, storeNames }) => {
-					const notesStore = tx.objectStore(storeNames.gameNotes);
-					const syncQueueStore = tx.objectStore(storeNames.syncQueue);
+				async ({ tx }) => {
+					const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
+					const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
 					const key = await runRequest(notesStore.add(note));
 					const queueItem = this.#syncQueueFactory.create({ Entity: 'gameNote', Payload: note });
 					await runRequest(syncQueueStore.add(queueItem));
@@ -58,48 +66,43 @@ export class GameNoteRepository {
 		}
 
 		try {
-			await runTransaction(
-				db,
-				['gameNotes', 'syncQueue'],
-				'readwrite',
-				async ({ tx, storeNames }) => {
-					const notesStore = tx.objectStore(storeNames.gameNotes);
-					const syncQueueStore = tx.objectStore(storeNames.syncQueue);
+			await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
+				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
+				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
 
-					const existingNote = await runRequest<GameNote | undefined>(notesStore.get(note.Id));
-					const index = syncQueueStore.index('Entity_PayloadId_Status_Type');
-					const existingQueueItem = await runRequest<SyncQueueItem | undefined>(
-						index.get(['gameNote', note.Id, 'pending', 'update']),
-					);
+				const existingNote = await runRequest<GameNote | undefined>(notesStore.get(note.Id));
+				const index = syncQueueStore.index(SyncQueueRepository.INDEX.Entity_PayloadId_Status_Type);
+				const existingQueueItem = await runRequest<SyncQueueItem | undefined>(
+					index.get(['gameNote', note.Id, 'pending', 'update']),
+				);
 
-					note.LastUpdatedAt = new Date().toISOString();
-					await runRequest(notesStore.put(note));
+				note.LastUpdatedAt = new Date().toISOString();
+				await runRequest(notesStore.put(note));
 
-					if (!existingNote) {
-						const queueItem = this.#syncQueueFactory.create({
-							Entity: 'gameNote',
-							Payload: note,
-							Type: 'create',
-						});
-						await runRequest(syncQueueStore.add(queueItem));
-						return true;
-					}
-
-					if (existingQueueItem) {
-						existingQueueItem.Payload = note;
-						await runRequest(syncQueueStore.put(existingQueueItem));
-					} else {
-						const queueItem = this.#syncQueueFactory.create({
-							Entity: 'gameNote',
-							Payload: note,
-							Type: 'update',
-						});
-						await runRequest(syncQueueStore.add(queueItem));
-					}
-
+				if (!existingNote) {
+					const queueItem = this.#syncQueueFactory.create({
+						Entity: 'gameNote',
+						Payload: note,
+						Type: 'create',
+					});
+					await runRequest(syncQueueStore.add(queueItem));
 					return true;
-				},
-			);
+				}
+
+				if (existingQueueItem) {
+					existingQueueItem.Payload = note;
+					await runRequest(syncQueueStore.put(existingQueueItem));
+				} else {
+					const queueItem = this.#syncQueueFactory.create({
+						Entity: 'gameNote',
+						Payload: note,
+						Type: 'update',
+					});
+					await runRequest(syncQueueStore.add(queueItem));
+				}
+
+				return true;
+			});
 			return true;
 		} catch (err) {
 			console.error('Failed to update note and queue item', err);
@@ -112,8 +115,8 @@ export class GameNoteRepository {
 		if (!db) return null;
 
 		try {
-			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx, storeNames }) => {
-				const notesStore = tx.objectStore(storeNames.gameNotes);
+			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
+				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 
 				if (props.Id) {
 					const note = await runRequest<GameNote | undefined>(notesStore.get(props.Id));
@@ -127,4 +130,21 @@ export class GameNoteRepository {
 			return null;
 		}
 	};
+
+	static defineSchema({
+		db,
+	}: {
+		db: IDBDatabase;
+		tx: IDBTransaction;
+		oldVersion: number;
+		newVersion: number | null;
+	}) {
+		if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+			const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'Id' });
+			store.createIndex(this.INDEX.byGameId, 'GameId', { unique: false });
+			store.createIndex(this.INDEX.bySessionId, 'SessionId', { unique: false });
+		}
+
+		// Future migrations
+	}
 }

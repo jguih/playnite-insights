@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import type { IndexedDbSignal } from '../app-state/AppData.types';
 import { GameNoteRepository } from './gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from './indexeddb';
+import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 const indexedDbSignal: IndexedDbSignal = { db: null };
 const syncQueueFactory = new SyncQueueFactory();
@@ -49,7 +50,8 @@ describe('GameNotesRepository', () => {
 
 	it('create queue item for created note', async () => {
 		// Arrange
-		const repo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const syncQueueRepo = new SyncQueueRepository({ indexedDbSignal });
 		const note = gameNoteFactory.create({
 			Title: 'Test Note #1',
 			Content: 'Testing',
@@ -58,11 +60,26 @@ describe('GameNotesRepository', () => {
 			SessionId: null,
 		});
 		// Act
-		const result = await repo.putAsync({ note });
-		const existingNote = await repo.getAsync({ Id: note.Id });
+		const result = await notesRepo.putAsync({ note });
+		const existingNote = await notesRepo.getAsync({ Id: note.Id });
+		const existingQueueItem = await syncQueueRepo.getAsync({
+			filterBy: SyncQueueRepository.FILTER_BY.Entity_PayloadId_Status_Type,
+			Entity: 'gameNote',
+			PayloadId: note.Id,
+			Status: 'pending',
+			Type: 'create',
+		});
 		// Assert
 		expect(result).toBe(true);
+		expect(existingQueueItem?.Payload).toMatchObject({
+			Id: note.Id,
+			Title: note.Title,
+			Content: note.Content,
+		});
 		expect(existingNote?.Id).toBe(note.Id);
 		expect(existingNote?.Title).toMatch(/Test Note #1/i);
+		expect(existingQueueItem?.Type).toMatch('create');
+		expect(existingQueueItem?.Status).toBe('pending');
+		expect(existingQueueItem?.Entity).toBe('gameNote');
 	});
 });
