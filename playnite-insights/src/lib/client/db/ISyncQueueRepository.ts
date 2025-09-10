@@ -9,5 +9,11 @@ type GetAsyncArgs =
 	  > & { PayloadId: GameNote['Id'] }));
 
 export interface ISyncQueueRepository {
+	/**
+	 * Finds and returns a sync queue item using the given filters
+	 * @returns The item or `null` when not found
+	 * @throws {IndexedDBNotInitializedError} If the DB is not ready
+	 * @throws {DOMException} If a transaction fails
+	 */
 	getAsync: (props: GetAsyncArgs) => Promise<SyncQueueItem | null>;
 }

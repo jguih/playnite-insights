@@ -6,7 +6,7 @@ import { GameNoteRepository } from './gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from './indexeddb';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
-const indexedDbSignal: IndexedDbSignal = { db: null };
+const indexedDbSignal: IndexedDbSignal = { db: null, dbReady: null };
 const syncQueueFactory = new SyncQueueFactory();
 const gameNoteFactory = new GameNoteFactory();
 
@@ -25,14 +25,15 @@ const baseNote = (overrides: Partial<GameNote> = {}) => {
 
 describe('GameNotesRepository', () => {
 	beforeEach(async () => {
-		await openIndexedDbAsync({ dbName: INDEXEDDB_NAME, version: INDEXEDDB_CURRENT_VERSION }).then(
-			(db) => {
-				db.onversionchange = () => {
-					db.close();
-				};
-				indexedDbSignal.db = db;
-			},
-		);
+		indexedDbSignal.dbReady = openIndexedDbAsync({
+			dbName: INDEXEDDB_NAME,
+			version: INDEXEDDB_CURRENT_VERSION,
+		}).then((db) => {
+			db.onversionchange = () => {
+				db.close();
+			};
+			indexedDbSignal.db = db;
+		});
 	});
 
 	afterEach(() => {

@@ -1,10 +1,10 @@
 import type {
-	GetAllCompaniesResponse,
-	GetAllGamesResponse,
-	GetAllGenresResponse,
-	GetAllPlatformsResponse,
-	GetPlayniteLibraryMetricsResponse,
-	GetRecentSessionsResponse,
+  GetAllCompaniesResponse,
+  GetAllGamesResponse,
+  GetAllGenresResponse,
+  GetAllPlatformsResponse,
+  GetPlayniteLibraryMetricsResponse,
+  GetRecentSessionsResponse,
 } from '@playnite-insights/lib/client';
 
 export type GameSignal = { raw: GetAllGamesResponse | null; isLoading: boolean };
@@ -27,4 +27,4 @@ export type LibraryMetricsSignal = {
 };
 export type GenreSignal = { raw: GetAllGenresResponse | null; isLoading: boolean };
 export type PlatformSignal = { raw: GetAllPlatformsResponse | null; isLoading: boolean };
-export type IndexedDbSignal = { db: IDBDatabase | null };
+export type IndexedDbSignal = { db: IDBDatabase | null; dbReady: Promise<void> | null };

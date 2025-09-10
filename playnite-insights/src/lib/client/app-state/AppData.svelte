@@ -27,7 +27,7 @@
 	} from './AppData.types';
 
 	export const httpClientSignal = $state<{ client: FetchClient | null }>({ client: null });
-	export const indexedDbSignal = $state<IndexedDbSignal>({ db: null });
+	export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
 	export const companySignal = $state<CompanySignal>({ raw: null, isLoading: true });
 	export const gameSignal = $state<GameSignal>({ raw: null, isLoading: false });
 	export const recentGameSessionSignal = $state<RecentGameSessionSignal>({

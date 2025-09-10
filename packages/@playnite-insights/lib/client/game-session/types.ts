@@ -13,8 +13,8 @@ export type OpenSessionCommand = z.infer<typeof openGameSessionSchema>;
 export type CloseSessionCommand = z.infer<typeof closeGameSessionSchema>;
 export type GameActivity = {
   status: "in_progress" | "not_playing";
-  gameName: string;
-  gameId: string;
+  gameName: string | null;
+  gameId: string | null;
   totalPlaytime: number;
   sessions: GameSession[];
 };

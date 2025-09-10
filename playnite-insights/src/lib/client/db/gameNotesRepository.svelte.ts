@@ -1,21 +1,19 @@
 import {
-	gameNoteSchema,
-	SyncQueueFactory,
-	type GameNote,
-	type SyncQueueItem,
+  gameNoteSchema,
+  SyncQueueFactory,
+  type GameNote,
+  type SyncQueueItem,
 } from '@playnite-insights/lib/client';
-import type { IndexedDbSignal } from '../app-state/AppData.types';
 import type { IGameNotesRepository } from './IGameNotesRepository';
 import { runRequest, runTransaction } from './indexeddb';
+import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 export type GameNotesRepositoryDeps = {
-	indexedDbSignal: IndexedDbSignal;
 	syncQueueFactory: SyncQueueFactory;
-};
+} & IndexedDBRepositoryDeps;
 
-export class GameNoteRepository implements IGameNotesRepository {
-	#indexedDbSignal: GameNotesRepositoryDeps['indexedDbSignal'];
+export class GameNoteRepository extends IndexedDBRepository implements IGameNotesRepository {
 	#syncQueueFactory: SyncQueueFactory;
 
 	static STORE_NAME = 'gameNotes' as const;
@@ -27,20 +25,19 @@ export class GameNoteRepository implements IGameNotesRepository {
 
 	static FILTER_BY = {
 		Id: 'Id',
+		byGameId: this.INDEX.byGameId,
 	} as const;
 
 	constructor({ indexedDbSignal, syncQueueFactory }: GameNotesRepositoryDeps) {
-		this.#indexedDbSignal = indexedDbSignal;
+		super({ indexedDbSignal });
 		this.#syncQueueFactory = syncQueueFactory;
 	}
 
 	addAsync: IGameNotesRepository['addAsync'] = async ({ note }) => {
 		const parseResult = gameNoteSchema.safeParse(note);
 		if (!parseResult.success) return null;
-		const db = this.#indexedDbSignal.db;
-		if (!db) return null;
 
-		try {
+		return this.withDb(async (db) => {
 			const key = await runTransaction(
 				db,
 				['gameNotes', 'syncQueue'],
@@ -55,22 +52,14 @@ export class GameNoteRepository implements IGameNotesRepository {
 				},
 			);
 			return key as string;
-		} catch (err) {
-			console.error('Failed to create note and queue item', err);
-			return null;
-		}
+		});
 	};
 
 	putAsync: IGameNotesRepository['putAsync'] = async ({ note }) => {
 		const parseResult = gameNoteSchema.safeParse(note);
 		if (!parseResult.success) return false;
-		const db = this.#indexedDbSignal.db;
-		if (!db) {
-			console.warn('db is not defined');
-			return false;
-		}
 
-		try {
+		return this.withDb(async (db) => {
 			await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
@@ -109,17 +98,11 @@ export class GameNoteRepository implements IGameNotesRepository {
 				return true;
 			});
 			return true;
-		} catch (err) {
-			console.error('Failed to update note and queue item', err);
-			return false;
-		}
+		});
 	};
 
 	getAsync: IGameNotesRepository['getAsync'] = async (props) => {
-		const db = this.#indexedDbSignal.db;
-		if (!db) return null;
-
-		try {
+		return this.withDb(async (db) => {
 			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 
@@ -132,26 +115,25 @@ export class GameNoteRepository implements IGameNotesRepository {
 						return null;
 				}
 			});
-		} catch (err) {
-			console.error('Failed to find note', err);
-			return null;
-		}
+		});
 	};
 
-	getAllAsync: IGameNotesRepository['getAllAsync'] = async () => {
-		const db = this.#indexedDbSignal.db;
-		if (!db) return [];
-
-		try {
+	getAllAsync: IGameNotesRepository['getAllAsync'] = async (props = {}) => {
+		return this.withDb(async (db) => {
 			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
-				const notes = await runRequest<GameNote[]>(notesStore.getAll());
-				return notes;
+
+				switch (props.filterBy) {
+					case 'byGameId': {
+						const index = notesStore.index(GameNoteRepository.INDEX.byGameId);
+						const notes = await runRequest<GameNote[]>(index.getAll(props.GameId));
+						return notes;
+					}
+					default:
+						return await runRequest<GameNote[]>(notesStore.getAll());
+				}
 			});
-		} catch (err) {
-			console.error('Failed to find note', err);
-			return [];
-		}
+		});
 	};
 
 	static defineSchema = ({

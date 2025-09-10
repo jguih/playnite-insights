@@ -12,7 +12,16 @@ export const openIndexedDbAsync: (props: {
 		const request = indexedDB.open(dbName, version);
 
 		request.onerror = () => reject(request.error);
-		request.onsuccess = () => resolve(request.result);
+		request.onsuccess = () => {
+			const db = request.result;
+
+			db.onversionchange = () => {
+				db.close();
+				console.warn('Database is outdated, please reload the app');
+			};
+
+			resolve(request.result);
+		};
 		request.onupgradeneeded = (event) => {
 			const db = request.result;
 			const tx = request.transaction!;

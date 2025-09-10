@@ -103,8 +103,8 @@ export class RecentActivityViewModel {
 
 			if (!data.has(key)) {
 				data.set(key, {
-					gameName: session.GameName ?? '',
-					gameId: session.GameId ?? '',
+					gameName: session.GameName,
+					gameId: session.GameId,
 					status: currentStatus,
 					totalPlaytime: duration,
 					sessions: [session],

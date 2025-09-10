@@ -82,15 +82,12 @@
 	onMount(() => {
 		httpClientSignal.client = new FetchClient({ url: window.location.origin });
 
-		openIndexedDbAsync({ dbName: INDEXEDDB_NAME, version: INDEXEDDB_CURRENT_VERSION }).then(
-			(db) => {
-				db.onversionchange = () => {
-					db.close();
-					console.warn('Database is outdated, please reload the app');
-				};
-				indexedDbSignal.db = db;
-			},
-		);
+		indexedDbSignal.dbReady = openIndexedDbAsync({
+			dbName: INDEXEDDB_NAME,
+			version: INDEXEDDB_CURRENT_VERSION,
+		}).then((db) => {
+			indexedDbSignal.db = db;
+		});
 
 		isLoading = true;
 		loadAllAppData().then(() => (isLoading = false));

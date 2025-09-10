@@ -1,17 +1,20 @@
 <script lang="ts">
 	import {
 		companySignal,
+		factory,
 		gameSignal,
+		indexedDbSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
-	import { openNoteEditor } from '$lib/client/components/game-page/Lib.svelte';
-	import NoteEditor from '$lib/client/components/game-page/NoteEditor.svelte';
+	import { GameNoteEditor } from '$lib/client/components/game-page/journal/gameNoteEditor.svelte.js';
+	import NoteEditor from '$lib/client/components/game-page/journal/NoteEditor.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
+	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte.js';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 	import {
 		getPlayniteGameImageUrl,
@@ -26,7 +29,11 @@
 
 	const { data } = $props();
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
-	const vm = new GamePageViewModel({
+	const notesRepo = new GameNoteRepository({
+		indexedDbSignal: indexedDbSignal,
+		syncQueueFactory: factory.syncQueue,
+	});
+	const pageVm = new GamePageViewModel({
 		getGameId: () => data.gameId,
 		gamesSignal: gameSignal,
 		companySignal: companySignal,
@@ -35,6 +42,10 @@
 		gameSignal: gameSignal,
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
+	});
+	const noteEditorHandler = new GameNoteEditor({
+		gameNoteFactory: factory.gameNote,
+		gameNoteRepository: notesRepo,
 	});
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
@@ -46,12 +57,37 @@
 		return session;
 	});
 	const todaySessionsCount = $derived.by(() => {
-		const inProgressActivity = activityVm.inProgressActivity;
-		return inProgressActivity?.sessions.length;
+		const recentActivityMap = activityVm.recentActivityMap;
+		const activityForThisGame = recentActivityMap.get(data.gameId);
+		return activityForThisGame?.sessions.length ?? 0;
 	});
-	let notes: GameNote[] = [];
+	const notesSignal = $state<{ notes: GameNote[]; isLoading: boolean }>({
+		notes: [],
+		isLoading: false,
+	});
+
+	const loadNotes = async () => {
+		const gameId = data.gameId;
+		try {
+			notesSignal.isLoading = true;
+			const notes = await notesRepo.getAllAsync({ filterBy: 'byGameId', GameId: gameId });
+			notesSignal.notes = notes;
+		} catch (err) {
+			console.error('failed to fetch notes', err);
+		} finally {
+			notesSignal.isLoading = false;
+		}
+	};
+
+	const handleOnNoteChange = async () => {
+		const gameId = data.gameId;
+		const sessionId = activeSessionForThisGame?.SessionId ?? null;
+		await noteEditorHandler.saveAsync({ gameId, sessionId });
+		await loadNotes();
+	};
 
 	onMount(() => {
+		loadNotes();
 		activityVm.setTickInterval();
 		return () => {
 			activityVm.clearTickInterval();
@@ -63,13 +99,14 @@
 	<li class="bg-background-1 mb-2 p-4">
 		<p class="text-lg font-semibold">{note.Title}</p>
 		<p class="text-md mb-2">{note.Content}</p>
-		<p class="text-sm opacity-70">{note.CreatedAt}</p>
+		<p class="text-sm opacity-70">{new Date(note.CreatedAt).toLocaleString()}</p>
 	</li>
 {/snippet}
 
 <NoteEditor
-	gameId={data.gameId}
-	sessionId={activeSessionForThisGame?.SessionId ?? null}
+	currentNote={noteEditorHandler.currentNote}
+	handleOnChange={handleOnNoteChange}
+	handleClose={noteEditorHandler.closeNoteEditor}
 />
 <BaseAppLayout>
 	<Header>
@@ -80,11 +117,11 @@
 		{/snippet}
 	</Header>
 	<Main bottomNav={false}>
-		{#if vm.game}
+		{#if pageVm.game}
 			<div class="mb-6 flex flex-row gap-4">
 				<img
-					src={getPlayniteGameImageUrl(vm.game.CoverImage)}
-					alt={`${vm.game.Name} cover image`}
+					src={getPlayniteGameImageUrl(pageVm.game.CoverImage)}
+					alt={`${pageVm.game.Name} cover image`}
 					loading="lazy"
 					class="h-7/8 w-26 object-cover"
 				/>
@@ -93,14 +130,14 @@
 						<p>
 							{m.game_journal_you_are_playing()}
 							<br />
-							<span class="text-3xl font-bold">{vm.game.Name}</span>
+							<span class="text-3xl font-bold">{pageVm.game.Name}</span>
 						</p>
 						<Divider />
 						<p class="text-2xl">
 							{getPlaytimeInHoursMinutesAndSeconds(activityVm.inProgressSessionPlaytime!)}
 						</p>
 					{:else}
-						<p class="text-3xl font-bold">{vm.game.Name}</p>
+						<p class="text-3xl font-bold">{pageVm.game.Name}</p>
 						<Divider />
 					{/if}
 					<small class="text-sm opacity-70">
@@ -112,20 +149,22 @@
 					</small>
 				</div>
 			</div>
-			<section class="mb-6">
-				<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
-				<Divider class="border-1 mb-4" />
-				{#each notes as note (note.Id)}
-					<ul class="">
-						{@render noteCard(note)}
-					</ul>
-				{/each}
-			</section>
-			<section class="mb-6 font-semibold">
-				<h1 class="text-xl">{m.game_journal_title_links()}</h1>
-				<Divider class="border-1 mb-4" />
-			</section>
-			<LightButton onclick={() => openNoteEditor()}>{m.game_journal_label_add_note()}</LightButton>
 		{/if}
+		<section class="mb-6">
+			<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
+			<Divider class="border-1 mb-4" />
+			{#each notesSignal.notes as note (note.Id)}
+				<ul class="">
+					{@render noteCard(note)}
+				</ul>
+			{/each}
+		</section>
+		<section class="mb-6 font-semibold">
+			<h1 class="text-xl">{m.game_journal_title_links()}</h1>
+			<Divider class="border-1 mb-4" />
+		</section>
+		<LightButton onclick={() => noteEditorHandler.openNoteEditor()}>
+			{m.game_journal_label_add_note()}
+		</LightButton>
 	</Main>
 </BaseAppLayout>

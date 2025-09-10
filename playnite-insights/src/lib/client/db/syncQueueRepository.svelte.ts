@@ -1,15 +1,9 @@
 import type { SyncQueueItem } from '@playnite-insights/lib/client';
-import type { IndexedDbSignal } from '../app-state/AppData.types';
 import { runRequest, runTransaction } from './indexeddb';
 import type { ISyncQueueRepository } from './ISyncQueueRepository';
+import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
 
-export type SyncQueueRepositoryDeps = {
-	indexedDbSignal: IndexedDbSignal;
-};
-
-export class SyncQueueRepository implements ISyncQueueRepository {
-	#indexedDbSignal: SyncQueueRepositoryDeps['indexedDbSignal'];
-
+export class SyncQueueRepository extends IndexedDBRepository implements ISyncQueueRepository {
 	static STORE_NAME = 'syncQueue' as const;
 
 	static INDEX = {
@@ -24,15 +18,12 @@ export class SyncQueueRepository implements ISyncQueueRepository {
 		Entity_PayloadId_Status_Type: SyncQueueRepository.INDEX.Entity_PayloadId_Status_Type,
 	} as const;
 
-	constructor({ indexedDbSignal }: SyncQueueRepositoryDeps) {
-		this.#indexedDbSignal = indexedDbSignal;
+	constructor(deps: IndexedDBRepositoryDeps) {
+		super(deps);
 	}
 
 	getAsync: ISyncQueueRepository['getAsync'] = async (props) => {
-		const db = this.#indexedDbSignal.db;
-		if (!db) return null;
-
-		try {
+		return this.withDb(async (db) => {
 			return await runTransaction(db, 'syncQueue', 'readonly', async ({ tx }) => {
 				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
 				let queueItem: SyncQueueItem | null = null;
@@ -57,10 +48,7 @@ export class SyncQueueRepository implements ISyncQueueRepository {
 
 				return queueItem;
 			});
-		} catch (err) {
-			console.error('Failed to find sync queue item', err);
-			return null;
-		}
+		});
 	};
 
 	static defineSchema({
