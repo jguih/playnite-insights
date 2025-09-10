@@ -80,9 +80,9 @@
 	--color-foreground: var(--color-neutral-50);
 	--shadow: var(--shadow-lg);
 	/* Primary variant */
-	--color-primary-bg: var(--pl-color-primary-600);
-	--color-primary-fg: var(--color-neutral-950);
-	--color-primary-hover-bg: var(--pl-color-primary-700);
+	--color-primary-bg: var(--pl-color-primary-700);
+	--color-primary-fg: var(--color-foreground);
+	--color-primary-hover-bg: var(--pl-color-primary-600);
 	--color-primary-hover-fg: var(--pl-color-primary-100);
 	--color-primary-active-bg: var(--pl-color-primary-800);
 	--color-primary-active-fg: var(--color-foreground);
@@ -120,4 +120,16 @@
 
 body {
 	@apply text-foreground bg-background overflow-hidden;
+}
+
+.size-sm {
+  @apply size-3
+}
+
+.size-md {
+  @apply size-4
+}
+
+.size-lg {
+  @apply size-5
 }

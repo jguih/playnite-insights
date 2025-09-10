@@ -10,6 +10,8 @@
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
+	import Dropdown from '$lib/client/components/dropdown/Dropdown.svelte';
+	import DropdownBody from '$lib/client/components/dropdown/DropdownBody.svelte';
 	import { GameNoteEditor } from '$lib/client/components/game-page/journal/gameNoteEditor.svelte.js';
 	import NoteEditor from '$lib/client/components/game-page/journal/NoteEditor.svelte';
 	import Header from '$lib/client/components/Header.svelte';
@@ -25,7 +27,7 @@
 	import { GamePageViewModel } from '$lib/client/viewmodel/gamePageViewModel.svelte';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { ArrowLeft } from '@lucide/svelte';
+	import { ArrowLeft, ChevronDown, ChevronUp, PlusIcon } from '@lucide/svelte';
 	import { type GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
@@ -45,7 +47,7 @@
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
 	});
-	const noteEditorHandler = new GameNoteEditor({
+	const noteEditor = new GameNoteEditor({
 		gameNoteFactory: factory.gameNote,
 		gameNoteRepository: notesRepo,
 	});
@@ -80,6 +82,7 @@
 			} else if (err instanceof Error) {
 				toast.error({ title: m.error_load_local_game_notes(), message: err.message });
 			}
+			toast.error({ message: m.error_load_local_game_notes() });
 		} finally {
 			notesSignal.isLoading = false;
 		}
@@ -88,8 +91,25 @@
 	const handleOnNoteChange = async () => {
 		const gameId = data.gameId;
 		const sessionId = activeSessionForThisGame?.SessionId ?? null;
-		await noteEditorHandler.saveAsync({ gameId, sessionId });
+		await noteEditor.saveAsync({ gameId, sessionId });
 		await loadNotes();
+	};
+
+	const handleOnClickNote = async (note: GameNote) => {
+		noteEditor.currentNote = note;
+		noteEditor.openNoteEditor();
+	};
+
+	const handleOnAddNote = async () => {
+		const newNote = factory.gameNote.create({
+			Title: null,
+			Content: null,
+			GameId: null,
+			ImagePath: null,
+			SessionId: null,
+		});
+		noteEditor.currentNote = newNote;
+		noteEditor.openNoteEditor();
 	};
 
 	onMount(() => {
@@ -102,17 +122,27 @@
 </script>
 
 {#snippet noteCard(note: GameNote)}
-	<li class="bg-background-1 mb-2 p-4">
-		<p class="text-lg font-semibold">{note.Title}</p>
-		<p class="text-md mb-2">{note.Content}</p>
-		<p class="text-sm opacity-70">{new Date(note.CreatedAt).toLocaleString()}</p>
+	<li class="bg-background-1">
+		<LightButton
+			class={['flex-col! items-start! w-full p-4 text-start']}
+			onclick={() => handleOnClickNote(note)}
+			type="button"
+		>
+			{#if note.Title}
+				<p class="text-lg font-semibold">{note.Title}</p>
+			{/if}
+			{#if note.Content}
+				<p class="text-md mb-2">{note.Content}</p>
+			{/if}
+			<p class="text-sm opacity-70">{new Date(note.CreatedAt).toLocaleString()}</p>
+		</LightButton>
 	</li>
 {/snippet}
 
 <NoteEditor
-	currentNote={noteEditorHandler.currentNote}
+	currentNote={noteEditor.currentNote}
 	handleOnChange={handleOnNoteChange}
-	handleClose={noteEditorHandler.closeNoteEditor}
+	handleClose={noteEditor.closeNoteEditor}
 />
 <BaseAppLayout>
 	<Header>
@@ -157,20 +187,71 @@
 			</div>
 		{/if}
 		<section class="mb-6">
-			<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
-			<Divider class="border-1 mb-4" />
-			{#each notesSignal.notes as note (note.Id)}
-				<ul class="">
-					{@render noteCard(note)}
-				</ul>
-			{/each}
+			<Dropdown initialState={true}>
+				{#snippet button({ onclick, show })}
+					<LightButton
+						{onclick}
+						class={['w-full p-2']}
+						justify="between"
+					>
+						<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
+						{#if show}
+							<ChevronUp class={['size-lg']} />
+						{:else}
+							<ChevronDown class={['size-lg']} />
+						{/if}
+					</LightButton>
+					<Divider class="border-1" />
+				{/snippet}
+				{#snippet body()}
+					<DropdownBody>
+						<LightButton
+							class={['border-background-1 mb-4 w-full border-2 p-2 text-xl']}
+							onclick={handleOnAddNote}
+							type="button"
+						>
+							<PlusIcon />
+							{m.game_journal_label_add_note()}
+						</LightButton>
+						<ul class="flex flex-col gap-4">
+							{#each notesSignal.notes as note (note.Id)}
+								{@render noteCard(note)}
+							{/each}
+						</ul>
+					</DropdownBody>
+				{/snippet}
+			</Dropdown>
 		</section>
-		<section class="mb-6 font-semibold">
-			<h1 class="text-xl">{m.game_journal_title_links()}</h1>
-			<Divider class="border-1 mb-4" />
+		<section class="mb-6">
+			<Dropdown initialState={true}>
+				{#snippet button({ onclick, show })}
+					<LightButton
+						{onclick}
+						class={['w-full p-2']}
+						justify="between"
+					>
+						<h1 class="text-xl font-semibold">{m.game_journal_title_links()}</h1>
+						{#if show}
+							<ChevronUp class={['size-lg']} />
+						{:else}
+							<ChevronDown class={['size-lg']} />
+						{/if}
+					</LightButton>
+					<Divider class="border-1" />
+				{/snippet}
+				{#snippet body()}
+					<DropdownBody>
+						<LightButton
+							class={['border-background-1 mb-4 w-full border-2 p-2 text-xl']}
+							type="button"
+						>
+							<PlusIcon />
+							{m.game_journal_label_add_link()}
+						</LightButton>
+						<ul class="flex flex-col gap-4"></ul>
+					</DropdownBody>
+				{/snippet}
+			</Dropdown>
 		</section>
-		<LightButton onclick={() => noteEditorHandler.openNoteEditor()}>
-			{m.game_journal_label_add_note()}
-		</LightButton>
 	</Main>
 </BaseAppLayout>

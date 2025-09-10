@@ -60,4 +60,8 @@ export class GameNoteEditor {
 	get currentNote() {
 		return this.#currentNote;
 	}
+
+	set currentNote(note: GameNote) {
+		this.#currentNote = note;
+	}
 }

@@ -9,7 +9,7 @@
 	{...props}
 	class={[
 		color === 'primary' && [
-			selected ? 'text-primary-active-fg' : 'bg-primary-active-bg',
+			selected ? 'text-primary-active-fg' : 'text-primary-fg',
 			'bg-primary-bg',
 			'hover:text-primary-hover-fg hover:bg-primary-hover-bg',
 			'active:text-primary-active-fg active:bg-primary-active-bg',

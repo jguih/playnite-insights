@@ -18,4 +18,5 @@ export type DropdownProps = {
 		]
 	>;
 	hideOnClickOutside?: boolean;
+	initialState?: boolean;
 } & HTMLAttributes<HTMLDivElement>;

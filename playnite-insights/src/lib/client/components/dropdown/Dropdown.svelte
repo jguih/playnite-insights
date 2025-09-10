@@ -2,9 +2,15 @@
 	import { onMount } from 'svelte';
 	import type { DropdownProps } from './types';
 
-	let { body, button, hideOnClickOutside = false, ...props }: DropdownProps = $props();
+	let {
+		body,
+		button,
+		hideOnClickOutside = false,
+		initialState = false,
+		...props
+	}: DropdownProps = $props();
 	let container: HTMLDivElement;
-	let show: boolean = $state(false);
+	let show: boolean = $state(initialState);
 
 	const handleClickOutside: EventListener = (event) => {
 		if (event.target instanceof Node && !container.contains(event.target)) {
@@ -23,7 +29,7 @@
 <div
 	bind:this={container}
 	{...props}
-	class={`w-fit ${props.class ?? ''}`}
+	class={[props.class]}
 >
 	{@render button({ onclick: () => (show = !show), show })}
 	{#if body}

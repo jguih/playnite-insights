@@ -295,7 +295,7 @@
 						<p class="text-md">{m.label_ongoing_session()}</p>
 						<p class="text-md font-semibold">{recentActivityVm.inProgressGame.Name}</p>
 					</div>
-					<ChevronRight class="ml-auto size-6" />
+					<ChevronRight class="size-lg ml-auto" />
 				</LightAnchor>
 			</div>
 			<div class="pb-20"></div>

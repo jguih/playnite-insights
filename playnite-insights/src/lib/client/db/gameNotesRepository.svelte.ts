@@ -136,10 +136,9 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 				}
 
 				return notes.sort((a, b) => {
-					if (a.Title == null && b.Title == null) return 0;
-					if (a.Title == null) return -1;
-					if (b.Title == null) return 1;
-					return a.Title?.localeCompare(b.Title);
+					if (b.CreatedAt === a.CreatedAt) return 0;
+					if (a.CreatedAt < b.CreatedAt) return 1;
+					return -1;
 				});
 			});
 		});

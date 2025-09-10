@@ -3,7 +3,7 @@ import type { SemanticColors } from '../types';
 
 export type BaseButtonProps = HTMLButtonAttributes & {
 	button?: HTMLButtonElement;
-	justify?: 'center' | 'between';
+	justify?: 'center' | 'between' | 'start';
 	color?: SemanticColors;
 };
 export type LightButtonProps = BaseButtonProps & { selected?: boolean };
