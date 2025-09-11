@@ -8,7 +8,6 @@ export class SyncQueueFactory {
       Partial<Pick<SyncQueueItem, "Type">>
   ): SyncQueueItem => {
     return {
-      Id: crypto.randomUUID(),
       CreatedAt: new Date().toISOString(),
       Status: "pending",
       Type: props.Type ?? "create",

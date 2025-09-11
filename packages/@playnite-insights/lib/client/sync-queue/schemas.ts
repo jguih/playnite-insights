@@ -3,7 +3,7 @@ import { gameNoteSchema } from "../game-notes";
 import { ISODateSchema } from "../schemas";
 
 const baseQueueItem = {
-  Id: z.string(),
+  Id: z.number().optional(),
   Type: z.enum(["create", "update", "delete"]),
   CreatedAt: ISODateSchema,
   Status: z.enum(["pending", "synced", "failed"]),

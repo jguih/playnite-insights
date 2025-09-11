@@ -17,10 +17,10 @@
 	import Checkbox from '../forms/Checkbox.svelte';
 	import Select from '../forms/Select.svelte';
 	import SearchBar from '../SearchBar.svelte';
+	import SidebarBody from '../sidebar/AsideBody.svelte';
+	import SidebarHeader from '../sidebar/AsideHeader.svelte';
 	import Backdrop from '../sidebar/Backdrop.svelte';
 	import Sidebar from '../sidebar/Sidebar.svelte';
-	import SidebarBody from '../sidebar/SidebarBody.svelte';
-	import SidebarHeader from '../sidebar/SidebarHeader.svelte';
 	import FilterCheckboxFieldset from './FilterCheckboxFieldset.svelte';
 	import FilterCheckboxLabel from './FilterCheckboxLabel.svelte';
 	import FilterDropdown from './FilterDropdown.svelte';

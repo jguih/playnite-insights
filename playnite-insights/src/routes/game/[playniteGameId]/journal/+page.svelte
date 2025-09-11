@@ -96,7 +96,7 @@
 	};
 
 	const handleOnClickNote = async (note: GameNote) => {
-		noteEditor.currentNote = note;
+		noteEditor.currentNote = { ...note };
 		noteEditor.openNoteEditor();
 	};
 
@@ -110,6 +110,11 @@
 		});
 		noteEditor.currentNote = newNote;
 		noteEditor.openNoteEditor();
+	};
+
+	const handleOnDeleteNote = async () => {
+		await noteEditor.deleteAsync();
+		await loadNotes();
 	};
 
 	onMount(() => {
@@ -141,8 +146,9 @@
 
 <NoteEditor
 	currentNote={noteEditor.currentNote}
-	handleOnChange={handleOnNoteChange}
-	handleClose={noteEditor.closeNoteEditor}
+	onChange={handleOnNoteChange}
+	onClose={noteEditor.closeNoteEditor}
+	onDelete={handleOnDeleteNote}
 />
 <BaseAppLayout>
 	<Header>

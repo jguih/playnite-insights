@@ -22,6 +22,13 @@ export interface IGameNotesRepository {
 	 */
 	putAsync: (props: { note: GameNote }) => Promise<boolean>;
 	/**
+	 * Deletes a game note
+	 * @returns `true` on success, `false` otherwise
+	 * @throws {IndexedDBNotInitializedError} If the DB is not ready
+	 * @throws {DOMException} If a transaction fails
+	 */
+	deleteAsync: (props: { noteId: GameNote['Id'] }) => Promise<boolean>;
+	/**
 	 * Finds and returns a game note using the given filters
 	 * @returns The game note or `null` when not found
 	 * @throws {IndexedDBNotInitializedError} If the DB is not ready

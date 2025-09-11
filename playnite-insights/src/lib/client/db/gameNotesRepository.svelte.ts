@@ -101,6 +101,30 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		});
 	};
 
+	deleteAsync: IGameNotesRepository['deleteAsync'] = async (props) => {
+		return this.withDb(async (db) => {
+			return await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
+				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
+				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
+				const existingNote = await runRequest<GameNote | undefined>(notesStore.get(props.noteId));
+
+				if (!existingNote) return false;
+				if (existingNote.DeletedAt) return true;
+				existingNote.DeletedAt = new Date().toISOString();
+				await runRequest(notesStore.put(existingNote));
+
+				const queueItem = this.#syncQueueFactory.create({
+					Entity: 'gameNote',
+					Payload: existingNote,
+					Type: 'delete',
+				});
+				await runRequest(syncQueueStore.add(queueItem));
+
+				return true;
+			});
+		});
+	};
+
 	getAsync: IGameNotesRepository['getAsync'] = async (props) => {
 		return this.withDb(async (db) => {
 			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
@@ -109,7 +133,8 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 				switch (props.filterBy) {
 					case 'Id': {
 						const note = await runRequest<GameNote | undefined>(notesStore.get(props.Id));
-						return note ?? null;
+						if (note && note.DeletedAt === null) return note;
+						return null;
 					}
 					default:
 						return null;
@@ -135,11 +160,13 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 						break;
 				}
 
-				return notes.sort((a, b) => {
-					if (b.CreatedAt === a.CreatedAt) return 0;
-					if (a.CreatedAt < b.CreatedAt) return 1;
-					return -1;
-				});
+				return notes
+					.sort((a, b) => {
+						if (b.CreatedAt === a.CreatedAt) return 0;
+						if (a.CreatedAt < b.CreatedAt) return 1;
+						return -1;
+					})
+					.filter((n) => n.DeletedAt === null);
 			});
 		});
 	};

@@ -12,10 +12,12 @@ export type GameNoteEditorDeps = {
 
 export class GameNoteEditor {
 	#currentNote: GameNote;
-	#noteRepository: GameNoteRepository;
+	#noteRepository: GameNoteEditorDeps['gameNoteRepository'];
+	#gameNoteFactory: GameNoteEditorDeps['gameNoteFactory'];
 
 	constructor({ gameNoteFactory: factory, gameNoteRepository }: GameNoteEditorDeps) {
 		this.#noteRepository = gameNoteRepository;
+		this.#gameNoteFactory = factory;
 
 		this.#currentNote = $state(
 			factory.create({
@@ -40,6 +42,27 @@ export class GameNoteEditor {
 		note.SessionId = sessionId;
 		try {
 			await this.#noteRepository.putAsync({ note });
+		} catch (err) {
+			if (err instanceof IndexedDBNotInitializedError) {
+				toast.error({ message: m.error_db_not_ready() });
+			} else if (err instanceof Error) {
+				toast.error({ title: m.error_save_game_note(), message: err.message });
+			}
+		}
+	};
+
+	deleteAsync = async () => {
+		const note = { ...this.#currentNote };
+		try {
+			await this.#noteRepository.deleteAsync({ noteId: note.Id });
+			this.closeNoteEditor();
+			this.#currentNote = this.#gameNoteFactory.create({
+				Title: null,
+				Content: null,
+				ImagePath: null,
+				GameId: null,
+				SessionId: null,
+			});
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
 				toast.error({ message: m.error_db_not_ready() });

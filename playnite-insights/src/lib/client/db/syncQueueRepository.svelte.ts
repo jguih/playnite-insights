@@ -51,6 +51,16 @@ export class SyncQueueRepository extends IndexedDBRepository implements ISyncQue
 		});
 	};
 
+	getAllAsync: ISyncQueueRepository['getAllAsync'] = async () => {
+		return this.withDb(async (db) => {
+			return await runTransaction(db, 'syncQueue', 'readonly', async ({ tx }) => {
+				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
+				const queueItems = await runRequest<SyncQueueItem[]>(syncQueueStore.getAll());
+				return queueItems;
+			});
+		});
+	};
+
 	static defineSchema({
 		db,
 		tx,
@@ -62,7 +72,7 @@ export class SyncQueueRepository extends IndexedDBRepository implements ISyncQue
 		newVersion: number | null;
 	}) {
 		if (!db.objectStoreNames.contains(this.STORE_NAME)) {
-			const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'Id' });
+			const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'Id', autoIncrement: true });
 			store.createIndex(this.INDEX.byType, 'Type', { unique: false });
 			store.createIndex(this.INDEX.byStatus, 'Status', { unique: false });
 		}
