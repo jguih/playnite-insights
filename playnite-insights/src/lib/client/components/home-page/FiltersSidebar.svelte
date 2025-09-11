@@ -332,6 +332,7 @@
 					<p class="mt-2 text-center">{m.no_developers_found()}</p>
 				{/if}
 			</FilterDropdown>
+			<div class="p-20"></div>
 		</SidebarBody>
 	</Sidebar>
 {/if}
