@@ -1,6 +1,5 @@
-import { isValidLogLevel, LOG_LEVELS } from "@playnite-insights/lib/client";
 import { type LogService } from "@playnite-insights/core";
-import { ZodError } from "zod";
+import { isValidLogLevel, LOG_LEVELS } from "@playnite-insights/lib/client";
 
 export const DEFAULT_SOURCE = "General";
 
@@ -23,16 +22,7 @@ export const makeLogService = (
       return;
     }
     console.error(`[${getDateTimeString()}][ERROR][${source}] ${message}`);
-    if (error && error instanceof ZodError) {
-      const formattedIssues = error.issues
-        .map((i) => `- ${i.path.join(".") || "(root)"}: ${i.message}`)
-        .join("\n");
-      console.error(formattedIssues);
-      return;
-    }
-    if (error) {
-      console.error(error);
-    }
+    console.error(`[${getDateTimeString()}][ERROR][${source}] `, error);
   };
 
   const logWarning = (message: string): void => {

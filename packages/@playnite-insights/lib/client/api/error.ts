@@ -25,7 +25,7 @@ export class ValidationError extends ApiError {
     message?: string;
     details?: ZodIssue[];
   }) {
-    super(message);
+    super(message, 400);
     this.details = details;
   }
 }

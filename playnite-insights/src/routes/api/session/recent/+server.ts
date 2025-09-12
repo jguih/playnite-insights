@@ -1,7 +1,7 @@
 import { services } from '$lib';
+import { createHashForObject } from '$lib/server/api/hash';
 import { emptyResponse, getRecentSessionsResponseSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { createHash } from 'crypto';
 
 export const GET: RequestHandler = async ({ request }) => {
 	const ifNoneMatch = request.headers.get('if-none-match');
@@ -23,8 +23,7 @@ export const GET: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const jsonStr = JSON.stringify(result.data);
-	const hash = createHash('sha256').update(jsonStr).digest('hex');
+	const hash = createHashForObject(result.data);
 	const etag = `"${hash}"`;
 
 	if (ifNoneMatch === etag) {

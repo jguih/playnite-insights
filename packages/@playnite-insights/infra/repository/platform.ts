@@ -1,128 +1,115 @@
+import type { PlatformRepository } from "@playnite-insights/core";
 import { platformSchema, type Platform } from "@playnite-insights/lib/client";
-import type { LogService, PlatformRepository } from "@playnite-insights/core";
-import type { DatabaseSync } from "node:sqlite";
 import z from "zod";
-import { getDb as _getDb } from "../database";
-import { defaultLogger } from "../services/log";
-
-type PlatformRepositoryDeps = {
-  getDb: () => DatabaseSync;
-  logService: LogService;
-};
-
-const defaultDeps: Required<PlatformRepositoryDeps> = {
-  getDb: _getDb,
-  logService: defaultLogger,
-};
+import {
+  BaseRepositoryDeps,
+  defaultRepositoryDeps,
+  repositoryCall,
+} from "./base";
 
 export const makePlatformRepository = (
-  deps: Partial<PlatformRepositoryDeps> = {}
+  deps: Partial<BaseRepositoryDeps> = {}
 ): PlatformRepository => {
-  const { getDb, logService } = { ...defaultDeps, ...deps };
+  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
 
   const add = (platform: Platform): boolean => {
-    const db = getDb();
-    const query = `
-        INSERT INTO platform
-          (Id, Name, SpecificationId, Icon, Cover, Background)
-        VALUES
-          (?, ?, ?, ?, ?, ?)
-      `;
-    try {
-      const stmt = db.prepare(query);
-      stmt.run(
-        platform.Id,
-        platform.Name,
-        platform.SpecificationId,
-        platform.Icon,
-        platform.Cover,
-        platform.Background
-      );
-      logService.debug(`Added platform ${platform.Name}`);
-      return true;
-    } catch (error) {
-      logService.error(
-        `Failed to add platform ${platform.Name}`,
-        error as Error
-      );
-      return false;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `
+          INSERT INTO platform
+            (Id, Name, SpecificationId, Icon, Cover, Background)
+          VALUES
+            (?, ?, ?, ?, ?, ?)
+        `;
+        const stmt = db.prepare(query);
+        stmt.run(
+          platform.Id,
+          platform.Name,
+          platform.SpecificationId,
+          platform.Icon,
+          platform.Cover,
+          platform.Background
+        );
+        logService.debug(`Created platform ${platform.Name}`);
+        return true;
+      },
+      `add(${platform.Id}, ${platform.Name})`
+    );
   };
 
   const exists = (platform: Pick<Platform, "Id" | "Name">): boolean => {
-    const db = getDb();
-    const query = `
-        SELECT EXISTS (
-          SELECT 1 FROM platform 
-          WHERE Id = (?)
-        )
-      `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.get(platform.Id);
-      if (result) {
-        return Object.values(result)[0] === 1;
-      }
-      return false;
-    } catch (error) {
-      logService.error(
-        `Failed to check if platform ${platform.Name} exists`,
-        error as Error
-      );
-      return false;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `
+          SELECT EXISTS (
+            SELECT 1 FROM platform 
+            WHERE Id = (?)
+          )
+        `;
+        const stmt = db.prepare(query);
+        const result = stmt.get(platform.Id);
+        if (result) {
+          return Object.values(result)[0] === 1;
+        }
+        return false;
+      },
+      `exists(${platform.Id})`
+    );
   };
 
   const update = (platform: Platform): boolean => {
-    const db = getDb();
-    const query = `
-      UPDATE platform
-      SET
-        Name = ?,
-        SpecificationId = ?,
-        Icon = ?,
-        Cover = ?,
-        Background = ?
-      WHERE Id = ?;
-    `;
-    try {
-      const stmt = db.prepare(query);
-      stmt.run(
-        platform.Name,
-        platform.SpecificationId,
-        platform.Icon,
-        platform.Cover,
-        platform.Background,
-        platform.Id
-      );
-      logService.debug(`Updated data for platform ${platform.Name}`);
-      return true;
-    } catch (error) {
-      logService.error(
-        `Failed to update platform ${platform.Name}`,
-        error as Error
-      );
-      return false;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `
+        UPDATE platform
+        SET
+          Name = ?,
+          SpecificationId = ?,
+          Icon = ?,
+          Cover = ?,
+          Background = ?
+        WHERE Id = ?;
+      `;
+        const stmt = db.prepare(query);
+        stmt.run(
+          platform.Name,
+          platform.SpecificationId,
+          platform.Icon,
+          platform.Cover,
+          platform.Background,
+          platform.Id
+        );
+        logService.debug(`Updated platform ${platform.Name}`);
+        return true;
+      },
+      `update(${platform.Id}, ${platform.Name})`
+    );
   };
 
   const getById = (id: string): Platform | undefined => {
-    const db = getDb();
-    const query = `
-      SELECT *
-      FROM platform
-      WHERE Id = ?;
-    `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.get(id);
-      const platform = z.optional(platformSchema).parse(result);
-      logService.debug(`Found platform ${platform?.Name}`);
-      return platform;
-    } catch (error) {
-      logService.error(`Failed to get platform with if ${id}`, error as Error);
-      return;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `
+        SELECT *
+        FROM platform
+        WHERE Id = ?;
+      `;
+        const stmt = db.prepare(query);
+        const result = stmt.get(id);
+        const platform = z.optional(platformSchema).parse(result);
+        logService.debug(`Found platform ${platform?.Name}`);
+        return platform;
+      },
+      `getById(${id})`
+    );
   };
 
   const hasChanges = (
@@ -140,17 +127,19 @@ export const makePlatformRepository = (
   };
 
   const all: PlatformRepository["all"] = () => {
-    const db = getDb();
-    const query = `SELECT * FROM platform ORDER BY Name ASC`;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all();
-      const platforms = z.optional(z.array(platformSchema)).parse(result);
-      logService.debug(`Found ${platforms?.length ?? 0} platforms`);
-      return platforms;
-    } catch (error) {
-      logService.error(`Failed to get platform list`, error as Error);
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `SELECT * FROM platform ORDER BY Name ASC`;
+        const stmt = db.prepare(query);
+        const result = stmt.all();
+        const platforms = z.optional(z.array(platformSchema)).parse(result);
+        logService.debug(`Found ${platforms?.length ?? 0} platforms`);
+        return platforms;
+      },
+      `all()`
+    );
   };
 
   return {

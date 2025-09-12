@@ -25,7 +25,7 @@ export const makeGenreRepository = (
       `;
         const stmt = db.prepare(query);
         stmt.run(genre.Id, genre.Name);
-        logService.debug(`Added genre ${genre.Name}`);
+        logService.debug(`Created genre ${genre.Name}`);
         return true;
       },
       `add(${genre.Id}, ${genre.Name})`
@@ -66,7 +66,7 @@ export const makeGenreRepository = (
         `;
         const stmt = db.prepare(query);
         stmt.run(genre.Name, genre.Id);
-        logService.debug(`Updated data for genre ${genre.Name}`);
+        logService.debug(`Updated genre ${genre.Name}`);
         return true;
       },
       `update(${genre.Id}, ${genre.Name})`

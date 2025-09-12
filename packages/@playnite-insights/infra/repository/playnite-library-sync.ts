@@ -1,94 +1,75 @@
-import type {
-  LogService,
-  PlayniteLibrarySyncRepository,
-} from "@playnite-insights/core";
-import type { DatabaseSync } from "node:sqlite";
-import { getDb as _getDb } from "../database";
-import { defaultLogger } from "../services";
-
-type PlayniteLibrarySyncRepositoryDeps = {
-  getDb: () => DatabaseSync;
-  logService: LogService;
-};
-
-const defaultDeps: Required<PlayniteLibrarySyncRepositoryDeps> = {
-  getDb: _getDb,
-  logService: defaultLogger,
-};
+import type { PlayniteLibrarySyncRepository } from "@playnite-insights/core";
+import {
+  BaseRepositoryDeps,
+  defaultRepositoryDeps,
+  repositoryCall,
+} from "./base";
 
 export const makePlayniteLibrarySyncRepository = (
-  deps: Partial<PlayniteLibrarySyncRepositoryDeps> = {}
+  deps: Partial<BaseRepositoryDeps> = {}
 ): PlayniteLibrarySyncRepository => {
-  const { getDb, logService } = { ...defaultDeps, ...deps };
+  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
 
   const add = (totalPlaytimeSeconds: number, totalGames: number) => {
-    const db = getDb();
-    const now = new Date().toISOString();
-    const query = `
-      INSERT INTO playnite_library_sync
-        (Timestamp, TotalPlaytimeSeconds, TotalGames)
-      VALUES
-        (?, ?, ?);
-    `;
-    try {
-      const stmt = db.prepare(query);
-      stmt.run(now, totalPlaytimeSeconds, totalGames);
-      logService.debug(
-        `Inserted playnite_library_sync entry with totalPlaytime: ${totalPlaytimeSeconds} seconds and totalGames: ${totalGames}`
-      );
-      return true;
-    } catch (error) {
-      logService.error(
-        "Error while inserting new entry for Playnite library sync",
-        error as Error
-      );
-      return false;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const now = new Date().toISOString();
+        const query = `
+        INSERT INTO playnite_library_sync
+          (Timestamp, TotalPlaytimeSeconds, TotalGames)
+        VALUES
+          (?, ?, ?);
+      `;
+        const stmt = db.prepare(query);
+        stmt.run(now, totalPlaytimeSeconds, totalGames);
+        logService.debug(
+          `Created library sync entry (totalPlaytime: ${totalPlaytimeSeconds}s, totalGames: ${totalGames})`
+        );
+        return true;
+      },
+      `add(${totalPlaytimeSeconds}, ${totalGames})`
+    );
   };
 
   const getTotalPlaytimeOverLast6Months = (): number[] => {
-    const query = `
-        SELECT totalPlaytimeSeconds FROM (
-          SELECT MAX(TotalPlaytimeSeconds) as totalPlaytimeSeconds, strftime('%Y-%m', Timestamp) as yearMonth
-          FROM playnite_library_sync
-          WHERE Timestamp >= datetime('now', '-6 months')
-          GROUP BY yearMonth
-          ORDER BY yearMonth
+    return repositoryCall(logService,() => {
+      const query = `
+          SELECT totalPlaytimeSeconds FROM (
+            SELECT MAX(TotalPlaytimeSeconds) as totalPlaytimeSeconds, strftime('%Y-%m', Timestamp) as yearMonth
+            FROM playnite_library_sync
+            WHERE Timestamp >= datetime('now', '-6 months')
+            GROUP BY yearMonth
+            ORDER BY yearMonth
+          );
+        `;
+        const stmt = getDb().prepare(query);
+        const result = stmt.all();
+        const data: number[] = [];
+        for (const entry of result) {
+          const value = entry.totalPlaytimeSeconds as number;
+          data.push(value);
+        }
+        logService.debug(
+          `Successfully queried total playtime over last 6 months: ${JSON.stringify(
+            data
+          )}`
         );
-      `;
-    try {
-      const stmt = getDb().prepare(query);
-      const result = stmt.all();
-      const data: number[] = [];
-      for (const entry of result) {
-        const value = entry.totalPlaytimeSeconds as number;
-        data.push(value);
-      }
-      logService.debug(
-        `Successfully queried total playtime over last 6 months: ${JSON.stringify(
-          data
-        )}`
-      );
-      return data;
-    } catch (error) {
-      logService.error(
-        "Failed to get total playtime over last 6 months",
-        error as Error
-      );
-      return [];
-    }
+        return data;
+    }, `getTotalPlaytimeOverLast6Months()`);
   };
 
   const getGamesOwnedLastNMonths: PlayniteLibrarySyncRepository["getGamesOwnedLastNMonths"] =
     (n = 6) => {
-      const query = `
-        SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
-        FROM playnite_library_sync
-        WHERE Timestamp >= datetime('now', ?)
-        GROUP BY yearMonth
-        ORDER BY yearMonth DESC;
-      `;
-      try {
+      return repositoryCall(logService, () => {
+        const query = `
+          SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
+          FROM playnite_library_sync
+          WHERE Timestamp >= datetime('now', ?)
+          GROUP BY yearMonth
+          ORDER BY yearMonth DESC;
+        `;
         const stmt = getDb().prepare(query);
         const result = stmt.all(`-${n} months`);
         const data: number[] = new Array(6).fill(0);
@@ -98,20 +79,13 @@ export const makePlayniteLibrarySyncRepository = (
           data[i] = value;
           i--;
         }
-
         logService.debug(
-          `Successfully queried total games owned over last 6 months: ${JSON.stringify(
+          `Found total games owned over last 6 months: ${JSON.stringify(
             data
           )}`
         );
         return data;
-      } catch (error) {
-        logService.error(
-          "Failed to get total games owned over last 6 months",
-          error as Error
-        );
-        return [];
-      }
+      }, `getGamesOwnedLastNMonths(${n})`)
     };
 
   return {
