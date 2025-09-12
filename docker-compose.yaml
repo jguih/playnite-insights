@@ -47,6 +47,7 @@ services:
       context: .
       target: prod
     container_name: app-prod
+    restart: always
     environment:
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
       APP_NAME: "Playnite Insights"

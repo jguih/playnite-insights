@@ -1,7 +1,7 @@
 import { LOG_LEVELS, type ValidLogLevels } from "@playnite-insights/lib/client";
 
 export type LogService = {
-  error: (message: string, error?: Error) => void;
+  error: (message: string, error?: unknown) => void;
   warning: (message: string) => void;
   info: (message: string) => void;
   success: (message: string) => void;
