@@ -1,7 +1,4 @@
-import {
-  type PlayniteLibraryManifest,
-  type ValidationResult,
-} from "@playnite-insights/lib/client";
+import { type PlayniteLibraryManifest } from "@playnite-insights/lib/client";
 import type {
   FileSystemService,
   LogService,
@@ -18,6 +15,6 @@ export type LibraryManifestServiceDeps = {
 };
 
 export type LibraryManifestService = {
-  write: () => Promise<ValidationResult<PlayniteLibraryManifest>>;
+  write: () => Promise<void>;
   get: () => Promise<PlayniteLibraryManifest | null>;
 };

@@ -1,9 +1,12 @@
+import {
+  ApiError,
+  type PlayniteLibraryManifest,
+} from "@playnite-insights/lib/client";
 import { join } from "path";
 import type {
-  LibraryManifestServiceDeps,
   LibraryManifestService,
+  LibraryManifestServiceDeps,
 } from "./service.types";
-import { type PlayniteLibraryManifest } from "@playnite-insights/lib/client";
 
 export const makeLibraryManifestService = ({
   getManifestData,
@@ -13,13 +16,16 @@ export const makeLibraryManifestService = ({
   FILES_DIR,
   CONTENT_HASH_FILE_NAME,
 }: LibraryManifestServiceDeps): LibraryManifestService => {
-  const write = async () => {
+  const write: LibraryManifestService["write"] = async () => {
     logService.debug("Writing library manifest...");
     try {
       const gamesInLibrary: PlayniteLibraryManifest["gamesInLibrary"] = [];
       const gamesManifestData = getManifestData();
       if (!gamesManifestData) {
-        throw new Error("Failed to fetch manifest data");
+        logService.warning(
+          `Library manifest was not written due to missing library data`
+        );
+        return;
       }
       for (const data of gamesManifestData) {
         gamesInLibrary.push({ gameId: data.Id, contentHash: data.ContentHash });
@@ -59,20 +65,13 @@ export const makeLibraryManifestService = ({
         LIBRARY_MANIFEST_FILE,
         JSON.stringify(manifest, null, 2)
       );
-      logService.success("manifest.json written successfully");
-      return {
-        isValid: true,
-        message: "manifest.json written sucessfully",
-        httpCode: 200,
-        data: manifest,
-      };
+      logService.success("Library manifest written successfully");
     } catch (error) {
-      logService.error("Error while writing manifest.json", error as Error);
-      return {
-        isValid: false,
-        message: "Failed to write manifest.json",
-        httpCode: 500,
-      };
+      logService.error("Failed to write manifest.json", error);
+      if (error instanceof ApiError) throw error;
+      throw new ApiError("Failed to write manifest.json", 500, {
+        cause: error,
+      });
     }
   };
 

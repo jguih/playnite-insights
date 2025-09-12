@@ -22,12 +22,29 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Unit Tests
+        run: pnpm test:unit
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: "**/test-results/*.xml"
+
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build playnite-insights Docker image
         uses: docker/build-push-action@v6.18.0
         with:
