@@ -3,6 +3,7 @@
 		companySignal,
 		factory,
 		gameSignal,
+		httpClientSignal,
 		indexedDbSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
@@ -19,6 +20,8 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
 	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte.js';
+	import { SyncQueueRepository } from '$lib/client/db/syncQueueRepository.svelte.js';
+	import { SyncQueue } from '$lib/client/sync-queue/syncQueue.js';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 	import {
 		getPlayniteGameImageUrl,
@@ -50,6 +53,12 @@
 	const noteEditor = new GameNoteEditor({
 		gameNoteFactory: factory.gameNote,
 		gameNoteRepository: notesRepo,
+	});
+	const syncRepo = new SyncQueueRepository({ indexedDbSignal: indexedDbSignal });
+	const syncQueue = new SyncQueue({
+		gameNoteRepository: notesRepo,
+		httpClientSignal: httpClientSignal,
+		syncQueueRepository: syncRepo,
 	});
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
@@ -116,6 +125,17 @@
 	const handleOnDeleteNote = async () => {
 		await noteEditor.deleteAsync();
 		await loadNotes();
+	};
+
+	const processQueue = async () => {
+		try {
+			await syncQueue.processQueueAsync();
+		} catch (err) {
+			toast.error({
+				title: 'Sync queue failed',
+				message: err instanceof Error ? err.message : 'Unknown error',
+			});
+		}
 	};
 
 	onMount(() => {
@@ -260,5 +280,11 @@
 				{/snippet}
 			</Dropdown>
 		</section>
+		<LightButton
+			type="button"
+			onclick={() => processQueue()}
+		>
+			Process Queue
+		</LightButton>
 	</Main>
 </BaseAppLayout>

@@ -26,6 +26,8 @@ ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights (Dev)'
 
+RUN apt update && apt install sqlite3 -y 
+
 RUN mkdir -p ./data/files ./data/tmp
 COPY ./playnite-insights/static/placeholder ./data/files/placeholder
 COPY ./packages/@playnite-insights/infra/migrations ./infra/migrations

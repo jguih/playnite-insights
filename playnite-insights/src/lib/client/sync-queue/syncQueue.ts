@@ -1,6 +1,6 @@
 import {
 	createGameNoteCommandSchema,
-	updateGameNoteResponseSchema,
+	createGameNoteResponseSchema,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
 import type { HttpClientSignal } from '../app-state/AppData.types';
@@ -42,7 +42,7 @@ export class SyncQueue {
 						const command = createGameNoteCommandSchema.parse(note);
 						const createdNote = await client.httpPostAsync({
 							endpoint: '/api/note',
-							strategy: new JsonStrategy(updateGameNoteResponseSchema),
+							strategy: new JsonStrategy(createGameNoteResponseSchema),
 							body: command,
 						});
 						await this.#gameNoteRepository.putAsync({ note: createdNote });
