@@ -1,4 +1,4 @@
-import { GameNote } from "@playnite-insights/lib/client";
+import { type GameNote } from "@playnite-insights/lib/client";
 
 export type GameNoteRepository = {
   add: (note: GameNote) => GameNote;

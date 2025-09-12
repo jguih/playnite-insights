@@ -45,12 +45,9 @@ export type PlayniteGameRepository = {
     publisher: Company
   ) => boolean;
   deletePublishersFor: (game: Pick<PlayniteGame, "Id" | "Name">) => boolean;
-  getById: (id: string) => PlayniteGame | undefined;
-  getManifestData: () => GameManifestData | undefined;
+  getById: (id: string) => PlayniteGame | null;
+  getManifestData: () => GameManifestData | null;
   getTotal: (filters?: GameFilters) => number;
-  getTotalPlaytimeSeconds: () => number | undefined;
-  /**
-   * Returns a list with all games
-   */
-  all: () => FullGame[] | undefined;
+  getTotalPlaytimeSeconds: () => number;
+  all: () => FullGame[];
 };

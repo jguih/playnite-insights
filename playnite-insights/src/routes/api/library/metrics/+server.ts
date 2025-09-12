@@ -1,26 +1,28 @@
 import { services } from '$lib';
+import { handleApiError } from '$lib/server/api/handle-error';
+import { createHashForObject } from '$lib/server/api/hash';
 import {
 	emptyResponse,
 	getPlayniteLibraryMetricsResponseSchema,
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = () => {
-	const _data = services.playniteLibrary.getLibraryMetrics();
+export const GET: RequestHandler = ({ request }) => {
+	const ifNoneMatch = request.headers.get('if-none-match');
 
-	if (!_data) {
-		return emptyResponse();
+	try {
+		const data = services.playniteLibrary.getLibraryMetrics();
+		if (!data) {
+			return emptyResponse();
+		}
+		getPlayniteLibraryMetricsResponseSchema.parse(data);
+		const hash = createHashForObject(data);
+		const etag = `"${hash}"`;
+		if (ifNoneMatch === etag) {
+			return emptyResponse(304);
+		}
+		return json(data, { headers: { 'Cache-Control': 'no-cache', ETag: etag } });
+	} catch (err) {
+		return handleApiError(err);
 	}
-
-	const result = getPlayniteLibraryMetricsResponseSchema.safeParse(_data);
-
-	if (!result.success) {
-		services.log.error(`Schema validation failed: ${result.error.format()}`);
-		return json(
-			{ error: { message: 'Invalid server data', details: result.error.flatten() } },
-			{ status: 500 },
-		);
-	}
-
-	return json(result.data);
 };

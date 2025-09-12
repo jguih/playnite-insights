@@ -1,4 +1,4 @@
-import { SyncQueueItem } from "./types";
+import { type SyncQueueItem } from "./types";
 
 export class SyncQueueFactory {
   constructor() {}

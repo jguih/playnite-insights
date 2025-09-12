@@ -2,9 +2,9 @@ import type { CompanyRepository } from "@playnite-insights/core";
 import { companySchema, type Company } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  BaseRepositoryDeps,
   defaultRepositoryDeps,
   repositoryCall,
+  type BaseRepositoryDeps,
 } from "./base";
 
 export const makeCompanyRepository = (

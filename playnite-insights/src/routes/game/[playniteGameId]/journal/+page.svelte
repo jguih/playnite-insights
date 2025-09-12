@@ -81,8 +81,9 @@
 				toast.error({ message: m.error_db_not_ready() });
 			} else if (err instanceof Error) {
 				toast.error({ title: m.error_load_local_game_notes(), message: err.message });
+			} else {
+				toast.error({ message: m.error_load_local_game_notes() });
 			}
-			toast.error({ message: m.error_load_local_game_notes() });
 		} finally {
 			notesSignal.isLoading = false;
 		}

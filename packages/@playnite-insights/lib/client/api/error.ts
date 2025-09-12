@@ -1,4 +1,4 @@
-import { ZodIssue } from "zod";
+import { type ZodIssue } from "zod";
 
 export class ApiError extends Error {
   public readonly statusCode: number;
@@ -9,8 +9,8 @@ export class ApiError extends Error {
     statusCode: number = 500,
     opts?: { cause?: unknown }
   ) {
-    super();
-    this.statusCode = 500;
+    super(message);
+    this.statusCode = statusCode;
     this.cause = opts?.cause;
   }
 }

@@ -48,3 +48,9 @@ export const syncGameListCommandSchema = z.object({
   RemovedItems: z.array(z.string()),
   UpdatedItems: z.array(incomingPlayniteGameDtoSchema),
 });
+
+export type IncomingPlayniteGameDTO = z.infer<
+  typeof incomingPlayniteGameDtoSchema
+>;
+
+export type SyncGameListCommand = z.infer<typeof syncGameListCommandSchema>;

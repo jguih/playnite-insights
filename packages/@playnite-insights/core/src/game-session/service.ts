@@ -200,8 +200,6 @@ export const makeGameSessionService = ({
     };
     sessions = gameSessionRepository.findAllBy({ filters });
 
-    logService.debug(`Found ${sessions?.length ?? 0} sessions`);
-
     return sessions ?? null;
   };
 

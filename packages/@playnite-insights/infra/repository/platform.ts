@@ -2,9 +2,9 @@ import type { PlatformRepository } from "@playnite-insights/core";
 import { platformSchema, type Platform } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  BaseRepositoryDeps,
   defaultRepositoryDeps,
   repositoryCall,
+  type BaseRepositoryDeps,
 } from "./base";
 
 export const makePlatformRepository = (

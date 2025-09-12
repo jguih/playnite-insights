@@ -8,6 +8,5 @@ export * from "./library-manifest";
 export * from "./log";
 export * from "./platform";
 export * from "./playnite-game";
-export * from "./playnite-library-importer";
 export * from "./sync-queue";
 export * from "./types";

@@ -1,160 +1,154 @@
-import type {
-  GameSessionRepository,
-  LogService,
-} from "@playnite-insights/core";
+import type { GameSessionRepository } from "@playnite-insights/core";
 import { gameSessionSchema } from "@playnite-insights/lib/client";
-import type { DatabaseSync } from "node:sqlite";
 import z from "zod";
-import { getDb as _getDb } from "../database";
-import { defaultLogger } from "../services/log";
+import {
+  type BaseRepositoryDeps,
+  defaultRepositoryDeps,
+  repositoryCall,
+} from "../repository/base";
 import { getWhereClauseAndParamsFromFilters } from "./filtering";
 
-type GameSessionRepositoryDeps = {
-  logService: LogService;
-  getDb: () => DatabaseSync;
-};
-
-const defaultDeps: Required<GameSessionRepositoryDeps> = {
-  getDb: _getDb,
-  logService: defaultLogger,
-};
-
 export const makeGameSessionRepository = (
-  deps: Partial<GameSessionRepositoryDeps> = {}
+  deps: Partial<BaseRepositoryDeps> = {}
 ): GameSessionRepository => {
-  const { getDb, logService } = { ...defaultDeps, ...deps };
+  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
 
   const getById: GameSessionRepository["getById"] = (sessionId) => {
-    const db = getDb();
-    const query = `SELECT * FROM game_session WHERE SessionId = (?)`;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.get(sessionId);
-      const session = z.optional(gameSessionSchema).parse(result);
-      return session;
-    } catch (error) {
-      logService.error(`Failed to get session by Id`, error as Error);
-      return;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `SELECT * FROM game_session WHERE SessionId = (?)`;
+        const stmt = db.prepare(query);
+        const result = stmt.get(sessionId);
+        const session = z.optional(gameSessionSchema).parse(result);
+        return session ?? null;
+      },
+      `getById(${sessionId})`
+    );
   };
 
   const add: GameSessionRepository["add"] = (session) => {
-    const db = getDb();
-    const query = `
-      INSERT INTO game_session
-        (SessionId, GameId, GameName, StartTime, EndTime, Duration, Status)
-      VALUES
-        (?, ?, ?, ?, ?, ?, ?)
-    `;
-    try {
-      const stmt = db.prepare(query);
-      stmt.run(
-        session.SessionId,
-        session.GameId,
-        session.GameName,
-        session.StartTime,
-        session.EndTime,
-        session.Duration,
-        session.Status
-      );
-      logService.debug(`Created session ${session.SessionId}`);
-      return true;
-    } catch (error) {
-      logService.error(`Failed to create session ${session.SessionId}`);
-      return false;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `
+        INSERT INTO game_session
+          (SessionId, GameId, GameName, StartTime, EndTime, Duration, Status)
+        VALUES
+          (?, ?, ?, ?, ?, ?, ?)
+      `;
+        const stmt = db.prepare(query);
+        stmt.run(
+          session.SessionId,
+          session.GameId,
+          session.GameName,
+          session.StartTime,
+          session.EndTime,
+          session.Duration,
+          session.Status
+        );
+        logService.debug(`Created session ${session.SessionId}`);
+        return true;
+      },
+      `add(${session.SessionId}, ${session.GameName})`
+    );
   };
 
   const update: GameSessionRepository["update"] = (session) => {
-    const query = `
-        UPDATE game_session
-        SET
-          GameId = ?,
-          GameName = ?,
-          StartTime = ?,
-          EndTime = ?,
-          Duration = ?,
-          Status = ?
-        WHERE
-          SessionId = ?
-      `;
-    try {
-      const db = getDb();
-      const stmt = db.prepare(query);
-      stmt.run(
-        session.GameId,
-        session.GameName,
-        session.StartTime,
-        session.EndTime,
-        session.Duration,
-        session.Status,
-        session.SessionId
-      );
-      logService.debug(`Updated session ${session.SessionId}`);
-      return true;
-    } catch (error) {
-      logService.error(`Failed to update session ${session.SessionId}`);
-      return false;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const query = `
+          UPDATE game_session
+          SET
+            GameId = ?,
+            GameName = ?,
+            StartTime = ?,
+            EndTime = ?,
+            Duration = ?,
+            Status = ?
+          WHERE
+            SessionId = ?
+        `;
+        const db = getDb();
+        const stmt = db.prepare(query);
+        stmt.run(
+          session.GameId,
+          session.GameName,
+          session.StartTime,
+          session.EndTime,
+          session.Duration,
+          session.Status,
+          session.SessionId
+        );
+        logService.debug(`Updated session ${session.SessionId}`);
+        return true;
+      },
+      `update(${session.SessionId}, ${session.GameName})`
+    );
   };
 
   const all: GameSessionRepository["all"] = () => {
-    const db = getDb();
-    const query = `SELECT * FROM game_session ORDER BY StartTime DESC`;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all();
-      const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
-      logService.debug(`Found ${sessions?.length ?? 0} sessions`);
-      return sessions;
-    } catch (error) {
-      logService.error(`Failed get all sessions`, error as Error);
-      return;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `SELECT * FROM game_session ORDER BY StartTime DESC`;
+        const stmt = db.prepare(query);
+        const result = stmt.all();
+        const sessions = z.array(gameSessionSchema).parse(result);
+        logService.debug(`Found ${sessions?.length ?? 0} sessions`);
+        return sessions;
+      },
+      `all()`
+    );
   };
 
   const unlinkSessionsForGame: GameSessionRepository["unlinkSessionsForGame"] =
     (gameId) => {
-      const db = getDb();
-      const query = `
-        UPDATE game_session
-        SET
-          GameId = NULL
-        WHERE
-          GameId = ?
-      `;
-      try {
-        const stmt = db.prepare(query);
-        stmt.run(gameId);
-        return true;
-      } catch (error) {
-        logService.error(
-          `Failed to unlink sessions for game with id ${gameId}`,
-          error as Error
-        );
-        return false;
-      }
+      return repositoryCall(
+        logService,
+        () => {
+          const db = getDb();
+          const query = `
+          UPDATE game_session
+          SET
+            GameId = NULL
+          WHERE
+            GameId = ?
+        `;
+          const stmt = db.prepare(query);
+          stmt.run(gameId);
+          return true;
+        },
+        `unlinkSessionsForGame(${gameId})`
+      );
     };
 
   const findAllBy: GameSessionRepository["findAllBy"] = (args) => {
-    const db = getDb();
-    let query = `
-      SELECT * 
-      FROM game_session 
-    `;
-    const { where, params } = getWhereClauseAndParamsFromFilters(args.filters);
-    query += where;
-    query += ` ORDER BY StartTime DESC;`;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all(...params);
-      const sessions = z.optional(z.array(gameSessionSchema)).parse(result);
-      logService.debug(`Found ${sessions?.length ?? 0} sessions`);
-      return sessions;
-    } catch (error) {
-      logService.error(`Failed get all sessions`, error as Error);
-      return;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        let query = `
+        SELECT * 
+        FROM game_session 
+      `;
+        const { where, params } = getWhereClauseAndParamsFromFilters(
+          args.filters
+        );
+        query += where;
+        query += ` ORDER BY StartTime DESC;`;
+        const stmt = db.prepare(query);
+        const result = stmt.all(...params);
+        const sessions = z.array(gameSessionSchema).parse(result);
+        logService.debug(`Found ${sessions?.length ?? 0} sessions`);
+        return sessions;
+      },
+      `findAllBy(${JSON.stringify(args.filters)})`
+    );
   };
 
   return { getById, add, update, all, unlinkSessionsForGame, findAllBy };

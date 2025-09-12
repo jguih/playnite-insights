@@ -4,12 +4,10 @@ import type {
 } from "@playnite-insights/lib/client";
 
 export type GameSessionRepository = {
-  getById: (sessionId: GameSession["SessionId"]) => GameSession | undefined;
+  getById: (sessionId: GameSession["SessionId"]) => GameSession | null;
   add: (newSession: GameSession) => boolean;
   update: (session: GameSession) => boolean;
-  all: () => GameSession[] | undefined;
+  all: () => GameSession[];
   unlinkSessionsForGame: (gameId: string) => boolean;
-  findAllBy: (params: {
-    filters?: GameSessionFilters;
-  }) => GameSession[] | undefined;
+  findAllBy: (params: { filters?: GameSessionFilters }) => GameSession[];
 };

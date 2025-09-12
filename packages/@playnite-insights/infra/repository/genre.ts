@@ -2,7 +2,7 @@ import type { GenreRepository } from "@playnite-insights/core";
 import { type Genre, genreSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  BaseRepositoryDeps,
+  type BaseRepositoryDeps,
   defaultRepositoryDeps,
   repositoryCall,
 } from "./base";

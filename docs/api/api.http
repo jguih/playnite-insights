@@ -1,3 +1,7 @@
+### Get library manifest
+GET {{protocol}}://{{host}}/api/sync/manifest
+Content-Type: {{contentType}}
+
 ### Get all companies
 GET {{protocol}}://{{host}}/api/company
 Content-Type: {{contentType}}

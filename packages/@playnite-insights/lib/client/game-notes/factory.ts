@@ -1,4 +1,4 @@
-import { GameNote } from "./types";
+import { type GameNote } from "./types";
 
 export class GameNoteFactory {
   constructor() {}
