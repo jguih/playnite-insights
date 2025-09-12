@@ -1,4 +1,5 @@
 import z from "zod";
+import { DateFilter } from "../types/date-filter";
 import {
   closeGameSessionSchema,
   gameSessionSchema,
@@ -18,13 +19,6 @@ export type GameActivity = {
   totalPlaytime: number;
   sessions: GameSession[];
 };
-
-export type DateFilter =
-  | { op: "between"; start: string; end: string }
-  | { op: "gte"; value: string }
-  | { op: "lte"; value: string }
-  | { op: "eq"; value: string }
-  | { op: "overlaps"; start: string; end: string };
 
 export type GameSessionFilters = {
   startTime?: DateFilter[];

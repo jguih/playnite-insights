@@ -1,0 +1,83 @@
+import { services } from '$lib';
+import { handleApiError } from '$lib/server/api/handle-error';
+import { createHashForObject } from '$lib/server/api/hash';
+import {
+	createGameNoteCommandSchema,
+	createGameNoteResponseSchema,
+	deleteGameNoteCommandSchema,
+	emptyResponse,
+	getAllGameNotesResponseSchema,
+	updateGameNoteCommandSchema,
+	updateGameNoteResponseSchema,
+	type GameNote,
+} from '@playnite-insights/lib/client';
+import { json, type RequestHandler } from '@sveltejs/kit';
+
+export const GET: RequestHandler = ({ request, url }) => {
+	const lastSync = url.searchParams.get('lastSync');
+	const ifNoneMatch = request.headers.get('if-none-match');
+
+	try {
+		let data: GameNote[] = [];
+		if (lastSync && !isNaN(Date.parse(lastSync))) {
+			return json(
+				{ error: { message: 'lastSync param must be a valid ISO date string' } },
+				{ status: 400 },
+			);
+		} else if (lastSync) {
+			const lastSyncDate = new Date(lastSync);
+			data = services.noteRepository.all({
+				filters: { lastUpdatedAt: [{ op: 'gte', value: lastSyncDate.toISOString() }] },
+			});
+		} else {
+			data = services.noteRepository.all();
+		}
+		if (!data || data.length === 0) {
+			return emptyResponse();
+		}
+		getAllGameNotesResponseSchema.parse(data);
+		const hash = createHashForObject(data);
+		const etag = `"${hash}"`;
+		if (ifNoneMatch === etag) {
+			return emptyResponse(304);
+		}
+		return json(data, { headers: { 'Cache-Control': 'no-cache', ETag: etag } });
+	} catch (err) {
+		return handleApiError(err);
+	}
+};
+
+export const POST: RequestHandler = async ({ request }) => {
+	try {
+		const jsonBody = await request.json();
+		const note = createGameNoteCommandSchema.parse(jsonBody);
+		const createdNote = services.noteRepository.add(note);
+		createGameNoteResponseSchema.parse(createdNote);
+		return json(createdNote);
+	} catch (err) {
+		return handleApiError(err);
+	}
+};
+
+export const PUT: RequestHandler = async ({ request }) => {
+	try {
+		const jsonBody = await request.json();
+		const note = updateGameNoteCommandSchema.parse(jsonBody);
+		const updatedNote = services.noteRepository.update(note);
+		updateGameNoteResponseSchema.parse(updatedNote);
+		return json(updatedNote);
+	} catch (err) {
+		return handleApiError(err);
+	}
+};
+
+export const DELETE: RequestHandler = async ({ request }) => {
+	try {
+		const jsonBody = await request.json();
+		const command = deleteGameNoteCommandSchema.parse(jsonBody);
+		services.noteRepository.remove(command.noteId);
+		return emptyResponse(204);
+	} catch (err) {
+		return handleApiError(err);
+	}
+};

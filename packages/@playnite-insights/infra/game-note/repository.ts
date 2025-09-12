@@ -1,16 +1,59 @@
 import type { GameNoteRepository } from "@playnite-insights/core";
-import { GameNote, gameNoteSchema } from "@playnite-insights/lib/client";
+import {
+  GameNote,
+  GameNoteFilters,
+  gameNoteSchema,
+} from "@playnite-insights/lib/client";
 import z from "zod";
 import {
   BaseRepositoryDeps,
   defaultRepositoryDeps,
   repositoryCall,
-} from "./base";
+} from "../repository/base";
 
 export const makeGameNoteRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): GameNoteRepository => {
   const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
+
+  const getWhereClauseAndParamsFromFilters = (filters?: GameNoteFilters) => {
+    const where: string[] = [];
+    const params: string[] = [];
+
+    if (filters?.lastUpdatedAt) {
+      for (const startTimeFilter of filters.lastUpdatedAt) {
+        switch (startTimeFilter.op) {
+          case "between": {
+            where.push(`LastUpdatedAt >= (?) AND LastUpdatedAt < (?)`);
+            params.push(startTimeFilter.start, startTimeFilter.end);
+            break;
+          }
+          case "eq": {
+            where.push(`LastUpdatedAt = (?)`);
+            params.push(startTimeFilter.value);
+            break;
+          }
+          case "gte": {
+            where.push(`LastUpdatedAt >= (?)`);
+            params.push(startTimeFilter.value);
+            break;
+          }
+          case "lte": {
+            where.push(`LastUpdatedAt <= (?)`);
+            params.push(startTimeFilter.value);
+            break;
+          }
+          case "overlaps": {
+            where.push(`LastUpdatedAt < (?) AND LastUpdatedAt >= (?)`);
+            params.push(startTimeFilter.end, startTimeFilter.start);
+            break;
+          }
+        }
+      }
+    }
+
+    return { where: ` WHERE ${where.join(" AND ")}`, params };
+  };
 
   const getById = (id: string): GameNote | null => {
     return repositoryCall(
@@ -134,19 +177,23 @@ export const makeGameNoteRepository = (
     );
   };
 
-  const all: GameNoteRepository["all"] = () => {
+  const all: GameNoteRepository["all"] = (args = {}) => {
     return repositoryCall(
       logService,
       () => {
         const db = getDb();
-        const query = `SELECT * FROM game_note WHERE Id = (?)`;
+        let query = `SELECT * FROM game_note`;
+        const { where, params } = getWhereClauseAndParamsFromFilters(
+          args.filters
+        );
+        query += where;
         const stmt = db.prepare(query);
-        const result = stmt.all();
+        const result = stmt.all(...params);
         const notes = z.array(gameNoteSchema).parse(result);
         logService.debug(`Found ${notes.length} notes`);
         return notes;
       },
-      `all()`
+      `all(${JSON.stringify(args)})`
     );
   };
 

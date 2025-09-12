@@ -10,6 +10,7 @@ import {
 	getDb,
 	makeCompanyRepository,
 	makeFileSystemService,
+	makeGameNoteRepository,
 	makeGameSessionRepository,
 	makeGenreRepository,
 	makeLogService,
@@ -40,6 +41,9 @@ export const setupServices = () => {
 	const gameSessionRepository = makeGameSessionRepository({
 		logService: makeLogService('GameSessionRepository'),
 	});
+	const noteRepository = makeGameNoteRepository({
+		logService: makeLogService('GameNoteRepository'),
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -47,6 +51,7 @@ export const setupServices = () => {
 		playniteLibrarySyncRepository,
 		genreRepository,
 		gameSessionRepository,
+		noteRepository,
 	};
 	const commonDeps = {
 		getDb,
