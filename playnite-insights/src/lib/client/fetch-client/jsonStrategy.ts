@@ -1,6 +1,6 @@
 import { ZodSchema } from 'zod';
 import type { IFetchClientStrategy } from './IFetchClientStrategy';
-import { FetchClientStrategyError } from './fetchClientStrategyError';
+import { FetchClientStrategyError } from './error/fetchClientStrategyError';
 
 export class JsonStrategy<Output> implements IFetchClientStrategy<Output> {
 	schema: ZodSchema<Output>;
@@ -22,7 +22,10 @@ export class JsonStrategy<Output> implements IFetchClientStrategy<Output> {
 		}
 
 		if (response.ok && status === 204) {
-			return null;
+			throw new FetchClientStrategyError({
+				message: 'Empty response body',
+				statusCode: status,
+			});
 		}
 
 		const originalJson = await response.json();

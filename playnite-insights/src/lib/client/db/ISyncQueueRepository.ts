@@ -17,4 +17,6 @@ export interface ISyncQueueRepository {
 	 */
 	getAsync: (props: GetAsyncArgs) => Promise<SyncQueueItem | null>;
 	getAllAsync: () => Promise<SyncQueueItem[]>;
+	removeAsync: (queueItemId: number) => Promise<void>;
+	putAsync: (props: { queueItem: SyncQueueItem }) => Promise<void>;
 }

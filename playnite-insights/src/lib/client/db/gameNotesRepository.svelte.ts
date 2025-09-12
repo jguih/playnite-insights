@@ -70,7 +70,6 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 					index.get(['gameNote', note.Id, 'pending', 'update']),
 				);
 
-				note.LastUpdatedAt = new Date().toISOString();
 				await runRequest(notesStore.put(note));
 
 				if (!existingNote) {

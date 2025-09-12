@@ -1,12 +1,14 @@
 import type {
-  GetAllCompaniesResponse,
-  GetAllGamesResponse,
-  GetAllGenresResponse,
-  GetAllPlatformsResponse,
-  GetPlayniteLibraryMetricsResponse,
-  GetRecentSessionsResponse,
+	GetAllCompaniesResponse,
+	GetAllGamesResponse,
+	GetAllGenresResponse,
+	GetAllPlatformsResponse,
+	GetPlayniteLibraryMetricsResponse,
+	GetRecentSessionsResponse,
 } from '@playnite-insights/lib/client';
+import type { FetchClient } from '../fetch-client/fetchClient';
 
+export type HttpClientSignal = { client: FetchClient | null };
 export type GameSignal = { raw: GetAllGamesResponse | null; isLoading: boolean };
 export type CompanySignal = { raw: GetAllCompaniesResponse | null; isLoading: boolean };
 export type ServerTimeSignal = {

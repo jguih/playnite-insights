@@ -8,7 +8,7 @@ type BaseHttpProps<Output> = {
 export type HttpGetProps<Output> = BaseHttpProps<Output>;
 
 export type HttpPostProps<Output> = BaseHttpProps<Output> & {
-	body?: RequestInit['body'];
+	body: object | FormData;
 };
 
 export type HttpDeleteProps<Output> = BaseHttpProps<Output>;

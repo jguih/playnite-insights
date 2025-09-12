@@ -10,6 +10,7 @@ import {
 	getServerUtcNowResponseSchema,
 	SyncQueueFactory,
 } from '@playnite-insights/lib/client';
+import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
 import type { FetchClient } from '../fetch-client/fetchClient';
 import { handleFetchClientErrors } from '../fetch-client/handleFetchClientErrors.svelte';
 import { JsonStrategy } from '../fetch-client/jsonStrategy';
@@ -17,6 +18,7 @@ import type {
 	CompanySignal,
 	GameSignal,
 	GenreSignal,
+	HttpClientSignal,
 	IndexedDbSignal,
 	LibraryMetricsSignal,
 	PlatformSignal,
@@ -24,7 +26,7 @@ import type {
 	ServerTimeSignal,
 } from './AppData.types';
 
-export const httpClientSignal = $state<{ client: FetchClient | null }>({ client: null });
+export const httpClientSignal = $state<HttpClientSignal>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
 export const companySignal = $state<CompanySignal>({ raw: null, isLoading: true });
 export const gameSignal = $state<GameSignal>({ raw: null, isLoading: false });
@@ -48,7 +50,7 @@ export const factory = {
 
 async function withHttpClient<T>(cb: (props: { client: FetchClient }) => Promise<T>): Promise<T> {
 	const client = httpClientSignal.client;
-	if (!client) throw new Error(m.error_http_client_not_set());
+	if (!client) throw new HttpClientNotSetError();
 	return cb({ client });
 }
 

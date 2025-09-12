@@ -1,5 +1,5 @@
-import { FetchClientStrategyError } from './fetchClientStrategyError';
-import type { HttpGetProps } from './types';
+import { FetchClientStrategyError } from './error/fetchClientStrategyError';
+import type { HttpGetProps, HttpPostProps } from './types';
 
 export class FetchClient {
 	#url: string;
@@ -26,13 +26,55 @@ export class FetchClient {
 		endpoint,
 		strategy,
 		...props
-	}: HttpGetProps<Output>): Promise<Output | null> => {
+	}: HttpGetProps<Output>): Promise<Output> => {
 		try {
 			const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
 			const response = await fetch(parsedUrl, {
 				...props,
 				method: 'GET',
 			});
+			const result = await strategy.handleAsync(response);
+			return result;
+		} catch (error) {
+			throw new FetchClientStrategyError({
+				statusCode: 0,
+				message: error instanceof Error ? error.message : 'Unknown fetch error',
+				data: { cause: error },
+			});
+		}
+	};
+
+	/**
+	 * @throws {FetchClientStrategyError} Error indicating strategy failure
+	 * @throws {TypeError} If a network error occurs (e.g., failed to fetch)
+	 * @throws {HttpError} If the response status is not ok
+	 */
+	httpPostAsync = async <Output>({
+		endpoint,
+		strategy,
+		body,
+		...props
+	}: HttpPostProps<Output>): Promise<Output> => {
+		try {
+			const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
+			let response: Response;
+			if (body instanceof FormData) {
+				response = await fetch(parsedUrl, {
+					...props,
+					body: body,
+					method: 'POST',
+				});
+			} else {
+				response = await fetch(parsedUrl, {
+					...props,
+					body: JSON.stringify(body),
+					method: 'POST',
+					headers: {
+						...props.headers,
+						'Content-Type': 'application/json',
+					},
+				});
+			}
 			const result = await strategy.handleAsync(response);
 			return result;
 		} catch (error) {

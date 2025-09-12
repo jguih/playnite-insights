@@ -40,6 +40,7 @@ export class GameNoteEditor {
 		const note = { ...this.#currentNote };
 		note.GameId = gameId;
 		note.SessionId = sessionId;
+		note.LastUpdatedAt = new Date().toISOString();
 		try {
 			await this.#noteRepository.putAsync({ note });
 		} catch (err) {

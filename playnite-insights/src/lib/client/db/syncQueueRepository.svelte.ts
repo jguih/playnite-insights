@@ -1,4 +1,4 @@
-import type { SyncQueueItem } from '@playnite-insights/lib/client';
+import { syncQueueItemSchema, type SyncQueueItem } from '@playnite-insights/lib/client';
 import { runRequest, runTransaction } from './indexeddb';
 import type { ISyncQueueRepository } from './ISyncQueueRepository';
 import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
@@ -57,6 +57,25 @@ export class SyncQueueRepository extends IndexedDBRepository implements ISyncQue
 				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
 				const queueItems = await runRequest<SyncQueueItem[]>(syncQueueStore.getAll());
 				return queueItems;
+			});
+		});
+	};
+
+	removeAsync: ISyncQueueRepository['removeAsync'] = async (itemId) => {
+		return this.withDb(async (db) => {
+			return await runTransaction(db, 'syncQueue', 'readwrite', async ({ tx }) => {
+				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
+				await runRequest(syncQueueStore.delete(itemId));
+			});
+		});
+	};
+
+	putAsync: ISyncQueueRepository['putAsync'] = async ({ queueItem }) => {
+		return this.withDb(async (db) => {
+			await runTransaction(db, 'syncQueue', 'readwrite', async ({ tx }) => {
+				syncQueueItemSchema.parse(queueItem);
+				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
+				await runRequest(syncQueueStore.put(queueItem));
 			});
 		});
 	};
