@@ -1,8 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FetchClientStrategyError } from './error/fetchClientStrategyError';
-import type { HttpGetProps, HttpPostProps } from './types';
+import type { IFetchClient } from './fetchClient.types';
+import type { HttpGetProps, HttpPostProps, HttpPutProps } from './types';
 
-export class FetchClient {
+export class FetchClient implements IFetchClient {
 	#url: string;
 
 	constructor({ url }: { url: string }) {
@@ -61,6 +62,40 @@ export class FetchClient {
 				...props,
 				body: JSON.stringify(body),
 				method: 'POST',
+				headers: {
+					...props.headers,
+					'Content-Type': 'application/json',
+				},
+			});
+		}
+		const result = await strategy.handleAsync(response);
+		return result;
+	};
+
+	/**
+	 * @throws {FetchClientStrategyError} Error indicating strategy failure
+	 * @throws {TypeError} If a network error occurs (e.g., failed to fetch)
+	 * @throws {HttpError} If the response status is not ok
+	 */
+	httpPutAsync = async <Output>({
+		endpoint,
+		strategy,
+		body,
+		...props
+	}: HttpPutProps<Output>): Promise<Output> => {
+		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
+		let response: Response;
+		if (body instanceof FormData) {
+			response = await fetch(parsedUrl, {
+				...props,
+				body: body,
+				method: 'PUT',
+			});
+		} else {
+			response = await fetch(parsedUrl, {
+				...props,
+				body: JSON.stringify(body),
+				method: 'PUT',
 				headers: {
 					...props.headers,
 					'Content-Type': 'application/json',

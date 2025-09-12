@@ -13,6 +13,4 @@ export type HttpPostProps<Output> = BaseHttpProps<Output> & {
 
 export type HttpDeleteProps<Output> = BaseHttpProps<Output>;
 
-export type HttpPutProps<Output> = BaseHttpProps<Output> & {
-	body?: RequestInit['body'];
-};
+export type HttpPutProps<Output> = HttpPostProps<Output>;

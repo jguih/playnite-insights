@@ -47,12 +47,17 @@ export const GET: RequestHandler = ({ request, url }) => {
 	}
 };
 
+/**
+ * 201: Created
+ * 409: Conflic (note already exists)
+ */
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);
 		if (existingNote) {
+			createGameNoteResponseSchema.parse(existingNote);
 			return json(existingNote, { status: 409 });
 		}
 		const createdNote = services.noteRepository.add(command);
@@ -63,11 +68,19 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 };
 
+/**
+ * 200: Updated
+ * 404: Not Found
+ */
 export const PUT: RequestHandler = async ({ request }) => {
 	try {
 		const jsonBody = await request.json();
-		const note = updateGameNoteCommandSchema.parse(jsonBody);
-		const updatedNote = services.noteRepository.update(note);
+		const command = updateGameNoteCommandSchema.parse(jsonBody);
+		const existingNote = services.noteRepository.getById(command.Id);
+		if (!existingNote) {
+			return json(null, { status: 404 });
+		}
+		const updatedNote = services.noteRepository.update(command);
 		updateGameNoteResponseSchema.parse(updatedNote);
 		return json(updatedNote);
 	} catch (err) {

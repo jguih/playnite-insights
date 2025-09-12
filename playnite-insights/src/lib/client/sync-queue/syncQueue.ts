@@ -2,6 +2,8 @@ import {
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
 	gameNoteSchema,
+	updateGameNoteCommandSchema,
+	updateGameNoteResponseSchema,
 	type GameNote,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
@@ -12,7 +14,7 @@ import { runRequest, runTransaction } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 import { FetchClientStrategyError } from '../fetch-client/error/fetchClientStrategyError';
 import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
-import type { FetchClient } from '../fetch-client/fetchClient';
+import type { IFetchClient } from '../fetch-client/fetchClient.types';
 import { JsonStrategy } from '../fetch-client/jsonStrategy';
 
 export type SyncQueueDeps = {
@@ -44,7 +46,7 @@ export class SyncQueue {
 		return callback(db);
 	}
 
-	withHttpClient = async <T>(cb: (props: { client: FetchClient }) => Promise<T>): Promise<T> => {
+	withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
 		const client = this.#httpClientSignal.client;
 		if (!client) throw new HttpClientNotSetError();
 		return cb({ client });
@@ -62,7 +64,7 @@ export class SyncQueue {
 		});
 	};
 
-	private createGameNoteAsync = async (queueItem: SyncQueueItem) => {
+	protected createGameNoteAsync = async (queueItem: SyncQueueItem) => {
 		return await this.withHttpClient(async ({ client }) => {
 			const note = { ...queueItem.Payload };
 			const command = createGameNoteCommandSchema.parse(note);
@@ -84,7 +86,53 @@ export class SyncQueue {
 		});
 	};
 
-	private processGameNoteAsync = async (queueItem: SyncQueueItem) => {
+	protected updateGameNoteAsync = async (queueItem: SyncQueueItem) => {
+		return await this.withHttpClient(async ({ client }) => {
+			const note = { ...queueItem.Payload };
+			const command = updateGameNoteCommandSchema.parse(note);
+			try {
+				const updatedNote = await client.httpPutAsync({
+					endpoint: '/api/note',
+					strategy: new JsonStrategy(updateGameNoteResponseSchema),
+					body: command,
+				});
+				await this.updateGameNoteAndDeleteQueueItemAsync(updatedNote, queueItem);
+			} catch (error) {
+				if (error instanceof FetchClientStrategyError && error.statusCode === 404) {
+					await this.withDb(async (db) => {
+						await runTransaction(db, ['syncQueue', 'gameNotes'], 'readwrite', async ({ tx }) => {
+							const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
+							const index = syncQueueStore.index(
+								SyncQueueRepository.INDEX.Entity_PayloadId_Status_Type,
+							);
+
+							const failedCreate = await runRequest(
+								index.getKey(['gameNote', note.Id, 'failed', 'create']),
+							);
+							if (failedCreate) {
+								await runRequest(syncQueueStore.delete(failedCreate));
+							}
+
+							const pendingCreate = await runRequest(
+								index.getKey(['gameNote', note.Id, 'pending', 'create']),
+							);
+							if (pendingCreate) {
+								await runRequest(syncQueueStore.delete(pendingCreate));
+							}
+
+							const newItem = { ...queueItem };
+							newItem.Type = 'create';
+							await runRequest(syncQueueStore.put(newItem));
+						});
+					});
+				} else {
+					throw error;
+				}
+			}
+		});
+	};
+
+	protected processGameNoteAsync = async (queueItem: SyncQueueItem) => {
 		try {
 			switch (queueItem.Type) {
 				case 'create': {
@@ -92,6 +140,7 @@ export class SyncQueue {
 					break;
 				}
 				case 'update': {
+					await this.updateGameNoteAsync(queueItem);
 					break;
 				}
 				case 'delete': {
