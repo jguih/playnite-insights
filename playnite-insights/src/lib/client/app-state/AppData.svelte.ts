@@ -11,6 +11,7 @@ import {
 	SyncQueueFactory,
 } from '@playnite-insights/lib/client';
 import type { FetchClient } from '../fetch-client/fetchClient';
+import { handleFetchClientErrors } from '../fetch-client/handleFetchClientErrors.svelte';
 import { JsonStrategy } from '../fetch-client/jsonStrategy';
 import type {
 	CompanySignal,
@@ -22,7 +23,6 @@ import type {
 	RecentGameSessionSignal,
 	ServerTimeSignal,
 } from './AppData.types';
-import { toast } from './toast.svelte';
 
 export const httpClientSignal = $state<{ client: FetchClient | null }>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
@@ -64,9 +64,7 @@ export const loadLibraryMetrics = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error)
-			toast.error({ title: m.error_load_library_metrics(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_library_metrics());
 		return null;
 	} finally {
 		libraryMetricsSignal.isLoading = false;
@@ -85,9 +83,7 @@ export const loadCompanies = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error)
-			toast.error({ title: m.error_load_companies(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_companies());
 		return null;
 	} finally {
 		companySignal.isLoading = false;
@@ -106,8 +102,7 @@ export const loadGames = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error) toast.error({ title: m.error_load_games(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_games());
 		return null;
 	} finally {
 		gameSignal.isLoading = false;
@@ -129,9 +124,7 @@ export const loadRecentGameSessions = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error)
-			toast.error({ title: m.error_load_recent_game_sessions(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_recent_game_sessions());
 		return null;
 	} finally {
 		recentGameSessionSignal.isLoading = false;
@@ -151,9 +144,7 @@ export const loadServerTime = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error)
-			toast.error({ title: m.error_load_server_time(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_server_time());
 		return null;
 	} finally {
 		serverTimeSignal.isLoading = false;
@@ -172,8 +163,7 @@ export const loadGenres = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error) toast.error({ title: m.error_load_genres(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_genres());
 		return null;
 	} finally {
 		genreSignal.isLoading = false;
@@ -192,9 +182,7 @@ export const loadPlatforms = async () => {
 			return result;
 		});
 	} catch (err) {
-		if (err instanceof Error)
-			toast.error({ title: m.error_load_platforms(), message: err.message });
-		console.error(err);
+		handleFetchClientErrors(err, m.error_load_platforms());
 		return null;
 	} finally {
 		platformSignal.isLoading = false;

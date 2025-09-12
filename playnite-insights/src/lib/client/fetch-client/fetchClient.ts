@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FetchClientStrategyError } from './fetchClientStrategyError';
+import { FetchClientStrategyError } from './fetchClientStrategyError';
 import type { HttpGetProps } from './types';
 
 export class FetchClient {
@@ -28,12 +27,20 @@ export class FetchClient {
 		strategy,
 		...props
 	}: HttpGetProps<Output>): Promise<Output | null> => {
-		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
-		const response = await fetch(parsedUrl, {
-			...props,
-			method: 'GET',
-		});
-		const result = await strategy.handleAsync(response);
-		return result;
+		try {
+			const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
+			const response = await fetch(parsedUrl, {
+				...props,
+				method: 'GET',
+			});
+			const result = await strategy.handleAsync(response);
+			return result;
+		} catch (error) {
+			throw new FetchClientStrategyError({
+				statusCode: 0,
+				message: error instanceof Error ? error.message : 'Unknown fetch error',
+				data: { cause: error },
+			});
+		}
 	};
 }
