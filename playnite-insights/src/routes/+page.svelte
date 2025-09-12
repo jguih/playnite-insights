@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		gameSignal,
@@ -8,7 +8,7 @@
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
-	import Home from '$lib/client/components/bottom-nav/Home.svelte';
+	import Home, { updateBottomNavHomeHref } from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
@@ -122,6 +122,13 @@
 		}
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	};
+
+	// Save current applied filters before navigate
+	beforeNavigate(() => {
+		const params = new URLSearchParams(page.url.searchParams);
+		const newHref = `${page.url.pathname}?${params.toString()}`;
+		updateBottomNavHomeHref(newHref);
+	});
 </script>
 
 {#snippet gameCard(game: PlayniteGame)}

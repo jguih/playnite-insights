@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { mainScrollPosition } from '$lib/client/app-state/MainScrollPosition.svelte';
+	import { mainScrollPosition } from '$lib/client/app-state/mainScrollPosition.svelte';
 	import { onMount } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
@@ -38,7 +38,7 @@
 <main
 	{...props}
 	class={[
-		'absolute top-[var(--header-height)] right-0 left-0 overflow-x-hidden overflow-y-auto p-4',
+		'absolute left-0 right-0 top-[var(--header-height)] overflow-y-auto overflow-x-hidden p-4',
 		bottomNav ? 'bottom-[var(--bottom-nav-height)]' : 'bottom-0',
 		props.class,
 	]}

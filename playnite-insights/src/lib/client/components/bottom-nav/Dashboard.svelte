@@ -3,7 +3,6 @@
 	import { LayoutDashboard } from '@lucide/svelte';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
 	import BottomNavAnchor from '../anchors/BottomNavAnchor.svelte';
-	import { bottomNavIconSize } from './common';
 	import Text from './Text.svelte';
 
 	let { selected, ...props }: HTMLAnchorAttributes & { selected?: boolean } = $props();
@@ -16,7 +15,7 @@
 		{href}
 		{...props}
 	>
-		<LayoutDashboard size={bottomNavIconSize} />
+		<LayoutDashboard class={['size-lg']} />
 		<Text>{m.bottom_nav_label_dash()}</Text>
 	</BottomNavAnchor>
 {:else}
@@ -24,7 +23,7 @@
 		{href}
 		{...props}
 	>
-		<LayoutDashboard size={bottomNavIconSize} />
+		<LayoutDashboard class={['size-lg']} />
 		<Text>{m.bottom_nav_label_dash()}</Text>
 	</BottomNavAnchor>
 {/if}

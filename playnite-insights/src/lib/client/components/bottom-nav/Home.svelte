@@ -1,30 +1,39 @@
+<script
+	lang="ts"
+	module
+>
+	let bottomNavHomeHref = $state<string>('/');
+
+	export const updateBottomNavHomeHref = (newHref:string) => {
+		bottomNavHomeHref = newHref;
+	}
+</script>
+
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { Home } from '@lucide/svelte';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
 	import BottomNavAnchor from '../anchors/BottomNavAnchor.svelte';
-	import { bottomNavIconSize } from './common';
 	import Text from './Text.svelte';
 
 	let { selected, ...props }: HTMLAnchorAttributes & { selected?: boolean } = $props();
-	const href = '/';
 </script>
 
 {#if selected}
 	<BottomNavAnchor
 		selected
-		{href}
+		href={bottomNavHomeHref}
 		{...props}
 	>
-		<Home size={bottomNavIconSize} />
+		<Home class={['size-lg']} />
 		<Text>{m.bottom_nav_label_home()}</Text>
 	</BottomNavAnchor>
 {:else}
 	<BottomNavAnchor
-		{href}
+		href={bottomNavHomeHref}
 		{...props}
 	>
-		<Home size={bottomNavIconSize} />
+		<Home class={['size-lg']} />
 		<Text>{m.bottom_nav_label_home()}</Text>
 	</BottomNavAnchor>
 {/if}
