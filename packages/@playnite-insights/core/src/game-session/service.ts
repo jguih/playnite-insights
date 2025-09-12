@@ -185,10 +185,6 @@ export const makeGameSessionService = ({
     const start = new Date(end);
     start.setDate(end.getDate() - 7);
 
-    logService.debug(
-      `Fetching game sessions between ${start.toISOString()} and ${end.toISOString()}`
-    );
-
     const filters: GameSessionFilters = {
       startTime: [
         {

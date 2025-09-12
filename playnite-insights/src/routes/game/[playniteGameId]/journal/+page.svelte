@@ -56,8 +56,8 @@
 	});
 	const syncRepo = new SyncQueueRepository({ indexedDbSignal: indexedDbSignal });
 	const syncQueue = new SyncQueue({
-		gameNoteRepository: notesRepo,
 		httpClientSignal: httpClientSignal,
+		indexedDbSignal: indexedDbSignal,
 		syncQueueRepository: syncRepo,
 	});
 	const isThisGameActive = $derived.by(() => {

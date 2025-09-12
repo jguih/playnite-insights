@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FetchClientStrategyError } from './error/fetchClientStrategyError';
 import type { HttpGetProps, HttpPostProps } from './types';
 
@@ -27,21 +28,13 @@ export class FetchClient {
 		strategy,
 		...props
 	}: HttpGetProps<Output>): Promise<Output> => {
-		try {
-			const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
-			const response = await fetch(parsedUrl, {
-				...props,
-				method: 'GET',
-			});
-			const result = await strategy.handleAsync(response);
-			return result;
-		} catch (error) {
-			throw new FetchClientStrategyError({
-				statusCode: 0,
-				message: error instanceof Error ? error.message : 'Unknown fetch error',
-				data: { cause: error },
-			});
-		}
+		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
+		const response = await fetch(parsedUrl, {
+			...props,
+			method: 'GET',
+		});
+		const result = await strategy.handleAsync(response);
+		return result;
 	};
 
 	/**
@@ -55,34 +48,26 @@ export class FetchClient {
 		body,
 		...props
 	}: HttpPostProps<Output>): Promise<Output> => {
-		try {
-			const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
-			let response: Response;
-			if (body instanceof FormData) {
-				response = await fetch(parsedUrl, {
-					...props,
-					body: body,
-					method: 'POST',
-				});
-			} else {
-				response = await fetch(parsedUrl, {
-					...props,
-					body: JSON.stringify(body),
-					method: 'POST',
-					headers: {
-						...props.headers,
-						'Content-Type': 'application/json',
-					},
-				});
-			}
-			const result = await strategy.handleAsync(response);
-			return result;
-		} catch (error) {
-			throw new FetchClientStrategyError({
-				statusCode: 0,
-				message: error instanceof Error ? error.message : 'Unknown fetch error',
-				data: { cause: error },
+		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
+		let response: Response;
+		if (body instanceof FormData) {
+			response = await fetch(parsedUrl, {
+				...props,
+				body: body,
+				method: 'POST',
+			});
+		} else {
+			response = await fetch(parsedUrl, {
+				...props,
+				body: JSON.stringify(body),
+				method: 'POST',
+				headers: {
+					...props.headers,
+					'Content-Type': 'application/json',
+				},
 			});
 		}
+		const result = await strategy.handleAsync(response);
+		return result;
 	};
 }

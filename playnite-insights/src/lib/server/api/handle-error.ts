@@ -13,9 +13,9 @@ export const handleApiError = (err: unknown, context?: string): Response => {
 	if (err instanceof ZodError) {
 		return json(
 			{
-				error: { message: `Internal validation error at ${context ?? ''}`, details: err.issues },
+				error: { message: `Validation error at ${context ?? ''}`, details: err.issues },
 			},
-			{ status: 500 },
+			{ status: 400 },
 		);
 	}
 	if (err instanceof ApiError) {

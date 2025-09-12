@@ -50,12 +50,16 @@ export const GET: RequestHandler = ({ request, url }) => {
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const jsonBody = await request.json();
-		const note = createGameNoteCommandSchema.parse(jsonBody);
-		const createdNote = services.noteRepository.add(note);
+		const command = createGameNoteCommandSchema.parse(jsonBody);
+		const existingNote = services.noteRepository.getById(command.Id);
+		if (existingNote) {
+			return json(existingNote, { status: 409 });
+		}
+		const createdNote = services.noteRepository.add(command);
 		createGameNoteResponseSchema.parse(createdNote);
-		return json(createdNote);
+		return json(createdNote, { status: 201 });
 	} catch (err) {
-		return handleApiError(err);
+		return handleApiError(err, `POST /api/note`);
 	}
 };
 

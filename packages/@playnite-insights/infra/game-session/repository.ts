@@ -144,7 +144,6 @@ export const makeGameSessionRepository = (
         const stmt = db.prepare(query);
         const result = stmt.all(...params);
         const sessions = z.array(gameSessionSchema).parse(result);
-        logService.debug(`Found ${sessions?.length ?? 0} sessions`);
         return sessions;
       },
       `findAllBy(${JSON.stringify(args.filters)})`

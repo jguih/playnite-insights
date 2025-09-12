@@ -21,7 +21,7 @@ export class JsonStrategy<Output> implements IFetchClientStrategy<Output> {
 			});
 		}
 
-		if (response.ok && status === 204) {
+		if (status === 204) {
 			throw new FetchClientStrategyError({
 				message: 'Empty response body',
 				statusCode: status,
