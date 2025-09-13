@@ -14,6 +14,7 @@
   "game_playtime_in_hours_minutes_seconds": "{hours}h {mins}m {secs}s",
   "game_info_developers": "Developers",
   "game_info_installed": "Installed",
+  "game_label_journal": "Game Journal",
   "game_journal_you_are_playing": "You're playing",
   "game_journal_sessions_today_singular": "{count} session today",
   "game_journal_sessions_today_plural": "{count} sessions today",

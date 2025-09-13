@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { companySignal, gameSignal } from '$lib/client/app-state/AppData.svelte.js';
+	import SolidAnchor from '$lib/client/components/anchors/SolidAnchor.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Header from '$lib/client/components/Header.svelte';
@@ -41,6 +42,15 @@
 				alt={`${vm.game.Name} background image`}
 				class="aspect-3/2 w-full"
 			/>
+			<div class="my-4">
+				<SolidAnchor
+					type="button"
+					href={`/game/${data.gameId}/journal`}
+					class={['block w-full text-center']}
+				>
+					{m.game_label_journal()}
+				</SolidAnchor>
+			</div>
 			<div class="mb-4 mt-4 flex flex-col">
 				{@render infoSection(m.game_info_release_date(), vm.getReleaseDate())}
 				{@render infoSection(m.game_info_added(), vm.getAdded())}

@@ -92,7 +92,7 @@
 	--color-primary-light-bg: transparent;
 	--color-primary-light-fg: var(--color-neutral-50);
 	--color-primary-light-hover-bg: rgba(255, 255, 255, 0.02);
-	--color-primary-light-hover-fg: var(--pl-color-primary-500);
+	--color-primary-light-hover-fg: var(--pl-color-primary-600);
 	--color-primary-light-active-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-active-fg: var(--pl-color-primary-700);
 	--color-primary-light-disabled-bg: rgba(255, 255, 255, 0.02);
