@@ -1,6 +1,5 @@
 import { m } from '$lib/paraglide/messages';
 import {
-	GameNoteFactory,
 	getAllCompaniesResponseSchema,
 	getAllGamesResponseSchema,
 	getAllGenresResponseSchema,
@@ -8,10 +7,9 @@ import {
 	getPlayniteLibraryMetricsResponseSchema,
 	getRecentSessionsResponseSchema,
 	getServerUtcNowResponseSchema,
-	SyncQueueFactory,
 } from '@playnite-insights/lib/client';
 import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
-import type { FetchClient } from '../fetch-client/fetchClient';
+import type { IFetchClient } from '../fetch-client/fetchClient.types';
 import { handleFetchClientErrors } from '../fetch-client/handleFetchClientErrors.svelte';
 import { JsonStrategy } from '../fetch-client/jsonStrategy';
 import type {
@@ -25,6 +23,7 @@ import type {
 	RecentGameSessionSignal,
 	ServerTimeSignal,
 } from './AppData.types';
+import { ClientServiceLocator } from './serviceLocator';
 
 export const httpClientSignal = $state<HttpClientSignal>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
@@ -42,13 +41,13 @@ export const serverTimeSignal = $state<ServerTimeSignal>({
 	isLoading: false,
 });
 export const libraryMetricsSignal = $state<LibraryMetricsSignal>({ raw: null, isLoading: false });
+export const clientServiceLocator = new ClientServiceLocator({
+	httpClientSignal,
+	indexedDbSignal,
+	serverTimeSignal,
+});
 
-export const factory = {
-	syncQueue: new SyncQueueFactory(),
-	gameNote: new GameNoteFactory(),
-};
-
-async function withHttpClient<T>(cb: (props: { client: FetchClient }) => Promise<T>): Promise<T> {
+async function withHttpClient<T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> {
 	const client = httpClientSignal.client;
 	if (!client) throw new HttpClientNotSetError();
 	return cb({ client });

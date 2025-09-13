@@ -121,13 +121,13 @@ export const makeGameNoteRepository = (
         const query = `
         UPDATE game_note 
         SET
-          Title = ?
-          Content = ?
-          ImagePath = ?
-          GameId = ?
-          SessionId = ?
-          DeletedAt = ?
-          CreatedAt = ?
+          Title = ?,
+          Content = ?,
+          ImagePath = ?,
+          GameId = ?,
+          SessionId = ?,
+          DeletedAt = ?,
+          CreatedAt = ?,
           LastUpdatedAt = ?
         WHERE Id = ?;
         `;
@@ -164,7 +164,7 @@ export const makeGameNoteRepository = (
         const query = `
         UPDATE game_note 
         SET
-          LastUpdatedAt = ?
+          LastUpdatedAt = ?,
           DeletedAt = ?
         WHERE Id = ?;
         `;

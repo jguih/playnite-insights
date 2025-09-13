@@ -1,7 +1,7 @@
-import type { Handle, ServerInit } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { setupServices } from '$lib/services/setup';
+import { setupServices } from '$lib/server/setup-services';
 import { defaultFileSystemService, initDatabase } from '@playnite-insights/infra';
+import type { Handle, ServerInit } from '@sveltejs/kit';
 
 export const { services } = setupServices();
 

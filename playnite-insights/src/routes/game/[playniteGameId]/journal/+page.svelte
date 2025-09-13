@@ -1,12 +1,9 @@
 <script lang="ts">
 	import {
+		clientServiceLocator,
 		companySignal,
-		factory,
 		gameSignal,
-		httpClientSignal,
-		indexedDbSignal,
 		recentGameSessionSignal,
-		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
@@ -19,10 +16,6 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
-	import { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte.js';
-	import { SyncQueueRepository } from '$lib/client/db/syncQueueRepository.svelte.js';
-	import { SyncQueue } from '$lib/client/sync-queue/syncQueue.js';
-	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte.js';
 	import {
 		getPlayniteGameImageUrl,
 		getPlaytimeInHoursMinutesAndSeconds,
@@ -35,11 +28,6 @@
 	import { onMount } from 'svelte';
 
 	const { data } = $props();
-	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
-	const notesRepo = new GameNoteRepository({
-		indexedDbSignal: indexedDbSignal,
-		syncQueueFactory: factory.syncQueue,
-	});
 	const pageVm = new GamePageViewModel({
 		getGameId: () => data.gameId,
 		gamesSignal: gameSignal,
@@ -48,17 +36,11 @@
 	const activityVm = new RecentActivityViewModel({
 		gameSignal: gameSignal,
 		recentGameSessionSignal: recentGameSessionSignal,
-		dateTimeHandler: dateTimeHandler,
+		dateTimeHandler: clientServiceLocator.dateTimeHandler,
 	});
 	const noteEditor = new GameNoteEditor({
-		gameNoteFactory: factory.gameNote,
-		gameNoteRepository: notesRepo,
-	});
-	const syncRepo = new SyncQueueRepository({ indexedDbSignal: indexedDbSignal });
-	const syncQueue = new SyncQueue({
-		httpClientSignal: httpClientSignal,
-		indexedDbSignal: indexedDbSignal,
-		syncQueueRepository: syncRepo,
+		gameNoteFactory: clientServiceLocator.factory.gameNote,
+		gameNoteRepository: clientServiceLocator.repository.gameNote,
 	});
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
@@ -83,7 +65,10 @@
 		const gameId = data.gameId;
 		try {
 			notesSignal.isLoading = true;
-			const notes = await notesRepo.getAllAsync({ filterBy: 'byGameId', GameId: gameId });
+			const notes = await clientServiceLocator.repository.gameNote.getAllAsync({
+				filterBy: 'byGameId',
+				GameId: gameId,
+			});
 			notesSignal.notes = notes;
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
@@ -111,7 +96,7 @@
 	};
 
 	const handleOnAddNote = async () => {
-		const newNote = factory.gameNote.create({
+		const newNote = clientServiceLocator.factory.gameNote.create({
 			Title: null,
 			Content: null,
 			GameId: null,
@@ -125,17 +110,6 @@
 	const handleOnDeleteNote = async () => {
 		await noteEditor.deleteAsync();
 		await loadNotes();
-	};
-
-	const processQueue = async () => {
-		try {
-			await syncQueue.processQueueAsync();
-		} catch (err) {
-			toast.error({
-				title: 'Sync queue failed',
-				message: err instanceof Error ? err.message : 'Unknown error',
-			});
-		}
 	};
 
 	onMount(() => {
@@ -280,11 +254,5 @@
 				{/snippet}
 			</Dropdown>
 		</section>
-		<LightButton
-			type="button"
-			onclick={() => processQueue()}
-		>
-			Process Queue
-		</LightButton>
 	</Main>
 </BaseAppLayout>

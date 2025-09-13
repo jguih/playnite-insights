@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		clientServiceLocator,
 		httpClientSignal,
 		indexedDbSignal,
 		loadCompanies,
@@ -37,6 +38,7 @@
 			loadPlatforms(),
 			loadServerTime(),
 			loadLibraryMetrics(),
+			clientServiceLocator.syncQueue.processQueueAsync(),
 		]);
 	};
 

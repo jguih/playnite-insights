@@ -40,7 +40,6 @@ export class GameNoteEditor {
 		const note = { ...this.#currentNote };
 		note.GameId = gameId;
 		note.SessionId = sessionId;
-		note.LastUpdatedAt = new Date().toISOString();
 		try {
 			await this.#noteRepository.putAsync({ note });
 		} catch (err) {
@@ -56,7 +55,6 @@ export class GameNoteEditor {
 		const note = { ...this.#currentNote };
 		try {
 			await this.#noteRepository.deleteAsync({ noteId: note.Id });
-			this.closeNoteEditor();
 			this.#currentNote = this.#gameNoteFactory.create({
 				Title: null,
 				Content: null,
@@ -64,6 +62,7 @@ export class GameNoteEditor {
 				GameId: null,
 				SessionId: null,
 			});
+			this.closeNoteEditor();
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
 				toast.error({ message: m.error_db_not_ready() });
