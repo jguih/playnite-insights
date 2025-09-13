@@ -2,7 +2,7 @@ import { GameNoteRepository } from './gameNotesRepository.svelte';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 export const INDEXEDDB_NAME = 'PlayAtlasDb';
-export const INDEXEDDB_CURRENT_VERSION = 4;
+export const INDEXEDDB_CURRENT_VERSION = 5;
 
 export const openIndexedDbAsync: (props: {
 	dbName: string;

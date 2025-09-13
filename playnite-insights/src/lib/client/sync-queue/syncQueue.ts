@@ -46,7 +46,9 @@ export class SyncQueue {
 		return callback(db);
 	}
 
-	withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
+	protected withHttpClient = async <T>(
+		cb: (props: { client: IFetchClient }) => Promise<T>,
+	): Promise<T> => {
 		const client = this.#httpClientSignal.client;
 		if (!client) throw new HttpClientNotSetError();
 		return cb({ client });
@@ -77,6 +79,7 @@ export class SyncQueue {
 				await this.updateGameNoteAndDeleteQueueItemAsync(createdNote, queueItem);
 			} catch (error) {
 				if (error instanceof FetchClientStrategyError && error.statusCode === 409) {
+					// When note already exists (conflict)
 					const existingNote = gameNoteSchema.parse(error.data);
 					await this.updateGameNoteAndDeleteQueueItemAsync(existingNote, queueItem);
 				} else {
@@ -102,26 +105,17 @@ export class SyncQueue {
 					await this.withDb(async (db) => {
 						await runTransaction(db, ['syncQueue', 'gameNotes'], 'readwrite', async ({ tx }) => {
 							const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
-							const index = syncQueueStore.index(
-								SyncQueueRepository.INDEX.Entity_PayloadId_Status_Type,
+							const index = syncQueueStore.index(SyncQueueRepository.INDEX.Entity_PayloadId_Type);
+							// Delete all create queue items for this payload
+							const createQueueItems = await runRequest(
+								index.getAllKeys(['gameNote', note.Id, 'create']),
 							);
-
-							const failedCreate = await runRequest(
-								index.getKey(['gameNote', note.Id, 'failed', 'create']),
-							);
-							if (failedCreate) {
-								await runRequest(syncQueueStore.delete(failedCreate));
-							}
-
-							const pendingCreate = await runRequest(
-								index.getKey(['gameNote', note.Id, 'pending', 'create']),
-							);
-							if (pendingCreate) {
-								await runRequest(syncQueueStore.delete(pendingCreate));
-							}
-
+							for (const createQueueItem of createQueueItems)
+								await runRequest(syncQueueStore.delete(createQueueItem));
+							// Update 'type' of current queue item to 'create'
 							const newItem = { ...queueItem };
 							newItem.Type = 'create';
+							newItem.Status = 'pending';
 							await runRequest(syncQueueStore.put(newItem));
 						});
 					});

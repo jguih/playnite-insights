@@ -1,14 +1,21 @@
 import { GameNoteFactory, SyncQueueFactory, type GameNote } from '@playnite-insights/lib/client';
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IndexedDbSignal } from '../app-state/AppData.types';
+import type { IndexedDbSignal, ServerTimeSignal } from '../app-state/AppData.types';
+import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { GameNoteRepository } from './gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from './indexeddb';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 const indexedDbSignal: IndexedDbSignal = { db: null, dbReady: null };
+const serverTimeSignal: ServerTimeSignal = {
+	isLoading: false,
+	syncPoint: Date.now(),
+	utcNow: Date.now(),
+};
 const syncQueueFactory = new SyncQueueFactory();
 const gameNoteFactory = new GameNoteFactory();
+const dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
 
 const baseNote = (overrides: Partial<GameNote> = {}) => {
 	return {
@@ -46,7 +53,7 @@ describe('GameNotesRepository', () => {
 		{ note: baseNote({ DeletedAt: 'invalid' }) },
 	])('put note fails if provided note is invalid', async ({ note }) => {
 		// Arrange
-		const repo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const repo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory, dateTimeHandler });
 		// Act
 		const result = await repo.putAsync({ note });
 		// Assert
@@ -55,7 +62,11 @@ describe('GameNotesRepository', () => {
 
 	it('creates a note', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		const note = gameNoteFactory.create({
 			Title: 'Test Note #1',
 			Content: 'Testing',
@@ -81,7 +92,11 @@ describe('GameNotesRepository', () => {
 
 	it('create queue item for created note', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		const syncQueueRepo = new SyncQueueRepository({ indexedDbSignal });
 		const note = gameNoteFactory.create({
 			Title: 'Test Note #1',
@@ -116,7 +131,11 @@ describe('GameNotesRepository', () => {
 
 	it('creates queue item for updated note', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		const syncQueueRepo = new SyncQueueRepository({ indexedDbSignal });
 		const note = gameNoteFactory.create({
 			Title: 'Test Note #1',
@@ -161,7 +180,11 @@ describe('GameNotesRepository', () => {
 
 	it('creates multiple notes', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		// Act
 		await notesRepo.putAsync({ note: baseNote({ Title: 'note1' }) });
 		await notesRepo.putAsync({ note: baseNote({ Title: 'note2' }) });
@@ -173,7 +196,11 @@ describe('GameNotesRepository', () => {
 
 	it('deletes a note', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		const note = baseNote({ Title: 'note1' });
 		// Act
 		await notesRepo.addAsync({ note });
@@ -185,7 +212,11 @@ describe('GameNotesRepository', () => {
 
 	it('creates queue item for deleted note', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		const syncQueueRepo = new SyncQueueRepository({ indexedDbSignal });
 		const note = gameNoteFactory.create({
 			Title: 'Test Note #1',
@@ -229,7 +260,11 @@ describe('GameNotesRepository', () => {
 
 	it('when a note is created, updated and deleted offline, all operations are queued in order', async () => {
 		// Arrange
-		const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory });
+		const notesRepo = new GameNoteRepository({
+			indexedDbSignal,
+			syncQueueFactory,
+			dateTimeHandler,
+		});
 		const syncQueueRepo = new SyncQueueRepository({ indexedDbSignal });
 		const note = gameNoteFactory.create({
 			Title: 'Test Note #1',

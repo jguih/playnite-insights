@@ -4,6 +4,7 @@ import {
 	type GameNote,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
+import type { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import type { IGameNotesRepository } from './IGameNotesRepository';
 import { runRequest, runTransaction } from './indexeddb';
 import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
@@ -11,10 +12,12 @@ import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 export type GameNotesRepositoryDeps = {
 	syncQueueFactory: SyncQueueFactory;
+	dateTimeHandler: DateTimeHandler;
 } & IndexedDBRepositoryDeps;
 
 export class GameNoteRepository extends IndexedDBRepository implements IGameNotesRepository {
-	#syncQueueFactory: SyncQueueFactory;
+	#syncQueueFactory: GameNotesRepositoryDeps['syncQueueFactory'];
+	#dateTimeHandler: GameNotesRepositoryDeps['dateTimeHandler'];
 
 	static STORE_NAME = 'gameNotes' as const;
 
@@ -28,9 +31,10 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		byGameId: this.INDEX.byGameId,
 	} as const;
 
-	constructor({ indexedDbSignal, syncQueueFactory }: GameNotesRepositoryDeps) {
+	constructor({ indexedDbSignal, syncQueueFactory, dateTimeHandler }: GameNotesRepositoryDeps) {
 		super({ indexedDbSignal });
 		this.#syncQueueFactory = syncQueueFactory;
+		this.#dateTimeHandler = dateTimeHandler;
 	}
 
 	addAsync: IGameNotesRepository['addAsync'] = async ({ note }) => {
@@ -58,6 +62,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 	putAsync: IGameNotesRepository['putAsync'] = async ({ note }) => {
 		const parseResult = gameNoteSchema.safeParse(note);
 		if (!parseResult.success) return false;
+		const now = new Date(this.#dateTimeHandler.getUtcNow()).toISOString();
 
 		return this.withDb(async (db) => {
 			await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
@@ -70,6 +75,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 					index.get(['gameNote', note.Id, 'pending', 'update']),
 				);
 
+				note.LastUpdatedAt = now;
 				await runRequest(notesStore.put(note));
 
 				if (!existingNote) {
@@ -101,6 +107,8 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 	};
 
 	deleteAsync: IGameNotesRepository['deleteAsync'] = async (props) => {
+		const now = new Date(this.#dateTimeHandler.getUtcNow()).toISOString();
+
 		return this.withDb(async (db) => {
 			return await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
@@ -109,7 +117,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 
 				if (!existingNote) return false;
 				if (existingNote.DeletedAt) return true;
-				existingNote.DeletedAt = new Date().toISOString();
+				existingNote.DeletedAt = now;
 				await runRequest(notesStore.put(existingNote));
 
 				const queueItem = this.#syncQueueFactory.create({

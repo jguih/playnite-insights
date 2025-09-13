@@ -9,6 +9,7 @@ export class SyncQueueRepository extends IndexedDBRepository implements ISyncQue
 	static INDEX = {
 		Entity_PayloadId_Status_Type: 'Entity_PayloadId_Status_Type',
 		Entity_PayloadId_Status: 'Entity_PayloadId_Status',
+		Entity_PayloadId_Type: 'Entity_PayloadId_Type',
 		byType: 'byType',
 		byStatus: 'byStatus',
 	} as const;
@@ -96,5 +97,12 @@ export class SyncQueueRepository extends IndexedDBRepository implements ISyncQue
 			);
 		}
 		// END Migration 2
+
+		// BEGIN Migration 3: Add Entity_PayloadId_Type index
+		if (oldVersion < 5 && !store.indexNames.contains(this.INDEX.Entity_PayloadId_Type)) {
+			store.createIndex(this.INDEX.Entity_PayloadId_Type, ['Entity', 'Payload.Id', 'Type'], {
+				unique: false,
+			});
+		}
 	}
 }
