@@ -43,4 +43,13 @@ export interface IGameNotesRepository {
 	 * @throws {DOMException} If a transaction fails
 	 */
 	getAllAsync: (props?: GetAllAsyncArgs) => Promise<GameNote[]>;
+	/**
+	 * Sync provided list of notes with local db, creating, updating
+	 * or deleting notes
+	 * @param props
+	 * @returns An array of game notes
+	 * @throws {IndexedDBNotInitializedError} If the DB is not ready
+	 * @throws {DOMException} If a transaction fails
+	 */
+	upsertOrDeleteManyAsync: (notes: GameNote[]) => Promise<void>;
 }

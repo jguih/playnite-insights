@@ -3,6 +3,7 @@
 		clientServiceLocator,
 		companySignal,
 		gameSignal,
+		loadGameNotesFromServer,
 		recentGameSessionSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
@@ -112,11 +113,24 @@
 		await loadNotes();
 	};
 
+	const handleFocus = () => {
+		loadGameNotesFromServer().then((notes) => {
+			if (notes) loadNotes();
+		});
+	};
+
 	onMount(() => {
+		// Load notes from indexedDb to hydrate UI faster
 		loadNotes();
+		loadGameNotesFromServer().then((notes) => {
+			if (notes) loadNotes();
+			// If notes = `null` nothing was changed since last sync
+		});
 		activityVm.setTickInterval();
+		window.addEventListener('focus', handleFocus);
 		return () => {
 			activityVm.clearTickInterval();
+			window.removeEventListener('focus', handleFocus);
 		};
 	});
 </script>
@@ -134,7 +148,9 @@
 			{#if note.Content}
 				<p class="text-md mb-2">{note.Content}</p>
 			{/if}
-			<p class="text-sm opacity-70">{new Date(note.CreatedAt).toLocaleString()}</p>
+			<p class="w-full text-right text-sm opacity-70">
+				{new Date(note.CreatedAt).toLocaleString()}
+			</p>
 		</LightButton>
 	</li>
 {/snippet}

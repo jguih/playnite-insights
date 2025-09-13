@@ -13,12 +13,12 @@ import {
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url }) => {
-	const lastSync = url.searchParams.get('lastSync');
+	const lastSync = url.searchParams.get('lastSync')?.trim();
 	const ifNoneMatch = request.headers.get('if-none-match');
 
 	try {
 		let data: GameNote[] = [];
-		if (lastSync && !isNaN(Date.parse(lastSync))) {
+		if (lastSync && isNaN(Date.parse(lastSync))) {
 			return json(
 				{ error: { message: 'lastSync param must be a valid ISO date string' } },
 				{ status: 400 },

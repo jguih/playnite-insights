@@ -1,6 +1,8 @@
 import { m } from '$lib/paraglide/messages';
 import {
+	AppError,
 	getAllCompaniesResponseSchema,
+	getAllGameNotesResponseSchema,
 	getAllGamesResponseSchema,
 	getAllGenresResponseSchema,
 	getAllPlatformsResponseSchema,
@@ -8,9 +10,10 @@ import {
 	getRecentSessionsResponseSchema,
 	getServerUtcNowResponseSchema,
 } from '@playnite-insights/lib/client';
+import { FetchClientStrategyError } from '../fetch-client/error/fetchClientStrategyError';
 import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
 import type { IFetchClient } from '../fetch-client/fetchClient.types';
-import { handleFetchClientErrors } from '../fetch-client/handleFetchClientErrors.svelte';
+import { handleClientErrors } from '../fetch-client/handleClientErrors.svelte';
 import { JsonStrategy } from '../fetch-client/jsonStrategy';
 import type {
 	CompanySignal,
@@ -65,7 +68,7 @@ export const loadLibraryMetrics = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_library_metrics());
+		handleClientErrors(err, m.error_load_library_metrics());
 		return null;
 	} finally {
 		libraryMetricsSignal.isLoading = false;
@@ -84,7 +87,7 @@ export const loadCompanies = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_companies());
+		handleClientErrors(err, m.error_load_companies());
 		return null;
 	} finally {
 		companySignal.isLoading = false;
@@ -103,7 +106,7 @@ export const loadGames = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_games());
+		handleClientErrors(err, m.error_load_games());
 		return null;
 	} finally {
 		gameSignal.isLoading = false;
@@ -125,7 +128,7 @@ export const loadRecentGameSessions = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_recent_game_sessions());
+		handleClientErrors(err, m.error_load_recent_game_sessions());
 		return null;
 	} finally {
 		recentGameSessionSignal.isLoading = false;
@@ -145,7 +148,7 @@ export const loadServerTime = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_server_time());
+		handleClientErrors(err, m.error_load_server_time());
 		return null;
 	} finally {
 		serverTimeSignal.isLoading = false;
@@ -164,7 +167,7 @@ export const loadGenres = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_genres());
+		handleClientErrors(err, m.error_load_genres());
 		return null;
 	} finally {
 		genreSignal.isLoading = false;
@@ -183,9 +186,46 @@ export const loadPlatforms = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleFetchClientErrors(err, m.error_load_platforms());
+		handleClientErrors(err, m.error_load_platforms());
 		return null;
 	} finally {
 		platformSignal.isLoading = false;
+	}
+};
+
+const getLastServerSync = (): string | null => {
+	const lastSync = localStorage.getItem('lastServerSync');
+	if (!lastSync) return null;
+	if (isNaN(Date.parse(lastSync))) throw new AppError('lastSync is a not a valid date');
+	return new Date(lastSync).toISOString();
+};
+
+const setLastServerSync = () => {
+	const serverNow = clientServiceLocator.dateTimeHandler.getUtcNow();
+	localStorage.setItem('lastServerSync', new Date(serverNow).toISOString());
+};
+
+export const loadGameNotesFromServer = async () => {
+	try {
+		return await withHttpClient(async ({ client }) => {
+			const lastSync = getLastServerSync();
+			const notes = await client.httpGetAsync({
+				endpoint: `/api/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
+				strategy: new JsonStrategy(getAllGameNotesResponseSchema),
+			});
+			setLastServerSync();
+			await clientServiceLocator.repository.gameNote.upsertOrDeleteManyAsync(notes);
+			return notes;
+		});
+	} catch (err) {
+		if (
+			err instanceof FetchClientStrategyError &&
+			(err.statusCode === 304 || err.statusCode === 204)
+		) {
+			setLastServerSync();
+			return null;
+		}
+		handleClientErrors(err, m.error_something_went_wrong());
+		return null;
 	}
 };

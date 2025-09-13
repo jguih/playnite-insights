@@ -52,6 +52,8 @@ export const makeGameNoteRepository = (
       }
     }
 
+    if (where.length === 0) return { where: "", params: [] };
+
     return { where: ` WHERE ${where.join(" AND ")}`, params };
   };
 

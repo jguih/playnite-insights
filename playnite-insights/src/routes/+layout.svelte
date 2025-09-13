@@ -4,6 +4,7 @@
 		httpClientSignal,
 		indexedDbSignal,
 		loadCompanies,
+		loadGameNotesFromServer,
 		loadGames,
 		loadGenres,
 		loadLibraryMetrics,
@@ -93,7 +94,7 @@
 		});
 
 		isLoading = true;
-		loadAllAppData().then(() => (isLoading = false));
+		Promise.all([loadAllAppData(), loadGameNotesFromServer()]).then(() => (isLoading = false));
 
 		recentGameSessionInterval = setInterval(loadRecentGameSessions, 5_000);
 		appDataInterval = setInterval(loadAllAppData, 60_000);
