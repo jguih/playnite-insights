@@ -11,6 +11,8 @@ export type HttpPostProps<Output> = BaseHttpProps<Output> & {
 	body: object | FormData;
 };
 
-export type HttpDeleteProps<Output> = BaseHttpProps<Output>;
+export type HttpDeleteProps<Output> = BaseHttpProps<Output> & {
+	body?: object | FormData;
+};
 
 export type HttpPutProps<Output> = HttpPostProps<Output>;

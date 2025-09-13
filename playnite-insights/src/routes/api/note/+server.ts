@@ -4,7 +4,6 @@ import { createHashForObject } from '$lib/server/api/hash';
 import {
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
-	deleteGameNoteCommandSchema,
 	emptyResponse,
 	getAllGameNotesResponseSchema,
 	updateGameNoteCommandSchema,
@@ -83,17 +82,6 @@ export const PUT: RequestHandler = async ({ request }) => {
 		const updatedNote = services.noteRepository.update(command);
 		updateGameNoteResponseSchema.parse(updatedNote);
 		return json(updatedNote);
-	} catch (err) {
-		return handleApiError(err);
-	}
-};
-
-export const DELETE: RequestHandler = async ({ request }) => {
-	try {
-		const jsonBody = await request.json();
-		const command = deleteGameNoteCommandSchema.parse(jsonBody);
-		services.noteRepository.remove(command.noteId);
-		return emptyResponse(204);
 	} catch (err) {
 		return handleApiError(err);
 	}

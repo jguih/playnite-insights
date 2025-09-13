@@ -12,6 +12,7 @@ import { IndexedDBNotInitializedError } from '../db/errors/indexeddbNotInitializ
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { runRequest, runTransaction } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
+import { EmptyStrategy } from '../fetch-client/emptyStrategy';
 import { FetchClientStrategyError } from '../fetch-client/error/fetchClientStrategyError';
 import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
 import type { IFetchClient } from '../fetch-client/fetchClient.types';
@@ -61,6 +62,15 @@ export class SyncQueue {
 		await this.withDb(async (db) => {
 			await runTransaction(db, ['syncQueue', 'gameNotes'], 'readwrite', async ({ tx }) => {
 				await runRequest(tx.objectStore(GameNoteRepository.STORE_NAME).put(note));
+				await runRequest(tx.objectStore(SyncQueueRepository.STORE_NAME).delete(queueItem.Id!));
+			});
+		});
+	};
+
+	private deleteGameNoteAndQueueItemAsync = async (note: GameNote, queueItem: SyncQueueItem) => {
+		await this.withDb(async (db) => {
+			await runTransaction(db, ['syncQueue', 'gameNotes'], 'readwrite', async ({ tx }) => {
+				await runRequest(tx.objectStore(GameNoteRepository.STORE_NAME).delete(note.Id));
 				await runRequest(tx.objectStore(SyncQueueRepository.STORE_NAME).delete(queueItem.Id!));
 			});
 		});
@@ -126,6 +136,25 @@ export class SyncQueue {
 		});
 	};
 
+	protected deleteGameNoteAsync = async (queueItem: SyncQueueItem) => {
+		return await this.withHttpClient(async ({ client }) => {
+			const note = { ...queueItem.Payload };
+			try {
+				await client.httpDeleteAsync({
+					endpoint: `/api/note/${note.Id}`,
+					strategy: new EmptyStrategy(),
+				});
+				await this.deleteGameNoteAndQueueItemAsync(note, queueItem);
+			} catch (error) {
+				if (error instanceof FetchClientStrategyError && error.statusCode === 404) {
+					await this.deleteGameNoteAndQueueItemAsync(note, queueItem);
+				} else {
+					throw error;
+				}
+			}
+		});
+	};
+
 	protected processGameNoteAsync = async (queueItem: SyncQueueItem) => {
 		try {
 			switch (queueItem.Type) {
@@ -138,6 +167,7 @@ export class SyncQueue {
 					break;
 				}
 				case 'delete': {
+					await this.deleteGameNoteAsync(queueItem);
 					break;
 				}
 			}

@@ -23,6 +23,7 @@ const fakeFetchClient = {
 	httpGetAsync: vi.fn(),
 	httpPostAsync: vi.fn(),
 	httpPutAsync: vi.fn(),
+	httpDeleteAsync: vi.fn(),
 } satisfies IFetchClient;
 const indexedDbSignal: IndexedDbSignal = { db: null, dbReady: null };
 const httpClientSignal: HttpClientSignal = { client: fakeFetchClient };
@@ -44,6 +45,10 @@ class TestSyncQueue extends SyncQueue {
 
 	testCreateGameNoteAsync = async (queueItem: SyncQueueItem) => {
 		return await this.createGameNoteAsync(queueItem);
+	};
+
+	testDeleteGameNoteAsync = async (queueItem: SyncQueueItem) => {
+		return await this.deleteGameNoteAsync(queueItem);
 	};
 }
 
@@ -152,5 +157,49 @@ describe('SyncQueue', () => {
 		expect(queueItems.every((i) => i.Type !== 'create')).toBe(true);
 		expect(currentNote?.GameId).toBe(existingNote.GameId);
 		expect(currentNote).toMatchObject(existingNote);
+	});
+
+	it('deleting a note removes it from indexedDb on success', async () => {
+		// Arrange
+		const note = await createAndUpdateNoteAsync();
+		await notesRepo.deleteAsync({ noteId: note.Id });
+		const deleteQueueItem = await syncQueueRepository.getAsync({
+			filterBy: 'Entity_PayloadId_Status_Type',
+			Entity: 'gameNote',
+			PayloadId: note.Id,
+			Status: 'pending',
+			Type: 'delete',
+		});
+		fakeFetchClient.httpDeleteAsync.mockImplementationOnce(() => null);
+		// Act
+		await syncQueue.testDeleteGameNoteAsync(deleteQueueItem!);
+		const currentNote = await notesRepo.getAsync({ filterBy: 'Id', Id: note.Id });
+		// Assert
+		expect(currentNote).toBe(null);
+	});
+
+	it('deleting a note removes it from indexedDb on 404', async () => {
+		// Arrange
+		const note = await createAndUpdateNoteAsync();
+		await notesRepo.deleteAsync({ noteId: note.Id });
+		const deleteQueueItem = await syncQueueRepository.getAsync({
+			filterBy: 'Entity_PayloadId_Status_Type',
+			Entity: 'gameNote',
+			PayloadId: note.Id,
+			Status: 'pending',
+			Type: 'delete',
+		});
+		fakeFetchClient.httpDeleteAsync.mockImplementationOnce(() => {
+			throw new FetchClientStrategyError({
+				statusCode: 404,
+				message: 'Note not found',
+				data: null,
+			});
+		});
+		// Act
+		await syncQueue.testDeleteGameNoteAsync(deleteQueueItem!);
+		const currentNote = await notesRepo.getAsync({ filterBy: 'Id', Id: note.Id });
+		// Assert
+		expect(currentNote).toBe(null);
 	});
 });

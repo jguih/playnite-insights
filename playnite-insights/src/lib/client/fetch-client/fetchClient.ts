@@ -1,7 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { FetchClientStrategyError } from './error/fetchClientStrategyError';
 import type { IFetchClient } from './fetchClient.types';
-import type { HttpGetProps, HttpPostProps, HttpPutProps } from './types';
 
 export class FetchClient implements IFetchClient {
 	#url: string;
@@ -19,16 +17,7 @@ export class FetchClient implements IFetchClient {
 		return `${parsedApiUrl}${parsedEndpoint}`;
 	};
 
-	/**
-	 * @throws {FetchClientStrategyError} Error indicating strategy failure
-	 * @throws {TypeError} If a network error occurs (e.g., failed to fetch)
-	 * @throws {HttpError} If the response status is not ok
-	 */
-	httpGetAsync = async <Output>({
-		endpoint,
-		strategy,
-		...props
-	}: HttpGetProps<Output>): Promise<Output> => {
+	httpGetAsync: IFetchClient['httpGetAsync'] = async ({ endpoint, strategy, ...props }) => {
 		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
 		const response = await fetch(parsedUrl, {
 			...props,
@@ -38,17 +27,36 @@ export class FetchClient implements IFetchClient {
 		return result;
 	};
 
-	/**
-	 * @throws {FetchClientStrategyError} Error indicating strategy failure
-	 * @throws {TypeError} If a network error occurs (e.g., failed to fetch)
-	 * @throws {HttpError} If the response status is not ok
-	 */
-	httpPostAsync = async <Output>({
+	httpDeleteAsync: IFetchClient['httpDeleteAsync'] = async ({
 		endpoint,
 		strategy,
 		body,
 		...props
-	}: HttpPostProps<Output>): Promise<Output> => {
+	}) => {
+		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
+		let response: Response;
+		if (body instanceof FormData) {
+			response = await fetch(parsedUrl, {
+				...props,
+				body: body,
+				method: 'DELETE',
+			});
+		} else {
+			response = await fetch(parsedUrl, {
+				...props,
+				body: JSON.stringify(body),
+				method: 'DELETE',
+				headers: {
+					...props.headers,
+					'Content-Type': 'application/json',
+				},
+			});
+		}
+		const result = await strategy.handleAsync(response);
+		return result;
+	};
+
+	httpPostAsync: IFetchClient['httpPostAsync'] = async ({ endpoint, strategy, body, ...props }) => {
 		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
 		let response: Response;
 		if (body instanceof FormData) {
@@ -72,17 +80,7 @@ export class FetchClient implements IFetchClient {
 		return result;
 	};
 
-	/**
-	 * @throws {FetchClientStrategyError} Error indicating strategy failure
-	 * @throws {TypeError} If a network error occurs (e.g., failed to fetch)
-	 * @throws {HttpError} If the response status is not ok
-	 */
-	httpPutAsync = async <Output>({
-		endpoint,
-		strategy,
-		body,
-		...props
-	}: HttpPutProps<Output>): Promise<Output> => {
+	httpPutAsync: IFetchClient['httpPutAsync'] = async ({ endpoint, strategy, body, ...props }) => {
 		const parsedUrl = this.safeJoinUrlAndEndpoint(this.#url, endpoint);
 		let response: Response;
 		if (body instanceof FormData) {
