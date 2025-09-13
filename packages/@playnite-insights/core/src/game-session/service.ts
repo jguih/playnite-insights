@@ -180,7 +180,7 @@ export const makeGameSessionService = ({
     const end = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate() + 1
     );
     const start = new Date(end);
     start.setDate(end.getDate() - 7);
