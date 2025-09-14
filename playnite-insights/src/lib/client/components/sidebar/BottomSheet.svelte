@@ -15,7 +15,7 @@
 <aside
 	{...props}
 	class={[
-		'bg-background-1 fixed right-0 bottom-0 z-1002 max-h-full w-full overflow-y-hidden shadow',
+		'bg-background-1 z-1002 fixed bottom-0 right-0 max-h-full w-full overflow-y-hidden shadow',
 		props.class,
 	]}
 	style:height={`${height}dvh`}

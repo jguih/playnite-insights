@@ -40,7 +40,7 @@
 
 {#if Object.hasOwn(page.state, 'bottomSheet')}
 	<Backdrop onclick={() => props.onClose()} />
-	<BottomSheet height={80}>
+	<BottomSheet height={100}>
 		<form class="h-full">
 			<AsideHeader>
 				<BaseInput
@@ -49,9 +49,6 @@
 					class={['text-2xl font-semibold']}
 					bind:value={props.currentNote.Title}
 					oninput={handleOnChange}
-					onMount={({ input }) => {
-						if (input) input.focus();
-					}}
 					enterkeyhint="next"
 					onkeydown={handleTitleKeyDown}
 				/>
