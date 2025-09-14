@@ -1,5 +1,6 @@
 import {
 	makeGameSessionService,
+	makeImageService,
 	makeLibraryManifestService,
 	makeMediaFilesService,
 	makePlayniteLibraryImporterService,
@@ -18,11 +19,13 @@ import {
 	makePlayniteGameRepository,
 	makePlayniteLibrarySyncRepository,
 	makeStreamUtilsService,
+	makeUploadService,
 } from '@playnite-insights/infra';
 
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
 	const streamUtilsService = makeStreamUtilsService();
+	const uploadService = makeUploadService({ logService: makeLogService('Upload') });
 	const logService = makeLogService('SvelteBackend');
 	// Repositories
 	const platformRepository = makePlatformRepository({
@@ -57,6 +60,7 @@ export const setupServices = () => {
 		getDb,
 		fileSystemService,
 		streamUtilsService,
+		uploadService,
 		...config,
 		...repositories,
 	};
@@ -84,6 +88,7 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('PlayniteLibraryService'),
 	});
+	const imageService = makeImageService({ ...commonDeps });
 
 	const services = {
 		...repositories,
@@ -93,6 +98,7 @@ export const setupServices = () => {
 		mediaFiles: mediaFilesService,
 		gameSession: gameSessionService,
 		playniteLibrary: playniteLibraryService,
+		image: imageService,
 		config,
 	};
 

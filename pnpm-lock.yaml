@@ -52,6 +52,12 @@ importers:
       '@playnite-insights/lib':
         specifier: workspace:*
         version: link:../lib
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
       zod:
         specifier: ^3.25.76
         version: 3.25.76

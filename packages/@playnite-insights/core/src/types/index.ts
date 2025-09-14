@@ -8,3 +8,4 @@ export type * from "./platform.types";
 export type * from "./playnite-game.types";
 export type * from "./playnite-library-sync.types";
 export type * from "./stream-utils.types";
+export type * from "./upload.types";
