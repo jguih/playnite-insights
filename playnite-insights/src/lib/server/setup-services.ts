@@ -18,6 +18,7 @@ import {
 	makePlatformRepository,
 	makePlayniteGameRepository,
 	makePlayniteLibrarySyncRepository,
+	makeSignatureService,
 	makeStreamUtilsService,
 	makeUploadService,
 } from '@playnite-insights/infra';
@@ -89,6 +90,10 @@ export const setupServices = () => {
 		logService: makeLogService('PlayniteLibraryService'),
 	});
 	const imageService = makeImageService({ ...commonDeps, logService: makeLogService('Image') });
+	const signatureService = makeSignatureService({
+		...commonDeps,
+		logService: makeLogService('Signature'),
+	});
 
 	const services = {
 		...repositories,
@@ -99,6 +104,7 @@ export const setupServices = () => {
 		gameSession: gameSessionService,
 		playniteLibrary: playniteLibraryService,
 		image: imageService,
+		signature: signatureService,
 		config,
 	};
 

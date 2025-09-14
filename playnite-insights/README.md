@@ -36,3 +36,28 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+## ShareX
+
+```
+{
+  "Version": "18.0.1",
+  "Name": "PlayAtlas",
+  "DestinationType": "ImageUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://example.domain.com/api/assets/upload/screenshot",
+  "Body": "MultipartFormData",
+  "FileFormName": "file",
+  "URL": "https://example.domain.com/api/assets/image/screenshot/{json:files.[0]}"
+}
+```
+
+## PlayAtlas Exporter HttpServer Setup
+
+1. Reserve the port the HttpServer will listen on:
+
+```ps
+netsh http add urlacl url=http://+:3001/ user=YOUR_USER
+```
+
+2. Allow traffic for that port by creating a firewall rule, follow `https://support.microsoft.com/en-us/windows/risks-of-allowing-apps-through-windows-firewall-654559af-3f54-3dcf-349f-71ccd90bcc5c`.
