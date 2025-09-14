@@ -88,7 +88,7 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('PlayniteLibraryService'),
 	});
-	const imageService = makeImageService({ ...commonDeps });
+	const imageService = makeImageService({ ...commonDeps, logService: makeLogService('Image') });
 
 	const services = {
 		...repositories,

@@ -28,7 +28,7 @@ ENV APP_NAME='Playnite Insights (Dev)'
 
 RUN apt update && apt install sqlite3 -y 
 
-RUN mkdir -p ./data/files ./data/tmp ./data/upload/screenshots
+RUN mkdir -p ./data/files ./data/tmp
 COPY ./playnite-insights/static/placeholder ./data/files/placeholder
 COPY ./packages/@playnite-insights/infra/migrations ./infra/migrations
 
@@ -50,7 +50,7 @@ ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-RUN mkdir -p ./data/files ./data/tmp ./data/upload/screenshots
+RUN mkdir -p ./data/files ./data/tmp
 RUN chown -R playnite-insights:playnite-insights ./data
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build
@@ -72,7 +72,7 @@ ENV BODY_SIZE_LIMIT=128M
 ENV APP_NAME='Playnite Insights (Stage)'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-RUN mkdir -p ./data/files ./data/tmp ./data/upload/screenshots
+RUN mkdir -p ./data/files ./data/tmp
 RUN chown -R playnite-insights:playnite-insights ./data
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build

@@ -1,4 +1,5 @@
 import type {
+  FileSystemService,
   LogService,
   StreamUtilsService,
   UploadService,
@@ -8,20 +9,27 @@ import busboy from "busboy";
 import type { IncomingHttpHeaders } from "http";
 import { extname, join } from "path";
 import { ReadableStream } from "stream/web";
+import { defaultFileSystemService } from "./file-system";
 import { defaultLogger } from "./log";
 import { defaultStreamUtilsService } from "./stream-utils";
 
 export type UploadServiceDeps = {
   streamUtilsService: StreamUtilsService;
+  fileSystemService: FileSystemService;
   logService: LogService;
 };
 
 export const makeUploadService = (
   deps: Partial<UploadServiceDeps> = {}
 ): UploadService => {
-  const { streamUtilsService, logService }: UploadServiceDeps = {
+  const {
+    streamUtilsService,
+    logService,
+    fileSystemService,
+  }: UploadServiceDeps = {
     streamUtilsService: defaultStreamUtilsService,
     logService: defaultLogger,
+    fileSystemService: defaultFileSystemService,
     ...deps,
   };
 
@@ -42,6 +50,8 @@ export const makeUploadService = (
     let uploadCount: number = 0;
     const start = performance.now();
 
+    await fileSystemService.mkdir(path, { recursive: true });
+
     bb.on("file", async (_, fileStream, { filename, mimeType }) => {
       const ext = extname(filename).toLowerCase();
       if (!allowedExts.includes(ext) || !mimeType.startsWith("image/")) {
@@ -59,7 +69,6 @@ export const makeUploadService = (
           resolve(uploadPath);
         });
         writeStream.on("error", (error) => {
-          logService.error(`Failed to save file ${uploadPath} to disk`, error);
           reject(error);
         });
         fileStream.pipe(writeStream);
