@@ -8,7 +8,7 @@ export const makeImageService = ({
   const uploadScreenshotsAsync: ImageService["uploadScreenshotsAsync"] = async (
     request
   ) => {
-    logService.debug(`Uploading screenshot to disk`);
+    logService.debug(`Downloading screenshot to disk`);
     return uploadService.uploadImagesAsync(request, SCREENSHOTS_DIR);
   };
 

@@ -66,7 +66,7 @@ export const makeUploadService = (
         const writeStream = streamUtilsService.createWriteStream(uploadPath);
         writeStream.on("finish", () => {
           logService.debug(`Saved file ${uploadPath} to disk`);
-          resolve(uploadPath);
+          resolve(uniqueFileName);
         });
         writeStream.on("error", (error) => {
           reject(error);

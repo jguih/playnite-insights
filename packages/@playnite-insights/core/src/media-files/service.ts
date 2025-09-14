@@ -1,10 +1,11 @@
-import { join } from "path";
+import { extname, join } from "path";
 import type { MediaFilesService, MediaFilesServiceDeps } from "./service.types";
 
 export const makeMediaFilesService = ({
   logService,
   fileSystemService,
   FILES_DIR,
+  SCREENSHOTS_DIR,
 }: MediaFilesServiceDeps): MediaFilesService => {
   const checkIfImageExists = async (imagePath: string): Promise<boolean> => {
     try {
@@ -32,6 +33,26 @@ export const makeMediaFilesService = ({
     }
   };
 
+  const getMimeType = (ext: string): string => {
+    switch (ext.toLowerCase()) {
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "png":
+        return "image/png";
+      case "gif":
+        return "image/gif";
+      case "webp":
+        return "image/webp";
+      case "svg":
+        return "image/svg+xml";
+      case "ico":
+        return "image/x-icon";
+      default:
+        return "application/octet-stream";
+    }
+  };
+
   const getGameImage = async (
     playniteGameId: string,
     imageFileName: string,
@@ -51,12 +72,12 @@ export const makeMediaFilesService = ({
     if (ifNoneMatch === etag || ifModifiedSince === lastModified) {
       return new Response(null, { status: 304 });
     }
-    const imageExtension = imageFileName.split(".").pop()?.toLowerCase();
+    const imageExtension = extname(imageFileName).replace(".", "");
     try {
       const imageFile = await fileSystemService.readfile(imagePath);
       const response = new Response(new Uint8Array(imageFile), {
         headers: {
-          "Content-Type": `image/${imageExtension}`,
+          "Content-Type": getMimeType(imageExtension),
           "Cache-Control": "public, max-age=604800, immutable",
           "Last-Modified": lastModified,
           ETag: etag,
@@ -72,7 +93,38 @@ export const makeMediaFilesService = ({
     }
   };
 
+  const getScreenshotAsync: MediaFilesService["getScreenshotAsync"] = async (
+    imageFileName,
+    ifNoneMatch,
+    ifModifiedSince
+  ) => {
+    const imagePath = join(SCREENSHOTS_DIR, imageFileName);
+    if (!(await checkIfImageExists(imagePath))) {
+      return new Response(null, { status: 404 });
+    }
+    const imageStats = await getImageStats(imagePath);
+    if (!imageStats) {
+      return new Response(null, { status: 500 });
+    }
+    const { lastModified, etag } = imageStats;
+    if (ifNoneMatch === etag || ifModifiedSince === lastModified) {
+      return new Response(null, { status: 304 });
+    }
+    const imageExtension = extname(imageFileName).replace(".", "");
+    const imageFile = await fileSystemService.readfile(imagePath);
+    const response = new Response(new Uint8Array(imageFile), {
+      headers: {
+        "Content-Type": getMimeType(imageExtension),
+        "Cache-Control": "public, max-age=604800, immutable",
+        "Last-Modified": lastModified,
+        ETag: etag,
+      },
+    });
+    return response;
+  };
+
   return {
     getGameImage,
+    getScreenshotAsync,
   };
 };

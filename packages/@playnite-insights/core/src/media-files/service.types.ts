@@ -5,6 +5,7 @@ export type MediaFilesServiceDeps = {
   fileSystemService: FileSystemService;
   logService: LogService;
   FILES_DIR: string;
+  SCREENSHOTS_DIR: string;
 };
 
 export type MediaFilesService = {
@@ -19,6 +20,11 @@ export type MediaFilesService = {
    */
   getGameImage: (
     playniteGameId: string,
+    imageFileName: string,
+    ifNoneMatch: string | null,
+    ifModifiedSince: string | null
+  ) => Promise<Response>;
+  getScreenshotAsync: (
     imageFileName: string,
     ifNoneMatch: string | null,
     ifModifiedSince: string | null
