@@ -12,6 +12,8 @@
 	import Dropdown from '$lib/client/components/dropdown/Dropdown.svelte';
 	import DropdownBody from '$lib/client/components/dropdown/DropdownBody.svelte';
 	import { GameNoteEditor } from '$lib/client/components/game-page/journal/gameNoteEditor.svelte.js';
+	import { ImageOptions } from '$lib/client/components/game-page/journal/imageOptions.svelte.js';
+	import ImageOptionsPanel from '$lib/client/components/game-page/journal/ImageOptionsPanel.svelte';
 	import NoteEditor from '$lib/client/components/game-page/journal/NoteEditor.svelte';
 	import { NoteExtras } from '$lib/client/components/game-page/journal/noteExtras.svelte.js';
 	import NoteExtrasPanel from '$lib/client/components/game-page/journal/NoteExtrasPanel.svelte';
@@ -47,6 +49,7 @@
 		gameNoteRepository: clientServiceLocator.repository.gameNote,
 	});
 	const noteExtras = new NoteExtras();
+	const imageOptions = new ImageOptions();
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
 		return inProgressActivity?.gameId === data.gameId;
@@ -134,6 +137,12 @@
 		}
 	};
 
+	const handleOnRemoveNoteCurrentImage = async () => {
+		noteEditor.currentNote.ImagePath = null;
+		handleOnNoteChange();
+		imageOptions.close();
+	};
+
 	onMount(() => {
 		// Load notes from indexedDb to hydrate UI faster
 		loadNotes();
@@ -183,6 +192,11 @@
 	</li>
 {/snippet}
 
+<ImageOptionsPanel
+	isOpen={imageOptions.isOpen}
+	onClose={imageOptions.close}
+	onRemoveImage={handleOnRemoveNoteCurrentImage}
+/>
 <NoteExtrasPanel
 	isOpen={noteExtras.isOpen}
 	onClose={noteExtras.close}
@@ -195,6 +209,7 @@
 	onDelete={handleOnDeleteNote}
 	onChange={handleOnNoteChange}
 	onOpenExtrasPanel={noteExtras.open}
+	onClickImage={imageOptions.open}
 />
 <BaseAppLayout>
 	<Header>
@@ -256,7 +271,6 @@
 							{/if}
 						</LightButton>
 						<LightButton
-							class={['border-background-1 grow-0 border-2 text-xl']}
 							size="md"
 							onclick={handleOnAddNote}
 							aria-label={m.game_journal_label_add_note()}
@@ -294,7 +308,6 @@
 							{/if}
 						</LightButton>
 						<LightButton
-							class={['border-background-1 grow-0 border-2 text-xl']}
 							size="md"
 							onclick={() => {}}
 							aria-label={m.game_journal_label_add_link()}

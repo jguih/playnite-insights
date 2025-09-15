@@ -20,6 +20,7 @@
 		onClose: () => void | Promise<void>;
 		onDelete: () => void | Promise<void>;
 		onOpenExtrasPanel: () => void | Promise<void>;
+		onClickImage: () => void | Promise<void>;
 	} = $props();
 	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 	let contentTextArea = $state<HTMLTextAreaElement | null>(null);
@@ -67,14 +68,19 @@
 		<AsideBody bottomNav>
 			<div class="flex flex-col">
 				{#if props.currentNote.ImagePath}
-					<div class="bg-background-2 h-86">
-						<img
-							src={props.currentNote.ImagePath}
-							alt={`note image`}
-							loading="lazy"
-							class="h-full w-full object-contain"
-						/>
-					</div>
+					<LightButton
+						class={['p-0!']}
+						onclick={props.onClickImage}
+					>
+						<div class="bg-background-2 h-86">
+							<img
+								src={props.currentNote.ImagePath}
+								alt={`note image`}
+								loading="lazy"
+								class="h-full w-full object-contain"
+							/>
+						</div>
+					</LightButton>
 				{/if}
 				<form class="flex grow flex-col p-2">
 					<BaseInput
