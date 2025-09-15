@@ -1,11 +1,17 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { BaseTextareaProps } from './types';
 
 	let {
 		value = $bindable<BaseTextareaProps['value']>(),
 		textArea = $bindable(),
+		onMount: handleOnMount,
 		...props
 	}: BaseTextareaProps = $props();
+
+	onMount(() => {
+		handleOnMount?.({ textArea });
+	});
 </script>
 
 <textarea

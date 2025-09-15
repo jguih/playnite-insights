@@ -26,6 +26,7 @@
 	const delay = 1_000;
 
 	const handleOnChange = () => {
+		resizeContentTextArea();
 		if (timeout) {
 			clearTimeout(timeout);
 		}
@@ -39,6 +40,12 @@
 			e.preventDefault();
 			contentTextArea.focus();
 		}
+	};
+
+	const resizeContentTextArea = () => {
+		if (!contentTextArea) return;
+		contentTextArea.style.height = 'auto';
+		contentTextArea.style.height = contentTextArea?.scrollHeight + 'px';
 	};
 </script>
 
@@ -78,13 +85,16 @@
 						oninput={handleOnChange}
 						enterkeyhint="next"
 						onkeydown={handleTitleKeyDown}
+						spellcheck="false"
 					/>
 					<BaseTextarea
 						placeholder={m.placeholder_note_editor_content()}
-						class={['mt-2 min-h-40 grow resize-none']}
+						class={['mt-2 w-full grow resize-none overflow-hidden']}
 						bind:value={props.currentNote.Content}
 						bind:textArea={contentTextArea}
 						oninput={handleOnChange}
+						onMount={resizeContentTextArea}
+						spellcheck="false"
 					></BaseTextarea>
 				</form>
 			</div>

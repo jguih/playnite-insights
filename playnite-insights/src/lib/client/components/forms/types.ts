@@ -13,6 +13,7 @@ export type BaseInputProps = {
 export type BaseTextareaProps = {
 	value?: string | number | null;
 	textArea?: HTMLTextAreaElement | null;
+	onMount?: (props: { textArea?: HTMLTextAreaElement | null }) => void;
 } & Omit<HTMLTextareaAttributes, 'value'>;
 export type BaseCheckboxProps = { checked: boolean; color?: SemanticColors } & BaseInputProps;
 export type BaseSelectProps = { value?: string | number | null } & Omit<

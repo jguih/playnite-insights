@@ -153,17 +153,30 @@
 {#snippet noteCard(note: GameNote)}
 	<li class="bg-background-1">
 		<LightButton
-			class={['flex-col! items-start! w-full p-4 text-start']}
+			class={['flex-col! items-start! w-full gap-4 p-4 text-start']}
 			onclick={() => handleOnClickNote(note)}
 			type="button"
 		>
-			{#if note.Title}
-				<p class="text-lg font-semibold">{note.Title}</p>
+			{#if note.ImagePath}
+				<img
+					src={note.ImagePath}
+					alt={`note image`}
+					loading="lazy"
+					class="h-64 w-full object-cover"
+				/>
 			{/if}
-			{#if note.Content}
-				<p class="text-md mb-2">{note.Content}</p>
-			{/if}
-			<p class="w-full text-right text-sm opacity-70">
+			<div class="relative max-h-[30dvh] overflow-y-hidden">
+				{#if note.Title}
+					<p class="mb-4 block w-full text-lg font-semibold">{note.Title}</p>
+				{/if}
+				{#if note.Content}
+					<p class="text-md block w-full opacity-80">{note.Content}</p>
+				{/if}
+				<div
+					class="from-background-1 pointer-events-none absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t to-transparent"
+				></div>
+			</div>
+			<p class="w-full text-right text-sm opacity-60">
 				{new Date(note.CreatedAt).toLocaleString()}
 			</p>
 		</LightButton>
@@ -228,30 +241,33 @@
 		<section class="mb-6">
 			<Dropdown initialState={true}>
 				{#snippet button({ onclick, show })}
-					<LightButton
-						{onclick}
-						class={['w-full p-2']}
-						justify="between"
-					>
-						<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
-						{#if show}
-							<ChevronUp class={['size-lg']} />
-						{:else}
-							<ChevronDown class={['size-lg']} />
-						{/if}
-					</LightButton>
+					<div class="flex flex-row gap-1">
+						<LightButton
+							{onclick}
+							class={['w-full']}
+							size="md"
+							justify="between"
+						>
+							<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
+							{#if show}
+								<ChevronUp class={['size-lg']} />
+							{:else}
+								<ChevronDown class={['size-lg']} />
+							{/if}
+						</LightButton>
+						<LightButton
+							class={['border-background-1 grow-0 border-2 text-xl']}
+							size="md"
+							onclick={handleOnAddNote}
+							aria-label={m.game_journal_label_add_note()}
+						>
+							<PlusIcon />
+						</LightButton>
+					</div>
 					<Divider class="border-1" />
 				{/snippet}
 				{#snippet body()}
 					<DropdownBody>
-						<LightButton
-							class={['border-background-1 mb-4 w-full border-2 p-2 text-xl']}
-							onclick={handleOnAddNote}
-							type="button"
-						>
-							<PlusIcon />
-							{m.game_journal_label_add_note()}
-						</LightButton>
 						<ul class="flex flex-col gap-4">
 							{#each notesSignal.notes as note (note.Id)}
 								{@render noteCard(note)}
@@ -264,29 +280,32 @@
 		<section class="mb-6">
 			<Dropdown initialState={true}>
 				{#snippet button({ onclick, show })}
-					<LightButton
-						{onclick}
-						class={['w-full p-2']}
-						justify="between"
-					>
-						<h1 class="text-xl font-semibold">{m.game_journal_title_links()}</h1>
-						{#if show}
-							<ChevronUp class={['size-lg']} />
-						{:else}
-							<ChevronDown class={['size-lg']} />
-						{/if}
-					</LightButton>
+					<div class="flex flex-row gap-1">
+						<LightButton
+							{onclick}
+							class={['w-full p-2']}
+							justify="between"
+						>
+							<h1 class="text-xl font-semibold">{m.game_journal_title_links()}</h1>
+							{#if show}
+								<ChevronUp class={['size-lg']} />
+							{:else}
+								<ChevronDown class={['size-lg']} />
+							{/if}
+						</LightButton>
+						<LightButton
+							class={['border-background-1 grow-0 border-2 text-xl']}
+							size="md"
+							onclick={() => {}}
+							aria-label={m.game_journal_label_add_link()}
+						>
+							<PlusIcon />
+						</LightButton>
+					</div>
 					<Divider class="border-1" />
 				{/snippet}
 				{#snippet body()}
 					<DropdownBody>
-						<LightButton
-							class={['border-background-1 mb-4 w-full border-2 p-2 text-xl']}
-							type="button"
-						>
-							<PlusIcon />
-							{m.game_journal_label_add_link()}
-						</LightButton>
 						<ul class="flex flex-col gap-4"></ul>
 					</DropdownBody>
 				{/snippet}
