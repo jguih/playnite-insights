@@ -1,3 +1,4 @@
+import type { UploadService } from "../types";
 import type { FileSystemService } from "../types/file-system.types";
 import type { LogService } from "../types/log.types";
 
@@ -6,6 +7,7 @@ export type MediaFilesServiceDeps = {
   logService: LogService;
   FILES_DIR: string;
   SCREENSHOTS_DIR: string;
+  uploadService: UploadService;
 };
 
 export type MediaFilesService = {
@@ -29,4 +31,6 @@ export type MediaFilesService = {
     ifNoneMatch: string | null,
     ifModifiedSince: string | null
   ) => Promise<Response>;
+  uploadScreenshotsAsync: (request: Request) => Promise<string[]>;
+  getAvailableScreenshots: () => Promise<string[]>;
 };

@@ -6,6 +6,7 @@ export const makeMediaFilesService = ({
   fileSystemService,
   FILES_DIR,
   SCREENSHOTS_DIR,
+  uploadService,
 }: MediaFilesServiceDeps): MediaFilesService => {
   const checkIfImageExists = async (imagePath: string): Promise<boolean> => {
     try {
@@ -123,8 +124,28 @@ export const makeMediaFilesService = ({
     return response;
   };
 
+  const uploadScreenshotsAsync: MediaFilesService["uploadScreenshotsAsync"] =
+    async (request) => {
+      logService.debug(`Downloading screenshot to disk`);
+      return uploadService.uploadImagesAsync(request, SCREENSHOTS_DIR);
+    };
+
+  const getAvailableScreenshots: MediaFilesService["getAvailableScreenshots"] =
+    async () => {
+      const entries = await fileSystemService.readdir(SCREENSHOTS_DIR, {
+        recursive: true,
+        withFileTypes: true,
+      });
+      const screenshotFiles = entries
+        .filter((e) => e.isFile())
+        .map((e) => e.name);
+      return screenshotFiles;
+    };
+
   return {
     getGameImage,
     getScreenshotAsync,
+    uploadScreenshotsAsync,
+    getAvailableScreenshots,
   };
 };

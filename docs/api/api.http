@@ -10,6 +10,10 @@ Content-Type: {{contentType}}
   "action": "screenshot"
 }
 
+### Get all available screenshots
+GET {{protocol}}://{{host}}/api/assets/image/screenshot/all
+Content-Type: {{contentType}}
+
 ### Get all companies
 GET {{protocol}}://{{host}}/api/company
 Content-Type: {{contentType}}

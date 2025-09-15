@@ -5,7 +5,7 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const result = await services.image.uploadScreenshotsAsync(request);
+		const result = await services.mediaFiles.uploadScreenshotsAsync(request);
 		const parsedResult = result.map((fileName) => `/api/assets/image/screenshot/${fileName}`);
 		const response: UploadScreenshotResponse = {
 			uploaded: parsedResult,

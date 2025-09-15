@@ -1,6 +1,5 @@
 import {
 	makeGameSessionService,
-	makeImageService,
 	makeLibraryManifestService,
 	makeMediaFilesService,
 	makePlayniteLibraryImporterService,
@@ -90,10 +89,9 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('PlayniteLibraryService'),
 	});
-	const imageService = makeImageService({ ...commonDeps, logService: makeLogService('Image') });
 	const signatureService = makeSignatureService({
 		...commonDeps,
-		logService: makeLogService('Signature'),
+		logService: makeLogService('SignatureService'),
 	});
 	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 
@@ -105,7 +103,6 @@ export const setupServices = () => {
 		mediaFiles: mediaFilesService,
 		gameSession: gameSessionService,
 		playniteLibrary: playniteLibraryService,
-		image: imageService,
 		signature: signatureService,
 		playniteHostHttpClient,
 		config,
