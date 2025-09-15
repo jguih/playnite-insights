@@ -6,6 +6,10 @@ Content-Type: {{contentType}}
 POST {{protocol}}://{{host}}/api/action
 Content-Type: {{contentType}}
 
+{
+  "action": "screenshot"
+}
+
 ### Get all companies
 GET {{protocol}}://{{host}}/api/company
 Content-Type: {{contentType}}

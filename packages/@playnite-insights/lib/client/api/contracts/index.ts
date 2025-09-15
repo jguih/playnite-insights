@@ -1,3 +1,4 @@
+export * from "./action";
 export * from "./company";
 export * from "./game";
 export * from "./game-notes";
