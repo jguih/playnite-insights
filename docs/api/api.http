@@ -2,6 +2,10 @@
 GET {{protocol}}://{{host}}/api/sync/manifest
 Content-Type: {{contentType}}
 
+### Run action on Playnite Host
+POST {{protocol}}://{{host}}/api/action
+Content-Type: {{contentType}}
+
 ### Get all companies
 GET {{protocol}}://{{host}}/api/company
 Content-Type: {{contentType}}

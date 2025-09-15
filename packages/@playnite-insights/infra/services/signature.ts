@@ -72,3 +72,5 @@ export const makeSignatureService = (
 
   return { generateKeyPairAsync, signAsync };
 };
+
+export const defaultSignatureService: SignatureService = makeSignatureService();

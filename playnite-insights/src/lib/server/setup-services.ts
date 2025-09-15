@@ -17,6 +17,7 @@ import {
 	makeLogService,
 	makePlatformRepository,
 	makePlayniteGameRepository,
+	makePlayniteHostClient,
 	makePlayniteLibrarySyncRepository,
 	makeSignatureService,
 	makeStreamUtilsService,
@@ -94,6 +95,7 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('Signature'),
 	});
+	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 
 	const services = {
 		...repositories,
@@ -105,6 +107,7 @@ export const setupServices = () => {
 		playniteLibrary: playniteLibraryService,
 		image: imageService,
 		signature: signatureService,
+		playniteHostHttpClient,
 		config,
 	};
 
