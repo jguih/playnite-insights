@@ -17,6 +17,8 @@
 	import NoteEditor from '$lib/client/components/game-page/journal/NoteEditor.svelte';
 	import { NoteExtras } from '$lib/client/components/game-page/journal/noteExtras.svelte.js';
 	import NoteExtrasPanel from '$lib/client/components/game-page/journal/NoteExtrasPanel.svelte';
+	import { ScreenshotsGallery } from '$lib/client/components/game-page/journal/screenshotsGallery.svelte.js';
+	import ScreenshotsGalleryPanel from '$lib/client/components/game-page/journal/ScreenshotsGalleryPanel.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
@@ -50,6 +52,7 @@
 	});
 	const noteExtras = new NoteExtras();
 	const imageOptions = new ImageOptions();
+	const screenshotGallery = new ScreenshotsGallery();
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
 		return inProgressActivity?.gameId === data.gameId;
@@ -130,7 +133,7 @@
 		try {
 			const uploadedImage = await noteExtras.uploadImageAsync(file);
 			noteEditor.currentNote.ImagePath = uploadedImage;
-			handleOnNoteChange();
+			await handleOnNoteChange();
 			noteExtras.close();
 		} catch (error) {
 			handleClientErrors(error, 'Failed to upload image');
@@ -139,8 +142,15 @@
 
 	const handleOnRemoveNoteCurrentImage = async () => {
 		noteEditor.currentNote.ImagePath = null;
-		handleOnNoteChange();
+		await handleOnNoteChange();
 		imageOptions.close();
+	};
+
+	const handleOnSelectImageFromGallery = async (path: string) => {
+		noteEditor.currentNote.ImagePath = path;
+		await handleOnNoteChange();
+		noteExtras.close();
+		screenshotGallery.close();
 	};
 
 	onMount(() => {
@@ -192,6 +202,11 @@
 	</li>
 {/snippet}
 
+<ScreenshotsGalleryPanel
+	isOpen={screenshotGallery.isOpen}
+	onClose={screenshotGallery.close}
+	onSelectImage={handleOnSelectImageFromGallery}
+/>
 <ImageOptionsPanel
 	isOpen={imageOptions.isOpen}
 	onClose={imageOptions.close}
@@ -200,7 +215,9 @@
 <NoteExtrasPanel
 	isOpen={noteExtras.isOpen}
 	onClose={noteExtras.close}
-	onChange={handleOnNoteImageChange}
+	onSelectImage={handleOnNoteImageChange}
+	onTakeScreenshotFromPlaynite={() => {}}
+	onAddAvailableScreenshot={screenshotGallery.open}
 />
 <NoteEditor
 	isOpen={noteEditor.isOpen}

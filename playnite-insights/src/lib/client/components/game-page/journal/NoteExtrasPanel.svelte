@@ -8,15 +8,17 @@
 
 	let props: {
 		isOpen: boolean;
-		onChange: (file: File) => void;
 		onClose: () => void | Promise<void>;
+		onSelectImage: (file: File) => void | Promise<void>;
+		onTakeScreenshotFromPlaynite: () => void | Promise<void>;
+		onAddAvailableScreenshot: () => void | Promise<void>;
 	} = $props();
 	let imageInput = $state<HTMLInputElement | null>(null);
 
 	const handleOnImageChange = async () => {
 		if (!imageInput || !imageInput.files) return;
 		if (imageInput.files.length === 0) return;
-		props.onChange(imageInput.files[0]);
+		props.onSelectImage(imageInput.files[0]);
 	};
 </script>
 
@@ -56,6 +58,7 @@
 						justify="start"
 						size="md"
 						class={['gap-3! w-full']}
+						onclick={props.onTakeScreenshotFromPlaynite}
 					>
 						<ScreenShare class={['size-md']} />
 						{m.label_note_editor_extras_take_screenshot_from_playnite_host()}
@@ -66,6 +69,7 @@
 						justify="start"
 						size="md"
 						class={['gap-3! w-full']}
+						onclick={props.onAddAvailableScreenshot}
 					>
 						<Image class={['size-md']} />
 						{m.label_note_editor_extras_add_available_screenshot()}
