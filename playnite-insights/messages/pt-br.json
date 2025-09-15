@@ -95,5 +95,6 @@
   "placeholder_note_editor_title": "Título",
   "placeholder_note_editor_content": "Nota",
   "label_note_editor_extras_add_image": "Adicionar imagem",
-  "label_note_editor_extras_take_screenshot_from_playnite_host": "Capturar tela do Playnite host"
+  "label_note_editor_extras_take_screenshot_from_playnite_host": "Capturar tela do Playnite host",
+  "label_note_editor_extras_add_available_screenshot": "Adicionar captura de tela disponível"
 }

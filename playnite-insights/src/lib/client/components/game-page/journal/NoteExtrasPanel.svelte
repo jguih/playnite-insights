@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { Image, ScreenShare } from '@lucide/svelte';
+	import { Image, ImagePlus, ScreenShare } from '@lucide/svelte';
 	import LightButton from '../../buttons/LightButton.svelte';
 	import AsideBody from '../../sidebar/AsideBody.svelte';
 	import Backdrop from '../../sidebar/Backdrop.svelte';
@@ -47,7 +47,7 @@
 						class={['gap-3! w-full']}
 						onclick={(e) => imageInput?.click()}
 					>
-						<Image class={['size-md']} />
+						<ImagePlus class={['size-md']} />
 						{m.label_note_editor_extras_add_image()}
 					</LightButton>
 				</li>
@@ -59,6 +59,16 @@
 					>
 						<ScreenShare class={['size-md']} />
 						{m.label_note_editor_extras_take_screenshot_from_playnite_host()}
+					</LightButton>
+				</li>
+				<li>
+					<LightButton
+						justify="start"
+						size="md"
+						class={['gap-3! w-full']}
+					>
+						<Image class={['size-md']} />
+						{m.label_note_editor_extras_add_available_screenshot()}
 					</LightButton>
 				</li>
 			</ul>
