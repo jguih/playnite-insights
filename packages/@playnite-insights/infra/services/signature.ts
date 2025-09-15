@@ -1,7 +1,7 @@
 import {
-  FileSystemService,
-  LogService,
-  SignatureService,
+  type FileSystemService,
+  type LogService,
+  type SignatureService,
 } from "@playnite-insights/core";
 import { sign as cryptoSign, generateKeyPairSync } from "crypto";
 import { join } from "path";

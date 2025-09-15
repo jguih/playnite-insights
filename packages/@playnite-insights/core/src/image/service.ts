@@ -1,4 +1,4 @@
-import { ImageService, ImageServiceDeps } from "./service.types";
+import type { ImageService, ImageServiceDeps } from "./service.types";
 
 export const makeImageService = ({
   logService,

@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import {
 	AppError,
+	FetchClientStrategyError,
 	getAllCompaniesResponseSchema,
 	getAllGameNotesResponseSchema,
 	getAllGamesResponseSchema,
@@ -9,12 +10,11 @@ import {
 	getPlayniteLibraryMetricsResponseSchema,
 	getRecentSessionsResponseSchema,
 	getServerUtcNowResponseSchema,
+	HttpClientNotSetError,
+	JsonStrategy,
+	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import { FetchClientStrategyError } from '../fetch-client/error/fetchClientStrategyError';
-import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
-import type { IFetchClient } from '../fetch-client/fetchClient.types';
-import { handleClientErrors } from '../fetch-client/handleClientErrors.svelte';
-import { JsonStrategy } from '../fetch-client/jsonStrategy';
+import { handleClientErrors } from '../utils/handleClientErrors.svelte';
 import type {
 	CompanySignal,
 	GameSignal,

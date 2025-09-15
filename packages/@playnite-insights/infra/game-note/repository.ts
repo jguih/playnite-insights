@@ -1,12 +1,12 @@
 import type { GameNoteRepository } from "@playnite-insights/core";
 import {
-  GameNote,
-  GameNoteFilters,
+  type GameNote,
+  type GameNoteFilters,
   gameNoteSchema,
 } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  BaseRepositoryDeps,
+  type BaseRepositoryDeps,
   defaultRepositoryDeps,
   repositoryCall,
 } from "../repository/base";

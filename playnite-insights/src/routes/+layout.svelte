@@ -19,7 +19,7 @@
 		INDEXEDDB_NAME,
 		openIndexedDbAsync,
 	} from '$lib/client/db/indexeddb';
-	import { FetchClient } from '$lib/client/fetch-client/fetchClient';
+	import { FetchClient } from '@playnite-insights/lib/client';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';

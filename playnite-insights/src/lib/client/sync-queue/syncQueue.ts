@@ -1,10 +1,15 @@
 import {
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
+	EmptyStrategy,
+	FetchClientStrategyError,
 	gameNoteSchema,
+	HttpClientNotSetError,
+	JsonStrategy,
 	updateGameNoteCommandSchema,
 	updateGameNoteResponseSchema,
 	type GameNote,
+	type IFetchClient,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
 import type { HttpClientSignal, IndexedDbSignal } from '../app-state/AppData.types';
@@ -12,11 +17,6 @@ import { IndexedDBNotInitializedError } from '../db/errors/indexeddbNotInitializ
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { runRequest, runTransaction } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
-import { EmptyStrategy } from '../fetch-client/emptyStrategy';
-import { FetchClientStrategyError } from '../fetch-client/error/fetchClientStrategyError';
-import { HttpClientNotSetError } from '../fetch-client/error/httpClientNotSetError';
-import type { IFetchClient } from '../fetch-client/fetchClient.types';
-import { JsonStrategy } from '../fetch-client/jsonStrategy';
 
 export type SyncQueueDeps = {
 	syncQueueRepository: SyncQueueRepository;

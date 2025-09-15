@@ -1,4 +1,4 @@
-import { LogService, UploadService } from "../types";
+import type { LogService, UploadService } from "../types";
 
 export type ImageServiceDeps = {
   uploadService: UploadService;

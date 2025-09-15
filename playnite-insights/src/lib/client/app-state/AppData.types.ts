@@ -5,8 +5,8 @@ import type {
 	GetAllPlatformsResponse,
 	GetPlayniteLibraryMetricsResponse,
 	GetRecentSessionsResponse,
+	IFetchClient,
 } from '@playnite-insights/lib/client';
-import type { IFetchClient } from '../fetch-client/fetchClient.types';
 
 export type HttpClientSignal = { client: IFetchClient | null };
 export type GameSignal = { raw: GetAllGamesResponse | null; isLoading: boolean };

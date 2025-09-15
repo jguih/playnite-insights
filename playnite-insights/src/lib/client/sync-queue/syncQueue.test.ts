@@ -1,7 +1,9 @@
 import {
+	FetchClientStrategyError,
 	GameNoteFactory,
 	SyncQueueFactory,
 	type GameNote,
+	type IFetchClient,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
 import 'fake-indexeddb/auto';
@@ -14,8 +16,6 @@ import type {
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
-import { FetchClientStrategyError } from '../fetch-client/error/fetchClientStrategyError';
-import type { IFetchClient } from '../fetch-client/fetchClient.types';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { SyncQueue } from './syncQueue';
 

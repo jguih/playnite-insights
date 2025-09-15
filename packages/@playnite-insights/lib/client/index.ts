@@ -1,5 +1,6 @@
 export * from "./api";
 export * from "./company";
+export * from "./fetch-client";
 export * from "./game-notes";
 export * from "./game-session";
 export * from "./genre";

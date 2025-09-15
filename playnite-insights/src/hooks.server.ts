@@ -13,7 +13,7 @@ export const init: ServerInit = async () => {
 	services.log.info(`APP_NAME: ${process.env.APP_NAME}`);
 	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
 	services.log.info(`TZ: ${process.env.TZ}`);
-	services.log.info(`PLAYNITE_HOST_ADDRESS: ${process.env.PLAYNITE_HOST_ADDRESS} || 'undefined'`);
+	services.log.info(`PLAYNITE_HOST_ADDRESS: ${process.env.PLAYNITE_HOST_ADDRESS || 'undefined'}`);
 	await initDatabase({
 		fileSystemService: defaultFileSystemService,
 		DB_FILE: services.config.DB_FILE,
