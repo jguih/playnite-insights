@@ -287,7 +287,7 @@
 			</LightButton>
 		</nav>
 		{#if recentActivityVm.inProgressGame}
-			<div class="z-1000 fixed bottom-[var(--bottom-nav-height)] left-0 w-full p-2">
+			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-20 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
 					href={`/game/${recentActivityVm.inProgressGame.Id}/journal`}

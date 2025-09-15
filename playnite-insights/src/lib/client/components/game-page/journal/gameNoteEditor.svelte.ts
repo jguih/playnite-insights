@@ -1,4 +1,5 @@
 import { pushState } from '$app/navigation';
+import { page } from '$app/state';
 import { toast } from '$lib/client/app-state/toast.svelte';
 import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized';
 import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
@@ -14,11 +15,13 @@ export class GameNoteEditor {
 	#currentNote: GameNote;
 	#noteRepository: GameNoteEditorDeps['gameNoteRepository'];
 	#gameNoteFactory: GameNoteEditorDeps['gameNoteFactory'];
+	#isOpen: boolean;
 
 	constructor({ gameNoteFactory: factory, gameNoteRepository }: GameNoteEditorDeps) {
 		this.#noteRepository = gameNoteRepository;
 		this.#gameNoteFactory = factory;
 
+		this.#isOpen = $derived(Object.hasOwn(page.state, 'noteEditor'));
 		this.#currentNote = $state(
 			factory.create({
 				Title: null,
@@ -62,7 +65,7 @@ export class GameNoteEditor {
 				GameId: null,
 				SessionId: null,
 			});
-			this.closeNoteEditor();
+			this.close();
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
 				toast.error({ message: m.error_db_not_ready() });
@@ -72,13 +75,17 @@ export class GameNoteEditor {
 		}
 	};
 
-	openNoteEditor = () => {
-		pushState('', { bottomSheet: true });
+	open = () => {
+		pushState('', { ...page.state, noteEditor: true });
 	};
 
-	closeNoteEditor = () => {
+	close = () => {
 		history.back();
 	};
+
+	get isOpen() {
+		return this.#isOpen;
+	}
 
 	get currentNote() {
 		return this.#currentNote;

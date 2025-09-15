@@ -30,7 +30,7 @@
 	<Header>
 		{#snippet action()}
 			<LightButton onclick={() => history.back()}>
-				<ArrowLeft />
+				<ArrowLeft class={['size-md']} />
 			</LightButton>
 		{/snippet}
 	</Header>

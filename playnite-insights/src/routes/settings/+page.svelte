@@ -7,9 +7,9 @@
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
-	import { ArrowLeft } from '@lucide/svelte';
-	import { getLocale, locales, setLocale } from '$lib/paraglide/runtime';
 	import { m } from '$lib/paraglide/messages';
+	import { getLocale, locales, setLocale } from '$lib/paraglide/runtime';
+	import { ArrowLeft } from '@lucide/svelte';
 
 	let currentLocale = $derived(getLocale());
 </script>
@@ -18,7 +18,7 @@
 	<Header>
 		{#snippet action()}
 			<LightButton onclick={() => history.back()}>
-				<ArrowLeft />
+				<ArrowLeft class={['size-md']} />
 			</LightButton>
 		{/snippet}
 	</Header>

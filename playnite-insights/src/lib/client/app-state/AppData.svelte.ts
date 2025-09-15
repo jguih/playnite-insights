@@ -50,7 +50,9 @@ export const clientServiceLocator = new ClientServiceLocator({
 	serverTimeSignal,
 });
 
-async function withHttpClient<T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> {
+export async function withHttpClient<T>(
+	cb: (props: { client: IFetchClient }) => Promise<T>,
+): Promise<T> {
 	const client = httpClientSignal.client;
 	if (!client) throw new HttpClientNotSetError();
 	return cb({ client });

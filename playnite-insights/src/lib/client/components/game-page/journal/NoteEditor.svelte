@@ -1,21 +1,25 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { TrashIcon } from '@lucide/svelte';
-	import type { GameNote } from '@playnite-insights/lib/client';
+	import { m } from '$lib/paraglide/messages';
+	import { ArrowLeft, PlusSquare, TrashIcon } from '@lucide/svelte';
+	import { type GameNote } from '@playnite-insights/lib/client';
 	import type { KeyboardEventHandler } from 'svelte/elements';
 	import LightButton from '../../buttons/LightButton.svelte';
+	import SolidButton from '../../buttons/SolidButton.svelte';
 	import BaseInput from '../../forms/BaseInput.svelte';
 	import BaseTextarea from '../../forms/BaseTextarea.svelte';
 	import AsideBody from '../../sidebar/AsideBody.svelte';
+	import AsideBottomNav from '../../sidebar/AsideBottomNav.svelte';
 	import AsideHeader from '../../sidebar/AsideHeader.svelte';
 	import Backdrop from '../../sidebar/Backdrop.svelte';
 	import BottomSheet from '../../sidebar/BottomSheet.svelte';
 
 	let props: {
+		isOpen: boolean;
 		currentNote: GameNote;
 		onChange: () => void;
 		onClose: () => void | Promise<void>;
 		onDelete: () => void | Promise<void>;
+		onOpenExtrasPanel: () => void | Promise<void>;
 	} = $props();
 	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 	let contentTextArea = $state<HTMLTextAreaElement | null>(null);
@@ -38,37 +42,63 @@
 	};
 </script>
 
-{#if Object.hasOwn(page.state, 'bottomSheet')}
+{#if props.isOpen}
 	<Backdrop onclick={() => props.onClose()} />
 	<BottomSheet height={100}>
-		<form class="h-full">
-			<AsideHeader>
-				<BaseInput
-					type="text"
-					placeholder="Título"
-					class={['text-2xl font-semibold']}
-					bind:value={props.currentNote.Title}
-					oninput={handleOnChange}
-					enterkeyhint="next"
-					onkeydown={handleTitleKeyDown}
-				/>
-				<LightButton
-					type="button"
-					color="neutral"
-					onclick={props.onDelete}
-				>
-					<TrashIcon class={['size-lg']} />
-				</LightButton>
-			</AsideHeader>
-			<AsideBody class={['flex grow flex-col']}>
-				<BaseTextarea
-					placeholder="Nota"
-					class={['grow resize-none']}
-					bind:value={props.currentNote.Content}
-					bind:textArea={contentTextArea}
-					oninput={handleOnChange}
-				></BaseTextarea>
-			</AsideBody>
-		</form>
+		<AsideHeader>
+			<LightButton onclick={() => props.onClose()}>
+				<ArrowLeft class={['size-md']} />
+			</LightButton>
+			<LightButton
+				type="button"
+				color="neutral"
+				onclick={props.onDelete}
+			>
+				<TrashIcon class={['size-md']} />
+			</LightButton>
+		</AsideHeader>
+		<AsideBody bottomNav>
+			<div class="flex flex-col">
+				{#if props.currentNote.ImagePath}
+					<div class="bg-background-2 h-86">
+						<img
+							src={props.currentNote.ImagePath}
+							alt={`note image`}
+							loading="lazy"
+							class="h-full w-full object-contain"
+						/>
+					</div>
+				{/if}
+				<form class="flex grow flex-col p-2">
+					<BaseInput
+						type="text"
+						placeholder={m.placeholder_note_editor_title()}
+						class={['text-2xl font-semibold']}
+						bind:value={props.currentNote.Title}
+						oninput={handleOnChange}
+						enterkeyhint="next"
+						onkeydown={handleTitleKeyDown}
+					/>
+					<BaseTextarea
+						placeholder={m.placeholder_note_editor_content()}
+						class={['mt-2 min-h-40 grow resize-none']}
+						bind:value={props.currentNote.Content}
+						bind:textArea={contentTextArea}
+						oninput={handleOnChange}
+					></BaseTextarea>
+				</form>
+			</div>
+		</AsideBody>
+		<AsideBottomNav>
+			<SolidButton
+				color="neutral"
+				rounded
+				aria-label="Add extras"
+				class={['h-fit grow-0']}
+				onclick={props.onOpenExtrasPanel}
+			>
+				<PlusSquare class={['size-md']} />
+			</SolidButton>
+		</AsideBottomNav>
 	</BottomSheet>
 {/if}

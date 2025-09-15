@@ -13,10 +13,13 @@
 	import DropdownBody from '$lib/client/components/dropdown/DropdownBody.svelte';
 	import { GameNoteEditor } from '$lib/client/components/game-page/journal/gameNoteEditor.svelte.js';
 	import NoteEditor from '$lib/client/components/game-page/journal/NoteEditor.svelte';
+	import { NoteExtras } from '$lib/client/components/game-page/journal/noteExtras.svelte.js';
+	import NoteExtrasPanel from '$lib/client/components/game-page/journal/NoteExtrasPanel.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
+	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte.js';
 	import {
 		getPlayniteGameImageUrl,
 		getPlaytimeInHoursMinutesAndSeconds,
@@ -43,6 +46,7 @@
 		gameNoteFactory: clientServiceLocator.factory.gameNote,
 		gameNoteRepository: clientServiceLocator.repository.gameNote,
 	});
+	const noteExtras = new NoteExtras();
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
 		return inProgressActivity?.gameId === data.gameId;
@@ -93,7 +97,7 @@
 
 	const handleOnClickNote = async (note: GameNote) => {
 		noteEditor.currentNote = { ...note };
-		noteEditor.openNoteEditor();
+		noteEditor.open();
 	};
 
 	const handleOnAddNote = async () => {
@@ -105,7 +109,7 @@
 			SessionId: null,
 		});
 		noteEditor.currentNote = newNote;
-		noteEditor.openNoteEditor();
+		noteEditor.open();
 	};
 
 	const handleOnDeleteNote = async () => {
@@ -117,6 +121,17 @@
 		loadGameNotesFromServer().then((notes) => {
 			if (notes) loadNotes();
 		});
+	};
+
+	const handleOnNoteImageChange = async (file: File) => {
+		try {
+			const uploadedImage = await noteExtras.uploadImageAsync(file);
+			noteEditor.currentNote.ImagePath = uploadedImage;
+			handleOnNoteChange();
+			noteExtras.close();
+		} catch (error) {
+			handleClientErrors(error, 'Failed to upload image');
+		}
 	};
 
 	onMount(() => {
@@ -155,17 +170,24 @@
 	</li>
 {/snippet}
 
+<NoteExtrasPanel
+	isOpen={noteExtras.isOpen}
+	onClose={noteExtras.close}
+	onChange={handleOnNoteImageChange}
+/>
 <NoteEditor
+	isOpen={noteEditor.isOpen}
+	onClose={noteEditor.close}
 	currentNote={noteEditor.currentNote}
-	onChange={handleOnNoteChange}
-	onClose={noteEditor.closeNoteEditor}
 	onDelete={handleOnDeleteNote}
+	onChange={handleOnNoteChange}
+	onOpenExtrasPanel={noteExtras.open}
 />
 <BaseAppLayout>
 	<Header>
 		{#snippet action()}
 			<LightButton onclick={() => history.back()}>
-				<ArrowLeft />
+				<ArrowLeft class={['size-md']} />
 			</LightButton>
 		{/snippet}
 	</Header>

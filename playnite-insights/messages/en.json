@@ -91,5 +91,9 @@
   "bottom_nav_label_dash": "Dashboard",
   "bottom_nav_label_home": "Home",
   "bottom_nav_label_settings": "Settings",
-  "label_ongoing_session": "Ongoing session"
+  "label_ongoing_session": "Ongoing session",
+  "placeholder_note_editor_title": "Title",
+  "placeholder_note_editor_content": "Note",
+  "label_note_editor_extras_add_image": "Add image",
+  "label_note_editor_extras_take_screenshot_from_playnite_host": "Take screenshot from Playnite host"
 }

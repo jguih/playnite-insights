@@ -7,7 +7,7 @@
 
 <div
 	{...props}
-	class={['fixed top-0 right-0 z-1001 h-full w-full max-w-full bg-black opacity-50', props.class]}
+	class={['fixed right-0 top-0 z-20 h-full w-full max-w-full bg-black opacity-50', props.class]}
 	role="presentation"
 	transition:fade={{ duration: 150 }}
 ></div>

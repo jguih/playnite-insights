@@ -7,7 +7,7 @@
 <div
 	{...props}
 	class={[
-		'border-background-2 border-b-1 z-21 absolute left-0 right-0 top-0 flex h-[var(--header-height)] flex-row items-center justify-between gap-2 p-4',
+		'bg-background-2 absolute bottom-0 left-0 right-0 flex h-[var(--bottom-nav-height)] w-full flex-row items-center justify-end p-2 shadow',
 		props.class,
 	]}
 >

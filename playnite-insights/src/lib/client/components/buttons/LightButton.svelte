@@ -24,7 +24,7 @@
 			'focus:ring-neutral-light-active-fg focus:ring-2',
 			'disabled:bg-neutral-light-disabled-bg disabled:text-neutral-light-disabled-fg',
 		],
-		'p-1 disabled:cursor-not-allowed',
+		'disabled:cursor-not-allowed',
 		props.class,
 	]}
 >
