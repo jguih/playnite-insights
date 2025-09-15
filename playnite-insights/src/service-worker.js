@@ -168,6 +168,8 @@ self.addEventListener('fetch', (event) => {
 
 	const url = new URL(event.request.url);
 
+	if (url.pathname.startsWith('/api/manifest')) return;
+
 	for (const [prefix, cacheKey, options] of apiRoutes) {
 		if (url.pathname.startsWith(prefix)) {
 			event.respondWith(staleWhileRevalidate(event.request, cacheKey, options));
