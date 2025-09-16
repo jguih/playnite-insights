@@ -15,6 +15,7 @@ import {
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
 import { EventSourceManager } from '../event-source-manager/eventSourceManager.svelte';
+import type { ServiceWorkerUpdater } from '../sw-updater.svelte';
 import { handleClientErrors } from '../utils/handleClientErrors.svelte';
 import type {
 	CompanySignal,
@@ -52,6 +53,9 @@ export const clientServiceLocator = new ClientServiceLocator({
 });
 export const eventSourceManagerSignal = $state<{ manager: EventSourceManager | null }>({
 	manager: null,
+});
+export const serviceWorkerUpdaterSignal = $state<{ updater: ServiceWorkerUpdater | null }>({
+	updater: null,
 });
 
 export async function withHttpClient<T>(

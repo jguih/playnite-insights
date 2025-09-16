@@ -1,11 +1,32 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
+	import { serviceWorkerUpdaterSignal } from '../app-state/AppData.svelte.js';
 	import { dismissToast, getToasts } from '../app-state/toast.svelte.js';
+
+	const newVersionAvailable = $derived(
+		serviceWorkerUpdaterSignal.updater?.newVersionAvailable ?? false,
+	);
 </script>
 
 <div
 	class="fixed left-0 right-0 top-[calc(var(--header-height)+2*var(--spacing))] z-40 mx-auto flex w-64 flex-col gap-1 shadow"
 >
+	{#if newVersionAvailable}
+		<button
+			in:fly={{ y: -20, duration: 200 }}
+			out:fly={{ y: -20, duration: 200 }}
+			class={['p-2 text-left', 'text-success-fg bg-success-bg']}
+			onclick={() => {
+				if (navigator.serviceWorker.controller)
+					navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+				if (serviceWorkerUpdaterSignal.updater)
+					serviceWorkerUpdaterSignal.updater.newVersionAvailable = false;
+			}}
+		>
+			<strong>New update available</strong>
+			<p>Click here to update</p>
+		</button>
+	{/if}
 	{#each getToasts() as toast, i (toast.key)}
 		<button
 			in:fly={{ y: -20, duration: 200 }}

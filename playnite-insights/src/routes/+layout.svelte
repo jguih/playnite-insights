@@ -12,6 +12,7 @@
 		loadPlatforms,
 		loadRecentGameSessions,
 		loadServerTime,
+		serviceWorkerUpdaterSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
@@ -21,6 +22,7 @@
 		openIndexedDbAsync,
 	} from '$lib/client/db/indexeddb';
 	import { EventSourceManager } from '$lib/client/event-source-manager/eventSourceManager.svelte';
+	import { ServiceWorkerUpdater } from '$lib/client/sw-updater.svelte';
 	import { FetchClient } from '@playnite-insights/lib/client';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
@@ -103,6 +105,8 @@
 		appDataInterval = setInterval(loadAllAppData, 60_000);
 		// Create event source manager
 		eventSourceManagerSignal.manager = new EventSourceManager();
+		serviceWorkerUpdaterSignal.updater = new ServiceWorkerUpdater();
+		serviceWorkerUpdaterSignal.updater.watchServiceWorkerUpdates();
 
 		navigator.serviceWorker?.addEventListener('message', handleMessage);
 		window.addEventListener('focus', handleFocus);
