@@ -172,7 +172,9 @@ self.addEventListener('fetch', (event) => {
 
 	for (const [prefix, cacheKey, options] of apiRoutes) {
 		if (url.pathname.startsWith(prefix)) {
-			event.respondWith(staleWhileRevalidate(event.request, cacheKey, options));
+			event.respondWith(
+				staleWhileRevalidate(event.request, cacheKey, { pathname: url.pathname, ...options }),
+			);
 			return;
 		}
 	}

@@ -3,6 +3,7 @@
 		clientServiceLocator,
 		companySignal,
 		gameSignal,
+		httpClientSignal,
 		loadGameNotesFromServer,
 		recentGameSessionSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
@@ -23,6 +24,7 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
+	import { PlayniteRemoteAction } from '$lib/client/playnite-remote-action/playniteRemoteAction.js';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte.js';
 	import {
 		getPlayniteGameImageUrl,
@@ -53,6 +55,7 @@
 	const noteExtras = new NoteExtras();
 	const imageOptions = new ImageOptions();
 	const screenshotGallery = new ScreenshotsGallery();
+	const playniteRemoteAction = new PlayniteRemoteAction({ httpClientSignal });
 	const isThisGameActive = $derived.by(() => {
 		const inProgressActivity = activityVm.inProgressActivity;
 		return inProgressActivity?.gameId === data.gameId;
@@ -153,6 +156,11 @@
 		screenshotGallery.close();
 	};
 
+	const handleOnTakeSreenshotFromPlaynite = async () => {
+		noteExtras.close();
+		await playniteRemoteAction.takeScreenshotAsync();
+	};
+
 	onMount(() => {
 		// Load notes from indexedDb to hydrate UI faster
 		loadNotes();
@@ -216,7 +224,7 @@
 	isOpen={noteExtras.isOpen}
 	onClose={noteExtras.close}
 	onSelectImage={handleOnNoteImageChange}
-	onTakeScreenshotFromPlaynite={() => {}}
+	onTakeScreenshotFromPlaynite={handleOnTakeSreenshotFromPlaynite}
 	onAddAvailableScreenshot={screenshotGallery.open}
 />
 <NoteEditor

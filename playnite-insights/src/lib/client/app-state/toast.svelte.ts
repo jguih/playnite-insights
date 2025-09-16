@@ -2,7 +2,7 @@ export type AppToast = {
 	key: string;
 	title?: string;
 	message: string;
-	type: 'info' | 'error' | 'warning';
+	type: 'info' | 'error' | 'warning' | 'success';
 	durationMs?: number;
 };
 
@@ -25,6 +25,7 @@ export const toast = {
 	info: (props: Omit<AppToast, 'type' | 'key'>) => pushToast({ type: 'info', ...props }),
 	error: (props: Omit<AppToast, 'type' | 'key'>) => pushToast({ type: 'error', ...props }),
 	warning: (props: Omit<AppToast, 'type' | 'key'>) => pushToast({ type: 'warning', ...props }),
+	success: (props: Omit<AppToast, 'type' | 'key'>) => pushToast({ type: 'success', ...props }),
 };
 
 export const getToasts = () => toastSignal;

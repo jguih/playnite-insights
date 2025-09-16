@@ -1,11 +1,21 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
 		bottomNav = false,
 		header = true,
+		onMount: handleOnMount,
 		...props
-	}: HTMLAttributes<HTMLDivElement> & { bottomNav?: boolean; header?: boolean } = $props();
+	}: HTMLAttributes<HTMLDivElement> & {
+		bottomNav?: boolean;
+		header?: boolean;
+		onMount?: () => void | Promise<void>;
+	} = $props();
+
+	onMount(() => {
+		handleOnMount?.();
+	});
 </script>
 
 <div

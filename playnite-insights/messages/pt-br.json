@@ -63,6 +63,7 @@
   "error_load_local_game_notes": "Falha ao carregar notas de jogo da base de dados local",
   "error_db_not_ready": "Base de dados não disponível, por favor recarregue o app",
   "error_save_game_note": "Falha ao salvar nota de jogo",
+  "error_load_screenshots": "Falhar ao carregar capturas de tela",
   "yes": "Sim",
   "no": "Não",
   "option_sort_ascending": "Crescente",
@@ -97,5 +98,12 @@
   "label_note_editor_extras_add_image": "Adicionar imagem",
   "label_note_editor_extras_take_screenshot_from_playnite_host": "Capturar tela do Playnite host",
   "label_note_editor_extras_add_available_screenshot": "Adicionar captura de tela disponível",
-  "label_note_editor_image_option_remove": "Remover imagem"
+  "label_note_editor_image_option_remove": "Remover imagem",
+  "image_gallery": "Galeria",
+  "toast_remote_action_take_screenshot_in_progress_title": "Capturando screenshot…",
+  "toast_remote_action_take_screenshot_in_progress_message": "Você pode continuar editando a nota enquanto capturamos a tela.",
+  "toast_remote_action_take_screenshot_success_title": "Screenshot salva",
+  "toast_remote_action_take_screenshot_success_message": "Sua screenshot agora está disponível na galeria.",
+  "toast_remote_action_take_screenshot_error_title": "Falha ao capturar screenshot",
+  "toast_remote_action_take_screenshot_error_message": "Algo deu errado. Por favor, tente novamente."
 }

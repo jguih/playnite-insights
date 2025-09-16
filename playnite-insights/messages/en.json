@@ -63,6 +63,7 @@
   "error_load_local_game_notes": "Failed to load game notes from local database",
   "error_db_not_ready": "Database not ready, please refresh the app",
   "error_save_game_note": "Failed to save game note",
+  "error_load_screenshots": "Failed to load screenshots",
   "yes": "Yes",
   "no": "No",
   "option_sort_ascending": "Ascending",
@@ -97,5 +98,12 @@
   "label_note_editor_extras_add_image": "Add image",
   "label_note_editor_extras_take_screenshot_from_playnite_host": "Take screenshot from Playnite host",
   "label_note_editor_extras_add_available_screenshot": "Add available screenshot",
-  "label_note_editor_image_option_remove": "Remove image"
+  "label_note_editor_image_option_remove": "Remove image",
+  "image_gallery": "Gallery",
+  "toast_remote_action_take_screenshot_in_progress_title": "Taking screenshot…",
+  "toast_remote_action_take_screenshot_in_progress_message": "You can keep editing your note while we grab it.",
+  "toast_remote_action_take_screenshot_success_title": "Screenshot saved",
+  "toast_remote_action_take_screenshot_success_message": "Your screenshot is now available in the gallery.",
+  "toast_remote_action_take_screenshot_error_title": "Screenshot failed",
+  "toast_remote_action_take_screenshot_error_message": "Something went wrong. Please try again."
 }

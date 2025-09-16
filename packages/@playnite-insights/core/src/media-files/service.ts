@@ -136,10 +136,17 @@ export const makeMediaFilesService = ({
         recursive: true,
         withFileTypes: true,
       });
-      const screenshotFiles = entries
-        .filter((e) => e.isFile())
-        .map((e) => e.name);
-      return screenshotFiles;
+      const filesWithTime = await Promise.all(
+        entries
+          .filter((e) => e.isFile())
+          .map(async (e) => {
+            const fullPath = join(SCREENSHOTS_DIR, e.name);
+            const stats = await fileSystemService.stat(fullPath);
+            return { name: e.name, mtime: stats.mtime };
+          })
+      );
+      filesWithTime.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+      return filesWithTime.map((f) => f.name);
     };
 
   return {
