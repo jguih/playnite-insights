@@ -48,7 +48,7 @@ You can preview the production build with `npm run preview`.
   "RequestURL": "https://example.domain.com/api/assets/upload/screenshot",
   "Body": "MultipartFormData",
   "FileFormName": "file",
-  "URL": "https://example.domain.com/api/assets/image/screenshot/{json:files.[0]}"
+  "URL": "https://example.domain.com{json:uploaded.[0]}"
 }
 ```
 
