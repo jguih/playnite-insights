@@ -12,7 +12,7 @@
 			out:fly={{ y: -20, duration: 200 }}
 			class={[
 				'p-2 text-left',
-				toast.type === 'info' && 'bg-background-1 text-foreground',
+				toast.type === 'info' && 'bg-info-bg text-info-fg',
 				toast.type === 'success' && 'text-success-fg bg-success-bg',
 				toast.type === 'error' && 'text-error-fg bg-error-bg',
 				toast.type === 'warning' && 'text-warning-fg bg-warning-bg',

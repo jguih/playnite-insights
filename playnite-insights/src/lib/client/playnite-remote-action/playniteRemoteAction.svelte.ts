@@ -14,9 +14,12 @@ export type PlayniteRemoteActionDeps = {
 
 export class PlayniteRemoteAction {
 	#httpClientSignal: PlayniteRemoteActionDeps['httpClientSignal'];
+	#actionLoadingState: { takeScreenShot: boolean };
 
 	constructor({ httpClientSignal }: PlayniteRemoteActionDeps) {
 		this.#httpClientSignal = httpClientSignal;
+
+		this.#actionLoadingState = $state({ takeScreenShot: false });
 	}
 
 	protected withHttpClient = async <T>(
@@ -30,6 +33,7 @@ export class PlayniteRemoteAction {
 	takeScreenshotAsync = async () => {
 		try {
 			await this.withHttpClient(async ({ client }) => {
+				this.#actionLoadingState.takeScreenShot = true;
 				toast.info({
 					title: m.toast_remote_action_take_screenshot_in_progress_title(),
 					message: m.toast_remote_action_take_screenshot_in_progress_message(),
@@ -53,6 +57,12 @@ export class PlayniteRemoteAction {
 				title: m.toast_remote_action_take_screenshot_error_title(),
 				message: m.toast_remote_action_take_screenshot_error_message(),
 			});
+		} finally {
+			this.#actionLoadingState.takeScreenShot = false;
 		}
 	};
+
+	get actionLoadingState() {
+		return this.#actionLoadingState;
+	}
 }

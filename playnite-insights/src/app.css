@@ -42,7 +42,7 @@
 	--color-primary-disabled-fg: var(--color-neutral-400);
 	/* Primary light variant */
 	--color-primary-light-bg: transparent;
-	--color-primary-light-fg: var(--color-neutral-50);
+	--color-primary-light-fg: var(--color-foreground);
 	--color-primary-light-hover-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-hover-fg: var(--pl-color-primary-600);
 	--color-primary-light-active-bg: rgba(255, 255, 255, 0.02);
@@ -60,11 +60,11 @@
 	--color-neutral-disabled-fg: var(--color-neutral-400);
 	/* Neutral light variant */
 	--color-neutral-light-bg: transparent;
-	--color-neutral-light-fg: var(--color-neutral-400);
+	--color-neutral-light-fg: var(--color-neutral-200);
 	--color-neutral-light-hover-bg: rgba(255, 255, 255, 0.02);
-	--color-neutral-light-hover-fg: var(--color-neutral-200);
+	--color-neutral-light-hover-fg: var(--color-neutral-300);
 	--color-neutral-light-active-bg: rgba(255, 255, 255, 0.02);
-	--color-neutral-light-active-fg: var(--color-neutral-100);
+	--color-neutral-light-active-fg: var(--color-neutral-400);
 	--color-neutral-light-disabled-bg: var(--color-neutral-800);
 	--color-neutral-light-disabled-fg: var(--color-neutral-400);
 	/* Success variant */
@@ -79,6 +79,9 @@
   /* Error variant */
   --color-error-bg: var(--color-red-700);
 	--color-error-fg: var(--color-foreground);
+  /* Info variant */
+  --color-info-bg: var(--pl-color-primary-800);
+	--color-info-fg: var(--color-foreground);
 	/* Warning light variant */
 	--color-warning-light-bg: transparent;
 	--color-warning-light-fg: var(--color-yellow-600);
@@ -103,7 +106,7 @@
 	--color-primary-disabled-fg: var(--color-neutral-400);
 	/* Primary light variant */
 	--color-primary-light-bg: transparent;
-	--color-primary-light-fg: var(--color-neutral-50);
+	--color-primary-light-fg: var(--color-foreground);
 	--color-primary-light-hover-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-hover-fg: var(--pl-color-primary-600);
 	--color-primary-light-active-bg: rgba(255, 255, 255, 0.02);
@@ -121,11 +124,11 @@
 	--color-neutral-disabled-fg: var(--color-neutral-400);
 	/* Neutral light variant */
 	--color-neutral-light-bg: transparent;
-	--color-neutral-light-fg: var(--color-neutral-400);
+	--color-neutral-light-fg: var(--color-neutral-200);
 	--color-neutral-light-hover-bg: rgba(255, 255, 255, 0.02);
-	--color-neutral-light-hover-fg: var(--color-neutral-200);
+	--color-neutral-light-hover-fg: var(--color-neutral-300);
 	--color-neutral-light-active-bg: rgba(255, 255, 255, 0.02);
-	--color-neutral-light-active-fg: var(--color-neutral-100);
+	--color-neutral-light-active-fg: var(--color-neutral-400);
 	--color-neutral-light-disabled-bg: var(--color-neutral-800);
 	--color-neutral-light-disabled-fg: var(--color-neutral-400);
 	/* Success variant */
@@ -140,6 +143,9 @@
   /* Error variant */
   --color-error-bg: var(--color-red-700);
 	--color-error-fg: var(--color-foreground);
+  /* Info variant */
+  --color-info-bg: var(--pl-color-primary-800);
+	--color-info-fg: var(--color-foreground);
 	/* Warning light variant */
 	--color-warning-light-bg: transparent;
 	--color-warning-light-fg: var(--color-yellow-600);

@@ -7,6 +7,7 @@
 	import SolidButton from '../../buttons/SolidButton.svelte';
 	import BaseInput from '../../forms/BaseInput.svelte';
 	import BaseTextarea from '../../forms/BaseTextarea.svelte';
+	import Loading from '../../Loading.svelte';
 	import AsideBody from '../../sidebar/AsideBody.svelte';
 	import AsideBottomNav from '../../sidebar/AsideBottomNav.svelte';
 	import AsideHeader from '../../sidebar/AsideHeader.svelte';
@@ -21,6 +22,8 @@
 		onDelete: () => void | Promise<void>;
 		onOpenExtrasPanel: () => void | Promise<void>;
 		onClickImage: () => void | Promise<void>;
+		isOpenExtrasDisabled?: boolean;
+		isImageLoading?: boolean;
 	} = $props();
 	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 	let contentTextArea = $state<HTMLTextAreaElement | null>(null);
@@ -65,24 +68,33 @@
 				<TrashIcon class={['size-md']} />
 			</LightButton>
 		</AsideHeader>
-		<AsideBody bottomNav>
+		<AsideBody
+			bottomNav
+			class={['p-0!']}
+		>
 			<div class="flex flex-col">
-				{#if props.currentNote.ImagePath}
+				{#if props.isImageLoading}
+					<LightButton class={['p-0!']}>
+						<div class="bg-background-2 flex max-h-[60dvh] w-full items-center justify-center">
+							<Loading class={['h-[60dvh]']} />
+						</div>
+					</LightButton>
+				{:else if props.currentNote.ImagePath}
 					<LightButton
 						class={['p-0!']}
 						onclick={props.onClickImage}
 					>
-						<div class="bg-background-2 h-86">
+						<div class="bg-background-2 flex max-h-[60dvh] w-full items-center justify-center">
 							<img
 								src={props.currentNote.ImagePath}
 								alt={`note image`}
 								loading="lazy"
-								class="h-full w-full object-contain"
+								class="max-h-[60dvh] w-auto object-contain"
 							/>
 						</div>
 					</LightButton>
 				{/if}
-				<form class="flex grow flex-col p-2">
+				<form class="flex grow flex-col p-4">
 					<BaseInput
 						type="text"
 						placeholder={m.placeholder_note_editor_title()}
@@ -107,11 +119,12 @@
 		</AsideBody>
 		<AsideBottomNav>
 			<SolidButton
-				color="neutral"
+				color="primary"
 				rounded
 				aria-label="Add extras"
 				class={['h-fit grow-0']}
 				onclick={props.onOpenExtrasPanel}
+				disabled={props.isOpenExtrasDisabled === true}
 			>
 				<PlusSquare class={['size-md']} />
 			</SolidButton>

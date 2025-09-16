@@ -50,6 +50,7 @@ services:
     restart: always
     environment:
       ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
+      PLAYNITE_HOST_ADDRESS: ${PLAYNITE_HOST_ADDRESS_PROD}
       APP_NAME: "Playnite Insights"
       TZ: "America/Sao_Paulo"
       LOG_LEVEL: 0

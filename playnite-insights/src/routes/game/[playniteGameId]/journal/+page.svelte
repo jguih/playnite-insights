@@ -15,6 +15,7 @@
 	import { GameNoteEditor } from '$lib/client/components/game-page/journal/gameNoteEditor.svelte.js';
 	import { ImageOptions } from '$lib/client/components/game-page/journal/imageOptions.svelte.js';
 	import ImageOptionsPanel from '$lib/client/components/game-page/journal/ImageOptionsPanel.svelte';
+	import NoteCard from '$lib/client/components/game-page/journal/NoteCard.svelte';
 	import NoteEditor from '$lib/client/components/game-page/journal/NoteEditor.svelte';
 	import { NoteExtras } from '$lib/client/components/game-page/journal/noteExtras.svelte.js';
 	import NoteExtrasPanel from '$lib/client/components/game-page/journal/NoteExtrasPanel.svelte';
@@ -24,7 +25,7 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
-	import { PlayniteRemoteAction } from '$lib/client/playnite-remote-action/playniteRemoteAction.js';
+	import { PlayniteRemoteAction } from '$lib/client/playnite-remote-action/playniteRemoteAction.svelte.js';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte.js';
 	import {
 		getPlayniteGameImageUrl,
@@ -177,39 +178,6 @@
 	});
 </script>
 
-{#snippet noteCard(note: GameNote)}
-	<li class="bg-background-1">
-		<LightButton
-			class={['flex-col! items-start! w-full gap-4 p-4 text-start']}
-			onclick={() => handleOnClickNote(note)}
-			type="button"
-		>
-			{#if note.ImagePath}
-				<img
-					src={note.ImagePath}
-					alt={`note image`}
-					loading="lazy"
-					class="h-64 w-full object-cover"
-				/>
-			{/if}
-			<div class="relative max-h-[30dvh] overflow-y-hidden">
-				{#if note.Title}
-					<p class="mb-4 block w-full text-lg font-semibold">{note.Title}</p>
-				{/if}
-				{#if note.Content}
-					<p class="text-md block w-full opacity-80">{note.Content}</p>
-				{/if}
-				<div
-					class="from-background-1 pointer-events-none absolute bottom-0 left-0 h-12 w-full bg-gradient-to-t to-transparent"
-				></div>
-			</div>
-			<p class="w-full text-right text-sm opacity-60">
-				{new Date(note.CreatedAt).toLocaleString()}
-			</p>
-		</LightButton>
-	</li>
-{/snippet}
-
 <ScreenshotsGalleryPanel
 	isOpen={screenshotGallery.isOpen}
 	onClose={screenshotGallery.close}
@@ -235,6 +203,8 @@
 	onChange={handleOnNoteChange}
 	onOpenExtrasPanel={noteExtras.open}
 	onClickImage={imageOptions.open}
+	isOpenExtrasDisabled={playniteRemoteAction.actionLoadingState.takeScreenShot}
+	isImageLoading={playniteRemoteAction.actionLoadingState.takeScreenShot}
 />
 <BaseAppLayout>
 	<Header>
@@ -309,7 +279,12 @@
 					<DropdownBody>
 						<ul class="flex flex-col gap-4">
 							{#each notesSignal.notes as note (note.Id)}
-								{@render noteCard(note)}
+								<li class="bg-background-1">
+									<NoteCard
+										{note}
+										onClick={handleOnClickNote}
+									/>
+								</li>
 							{/each}
 						</ul>
 					</DropdownBody>
