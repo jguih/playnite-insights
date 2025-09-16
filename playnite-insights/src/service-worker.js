@@ -39,6 +39,11 @@ const apiRoutes = [
 	['/api/assets/image', CacheKeys.GAME_IMAGES, { type: 'GAME_IMAGES_UPDATE' }],
 ];
 
+/**
+ * @var {string[]} ignoredApiRoutes
+ */
+const ignoredApiRoutes = ['/api/event', '/api/manifest', '/api/health'];
+
 const ASSETS = [
 	...build, // the app itself
 	...files, // everything in `static`
@@ -168,7 +173,9 @@ self.addEventListener('fetch', (event) => {
 
 	const url = new URL(event.request.url);
 
-	if (url.pathname.startsWith('/api/manifest')) return;
+	for (const prefix of ignoredApiRoutes) {
+		if (url.pathname.startsWith(prefix)) return;
+	}
 
 	for (const [prefix, cacheKey, options] of apiRoutes) {
 		if (url.pathname.startsWith(prefix)) {

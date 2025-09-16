@@ -2,6 +2,7 @@
 	import {
 		clientServiceLocator,
 		companySignal,
+		eventSourceManagerSignal,
 		gameSignal,
 		httpClientSignal,
 		loadGameNotesFromServer,
@@ -25,6 +26,7 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
+	import type { EventSourceManagerListener } from '$lib/client/event-source-manager/eventSourceManager.svelte.js';
 	import { PlayniteRemoteAction } from '$lib/client/playnite-remote-action/playniteRemoteAction.svelte.js';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte.js';
 	import {
@@ -162,6 +164,20 @@
 		await playniteRemoteAction.takeScreenshotAsync();
 	};
 
+	const handleOnScreenshotTakenSSE: EventSourceManagerListener<'screenshotTaken'>['cb'] = async ({
+		data,
+	}) => {
+		const warnMessage =
+			m.toast_remote_action_take_screenshot_warn_no_screenshots_returned_message();
+		const first = data.paths.at(0)?.trim();
+		if (!first) {
+			toast.warning({ message: warnMessage });
+			return;
+		}
+		noteEditor.currentNote.ImagePath = first;
+		await handleOnNoteChange();
+	};
+
 	onMount(() => {
 		// Load notes from indexedDb to hydrate UI faster
 		loadNotes();
@@ -169,11 +185,18 @@
 			if (notes) loadNotes();
 			// If notes = `null` nothing was changed since last sync
 		});
+
+		const unsub = eventSourceManagerSignal.manager?.addListener({
+			type: 'screenshotTaken',
+			cb: handleOnScreenshotTakenSSE,
+		});
+
 		activityVm.setTickInterval();
 		window.addEventListener('focus', handleFocus);
 		return () => {
 			activityVm.clearTickInterval();
 			window.removeEventListener('focus', handleFocus);
+			unsub?.();
 		};
 	});
 </script>

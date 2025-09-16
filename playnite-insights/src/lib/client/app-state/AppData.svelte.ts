@@ -14,6 +14,7 @@ import {
 	JsonStrategy,
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
+import { EventSourceManager } from '../event-source-manager/eventSourceManager.svelte';
 import { handleClientErrors } from '../utils/handleClientErrors.svelte';
 import type {
 	CompanySignal,
@@ -48,6 +49,9 @@ export const clientServiceLocator = new ClientServiceLocator({
 	httpClientSignal,
 	indexedDbSignal,
 	serverTimeSignal,
+});
+export const eventSourceManagerSignal = $state<{ manager: EventSourceManager | null }>({
+	manager: null,
 });
 
 export async function withHttpClient<T>(

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		clientServiceLocator,
+		eventSourceManagerSignal,
 		httpClientSignal,
 		indexedDbSignal,
 		loadCompanies,
@@ -19,6 +20,7 @@
 		INDEXEDDB_NAME,
 		openIndexedDbAsync,
 	} from '$lib/client/db/indexeddb';
+	import { EventSourceManager } from '$lib/client/event-source-manager/eventSourceManager.svelte';
 	import { FetchClient } from '@playnite-insights/lib/client';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
@@ -84,20 +86,23 @@
 	};
 
 	onMount(() => {
+		// Setup http client
 		httpClientSignal.client = new FetchClient({ url: window.location.origin });
-
+		// Setup indexeddb connection
 		indexedDbSignal.dbReady = openIndexedDbAsync({
 			dbName: INDEXEDDB_NAME,
 			version: INDEXEDDB_CURRENT_VERSION,
 		}).then((db) => {
 			indexedDbSignal.db = db;
 		});
-
+		// Load app data
 		isLoading = true;
 		Promise.all([loadAllAppData(), loadGameNotesFromServer()]).then(() => (isLoading = false));
-
+		// Periodic data fetch
 		recentGameSessionInterval = setInterval(loadRecentGameSessions, 5_000);
 		appDataInterval = setInterval(loadAllAppData, 60_000);
+		// Create event source manager
+		eventSourceManagerSignal.manager = new EventSourceManager();
 
 		navigator.serviceWorker?.addEventListener('message', handleMessage);
 		window.addEventListener('focus', handleFocus);
@@ -106,6 +111,7 @@
 			navigator.serviceWorker?.removeEventListener('message', handleMessage);
 			if (recentGameSessionInterval) clearInterval(recentGameSessionInterval);
 			if (appDataInterval) clearInterval(appDataInterval);
+			eventSourceManagerSignal.manager?.close();
 		};
 	});
 </script>

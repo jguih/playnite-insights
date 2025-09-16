@@ -105,5 +105,6 @@
   "toast_remote_action_take_screenshot_success_title": "Screenshot salva",
   "toast_remote_action_take_screenshot_success_message": "Sua screenshot agora está disponível na galeria.",
   "toast_remote_action_take_screenshot_error_title": "Falha ao capturar screenshot",
-  "toast_remote_action_take_screenshot_error_message": "Algo deu errado. Por favor, tente novamente."
+  "toast_remote_action_take_screenshot_error_message": "Algo deu errado. Por favor, tente novamente.",
+  "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "O servidor não retornou nenhuma screenshot"
 }

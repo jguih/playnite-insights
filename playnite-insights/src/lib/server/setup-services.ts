@@ -26,7 +26,7 @@ import {
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
 	const streamUtilsService = makeStreamUtilsService();
-	const uploadService = makeUploadService({ logService: makeLogService('Upload') });
+	const uploadService = makeUploadService({ logService: makeLogService('UploadService') });
 	const logService = makeLogService('SvelteBackend');
 	// Repositories
 	const platformRepository = makePlatformRepository({
