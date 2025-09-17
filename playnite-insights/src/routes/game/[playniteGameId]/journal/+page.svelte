@@ -24,7 +24,6 @@
 	import ScreenshotsGalleryPanel from '$lib/client/components/game-page/journal/ScreenshotsGalleryPanel.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
-	import Loading from '$lib/client/components/Loading.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
 	import type { EventSourceManagerListener } from '$lib/client/event-source-manager/eventSourceManager.svelte.js';
@@ -302,20 +301,16 @@
 				{/snippet}
 				{#snippet body()}
 					<DropdownBody>
-						{#if notesSignal.isLoading}
-							<Loading />
-						{:else}
-							<ul class="flex flex-col gap-4">
-								{#each notesSignal.notes as note (note.Id)}
-									<li class="bg-background-1">
-										<NoteCard
-											{note}
-											onClick={handleOnClickNote}
-										/>
-									</li>
-								{/each}
-							</ul>
-						{/if}
+						<ul class="flex flex-col gap-4">
+							{#each notesSignal.notes as note (note.Id)}
+								<li class="bg-background-1">
+									<NoteCard
+										{note}
+										onClick={handleOnClickNote}
+									/>
+								</li>
+							{/each}
+						</ul>
 					</DropdownBody>
 				{/snippet}
 			</Dropdown>

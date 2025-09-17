@@ -44,7 +44,11 @@
 			return;
 		const type = event.data.type;
 		const pathname = event.data.pathname;
-		if (type === 'GAME_IMAGES_UPDATE' && pathname === '/api/assets/image/screenshot/all') {
+		if (
+			type === 'GAME_IMAGES_UPDATE' &&
+			typeof pathname === 'string' &&
+			pathname.startsWith('/api/assets/image/screenshot/all')
+		) {
 			await loadScreenshots();
 		}
 	};

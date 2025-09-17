@@ -1,20 +1,26 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
 		bottomNav = false,
 		header = true,
 		onMount: handleOnMount,
+		onDestroy: handleOnDetroy,
 		...props
 	}: HTMLAttributes<HTMLDivElement> & {
 		bottomNav?: boolean;
 		header?: boolean;
 		onMount?: () => void | Promise<void>;
+		onDestroy?: () => void | Promise<void>;
 	} = $props();
 
 	onMount(() => {
 		handleOnMount?.();
+	});
+
+	onDestroy(() => {
+		handleOnDetroy?.();
 	});
 </script>
 
