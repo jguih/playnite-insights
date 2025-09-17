@@ -18,7 +18,8 @@
 	const handleOnImageChange = async () => {
 		if (!imageInput || !imageInput.files) return;
 		if (imageInput.files.length === 0) return;
-		props.onSelectImage(imageInput.files[0]);
+		await props.onSelectImage(imageInput.files[0]);
+		imageInput.value = '';
 	};
 </script>
 

@@ -13,6 +13,7 @@ import {
 	makeGameNoteRepository,
 	makeGameSessionRepository,
 	makeGenreRepository,
+	makeImageRepository,
 	makeLogService,
 	makePlatformRepository,
 	makePlayniteGameRepository,
@@ -26,7 +27,6 @@ import {
 export const setupServices = () => {
 	const fileSystemService = makeFileSystemService();
 	const streamUtilsService = makeStreamUtilsService();
-	const uploadService = makeUploadService({ logService: makeLogService('UploadService') });
 	const logService = makeLogService('SvelteBackend');
 	// Repositories
 	const platformRepository = makePlatformRepository({
@@ -48,6 +48,7 @@ export const setupServices = () => {
 	const noteRepository = makeGameNoteRepository({
 		logService: makeLogService('GameNoteRepository'),
 	});
+	const imageRepository = makeImageRepository({ logService: makeLogService('ImageRepository') });
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -56,12 +57,12 @@ export const setupServices = () => {
 		genreRepository,
 		gameSessionRepository,
 		noteRepository,
+		imageRepository,
 	};
 	const commonDeps = {
 		getDb,
 		fileSystemService,
 		streamUtilsService,
-		uploadService,
 		...config,
 		...repositories,
 	};
@@ -77,8 +78,15 @@ export const setupServices = () => {
 		libraryManifestService: libraryManifestService,
 		logService: makeLogService('PlayniteLibraryImporterService'),
 	});
+	const uploadService = makeUploadService({
+		...commonDeps,
+		...repositories,
+		logService: makeLogService('UploadService'),
+	});
 	const mediaFilesService = makeMediaFilesService({
 		...commonDeps,
+		...repositories,
+		uploadService: uploadService,
 		logService: makeLogService('MediaFilesService'),
 	});
 	const gameSessionService = makeGameSessionService({

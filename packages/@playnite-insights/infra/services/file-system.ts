@@ -12,6 +12,7 @@ export const makeFileSystemService = (): FileSystemService => {
     unlink: fsAsync.unlink,
     writeFile: fsAsync.writeFile,
     constants: fsAsync.constants,
+    rename: fsAsync.rename,
   };
 };
 

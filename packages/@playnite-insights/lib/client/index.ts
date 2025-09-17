@@ -5,6 +5,7 @@ export * from "./game-notes";
 export * from "./game-session";
 export * from "./genre";
 export * from "./home-page";
+export * from "./image";
 export * from "./library-manifest";
 export * from "./log";
 export * from "./platform";

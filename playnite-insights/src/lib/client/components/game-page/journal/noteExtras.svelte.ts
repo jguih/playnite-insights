@@ -35,6 +35,9 @@ export class NoteExtras {
 				endpoint: '/api/assets/upload/screenshot',
 				body: formData,
 				strategy: new JsonStrategy(uploadScreenshotResponseSchema),
+				headers: {
+					'X-Upload-Source': 'web-ui',
+				},
 			});
 			const uploadedImage = uploadedFiles.uploaded[0];
 			return uploadedImage;

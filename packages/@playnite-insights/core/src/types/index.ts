@@ -3,6 +3,7 @@ export type * from "./file-system.types";
 export type * from "./game-note.types";
 export type * from "./game-session.types";
 export type * from "./genre.types";
+export type * from "./image.types";
 export type * from "./log.types";
 export type * from "./platform.types";
 export type * from "./playnite-game.types";

@@ -1,3 +1,4 @@
+import { Image, validImageSources } from "@playnite-insights/lib/client";
 import { extname, join } from "path";
 import type { MediaFilesService, MediaFilesServiceDeps } from "./service.types";
 
@@ -52,6 +53,13 @@ export const makeMediaFilesService = ({
       default:
         return "application/octet-stream";
     }
+  };
+
+  const isValidUploadSource = (
+    uploader: string | null
+  ): uploader is Image["Source"] => {
+    if (!uploader) return false;
+    return validImageSources.includes(uploader as Image["Source"]);
   };
 
   const getGameImage = async (
@@ -126,8 +134,16 @@ export const makeMediaFilesService = ({
 
   const uploadScreenshotsAsync: MediaFilesService["uploadScreenshotsAsync"] =
     async (request) => {
-      logService.debug(`Downloading screenshot to disk`);
-      return uploadService.uploadImagesAsync(request, SCREENSHOTS_DIR);
+      const uploader = request.headers.get("X-Upload-Source");
+      const source: Image["Source"] = isValidUploadSource(uploader)
+        ? uploader
+        : "unknown";
+      logService.info(`Received request to upload images from ${source}`);
+      return await uploadService.uploadImagesAsync(
+        request,
+        SCREENSHOTS_DIR,
+        source
+      );
     };
 
   const getAvailableScreenshots: MediaFilesService["getAvailableScreenshots"] =

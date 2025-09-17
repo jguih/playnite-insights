@@ -10,4 +10,5 @@ export type FileSystemService = {
   stat: typeof fsAsync.stat;
   constants: typeof fsAsync.constants;
   mkdir: typeof fsAsync.mkdir;
+  rename: typeof fsAsync.rename;
 };
