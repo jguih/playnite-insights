@@ -1,4 +1,5 @@
-import type { UploadService } from "../types";
+import { Image } from "@playnite-insights/lib/client";
+import type { ImageRepository, UploadService } from "../types";
 import type { FileSystemService } from "../types/file-system.types";
 import type { LogService } from "../types/log.types";
 
@@ -8,6 +9,7 @@ export type MediaFilesServiceDeps = {
   FILES_DIR: string;
   SCREENSHOTS_DIR: string;
   uploadService: UploadService;
+  imageRepository: ImageRepository;
 };
 
 export type MediaFilesService = {
@@ -32,5 +34,5 @@ export type MediaFilesService = {
     ifModifiedSince: string | null
   ) => Promise<Response>;
   uploadScreenshotsAsync: (request: Request) => Promise<string[]>;
-  getAvailableScreenshots: () => Promise<string[]>;
+  getAvailableScreenshots: () => Promise<Image[]>;
 };

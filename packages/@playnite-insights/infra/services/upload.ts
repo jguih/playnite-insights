@@ -44,7 +44,7 @@ export const makeUploadService = (
     ...deps,
   };
 
-  const uploadImageAsync: UploadService["uploadImagesAsync"] = async (
+  const uploadImagesAsync: UploadService["uploadImagesAsync"] = async (
     request,
     path,
     source
@@ -156,5 +156,5 @@ export const makeUploadService = (
     });
   };
 
-  return { uploadImagesAsync: uploadImageAsync };
+  return { uploadImagesAsync };
 };

@@ -9,7 +9,12 @@ export const GET: RequestHandler = async ({ request }) => {
 
 	try {
 		const result = await services.mediaFiles.getAvailableScreenshots();
-		const parsedResult = result.map((fileName) => `/api/assets/image/screenshot/${fileName}`);
+		const parsedResult = result.map((image) => {
+			return {
+				...image,
+				Path: `/api/assets/image/screenshot/${image.FileName}`,
+			};
+		});
 		const response: GetAllScreenshotsResponse = {
 			screenshots: parsedResult,
 		};

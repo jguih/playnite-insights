@@ -3,7 +3,11 @@
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { ArrowLeft } from '@lucide/svelte';
-	import { getAllScreenshotsResponseSchema, JsonStrategy } from '@playnite-insights/lib/client';
+	import {
+		getAllScreenshotsResponseSchema,
+		JsonStrategy,
+		type GetAllScreenshotsResponse,
+	} from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 	import LightButton from '../../buttons/LightButton.svelte';
 	import Loading from '../../Loading.svelte';
@@ -17,8 +21,11 @@
 		onClose: () => void | Promise<void>;
 		onSelectImage: (path: string) => void | Promise<void>;
 	} = $props();
-	const screenshots = $state<{ paths: string[]; isLoading: boolean }>({
-		paths: [],
+	const screenshots = $state<{
+		data: GetAllScreenshotsResponse['screenshots'];
+		isLoading: boolean;
+	}>({
+		data: [],
 		isLoading: false,
 	});
 
@@ -30,7 +37,7 @@
 					endpoint: '/api/assets/image/screenshot/all',
 					strategy: new JsonStrategy(getAllScreenshotsResponseSchema),
 				});
-				screenshots.paths = response.screenshots;
+				screenshots.data = response.screenshots;
 			});
 		} catch (error) {
 			handleClientErrors(error, m.error_load_screenshots());
@@ -84,14 +91,14 @@
 				<Loading />
 			{:else}
 				<ul class={['grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4']}>
-					{#each screenshots.paths as path (path)}
+					{#each screenshots.data as screenshot (screenshot.Id)}
 						<li>
 							<LightButton
 								class={['p-0! w-full']}
-								onclick={() => props.onSelectImage(path)}
+								onclick={() => props.onSelectImage(screenshot.Path)}
 							>
 								<img
-									src={path}
+									src={screenshot.Path}
 									alt="screenshot"
 									loading="lazy"
 									class={['h-48 w-full object-cover']}

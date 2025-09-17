@@ -8,6 +8,7 @@ export const makeMediaFilesService = ({
   FILES_DIR,
   SCREENSHOTS_DIR,
   uploadService,
+  imageRepository,
 }: MediaFilesServiceDeps): MediaFilesService => {
   const checkIfImageExists = async (imagePath: string): Promise<boolean> => {
     try {
@@ -148,21 +149,8 @@ export const makeMediaFilesService = ({
 
   const getAvailableScreenshots: MediaFilesService["getAvailableScreenshots"] =
     async () => {
-      const entries = await fileSystemService.readdir(SCREENSHOTS_DIR, {
-        recursive: true,
-        withFileTypes: true,
-      });
-      const filesWithTime = await Promise.all(
-        entries
-          .filter((e) => e.isFile())
-          .map(async (e) => {
-            const fullPath = join(SCREENSHOTS_DIR, e.name);
-            const stats = await fileSystemService.stat(fullPath);
-            return { name: e.name, mtime: stats.mtime };
-          })
-      );
-      filesWithTime.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
-      return filesWithTime.map((f) => f.name);
+      const images = imageRepository.all();
+      return images;
     };
 
   return {
