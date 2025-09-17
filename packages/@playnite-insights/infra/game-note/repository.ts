@@ -7,14 +7,14 @@ import {
 import z from "zod";
 import {
   type BaseRepositoryDeps,
-  defaultRepositoryDeps,
+  getDefaultRepositoryDeps,
   repositoryCall,
 } from "../repository/base";
 
 export const makeGameNoteRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): GameNoteRepository => {
-  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
 
   const getWhereClauseAndParamsFromFilters = (filters?: GameNoteFilters) => {
     const where: string[] = [];

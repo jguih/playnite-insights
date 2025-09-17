@@ -3,6 +3,8 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 RUN apk add tzdata
+# Add build dependencies for sharp
+RUN apk add --no-cache build-base vips-dev fftw-dev libc6-compat python3
 
 FROM base AS deps
 COPY . /usr/src/app

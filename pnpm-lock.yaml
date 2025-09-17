@@ -115,6 +115,9 @@ importers:
       echarts:
         specifier: ^5.6.0
         version: 5.6.0
+      sharp:
+        specifier: ^0.34.3
+        version: 0.34.3
       zod:
         specifier: ^3.25.74
         version: 3.25.76

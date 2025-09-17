@@ -1,14 +1,14 @@
 import type { PlayniteLibrarySyncRepository } from "@playnite-insights/core";
 import {
   type BaseRepositoryDeps,
-  defaultRepositoryDeps,
+  getDefaultRepositoryDeps,
   repositoryCall,
 } from "./base";
 
 export const makePlayniteLibrarySyncRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): PlayniteLibrarySyncRepository => {
-  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
 
   const add = (totalPlaytimeSeconds: number, totalGames: number) => {
     return repositoryCall(

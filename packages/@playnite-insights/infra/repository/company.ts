@@ -2,7 +2,7 @@ import type { CompanyRepository } from "@playnite-insights/core";
 import { companySchema, type Company } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  defaultRepositoryDeps,
+  getDefaultRepositoryDeps,
   repositoryCall,
   type BaseRepositoryDeps,
 } from "./base";
@@ -10,7 +10,7 @@ import {
 export const makeCompanyRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): CompanyRepository => {
-  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
 
   const add = (company: Company): boolean => {
     const query = `

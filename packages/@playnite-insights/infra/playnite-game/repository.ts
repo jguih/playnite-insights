@@ -12,7 +12,7 @@ import {
 } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  defaultRepositoryDeps,
+  getDefaultRepositoryDeps,
   repositoryCall,
   type BaseRepositoryDeps,
 } from "../repository/base";
@@ -28,7 +28,7 @@ type PlayniteGameRepositoryDeps = BaseRepositoryDeps & {
 };
 
 const defaultDeps: Required<PlayniteGameRepositoryDeps> = {
-  ...defaultRepositoryDeps,
+  ...getDefaultRepositoryDeps(),
   platformRepository: defaultPlatformRepository,
   genreRepository: defaultGenreRepository,
   companyRepository: defaultCompanyRepository,

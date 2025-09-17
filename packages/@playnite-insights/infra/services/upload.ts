@@ -13,7 +13,7 @@ import { extname, join } from "path";
 import sharp from "sharp";
 import { ReadableStream } from "stream/web";
 import { config } from "../config";
-import { defaultImageRepository } from "../repository";
+import { defaultImageRepository } from "../repository/image";
 import { defaultFileSystemService } from "./file-system";
 import { defaultLogger } from "./log";
 import { defaultStreamUtilsService } from "./stream-utils";

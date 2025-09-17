@@ -2,17 +2,19 @@ import type { LogService } from "@playnite-insights/core";
 import { ApiError, ValidationError } from "@playnite-insights/lib/client";
 import type { DatabaseSync } from "node:sqlite";
 import { ZodError } from "zod";
-import { getDb as _getDb } from "../database";
-import { defaultLogger } from "../services";
+import { getDb as _getDb } from "../database/database";
+import { defaultLogger } from "../services/log";
 
 export type BaseRepositoryDeps = {
   getDb: () => DatabaseSync;
   logService: LogService;
 };
 
-export const defaultRepositoryDeps: Required<BaseRepositoryDeps> = {
-  getDb: _getDb,
-  logService: defaultLogger,
+export const getDefaultRepositoryDeps = (): Required<BaseRepositoryDeps> => {
+  return {
+    getDb: _getDb,
+    logService: defaultLogger,
+  };
 };
 
 export const repositoryCall = <T>(

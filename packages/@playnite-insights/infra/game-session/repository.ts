@@ -3,7 +3,7 @@ import { gameSessionSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
   type BaseRepositoryDeps,
-  defaultRepositoryDeps,
+  getDefaultRepositoryDeps,
   repositoryCall,
 } from "../repository/base";
 import { getWhereClauseAndParamsFromFilters } from "./filtering";
@@ -11,7 +11,7 @@ import { getWhereClauseAndParamsFromFilters } from "./filtering";
 export const makeGameSessionRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): GameSessionRepository => {
-  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
 
   const getById: GameSessionRepository["getById"] = (sessionId) => {
     return repositoryCall(

@@ -2,7 +2,7 @@ import type { PlatformRepository } from "@playnite-insights/core";
 import { platformSchema, type Platform } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  defaultRepositoryDeps,
+  getDefaultRepositoryDeps,
   repositoryCall,
   type BaseRepositoryDeps,
 } from "./base";
@@ -10,7 +10,7 @@ import {
 export const makePlatformRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): PlatformRepository => {
-  const { getDb, logService } = { ...defaultRepositoryDeps, ...deps };
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
 
   const add = (platform: Platform): boolean => {
     return repositoryCall(
