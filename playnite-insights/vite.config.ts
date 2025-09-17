@@ -28,7 +28,6 @@ export default defineConfig({
 			},
 		],
 	},
-	ssr: { external: ['sharp'] },
 	build: {
 		rollupOptions: {
 			external: ['sharp'],

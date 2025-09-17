@@ -1,6 +1,12 @@
 <script lang="ts">
-	import { init, type BarSeriesOption, type ComposeOption } from 'echarts';
+	import type { BarSeriesOption, ComposeOption } from 'echarts';
+	import { BarChart } from 'echarts/charts';
+	import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+	import * as echarts from 'echarts/core';
+	import { CanvasRenderer } from 'echarts/renderers';
 	import { onMount } from 'svelte';
+
+	echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, CanvasRenderer]);
 
 	type Props = {
 		xAxis: { data: string[] };
@@ -10,7 +16,7 @@
 	let { xAxis, series }: Props = $props();
 
 	const id = 'chart-games-owned-over-time';
-	var option: ComposeOption<BarSeriesOption> = $derived({
+	const option: ComposeOption<BarSeriesOption> = $derived({
 		title: {
 			show: false,
 		},
@@ -41,9 +47,9 @@
 		],
 	});
 
-	onMount(() => {
+	onMount(async () => {
 		if (document) {
-			var myChart = init(document.getElementById(id));
+			const myChart = echarts.init(document.getElementById(id));
 			myChart.setOption(option);
 		}
 	});
