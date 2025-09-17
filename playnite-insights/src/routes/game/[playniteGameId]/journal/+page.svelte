@@ -139,9 +139,10 @@
 			const uploadedImage = await noteExtras.uploadImageAsync(file);
 			noteEditor.currentNote.ImagePath = uploadedImage;
 			await handleOnNoteChange();
-			noteExtras.close();
 		} catch (error) {
 			handleClientErrors(error, 'Failed to upload image');
+		} finally {
+			noteExtras.close();
 		}
 	};
 

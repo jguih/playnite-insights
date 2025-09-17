@@ -15,11 +15,9 @@
 	} = $props();
 	let imageInput = $state<HTMLInputElement | null>(null);
 
-	const handleOnImageChange = async () => {
-		if (!imageInput || !imageInput.files) return;
-		if (imageInput.files.length === 0) return;
-		await props.onSelectImage(imageInput.files[0]);
-		imageInput.value = '';
+	const handleOnImageChange = () => {
+		if (!imageInput || !imageInput.files || imageInput.files.length === 0) return;
+		props.onSelectImage(imageInput.files[0]);
 	};
 </script>
 
@@ -36,11 +34,10 @@
 			<input
 				type="file"
 				name="file"
-				accept="image/*"
 				id="image-file"
 				bind:this={imageInput}
 				onchange={handleOnImageChange}
-				class="hidden"
+				class="absolute -top-10 opacity-0"
 			/>
 			<ul class={['flex flex-col justify-start gap-2']}>
 				<li>

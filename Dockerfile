@@ -26,7 +26,7 @@ WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='Playnite Insights (Dev)'
+ENV APP_NAME='PlayAtlas (Dev)'
 
 RUN apt update && apt install sqlite3 -y 
 
@@ -49,7 +49,7 @@ WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='production'
 ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='Playnite Insights'
+ENV APP_NAME='PlayAtlas'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p ./data/files ./data/tmp
@@ -71,7 +71,7 @@ WORKDIR /app
 ENV WORK_DIR=/app
 ENV NODE_ENV='testing'
 ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='Playnite Insights (Stage)'
+ENV APP_NAME='PlayAtlas (Stage)'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p ./data/files ./data/tmp
