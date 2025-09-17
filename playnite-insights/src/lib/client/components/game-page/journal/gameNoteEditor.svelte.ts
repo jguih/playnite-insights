@@ -33,16 +33,8 @@ export class GameNoteEditor {
 		);
 	}
 
-	saveAsync = async ({
-		gameId,
-		sessionId,
-	}: {
-		gameId: GameNote['GameId'];
-		sessionId: GameNote['SessionId'];
-	}) => {
+	saveAsync = async () => {
 		const note = { ...this.#currentNote };
-		note.GameId = gameId;
-		note.SessionId = sessionId;
 		try {
 			await this.#noteRepository.putAsync({ note });
 		} catch (err) {

@@ -101,9 +101,11 @@
 	};
 
 	const handleOnNoteChange = async () => {
-		const gameId = data.gameId;
-		const sessionId = activeSessionForThisGame?.SessionId ?? null;
-		await noteEditor.saveAsync({ gameId, sessionId });
+		await noteEditor.saveAsync();
+	};
+
+	const handleOnCloseNoteEditor = async () => {
+		noteEditor.close();
 		await loadNotes();
 	};
 
@@ -113,11 +115,13 @@
 	};
 
 	const handleOnAddNote = async () => {
+		const gameId = data.gameId;
+		const sessionId = activeSessionForThisGame?.SessionId ?? null;
 		const newNote = clientServiceLocator.factory.gameNote.create({
 			Title: null,
 			Content: null,
-			GameId: null,
-			ImagePath: null,
+			GameId: gameId,
+			ImagePath: sessionId,
 			SessionId: null,
 		});
 		noteEditor.currentNote = newNote;
@@ -220,7 +224,7 @@
 />
 <NoteEditor
 	isOpen={noteEditor.isOpen}
-	onClose={noteEditor.close}
+	onClose={handleOnCloseNoteEditor}
 	currentNote={noteEditor.currentNote}
 	onDelete={handleOnDeleteNote}
 	onChange={handleOnNoteChange}
