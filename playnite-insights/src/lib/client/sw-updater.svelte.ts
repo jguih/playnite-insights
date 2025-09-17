@@ -1,3 +1,6 @@
+import { m } from '$lib/paraglide/messages';
+import { toast } from './app-state/toast.svelte';
+
 export class ServiceWorkerUpdater {
 	#newVersionAvailable: boolean;
 
@@ -13,8 +16,20 @@ export class ServiceWorkerUpdater {
 					if (!newWorker) return;
 
 					newWorker.addEventListener('statechange', () => {
-						if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-							this.#newVersionAvailable = true;
+						if (
+							newWorker.state === 'installed' &&
+							navigator.serviceWorker.controller &&
+							registration.waiting
+						) {
+							toast.success({
+								title: m.toast_new_update_available_title(),
+								message: m.toast_new_update_available_message(),
+								durationMs: 999_999,
+								action: () => {
+									registration.waiting?.postMessage({ action: 'skipWaiting' });
+									this.newVersionAvailable = false;
+								},
+							});
 						}
 					});
 				});

@@ -106,5 +106,7 @@
   "toast_remote_action_take_screenshot_success_message": "Your screenshot is now available in the gallery.",
   "toast_remote_action_take_screenshot_error_title": "Screenshot failed",
   "toast_remote_action_take_screenshot_error_message": "Something went wrong. Please try again.",
-  "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "No screenshots were returned from the server"
+  "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "No screenshots were returned from the server",
+  "toast_new_update_available_title": "New update available",
+  "toast_new_update_available_message": "Click here to update"
 }

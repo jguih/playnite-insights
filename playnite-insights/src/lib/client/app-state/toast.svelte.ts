@@ -4,6 +4,7 @@ export type AppToast = {
 	message: string;
 	type: 'info' | 'error' | 'warning' | 'success';
 	durationMs?: number;
+	action?: () => void | Promise<void>;
 };
 
 let toastSignal = $state<AppToast[]>([]);

@@ -24,6 +24,7 @@
 	import ScreenshotsGalleryPanel from '$lib/client/components/game-page/journal/ScreenshotsGalleryPanel.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
+	import Loading from '$lib/client/components/Loading.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
 	import type { EventSourceManagerListener } from '$lib/client/event-source-manager/eventSourceManager.svelte.js';
@@ -104,11 +105,6 @@
 		await noteEditor.saveAsync();
 	};
 
-	const handleOnCloseNoteEditor = async () => {
-		noteEditor.close();
-		await loadNotes();
-	};
-
 	const handleOnClickNote = async (note: GameNote) => {
 		noteEditor.currentNote = { ...note };
 		noteEditor.open();
@@ -180,6 +176,7 @@
 		}
 		noteEditor.currentNote.ImagePath = first;
 		await handleOnNoteChange();
+		await loadNotes();
 	};
 
 	onMount(() => {
@@ -224,10 +221,11 @@
 />
 <NoteEditor
 	isOpen={noteEditor.isOpen}
-	onClose={handleOnCloseNoteEditor}
+	onClose={noteEditor.close}
 	currentNote={noteEditor.currentNote}
 	onDelete={handleOnDeleteNote}
 	onChange={handleOnNoteChange}
+	onDestroy={loadNotes}
 	onOpenExtrasPanel={noteExtras.open}
 	onClickImage={imageOptions.open}
 	isOpenExtrasDisabled={playniteRemoteAction.actionLoadingState.takeScreenShot}
@@ -304,16 +302,20 @@
 				{/snippet}
 				{#snippet body()}
 					<DropdownBody>
-						<ul class="flex flex-col gap-4">
-							{#each notesSignal.notes as note (note.Id)}
-								<li class="bg-background-1">
-									<NoteCard
-										{note}
-										onClick={handleOnClickNote}
-									/>
-								</li>
-							{/each}
-						</ul>
+						{#if notesSignal.isLoading}
+							<Loading />
+						{:else}
+							<ul class="flex flex-col gap-4">
+								{#each notesSignal.notes as note (note.Id)}
+									<li class="bg-background-1">
+										<NoteCard
+											{note}
+											onClick={handleOnClickNote}
+										/>
+									</li>
+								{/each}
+							</ul>
+						{/if}
 					</DropdownBody>
 				{/snippet}
 			</Dropdown>

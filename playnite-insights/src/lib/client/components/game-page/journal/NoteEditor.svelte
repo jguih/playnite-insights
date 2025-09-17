@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { ArrowLeft, PlusSquare, TrashIcon } from '@lucide/svelte';
 	import { type GameNote } from '@playnite-insights/lib/client';
+	import { onDestroy } from 'svelte';
 	import type { KeyboardEventHandler } from 'svelte/elements';
 	import LightButton from '../../buttons/LightButton.svelte';
 	import SolidButton from '../../buttons/SolidButton.svelte';
@@ -24,6 +25,7 @@
 		onClickImage: () => void | Promise<void>;
 		isOpenExtrasDisabled?: boolean;
 		isImageLoading?: boolean;
+		onDestroy?: () => void | Promise<void>;
 	} = $props();
 	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 	let contentTextArea = $state<HTMLTextAreaElement | null>(null);
@@ -51,6 +53,10 @@
 		contentTextArea.style.height = 'auto';
 		contentTextArea.style.height = contentTextArea?.scrollHeight + 'px';
 	};
+
+	onDestroy(() => {
+		props.onDestroy?.();
+	});
 </script>
 
 {#if props.isOpen}

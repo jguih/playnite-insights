@@ -24,12 +24,17 @@
 - Fix: Media files being deleted even when game delete fails
 - Dashboard page
 - Bottom nav improvements
-
-## 🛠️ In Progress
-
 - Active session page:
   - Display current game being played
   - Allow user to manage notes linked to the current session
+
+## 🛠️ In Progress
+
+- Screenshot gallery improvements:
+  - Delete images
+  - Store metadata in database
+  - Restore images from trash
+  - Compare image hashes to avoid duplicates
 
 ## 📌 To Do
 
