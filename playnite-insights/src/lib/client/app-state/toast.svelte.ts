@@ -3,6 +3,7 @@ export type AppToast = {
 	title?: string;
 	message: string;
 	type: 'info' | 'error' | 'warning' | 'success';
+	category: 'network' | 'local-database' | 'app';
 	durationMs?: number;
 	action?: () => void | Promise<void>;
 };
@@ -10,6 +11,8 @@ export type AppToast = {
 let toastSignal = $state<AppToast[]>([]);
 
 const pushToast = (toast: Omit<AppToast, 'key'>) => {
+	if (toast.category === 'network' && !navigator.onLine) return;
+
 	const newToast: AppToast = { ...toast, key: crypto.randomUUID() };
 	const currentToasts: AppToast[] = [...toastSignal];
 	const duration = toast.durationMs ?? 6_000;

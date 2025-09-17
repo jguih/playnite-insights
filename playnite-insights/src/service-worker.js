@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 /// <reference types="@sveltejs/kit" />
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext" />
@@ -41,7 +43,7 @@ const apiRoutes = [
 /**
  * @var {string[]} ignoredApiRoutes
  */
-const ignoredApiRoutes = ['/api/event', '/api/manifest', '/api/health'];
+const ignoredApiRoutes = ['/api/event', '/api/manifest', '/api/health', '/api/note'];
 
 const ASSETS = [
 	...build, // the app itself
@@ -85,7 +87,7 @@ sw.addEventListener('message', (event) => {
  * @param {object} message
  */
 function notifyClients(message) {
-	clients.matchAll().then((clients) => {
+	sw.clients.matchAll().then((clients) => {
 		clients.forEach((client) => {
 			client.postMessage(message);
 		});
@@ -138,14 +140,14 @@ async function networkFirst(request, cacheName) {
 			cache.put(request, networkResponse.clone());
 		}
 		return networkResponse;
-	} catch {
+	} catch (error) {
 		// Network failed, try to return from cache
 		const cachedResponse = await cache.match(request);
 		if (cachedResponse) {
 			return cachedResponse;
 		}
 
-		console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
+		console.warn(`SW failed to fetch and found no cache for ${request.url}`, error);
 		return new Response('Network error and no cache available', { status: 503 });
 	}
 }
@@ -173,12 +175,12 @@ async function defaultFetchHandler(request, cacheName) {
 		const fallback = await cache.match(request);
 		if (fallback) return fallback;
 
-		console.warn(`SW failed to fetch and found no cache for ${event.request.url}`, err);
+		console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
 		return new Response('Network error and no cache available', { status: 503 });
 	}
 }
 
-self.addEventListener('fetch', (event) => {
+sw.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
 
 	const url = new URL(event.request.url);

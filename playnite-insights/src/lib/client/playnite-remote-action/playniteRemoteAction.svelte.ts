@@ -37,6 +37,7 @@ export class PlayniteRemoteAction {
 				toast.info({
 					title: m.toast_remote_action_take_screenshot_in_progress_title(),
 					message: m.toast_remote_action_take_screenshot_in_progress_message(),
+					category: 'network',
 				});
 				const command: RemoteAction = {
 					action: 'screenshot',
@@ -49,6 +50,7 @@ export class PlayniteRemoteAction {
 				toast.success({
 					title: m.toast_remote_action_take_screenshot_success_title(),
 					message: m.toast_remote_action_take_screenshot_success_message(),
+					category: 'network',
 				});
 			});
 		} catch (error) {
@@ -56,6 +58,7 @@ export class PlayniteRemoteAction {
 			toast.error({
 				title: m.toast_remote_action_take_screenshot_error_title(),
 				message: m.toast_remote_action_take_screenshot_error_message(),
+				category: 'network',
 			});
 		} finally {
 			this.#actionLoadingState.takeScreenShot = false;

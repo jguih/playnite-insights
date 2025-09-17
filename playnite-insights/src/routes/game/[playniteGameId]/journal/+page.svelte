@@ -89,11 +89,11 @@
 			notesSignal.notes = notes;
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
-				toast.error({ message: m.error_db_not_ready() });
+				toast.error({ message: m.error_db_not_ready(), category: 'local-database' });
 			} else if (err instanceof Error) {
-				toast.error({ title: m.error_load_local_game_notes(), message: err.message });
+				toast.error({ message: m.error_load_local_game_notes(), category: 'local-database' });
 			} else {
-				toast.error({ message: m.error_load_local_game_notes() });
+				toast.error({ message: m.error_load_local_game_notes(), category: 'local-database' });
 			}
 		} finally {
 			notesSignal.isLoading = false;
@@ -171,7 +171,7 @@
 			m.toast_remote_action_take_screenshot_warn_no_screenshots_returned_message();
 		const first = data.paths.at(0)?.trim();
 		if (!first) {
-			toast.warning({ message: warnMessage });
+			toast.warning({ message: warnMessage, category: 'network' });
 			return;
 		}
 		noteEditor.currentNote.ImagePath = first;

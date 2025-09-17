@@ -29,6 +29,7 @@ export class ServiceWorkerUpdater {
 									registration.waiting?.postMessage({ action: 'skipWaiting' });
 									this.newVersionAvailable = false;
 								},
+								category: 'app',
 							});
 						}
 					});

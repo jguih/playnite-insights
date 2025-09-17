@@ -39,9 +39,13 @@ export class GameNoteEditor {
 			await this.#noteRepository.putAsync({ note });
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
-				toast.error({ message: m.error_db_not_ready() });
+				toast.error({ message: m.error_db_not_ready(), category: 'local-database' });
 			} else if (err instanceof Error) {
-				toast.error({ title: m.error_save_game_note(), message: err.message });
+				toast.error({
+					title: m.error_save_game_note(),
+					message: err.message,
+					category: 'local-database',
+				});
 			}
 		}
 	};
@@ -60,9 +64,13 @@ export class GameNoteEditor {
 			this.close();
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
-				toast.error({ message: m.error_db_not_ready() });
+				toast.error({ message: m.error_db_not_ready(), category: 'local-database' });
 			} else if (err instanceof Error) {
-				toast.error({ title: m.error_save_game_note(), message: err.message });
+				toast.error({
+					title: m.error_save_game_note(),
+					message: err.message,
+					category: 'local-database',
+				});
 			}
 		}
 	};

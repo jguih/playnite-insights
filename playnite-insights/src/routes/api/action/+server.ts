@@ -15,6 +15,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: { message: 'Invalid command' } }, { status: 400 });
 		}
 		const command = result.data;
+		services.log.info(`Running remote action on Playnite host: ${JSON.stringify(command)}`);
 		await services.playniteHostHttpClient.httpPostAsync({
 			endpoint: '/',
 			strategy: new EmptyStrategy(),
