@@ -7,6 +7,7 @@ const baseQueueItem = {
   Type: z.enum(["create", "update", "delete"]),
   CreatedAt: ISODateSchema,
   Status: z.enum(["pending", "synced", "failed"]),
+  Retries: z.number().optional(),
 };
 
 export const syncQueueItemSchema = z.discriminatedUnion("Entity", [

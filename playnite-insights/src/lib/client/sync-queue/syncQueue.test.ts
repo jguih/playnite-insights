@@ -110,7 +110,7 @@ describe('SyncQueue', () => {
 		expect(newQueueItems[0].Status).toBe('pending');
 	});
 
-	it.each([{ statusCode: 500 }, { statusCode: 409 }, { statusCode: 501 }])(
+	it.each([{ statusCode: 500 }, { statusCode: 409 }, { statusCode: 501 }, { statusCode: 503 }])(
 		'does not change queue items when update request fails with $statusCode',
 		async ({ statusCode }) => {
 			// Arrange

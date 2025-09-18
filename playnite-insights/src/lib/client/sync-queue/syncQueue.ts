@@ -28,6 +28,7 @@ export class SyncQueue {
 	#syncQueueRepository: SyncQueueDeps['syncQueueRepository'];
 	#httpClientSignal: SyncQueueDeps['httpClientSignal'];
 	#indexedDbSignal: SyncQueueDeps['indexedDbSignal'];
+	#permanentFailureCodes = [400, 401, 403, 404, 409, 422, 501];
 
 	constructor(deps: SyncQueueDeps) {
 		this.#syncQueueRepository = deps.syncQueueRepository;
@@ -173,8 +174,14 @@ export class SyncQueue {
 			}
 		} catch (error) {
 			console.error(error);
+			if (
+				error instanceof FetchClientStrategyError &&
+				!this.#permanentFailureCodes.includes(error.statusCode)
+			)
+				return;
 			const item = { ...queueItem };
 			item.Status = 'failed';
+			item.Retries = (item.Retries ?? 0) + 1;
 			await this.withDb(async (db) => {
 				await runTransaction(db, 'syncQueue', 'readwrite', async ({ tx }) => {
 					await runRequest(tx.objectStore(SyncQueueRepository.STORE_NAME).put(item));
@@ -187,6 +194,7 @@ export class SyncQueue {
 		try {
 			const queueItems = await this.#syncQueueRepository.getAllAsync();
 			for (const queueItem of queueItems) {
+				if (queueItem.Retries && queueItem.Retries >= 100) continue;
 				switch (queueItem.Entity) {
 					case 'gameNote':
 						await this.processGameNoteAsync(queueItem);

@@ -11,6 +11,7 @@ export class SyncQueueFactory {
       CreatedAt: new Date().toISOString(),
       Status: "pending",
       Type: props.Type ?? "create",
+      Retries: 0,
       ...props,
     };
   };

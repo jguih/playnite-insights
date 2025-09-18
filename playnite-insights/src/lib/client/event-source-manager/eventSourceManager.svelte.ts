@@ -25,10 +25,6 @@ export class EventSourceManager {
 	constructor() {
 		this.#eventSource = new EventSource('/api/event');
 		this.#globalListenersUnsub = [];
-
-		this.#eventSource.onerror = (e) => {
-			console.error('SSE connection error:', e);
-		};
 	}
 
 	private parseEvent = <T extends APISSEventType>(
