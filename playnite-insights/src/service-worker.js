@@ -183,6 +183,7 @@ async function networkFirst(request, cacheName) {
 
 sw.addEventListener('fetch', async (event) => {
 	if (event.request.method !== 'GET') return;
+	if (event.request.destination === 'image') return;
 
 	const url = new URL(event.request.url);
 
