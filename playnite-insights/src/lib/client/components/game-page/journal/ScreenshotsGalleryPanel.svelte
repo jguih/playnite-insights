@@ -47,15 +47,9 @@
 	};
 
 	const handleSwMessage = async (event: MessageEvent) => {
-		if (!event.data || !Object.hasOwn(event.data, 'type') || !Object.hasOwn(event.data, 'pathname'))
-			return;
+		if (!event.data || !Object.hasOwn(event.data, 'type')) return;
 		const type = event.data.type;
-		const pathname = event.data.pathname;
-		if (
-			type === 'GAME_IMAGES_UPDATE' &&
-			typeof pathname === 'string' &&
-			pathname.startsWith('/api/assets/image/screenshot/all')
-		) {
+		if (type === 'ALL_SCREENSHOT_UPDATE') {
 			await loadScreenshots();
 		}
 	};

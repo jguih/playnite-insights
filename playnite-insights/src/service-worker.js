@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 /// <reference types="@sveltejs/kit" />
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext" />
@@ -22,28 +20,53 @@ const CacheKeys = {
 	PLATFORM: cacheKey('platform'),
 	RECENT_SESSION: cacheKey('recent-session'),
 	LIBRARY_METRICS: cacheKey('library-metrics'),
-	GAME_IMAGES: cacheKey('game-images'),
+	SCREENSHOT_METADATA: cacheKey('screenshot_metadata'),
 };
 
 const cacheKeysArr = Object.values(CacheKeys);
 
 /**
- * @var {[string, string, { type?: string }?]} apiRoutes
+ * @typedef {{
+ *  type: string
+ * }} UpdateMessage
  */
-const apiRoutes = [
-	['/api/game', CacheKeys.GAMES, { type: 'GAMES_UPDATE' }],
-	['/api/company', CacheKeys.COMPANY, { type: 'COMPANY_UPDATE' }],
-	['/api/genre', CacheKeys.GENRE, { type: 'GENRE_UPDATE' }],
-	['/api/platform', CacheKeys.PLATFORM, { type: 'PLATFORM_UPDATE' }],
-	['/api/session/recent', CacheKeys.RECENT_SESSION, { type: 'RECENT_SESSION_UPDATE' }],
-	['/api/library/metrics', CacheKeys.LIBRARY_METRICS, { type: 'LIBRARY_METRICS_UPDATE' }],
-	['/api/assets/image', CacheKeys.GAME_IMAGES, { type: 'GAME_IMAGES_UPDATE' }],
-];
 
 /**
- * @var {string[]} ignoredApiRoutes
+ * @typedef {[
+ *   string,                // prefix (e.g. "/api/game")
+ *   string,                // cache key
+ *   UpdateMessage,      // update message
+ *   (request: Request, cacheName: string, updateMessage?: UpdateMessage) => Promise<Response> // strategy fn
+ * ]} ApiRoute
  */
-const ignoredApiRoutes = ['/api/event', '/api/manifest', '/api/health', '/api/note'];
+
+/**
+ *  @type {ApiRoute[]}
+ */
+const apiRoutes = [
+	['/api/game', CacheKeys.GAMES, { type: 'GAMES_UPDATE' }, staleWhileRevalidate],
+	['/api/company', CacheKeys.COMPANY, { type: 'COMPANY_UPDATE' }, staleWhileRevalidate],
+	['/api/genre', CacheKeys.GENRE, { type: 'GENRE_UPDATE' }, staleWhileRevalidate],
+	['/api/platform', CacheKeys.PLATFORM, { type: 'PLATFORM_UPDATE' }, staleWhileRevalidate],
+	[
+		'/api/session/recent',
+		CacheKeys.RECENT_SESSION,
+		{ type: 'RECENT_SESSION_UPDATE' },
+		networkFirst,
+	],
+	[
+		'/api/library/metrics',
+		CacheKeys.LIBRARY_METRICS,
+		{ type: 'LIBRARY_METRICS_UPDATE' },
+		staleWhileRevalidate,
+	],
+	[
+		'/api/assets/image/screenshot/all',
+		CacheKeys.SCREENSHOT_METADATA,
+		{ type: 'ALL_SCREENSHOT_UPDATE' },
+		staleWhileRevalidate,
+	],
+];
 
 const ASSETS = [
 	...build, // the app itself
@@ -84,7 +107,7 @@ sw.addEventListener('message', (event) => {
 
 /**
  *
- * @param {object} message
+ * @param {UpdateMessage} message
  */
 function notifyClients(message) {
 	sw.clients.matchAll().then((clients) => {
@@ -96,9 +119,17 @@ function notifyClients(message) {
 
 /**
  *
+ * @param {Response} response
+ */
+function shouldCache(response) {
+	return response.type !== 'opaque' && response.ok;
+}
+
+/**
+ *
  * @param {Request} request
  * @param {string} cacheName
- * @param {object} updateMessage
+ * @param {UpdateMessage} updateMessage
  */
 async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 'UNKNOWN' }) {
 	const cache = await caches.open(cacheName);
@@ -107,7 +138,7 @@ async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 
 
 	const fetchAndUpdate = fetch(request)
 		.then((networkResponse) => {
-			if (networkResponse.ok) {
+			if (shouldCache(networkResponse)) {
 				cache.put(request, networkResponse.clone());
 			}
 			const networkETag = networkResponse.headers.get('ETag');
@@ -128,75 +159,65 @@ async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 
 /**
  * @param {Request} request
  * @param {string} cacheName
- * @returns
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function networkFirst(request, cacheName) {
 	const cache = await caches.open(cacheName);
 
 	try {
 		const networkResponse = await fetch(request);
-		if (networkResponse.ok) {
+		if (shouldCache(networkResponse)) {
 			cache.put(request, networkResponse.clone());
 		}
 		return networkResponse;
-	} catch (error) {
+	} catch {
 		// Network failed, try to return from cache
 		const cachedResponse = await cache.match(request);
 		if (cachedResponse) {
 			return cachedResponse;
 		}
 
-		console.warn(`SW failed to fetch and found no cache for ${request.url}`, error);
 		return new Response('Network error and no cache available', { status: 503 });
 	}
 }
 
-/**
- * @param {Request} request
- * @param {string} cacheName
- */
-async function defaultFetchHandler(request, cacheName) {
-	const url = new URL(request.url);
-	const cache = await caches.open(cacheName);
-
-	if (ASSETS.includes(url.pathname)) {
-		const response = await cache.match(url.pathname);
-		if (response) return response;
-	}
-
-	try {
-		const response = await fetch(request);
-		if (response.ok) {
-			cache.put(request, response.clone());
-		}
-		return response;
-	} catch (err) {
-		const fallback = await cache.match(request);
-		if (fallback) return fallback;
-
-		console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
-		return new Response('Network error and no cache available', { status: 503 });
-	}
-}
-
-sw.addEventListener('fetch', (event) => {
+sw.addEventListener('fetch', async (event) => {
 	if (event.request.method !== 'GET') return;
 
 	const url = new URL(event.request.url);
 
-	for (const prefix of ignoredApiRoutes) {
-		if (url.pathname.startsWith(prefix)) return;
+	if (ASSETS.includes(url.pathname) || !url.pathname.startsWith('/api')) {
+		const returnCachedAssets = async () => {
+			const cache = await caches.open(CacheKeys.APP);
+			const cachedResponse = await cache.match(url.pathname);
+			if (cachedResponse) return cachedResponse;
+			const response = await fetch(event.request);
+			if (shouldCache(response)) {
+				cache.put(url.pathname, response.clone());
+			}
+			return response;
+		};
+		event.respondWith(returnCachedAssets());
+		return;
 	}
 
-	for (const [prefix, cacheKey, options] of apiRoutes) {
+	for (const [prefix, cacheKey, updateMessage, strategy] of apiRoutes) {
 		if (url.pathname.startsWith(prefix)) {
-			event.respondWith(
-				staleWhileRevalidate(event.request, cacheKey, { pathname: url.pathname, ...options }),
-			);
+			event.respondWith(strategy(event.request, cacheKey, updateMessage));
 			return;
 		}
 	}
 
-	event.respondWith(defaultFetchHandler(event.request, CacheKeys.APP));
+	event.respondWith(
+		(async () => {
+			try {
+				return await fetch(event.request);
+			} catch {
+				const cache = await caches.open(CacheKeys.APP);
+				const cachedResponse = await cache.match(event.request);
+				if (cachedResponse) return cachedResponse;
+				return new Response('Offline and not cached', { status: 503 });
+			}
+		})(),
+	);
 });

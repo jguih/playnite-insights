@@ -16,17 +16,14 @@ export class ServiceWorkerUpdater {
 					if (!newWorker) return;
 
 					newWorker.addEventListener('statechange', () => {
-						if (
-							newWorker.state === 'installed' &&
-							navigator.serviceWorker.controller &&
-							registration.waiting
-						) {
+						if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+							const waitingWorker = registration.waiting || newWorker;
 							toast.success({
 								title: m.toast_new_update_available_title(),
 								message: m.toast_new_update_available_message(),
 								durationMs: 999_999,
 								action: () => {
-									registration.waiting?.postMessage({ action: 'skipWaiting' });
+									waitingWorker.postMessage({ action: 'skipWaiting' });
 									this.newVersionAvailable = false;
 								},
 								category: 'app',
