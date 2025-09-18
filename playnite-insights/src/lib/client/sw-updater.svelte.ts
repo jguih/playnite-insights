@@ -1,4 +1,12 @@
 import { m } from '$lib/paraglide/messages';
+import {
+	loadCompanies,
+	loadGames,
+	loadGenres,
+	loadLibraryMetrics,
+	loadPlatforms,
+	loadRecentGameSessions,
+} from './app-state/AppData.svelte';
 import { toast } from './app-state/toast.svelte';
 
 export class ServiceWorkerUpdater {
@@ -7,6 +15,37 @@ export class ServiceWorkerUpdater {
 	constructor() {
 		this.#newVersionAvailable = $state(false);
 	}
+
+	private handleMessage = (event: MessageEvent) => {
+		if (!event.data || !Object.hasOwn(event.data, 'type')) return;
+		const type = event.data.type;
+		switch (type) {
+			case 'GAMES_UPDATE': {
+				loadGames();
+				break;
+			}
+			case 'COMPANY_UPDATE': {
+				loadCompanies();
+				break;
+			}
+			case 'RECENT_SESSION_UPDATE': {
+				loadRecentGameSessions();
+				break;
+			}
+			case 'GENRE_UPDATE': {
+				loadGenres();
+				break;
+			}
+			case 'PLATFORM_UPDATE': {
+				loadPlatforms();
+				break;
+			}
+			case 'LIBRARY_METRICS_UPDATE': {
+				loadLibraryMetrics();
+				break;
+			}
+		}
+	};
 
 	watchServiceWorkerUpdates = () => {
 		if ('serviceWorker' in navigator) {
@@ -37,6 +76,15 @@ export class ServiceWorkerUpdater {
 				window.location.reload();
 			});
 		}
+	};
+
+	setupGlobalListeners = () => {
+		this.clearGlobalListeners();
+		navigator.serviceWorker?.addEventListener('message', this.handleMessage);
+	};
+
+	clearGlobalListeners = () => {
+		navigator.serviceWorker?.removeEventListener('message', this.handleMessage);
 	};
 
 	get newVersionAvailable() {

@@ -183,7 +183,7 @@ async function networkFirst(request, cacheName) {
 
 sw.addEventListener('fetch', async (event) => {
 	if (event.request.method !== 'GET') return;
-	if (event.request.destination === 'image') return;
+	if (event.request.headers.get('Accept')?.includes('text/event-stream')) return;
 
 	const url = new URL(event.request.url);
 
@@ -209,16 +209,5 @@ sw.addEventListener('fetch', async (event) => {
 		}
 	}
 
-	event.respondWith(
-		(async () => {
-			try {
-				return await fetch(event.request);
-			} catch {
-				const cache = await caches.open(CacheKeys.APP);
-				const cachedResponse = await cache.match(event.request);
-				if (cachedResponse) return cachedResponse;
-				return new Response('Offline and not cached', { status: 503 });
-			}
-		})(),
-	);
+	return;
 });

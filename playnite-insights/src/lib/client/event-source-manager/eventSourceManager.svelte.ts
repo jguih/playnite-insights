@@ -1,23 +1,37 @@
 import { apiSSEventDataSchema, type APISSEventType } from '@playnite-insights/lib/client';
 import z from 'zod';
+import {
+	loadCompanies,
+	loadGames,
+	loadGenres,
+	loadLibraryMetrics,
+	loadPlatforms,
+	loadRecentGameSessions,
+} from '../app-state/AppData.svelte';
+
+export type EventSourceManagerListenerCallback<T extends APISSEventType> = (args: {
+	data: z.infer<(typeof apiSSEventDataSchema)[T]>;
+}) => void;
 
 export type EventSourceManagerListener<T extends APISSEventType = APISSEventType> = {
 	type: T;
-	cb: (args: { data: z.infer<(typeof apiSSEventDataSchema)[T]> }) => void;
+	cb: EventSourceManagerListenerCallback<T>;
 };
 
 export class EventSourceManager {
 	#eventSource: EventSource;
+	#globalListenersUnsub: Array<() => void>;
 
 	constructor() {
 		this.#eventSource = new EventSource('/api/event');
+		this.#globalListenersUnsub = [];
 
 		this.#eventSource.onerror = (e) => {
 			console.error('SSE connection error:', e);
 		};
 	}
 
-	parseEvent = <T extends APISSEventType>(
+	private parseEvent = <T extends APISSEventType>(
 		type: T,
 		raw: string,
 	): z.infer<(typeof apiSSEventDataSchema)[T]> => {
@@ -48,6 +62,38 @@ export class EventSourceManager {
 		return () => {
 			this.#eventSource.removeEventListener(listener.type, handler);
 		};
+	};
+
+	setupGlobalListeners = () => {
+		this.clearGlobalListeners();
+		this.#globalListenersUnsub.push(
+			this.addListener({
+				type: 'gameLibraryUpdated',
+				cb: async () =>
+					await Promise.all([
+						loadGames(),
+						loadCompanies(),
+						loadGenres(),
+						loadPlatforms(),
+						loadLibraryMetrics(),
+					]),
+			}),
+			this.addListener({
+				type: 'sessionOpened',
+				cb: async () => await loadRecentGameSessions(),
+			}),
+			this.addListener({
+				type: 'sessionClosed',
+				cb: async () => await loadRecentGameSessions(),
+			}),
+		);
+	};
+
+	clearGlobalListeners = () => {
+		for (const unsub of this.#globalListenersUnsub) {
+			unsub();
+		}
+		this.#globalListenersUnsub = [];
 	};
 
 	close = () => {
