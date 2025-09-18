@@ -26,18 +26,11 @@
 		isImageLoading?: boolean;
 		onDestroy?: () => void | Promise<void>;
 	} = $props();
-	let timeout: ReturnType<typeof setTimeout> | null = $state(null);
 	let contentTextArea = $state<HTMLTextAreaElement | null>(null);
-	const delay = 1_000;
 
 	const handleOnChange = () => {
 		resizeContentTextArea();
-		if (timeout) {
-			clearTimeout(timeout);
-		}
-		timeout = setTimeout(() => {
-			props.onChange();
-		}, delay);
+		props.onChange();
 	};
 
 	const handleTitleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {

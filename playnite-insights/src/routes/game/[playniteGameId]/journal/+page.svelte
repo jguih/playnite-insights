@@ -77,6 +77,7 @@
 		notes: [],
 		isLoading: false,
 	});
+	let noteChangeTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
 
 	const loadNotes = async () => {
 		const gameId = data.gameId;
@@ -101,7 +102,16 @@
 	};
 
 	const handleOnNoteChange = async () => {
+		if (noteChangeTimeout) clearTimeout(noteChangeTimeout);
+		noteChangeTimeout = setTimeout(async () => {
+			await noteEditor.saveAsync();
+		}, 1_000);
+	};
+
+	const handleOnDetroyNoteEditor = async () => {
+		if (noteChangeTimeout) clearTimeout(noteChangeTimeout);
 		await noteEditor.saveAsync();
+		loadNotes();
 	};
 
 	const handleOnClickNote = async (note: GameNote) => {
@@ -225,7 +235,7 @@
 	currentNote={noteEditor.currentNote}
 	onDelete={handleOnDeleteNote}
 	onChange={handleOnNoteChange}
-	onDestroy={loadNotes}
+	onDestroy={handleOnDetroyNoteEditor}
 	onOpenExtrasPanel={noteExtras.open}
 	onClickImage={imageOptions.open}
 	isOpenExtrasDisabled={playniteRemoteAction.actionLoadingState.takeScreenShot}
