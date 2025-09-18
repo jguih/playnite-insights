@@ -116,8 +116,8 @@
 			Title: null,
 			Content: null,
 			GameId: gameId,
-			ImagePath: sessionId,
-			SessionId: null,
+			SessionId: sessionId,
+			ImagePath: null,
 		});
 		noteEditor.currentNote = newNote;
 		noteEditor.open();
