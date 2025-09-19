@@ -22,4 +22,8 @@ export type GameActivity = {
 
 export type GameSessionFilters = {
   startTime?: DateFilter[];
+  status?: {
+    op: "in" | "not in";
+    types: GameSession["Status"][];
+  };
 };

@@ -13,8 +13,6 @@ import {
 	JsonStrategy,
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import { EventSourceManager } from '../event-source-manager/eventSourceManager.svelte';
-import type { ServiceWorkerUpdater } from '../sw-updater.svelte';
 import { handleClientErrors } from '../utils/handleClientErrors.svelte';
 import type {
 	CompanySignal,
@@ -49,12 +47,6 @@ export const clientServiceLocator = new ClientServiceLocator({
 	httpClientSignal,
 	indexedDbSignal,
 	serverTimeSignal,
-});
-export const eventSourceManagerSignal = $state<{ manager: EventSourceManager | null }>({
-	manager: null,
-});
-export const serviceWorkerUpdaterSignal = $state<{ updater: ServiceWorkerUpdater | null }>({
-	updater: null,
 });
 
 export async function withHttpClient<T>(
@@ -144,7 +136,13 @@ export const loadRecentGameSessions = async () => {
 	}
 };
 
+/**
+ * Loads server time
+ * Cached by SW: No
+ * Offline-safe: No
+ */
 export const loadServerTime = async () => {
+	if (!clientServiceLocator.serverHeartbeat.isAlive) return null;
 	try {
 		return await withHttpClient(async ({ client }) => {
 			serverTimeSignal.isLoading = true;
@@ -214,7 +212,13 @@ const setLastServerSync = () => {
 	localStorage.setItem('lastServerSync', new Date(serverNow).toISOString());
 };
 
+/**
+ * Loads game notes from the server
+ * Cached by SW: No
+ * Offline-safe: No
+ */
 export const loadGameNotesFromServer = async () => {
+	if (!clientServiceLocator.serverHeartbeat.isAlive) return null;
 	try {
 		return await withHttpClient(async ({ client }) => {
 			const lastSync = getLastServerSync();

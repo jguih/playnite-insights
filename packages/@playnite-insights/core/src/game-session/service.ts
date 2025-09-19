@@ -193,6 +193,10 @@ export const makeGameSessionService = ({
           end: end.toISOString(),
         },
       ],
+      status: {
+        op: "not in",
+        types: ["stale"],
+      },
     };
     sessions = gameSessionRepository.findAllBy({ filters });
 

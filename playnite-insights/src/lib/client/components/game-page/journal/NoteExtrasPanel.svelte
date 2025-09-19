@@ -12,6 +12,11 @@
 		onSelectImage: (file: File) => void | Promise<void>;
 		onTakeScreenshotFromPlaynite: () => void | Promise<void>;
 		onAddAvailableScreenshot: () => void | Promise<void>;
+		isOptionDisabled?: {
+			uploadImage?: boolean;
+			takeScreenshotFromPlayniteHost?: boolean;
+			addAvailableScreenshot?: boolean;
+		};
 	} = $props();
 	let imageInput = $state<HTMLInputElement | null>(null);
 
@@ -34,6 +39,7 @@
 			<input
 				type="file"
 				name="file"
+				accept="image/*"
 				id="image-file"
 				bind:this={imageInput}
 				onchange={handleOnImageChange}
@@ -46,6 +52,7 @@
 						size="md"
 						class={['gap-3! w-full']}
 						onclick={(e) => imageInput?.click()}
+						disabled={props.isOptionDisabled?.uploadImage ?? false}
 					>
 						<ImagePlus class={['size-md']} />
 						{m.label_note_editor_extras_add_image()}
@@ -57,6 +64,7 @@
 						size="md"
 						class={['gap-3! w-full']}
 						onclick={props.onTakeScreenshotFromPlaynite}
+						disabled={props.isOptionDisabled?.takeScreenshotFromPlayniteHost ?? false}
 					>
 						<ScreenShare class={['size-md']} />
 						{m.label_note_editor_extras_take_screenshot_from_playnite_host()}
@@ -68,6 +76,7 @@
 						size="md"
 						class={['gap-3! w-full']}
 						onclick={props.onAddAvailableScreenshot}
+						disabled={props.isOptionDisabled?.addAvailableScreenshot ?? false}
 					>
 						<Image class={['size-md']} />
 						{m.label_note_editor_extras_add_available_screenshot()}

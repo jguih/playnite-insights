@@ -38,5 +38,22 @@ export const getWhereClauseAndParamsFromFilters = (
     }
   }
 
-  return { where: `WHERE ${where.join(" AND ")}`, params };
+  if (filters?.status) {
+    const values = filters.status.types;
+    const placeholders = values.map(() => "?").join(", ");
+    switch (filters.status.op) {
+      case "in": {
+        where.push(`Status IN (${placeholders})`);
+      }
+      case "not in": {
+        where.push(`Status NOT IN (${placeholders})`);
+      }
+    }
+    params.push(...filters.status.types);
+  }
+
+  return {
+    where: where.length > 0 ? `WHERE ${where.join(" AND ")}` : "",
+    params,
+  };
 };

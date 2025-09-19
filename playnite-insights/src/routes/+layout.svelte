@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		clientServiceLocator,
-		eventSourceManagerSignal,
 		httpClientSignal,
 		indexedDbSignal,
 		loadCompanies,
@@ -12,7 +11,6 @@
 		loadPlatforms,
 		loadRecentGameSessions,
 		loadServerTime,
-		serviceWorkerUpdaterSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
@@ -21,8 +19,6 @@
 		INDEXEDDB_NAME,
 		openIndexedDbAsync,
 	} from '$lib/client/db/indexeddb';
-	import { EventSourceManager } from '$lib/client/event-source-manager/eventSourceManager.svelte';
-	import { ServiceWorkerUpdater } from '$lib/client/sw-updater.svelte';
 	import { FetchClient } from '@playnite-insights/lib/client';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
@@ -51,34 +47,33 @@
 		}).then((db) => {
 			indexedDbSignal.db = db;
 		});
-		// Load app data
+		// Load core app data (cached by sw)
 		isLoading = true;
-		Promise.all([
+		const core = Promise.all([
 			loadGames(),
 			loadCompanies(),
 			loadRecentGameSessions(),
 			loadGenres(),
 			loadPlatforms(),
-			loadServerTime(),
 			loadLibraryMetrics(),
-			loadGameNotesFromServer(),
-		]).then(() => (isLoading = false));
+		]);
+		// Network only requests
+		const extras = Promise.all([loadServerTime(), loadGameNotesFromServer()]);
+		core.then(() => (isLoading = false));
+		extras.catch(() => {});
 		// Periodic data processing
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
-		// Create event source manager
-		eventSourceManagerSignal.manager = new EventSourceManager();
-		eventSourceManagerSignal.manager.setupGlobalListeners();
-		serviceWorkerUpdaterSignal.updater = new ServiceWorkerUpdater();
-		serviceWorkerUpdaterSignal.updater.setupGlobalListeners();
-		serviceWorkerUpdaterSignal.updater.watchServiceWorkerUpdates();
-
+		clientServiceLocator.eventSourceManager.connect();
+		clientServiceLocator.eventSourceManager.setupGlobalListeners();
+		clientServiceLocator.serviceWorkerUpdater.setupGlobalListeners();
+		clientServiceLocator.serviceWorkerUpdater.watchServiceWorkerUpdates();
 		window.addEventListener('focus', handleFocus);
 		return () => {
 			window.removeEventListener('focus', handleFocus);
 			if (appProcessingInterval) clearInterval(appProcessingInterval);
-			serviceWorkerUpdaterSignal.updater?.clearGlobalListeners();
-			eventSourceManagerSignal.manager?.clearGlobalListeners();
-			eventSourceManagerSignal.manager?.close();
+			clientServiceLocator.serviceWorkerUpdater.clearGlobalListeners();
+			clientServiceLocator.eventSourceManager.clearGlobalListeners();
+			clientServiceLocator.eventSourceManager.close();
 		};
 	});
 </script>

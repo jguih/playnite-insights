@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { eventSourceManagerSignal } from '$lib/client/app-state/AppData.svelte';
+	import { clientServiceLocator } from '$lib/client/app-state/AppData.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -14,10 +14,10 @@
 
 	let currentLocale = $derived(getLocale());
 	let serverConnectionStatusText = $derived(
-		eventSourceManagerSignal.manager?.serverConnectionStatusText ?? '',
+		clientServiceLocator.eventSourceManager.serverConnectionStatusText,
 	);
 	let serverConnectionStatus = $derived(
-		eventSourceManagerSignal.manager?.serverConnectionStatus ?? false,
+		clientServiceLocator.eventSourceManager.serverConnectionStatus,
 	);
 </script>
 

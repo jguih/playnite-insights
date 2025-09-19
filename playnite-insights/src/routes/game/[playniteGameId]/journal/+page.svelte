@@ -2,7 +2,6 @@
 	import {
 		clientServiceLocator,
 		companySignal,
-		eventSourceManagerSignal,
 		gameSignal,
 		httpClientSignal,
 		loadGameNotesFromServer,
@@ -192,7 +191,7 @@
 			// If notes = `null` nothing was changed since last sync
 		});
 
-		const unsub = eventSourceManagerSignal.manager?.addListener({
+		const unsub = clientServiceLocator.eventSourceManager.addListener({
 			type: 'screenshotTaken',
 			cb: handleOnScreenshotTakenSSE,
 		});
@@ -223,6 +222,11 @@
 	onSelectImage={handleOnNoteImageChange}
 	onTakeScreenshotFromPlaynite={handleOnTakeSreenshotFromPlaynite}
 	onAddAvailableScreenshot={screenshotGallery.open}
+	isOptionDisabled={{
+		addAvailableScreenshot: false,
+		takeScreenshotFromPlayniteHost: !clientServiceLocator.serverHeartbeat.isAlive,
+		uploadImage: !clientServiceLocator.serverHeartbeat.isAlive,
+	}}
 />
 <NoteEditor
 	isOpen={noteEditor.isOpen}

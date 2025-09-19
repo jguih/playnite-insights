@@ -35,34 +35,6 @@ export class EventSourceManager {
 		this.#listeners = new Map();
 		this.#serverConnectionStatus = $state(false);
 		this.#serverConnectionStatusText = $state(m.server_offline_message());
-		this.#connect();
-	}
-
-	#connect() {
-		if (this.#eventSource) {
-			this.#detachAllListeners();
-			this.#eventSource.close();
-		}
-
-		this.#eventSource = new EventSource(EventSourceManager.EVENT_ENDPOINT);
-
-		for (const [type, set] of this.#listeners) {
-			for (const cb of set) this.#eventSource.addEventListener(type, cb);
-		}
-
-		this.#resetHeartbeat();
-
-		this.#clearHeartbeatListener?.();
-		this.#clearHeartbeatListener = this.addListener({
-			type: 'heartbeat',
-			cb: () => {
-				if (this.serverConnectionStatus === false) {
-					this.#serverConnectionStatus = true;
-					this.#serverConnectionStatusText = m.server_online_message();
-				}
-				this.#resetHeartbeat();
-			},
-		});
 	}
 
 	#resetHeartbeat() {
@@ -72,7 +44,7 @@ export class EventSourceManager {
 				this.#serverConnectionStatus = false;
 				this.#serverConnectionStatusText = m.server_offline_message();
 			}
-			this.#connect();
+			this.connect();
 		}, 20_000);
 	}
 
@@ -112,6 +84,33 @@ export class EventSourceManager {
 			this.#listeners.delete(type);
 		}
 	};
+
+	connect() {
+		if (this.#eventSource) {
+			this.#detachAllListeners();
+			this.#eventSource.close();
+		}
+
+		this.#eventSource = new EventSource(EventSourceManager.EVENT_ENDPOINT);
+
+		for (const [type, set] of this.#listeners) {
+			for (const cb of set) this.#eventSource.addEventListener(type, cb);
+		}
+
+		this.#resetHeartbeat();
+
+		this.#clearHeartbeatListener?.();
+		this.#clearHeartbeatListener = this.addListener({
+			type: 'heartbeat',
+			cb: () => {
+				if (this.serverConnectionStatus === false) {
+					this.#serverConnectionStatus = true;
+					this.#serverConnectionStatusText = m.server_online_message();
+				}
+				this.#resetHeartbeat();
+			},
+		});
+	}
 
 	addListener = <T extends APISSEventType>(listener: EventSourceManagerListener<T>) => {
 		const handler = (e: MessageEvent<string>) => {
