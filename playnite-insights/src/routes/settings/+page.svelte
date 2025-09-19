@@ -5,20 +5,32 @@
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import Select from '$lib/client/components/forms/Select.svelte';
 	import Header from '$lib/client/components/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
+	import ConfigSection from '$lib/client/components/settings-page/ConfigSection.svelte';
 	import { m } from '$lib/paraglide/messages';
-	import { getLocale, locales, setLocale } from '$lib/paraglide/runtime';
+	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
 	import { AlertCircle, ArrowLeft, CheckCircle } from '@lucide/svelte';
+	import type { ChangeEventHandler } from 'svelte/elements';
 
-	let currentLocale = $derived(getLocale());
+	let currentLocale = $state(getLocale());
 	let serverConnectionStatusText = $derived(
 		clientServiceLocator.eventSourceManager.serverConnectionStatusText,
 	);
 	let serverConnectionStatus = $derived(
 		clientServiceLocator.eventSourceManager.serverConnectionStatus,
 	);
+
+	const isValidLocale = (value: string): value is Locale => {
+		return locales.includes(value as Locale);
+	};
+
+	const handleOnChangeLocale: ChangeEventHandler<HTMLSelectElement> = (e) => {
+		const value = e.currentTarget.value;
+		if (isValidLocale(value)) setLocale(value);
+	};
 </script>
 
 <BaseAppLayout>
@@ -43,24 +55,26 @@
 		</div>
 	</Header>
 	<Main>
-		<ul>
-			{#each locales as locale (locale)}
-				<li>
-					{#if currentLocale === locale}
-						<LightButton
-							onclick={() => setLocale(locale)}
-							selected
-						>
+		<ConfigSection title="Idioma">
+			<label
+				for="settings-language"
+				class="flex flex-col items-start gap-2"
+			>
+				Selecionar idioma
+				<Select
+					onchange={handleOnChangeLocale}
+					id="settings-language"
+					class={['bg-background-2! w-full']}
+					value={currentLocale}
+				>
+					{#each locales as locale (locale)}
+						<option value={locale}>
 							{m.language_name({}, { locale: locale })}
-						</LightButton>
-					{:else}
-						<LightButton onclick={() => setLocale(locale)}>
-							{m.language_name({}, { locale: locale })}
-						</LightButton>
-					{/if}
-				</li>
-			{/each}
-		</ul>
+						</option>
+					{/each}
+				</Select>
+			</label>
+		</ConfigSection>
 	</Main>
 	<BottomNav>
 		<Home />
