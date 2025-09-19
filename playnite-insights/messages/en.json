@@ -100,7 +100,6 @@
   "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "No screenshots were returned from the server",
   "toast_new_update_available_title": "New update available",
   "toast_new_update_available_message": "Click here to update",
-  "toast_server_online_message": "Server online",
-  "toast_server_offline_title": "Server offline",
-  "toast_server_offline_message": "trying to reconnect..."
+  "server_online_message": "Server online",
+  "server_offline_message": "Server offline"
 }

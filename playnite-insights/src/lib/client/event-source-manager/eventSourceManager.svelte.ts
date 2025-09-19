@@ -9,7 +9,6 @@ import {
 	loadPlatforms,
 	loadRecentGameSessions,
 } from '../app-state/AppData.svelte';
-import { toast } from '../app-state/toast.svelte';
 
 export type EventSourceManagerListenerCallback<T extends APISSEventType> = (args: {
 	data: z.infer<(typeof apiSSEventDataSchema)[T]>;
@@ -26,27 +25,40 @@ export class EventSourceManager {
 	#heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
 	#serverConnectionStatus: boolean;
 	#serverConnectionStatusText: string;
+	#listeners: Map<APISSEventType, Set<(e: MessageEvent<string>) => void>>;
+	#clearHeartbeatListener: ReturnType<typeof this.addListener> | null = null;
 
 	static EVENT_ENDPOINT = '/api/event';
 
 	constructor() {
 		this.#globalListenersUnsub = [];
-		this.#serverConnectionStatus = $state(true);
-		this.#serverConnectionStatusText = $state(m.toast_server_online_message());
+		this.#listeners = new Map();
+		this.#serverConnectionStatus = $state(false);
+		this.#serverConnectionStatusText = $state(m.server_offline_message());
 		this.#connect();
 	}
 
 	#connect() {
-		if (this.#eventSource) this.#eventSource.close();
+		if (this.#eventSource) {
+			this.#detachAllListeners();
+			this.#eventSource.close();
+		}
+
 		this.#eventSource = new EventSource(EventSourceManager.EVENT_ENDPOINT);
+
+		for (const [type, set] of this.#listeners) {
+			for (const cb of set) this.#eventSource.addEventListener(type, cb);
+		}
+
 		this.#resetHeartbeat();
-		this.addListener({
+
+		this.#clearHeartbeatListener?.();
+		this.#clearHeartbeatListener = this.addListener({
 			type: 'heartbeat',
 			cb: () => {
 				if (this.serverConnectionStatus === false) {
 					this.#serverConnectionStatus = true;
-					this.#serverConnectionStatusText = m.toast_server_online_message();
-					toast.success({ category: 'network', message: m.toast_server_online_message() });
+					this.#serverConnectionStatusText = m.server_online_message();
 				}
 				this.#resetHeartbeat();
 			},
@@ -58,12 +70,7 @@ export class EventSourceManager {
 		this.#heartbeatTimeout = setTimeout(() => {
 			if (this.serverConnectionStatus === true) {
 				this.#serverConnectionStatus = false;
-				this.#serverConnectionStatusText = m.toast_server_offline_title();
-				toast.warning({
-					category: 'network',
-					message: m.toast_server_offline_message(),
-					title: m.toast_server_offline_title(),
-				});
+				this.#serverConnectionStatusText = m.server_offline_message();
 			}
 			this.#connect();
 		}, 20_000);
@@ -84,21 +91,49 @@ export class EventSourceManager {
 		return apiSSEventDataSchema[type].parse(data);
 	};
 
+	#detachAllListeners() {
+		if (!this.#eventSource) return;
+		for (const [type, set] of this.#listeners) {
+			for (const cb of set) {
+				this.#eventSource.removeEventListener(type, cb);
+			}
+		}
+	}
+
+	#removeListener = (type: APISSEventType, cb: (e: MessageEvent<string>) => void) => {
+		const set = this.#listeners.get(type);
+		if (!set) return;
+
+		set.delete(cb);
+		if (this.#eventSource) {
+			this.#eventSource.removeEventListener(type, cb);
+		}
+		if (set.size === 0) {
+			this.#listeners.delete(type);
+		}
+	};
+
 	addListener = <T extends APISSEventType>(listener: EventSourceManagerListener<T>) => {
-		const handler = (e: MessageEvent) => {
+		const handler = (e: MessageEvent<string>) => {
 			try {
-				const parsed = this.#parseEvent(listener.type, e.data as string);
+				const parsed = this.#parseEvent(listener.type, e.data);
 				listener.cb({ data: parsed });
 			} catch (error) {
 				console.error(error);
 			}
 		};
 
-		this.#eventSource?.addEventListener(listener.type, handler);
+		if (!this.#listeners.has(listener.type)) {
+			this.#listeners.set(listener.type, new Set());
+		}
+		this.#listeners.get(listener.type)!.add(handler);
 
-		// return unsubscribe
+		if (this.#eventSource) {
+			this.#eventSource.addEventListener(listener.type, handler);
+		}
+
 		return () => {
-			this.#eventSource?.removeEventListener(listener.type, handler);
+			this.#removeListener(listener.type, handler);
 		};
 	};
 
@@ -135,7 +170,10 @@ export class EventSourceManager {
 	};
 
 	close = () => {
+		if (this.#heartbeatTimeout) clearTimeout(this.#heartbeatTimeout);
+		this.#detachAllListeners();
 		this.#eventSource?.close();
+		this.#eventSource = null;
 	};
 
 	get serverConnectionStatusText() {
