@@ -1,4 +1,3 @@
-import { m } from '$lib/paraglide/messages';
 import {
 	AppError,
 	FetchClientStrategyError,
@@ -78,7 +77,7 @@ export const loadLibraryMetrics = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_library_metrics());
+		handleClientErrors(err, `[loadLibraryMetrics] failed to fetch /api/library/metrics`);
 		return null;
 	} finally {
 		libraryMetricsSignal.isLoading = false;
@@ -97,7 +96,7 @@ export const loadCompanies = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_companies());
+		handleClientErrors(err, `[loadCompanies] failed to fetch /api/company`);
 		return null;
 	} finally {
 		companySignal.isLoading = false;
@@ -116,7 +115,7 @@ export const loadGames = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_games());
+		handleClientErrors(err, `[loadGames] failed to fetch /api/game`);
 		return null;
 	} finally {
 		gameSignal.isLoading = false;
@@ -138,7 +137,7 @@ export const loadRecentGameSessions = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_recent_game_sessions());
+		handleClientErrors(err, `[loadRecentGameSessions] failed to fetch /api/session/recent`);
 		return null;
 	} finally {
 		recentGameSessionSignal.isLoading = false;
@@ -158,7 +157,7 @@ export const loadServerTime = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_server_time());
+		handleClientErrors(err, `[loadServerTime] failed to fetch /api/time/now`);
 		return null;
 	} finally {
 		serverTimeSignal.isLoading = false;
@@ -177,7 +176,7 @@ export const loadGenres = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_genres());
+		handleClientErrors(err, `[loadGenres] failed to fetch /api/genre`);
 		return null;
 	} finally {
 		genreSignal.isLoading = false;
@@ -196,7 +195,7 @@ export const loadPlatforms = async () => {
 			return result;
 		});
 	} catch (err) {
-		handleClientErrors(err, m.error_load_platforms());
+		handleClientErrors(err, `[loadPlatforms] failed to fetch /api/platform`);
 		return null;
 	} finally {
 		platformSignal.isLoading = false;
@@ -235,7 +234,7 @@ export const loadGameNotesFromServer = async () => {
 			setLastServerSync();
 			return null;
 		}
-		handleClientErrors(err, m.error_something_went_wrong());
+		handleClientErrors(err, `[loadGameNotesFromServer] failed to fetch /api/note`);
 		return null;
 	}
 };

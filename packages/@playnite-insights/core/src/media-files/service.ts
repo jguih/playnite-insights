@@ -1,4 +1,4 @@
-import { Image, validImageSources } from "@playnite-insights/lib/client";
+import { type Image, validImageSources } from "@playnite-insights/lib/client";
 import { extname, join } from "path";
 import type { MediaFilesService, MediaFilesServiceDeps } from "./service.types";
 

@@ -40,7 +40,10 @@
 				screenshots.data = response.screenshots;
 			});
 		} catch (error) {
-			handleClientErrors(error, m.error_load_screenshots());
+			handleClientErrors(
+				error,
+				`[loadScreenshots] failed to fetch /api/assets/image/screenshot/all`,
+			);
 		} finally {
 			screenshots.isLoading = false;
 		}

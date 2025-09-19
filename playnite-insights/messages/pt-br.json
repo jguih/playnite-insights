@@ -54,16 +54,8 @@
   "error_something_went_wrong": "Algo deu errado.",
   "error_http_client_not_set": "O cliente HTTP não está configurado, por favor recarregue o app",
   "error_load_library_metrics": "Falha ao carregar métricas da biblioteca",
-  "error_load_companies": "Falha ao carregar empresas",
-  "error_load_games": "Falha ao carregar jogos",
-  "error_load_recent_game_sessions": "Falha ao carregar sessões recentes de jogos",
-  "error_load_server_time": "Falha ao carregar o horário do servidor",
-  "error_load_genres": "Falha ao carregar gêneros",
-  "error_load_platforms": "Falha ao carregar plataformas",
-  "error_load_local_game_notes": "Falha ao carregar notas de jogo da base de dados local",
   "error_db_not_ready": "Base de dados não disponível, por favor recarregue o app",
   "error_save_game_note": "Falha ao salvar nota de jogo",
-  "error_load_screenshots": "Falhar ao carregar capturas de tela",
   "yes": "Sim",
   "no": "Não",
   "option_sort_ascending": "Crescente",
@@ -108,5 +100,8 @@
   "toast_remote_action_take_screenshot_error_message": "Algo deu errado. Por favor, tente novamente.",
   "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "O servidor não retornou nenhuma screenshot",
   "toast_new_update_available_title": "Nova atualização disponível",
-  "toast_new_update_available_message": "Clique aqui para atualizar"
+  "toast_new_update_available_message": "Clique aqui para atualizar",
+  "toast_server_online_message": "Servidor online",
+  "toast_server_offline_title": "Servidor indisponível",
+  "toast_server_offline_message": "tentando reconectar..."
 }

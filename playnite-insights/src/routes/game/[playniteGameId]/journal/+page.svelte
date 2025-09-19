@@ -89,13 +89,8 @@
 			});
 			notesSignal.notes = notes;
 		} catch (err) {
-			if (err instanceof IndexedDBNotInitializedError) {
+			if (err instanceof IndexedDBNotInitializedError)
 				toast.error({ message: m.error_db_not_ready(), category: 'local-database' });
-			} else if (err instanceof Error) {
-				toast.error({ message: m.error_load_local_game_notes(), category: 'local-database' });
-			} else {
-				toast.error({ message: m.error_load_local_game_notes(), category: 'local-database' });
-			}
 		} finally {
 			notesSignal.isLoading = false;
 		}

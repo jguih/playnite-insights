@@ -1,16 +1,21 @@
-import { APISSEvent } from "@playnite-insights/lib/client";
+import { type APISSEvent } from "@playnite-insights/lib/client";
 
 export class EventStream {
   private controller: ReadableStreamDefaultController | null = null;
   private stream: ReadableStream;
+  private heartBeatInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor({ onClose }: { onClose?: () => void } = {}) {
     this.stream = new ReadableStream({
       start: (controller) => {
         this.controller = controller;
-        this.send({ data: "connected", type: "message" });
+        this.send({ data: true, type: "heartbeat" });
+        this.heartBeatInterval = setInterval(() => {
+          this.send({ data: true, type: "heartbeat" });
+        }, 15_000);
       },
       cancel: () => {
+        if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
         this.controller = null;
         onClose?.();
       },

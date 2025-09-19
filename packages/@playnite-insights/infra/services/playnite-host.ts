@@ -1,5 +1,5 @@
-import { SignatureService } from "@playnite-insights/core";
-import { FetchClient, IFetchClient } from "@playnite-insights/lib/client";
+import { type SignatureService } from "@playnite-insights/core";
+import { FetchClient, type IFetchClient } from "@playnite-insights/lib/client";
 import * as config from "../config/config";
 import { defaultSignatureService } from "./signature";
 

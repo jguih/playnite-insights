@@ -1,4 +1,4 @@
-import { Image } from "@playnite-insights/lib/client";
+import { type Image } from "@playnite-insights/lib/client";
 
 export type ImageRepository = {
   add: (image: Omit<Image, "Id">) => void;

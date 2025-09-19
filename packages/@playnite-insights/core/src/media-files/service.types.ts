@@ -1,4 +1,4 @@
-import { Image } from "@playnite-insights/lib/client";
+import { type Image } from "@playnite-insights/lib/client";
 import type { ImageRepository, UploadService } from "../types";
 import type { FileSystemService } from "../types/file-system.types";
 import type { LogService } from "../types/log.types";

@@ -1,4 +1,4 @@
-import { ImageRepository } from "@playnite-insights/core";
+import { type ImageRepository } from "@playnite-insights/core";
 import { imageSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import {

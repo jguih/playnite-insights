@@ -7,6 +7,7 @@ export const apiSSEventDataSchema = {
   recentGameSessionsUpdated: z.boolean(),
   sessionOpened: z.boolean(),
   sessionClosed: z.boolean(),
+  heartbeat: z.boolean(),
 } as const;
 
 export const apiSSEventType = Object.fromEntries(
@@ -39,4 +40,8 @@ export type APISSEvent =
   | {
       type: typeof apiSSEventType.sessionClosed;
       data: z.infer<typeof apiSSEventDataSchema.sessionClosed>;
+    }
+  | {
+      type: typeof apiSSEventType.heartbeat;
+      data: z.infer<typeof apiSSEventDataSchema.heartbeat>;
     };
