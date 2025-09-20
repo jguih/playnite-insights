@@ -310,7 +310,7 @@
 					<Divider class="border-1" />
 				{/snippet}
 				{#snippet body()}
-					<DropdownBody>
+					<DropdownBody class={['px-0!']}>
 						<ul class="flex flex-col gap-4">
 							{#each notesSignal.notes as note (note.Id)}
 								<li class="bg-background-1">

@@ -42,7 +42,7 @@
 
 	const resizeContentTextArea = () => {
 		if (!contentTextArea) return;
-		contentTextArea.style.height = 'auto';
+		contentTextArea.style.height = '40dvh';
 		contentTextArea.style.height = contentTextArea?.scrollHeight + 'px';
 	};
 </script>

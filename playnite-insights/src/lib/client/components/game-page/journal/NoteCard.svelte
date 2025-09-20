@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
-	import LightButton from '../../buttons/LightButton.svelte';
+	import BaseButton from '../../buttons/BaseButton.svelte';
 
 	type NoteCardProps = {
 		note: GameNote;
@@ -19,28 +19,34 @@
 	});
 </script>
 
-<LightButton
-	class={['flex-col! items-start! w-full gap-4 p-4 text-start']}
+<BaseButton
+	class={[
+		'flex-col! items-start! p-0! w-full',
+		'hover:outline-primary-hover-bg hover:outline-2',
+		'active:bg-primary-light-active-bg',
+	]}
 	onclick={() => onClick(note)}
 	type="button"
 >
 	{#if note.ImagePath}
-		<img
-			src={note.ImagePath}
-			alt={`note image`}
-			loading="lazy"
-			class="h-64 w-full object-cover"
-		/>
+		<div class="bg-background-2 w-full">
+			<img
+				src={note.ImagePath}
+				alt={`note image`}
+				loading="lazy"
+				class="mx-auto max-h-[35dvh] w-auto object-contain"
+			/>
+		</div>
 	{/if}
 	<div
-		class="relative max-h-[30dvh] overflow-y-hidden"
+		class="relative mb-2 max-h-[20dvh] w-full overflow-y-hidden px-4 pt-3 text-start"
 		bind:this={noteContentEl}
 	>
 		{#if note.Title}
-			<p class="mb-4 block w-full text-lg font-semibold">{note.Title}</p>
+			<p class="block w-full truncate text-lg font-semibold">{note.Title}</p>
 		{/if}
 		{#if note.Content}
-			<p class="text-md block w-full opacity-80">{note.Content}</p>
+			<p class="text-md my-2 block w-full opacity-80">{note.Content}</p>
 		{/if}
 		{#if isOverflowing}
 			<div
@@ -48,7 +54,7 @@
 			></div>
 		{/if}
 	</div>
-	<p class="w-full text-right text-sm opacity-60">
+	<p class="w-full p-2 pt-0 text-right text-sm opacity-60">
 		{new Date(note.CreatedAt).toLocaleString()}
 	</p>
-</LightButton>
+</BaseButton>
