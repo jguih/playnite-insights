@@ -178,18 +178,19 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		});
 	};
 
-	upsertOrDeleteManyAsync: IGameNotesRepository['upsertOrDeleteManyAsync'] = async (notes) => {
+	upsertOrDeleteManyAsync: IGameNotesRepository['upsertOrDeleteManyAsync'] = async (notes, ops) => {
+		const shouldOverride = ops?.override === true;
 		return await this.withDb(async (db) => {
 			await runTransaction(db, [GameNoteRepository.STORE_NAME], 'readwrite', async ({ tx }) => {
 				const store = tx.objectStore(GameNoteRepository.STORE_NAME);
 				for (const note of notes) {
 					const existing = await runRequest<GameNote | undefined>(store.get(note.Id));
-					if (!existing || new Date(note.LastUpdatedAt) > new Date(existing.LastUpdatedAt)) {
-						if (note.DeletedAt) {
-							await runRequest(store.delete(note.Id));
-						} else {
-							await runRequest(store.put(note));
-						}
+					if (
+						shouldOverride ||
+						!existing ||
+						new Date(note.LastUpdatedAt) > new Date(existing.LastUpdatedAt)
+					) {
+						await runRequest(store.put(note));
 					}
 				}
 			});

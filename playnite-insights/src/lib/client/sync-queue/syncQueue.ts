@@ -200,8 +200,10 @@ export class SyncQueue {
 						await this.processGameNoteAsync(queueItem);
 				}
 			}
+			return true;
 		} catch (error) {
 			console.error(error);
+			return false;
 		}
 	};
 }

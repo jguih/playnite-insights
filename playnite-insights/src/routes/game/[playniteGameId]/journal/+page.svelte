@@ -21,7 +21,7 @@
 	import NoteExtrasPanel from '$lib/client/components/game-page/journal/NoteExtrasPanel.svelte';
 	import { ScreenshotsGallery } from '$lib/client/components/game-page/journal/screenshotsGallery.svelte.js';
 	import ScreenshotsGalleryPanel from '$lib/client/components/game-page/journal/ScreenshotsGalleryPanel.svelte';
-	import Header from '$lib/client/components/Header.svelte';
+	import Header from '$lib/client/components/header/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized.js';
@@ -35,7 +35,7 @@
 	import { GamePageViewModel } from '$lib/client/viewmodel/gamePageViewModel.svelte';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { ArrowLeft, ChevronDown, ChevronUp, PlusIcon } from '@lucide/svelte';
+	import { ArrowLeft, ChevronDown, ChevronUp, Menu, PlusIcon } from '@lucide/svelte';
 	import { type GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
@@ -186,8 +186,8 @@
 	onMount(() => {
 		// Load notes from indexedDb to hydrate UI faster
 		loadNotes();
-		loadGameNotesFromServer().then((notes) => {
-			if (notes) loadNotes();
+		loadGameNotesFromServer().then((result) => {
+			if (result.notes) loadNotes();
 			// If notes = `null` nothing was changed since last sync
 		});
 
@@ -241,12 +241,13 @@
 	isImageLoading={playniteRemoteAction.actionLoadingState.takeScreenShot}
 />
 <BaseAppLayout>
-	<Header>
-		{#snippet action()}
-			<LightButton onclick={() => history.back()}>
-				<ArrowLeft class={['size-md']} />
-			</LightButton>
-		{/snippet}
+	<Header class={['flex items-center justify-between']}>
+		<LightButton onclick={() => history.back()}>
+			<ArrowLeft class={['size-md']} />
+		</LightButton>
+		<LightButton>
+			<Menu class={['size-md']} />
+		</LightButton>
 	</Header>
 	<Main bottomNav={false}>
 		{#if pageVm.game}

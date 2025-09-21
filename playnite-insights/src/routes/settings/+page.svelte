@@ -1,18 +1,22 @@
 <script lang="ts">
-	import { clientServiceLocator } from '$lib/client/app-state/AppData.svelte';
+	import {
+		clientServiceLocator,
+		loadGameNotesFromServer,
+	} from '$lib/client/app-state/AppData.svelte';
+	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
-	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
+	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import Select from '$lib/client/components/forms/Select.svelte';
-	import Header from '$lib/client/components/Header.svelte';
+	import Header from '$lib/client/components/header/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import ConfigSection from '$lib/client/components/settings-page/ConfigSection.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
-	import { AlertCircle, ArrowLeft, CheckCircle } from '@lucide/svelte';
+	import { AlertCircle, CheckCircle } from '@lucide/svelte';
 	import type { ChangeEventHandler } from 'svelte/elements';
 
 	let currentLocale = $state(getLocale());
@@ -31,15 +35,25 @@
 		const value = e.currentTarget.value;
 		if (isValidLocale(value)) setLocale(value);
 	};
+
+	const handleOnDataSync = async () => {
+		const syncResult = await clientServiceLocator.syncQueue.processQueueAsync();
+		const loadResult = syncResult ? await loadGameNotesFromServer(true) : false;
+		if (!syncResult || !loadResult) {
+			toast.error({ category: 'app', message: m.toast_data_sync_failed() });
+			return;
+		}
+		toast.success({ category: 'app', message: m.toast_data_sync_succeeded() });
+	};
 </script>
 
 <BaseAppLayout>
-	<Header>
-		{#snippet action()}
-			<LightButton onclick={() => history.back()}>
-				<ArrowLeft class={['size-md']} />
-			</LightButton>
-		{/snippet}
+	<Header class={['flex items-center justify-center']}>
+		<h1 class="block h-fit w-fit text-lg underline">
+			{m.bottom_nav_label_settings()}
+		</h1>
+	</Header>
+	<Main class={['flex flex-col gap-4']}>
 		<div class="flex w-full justify-end">
 			{#if serverConnectionStatus === true}
 				<p class="text-success-light-fg wrap-normal block text-sm">
@@ -53,14 +67,13 @@
 				</p>
 			{/if}
 		</div>
-	</Header>
-	<Main>
-		<ConfigSection title="Idioma">
+		<ConfigSection title={m.settings_language_section_title()}>
+			<p class="mb-4 text-sm">{m.settings_language_section_summary()}</p>
 			<label
 				for="settings-language"
 				class="flex flex-col items-start gap-2"
 			>
-				Selecionar idioma
+				{m.settings_language_section_label_language_picker()}
 				<Select
 					onchange={handleOnChangeLocale}
 					id="settings-language"
@@ -74,6 +87,21 @@
 					{/each}
 				</Select>
 			</label>
+		</ConfigSection>
+		<ConfigSection title={m.settings_sync_section_title()}>
+			<p class="text-sm">
+				{m.settings_sync_section_summary_paragraph1()}
+			</p>
+			<p class="mb-4 mt-2 text-sm">
+				{m.settings_sync_section_summary_paragraph2()}
+			</p>
+			<SolidButton
+				class={['w-full']}
+				onclick={handleOnDataSync}
+				disabled={!clientServiceLocator.serverHeartbeat.isAlive}
+			>
+				{m.settings_sync_section_label_sync()}
+			</SolidButton>
 		</ConfigSection>
 	</Main>
 	<BottomNav>

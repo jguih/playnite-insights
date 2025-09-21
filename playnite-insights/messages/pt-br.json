@@ -101,6 +101,15 @@
   "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "O servidor não retornou nenhuma screenshot",
   "toast_new_update_available_title": "Nova atualização disponível",
   "toast_new_update_available_message": "Clique aqui para atualizar",
-  "server_online_message": "Server online",
-  "server_offline_message": "Server offline"
+  "server_online_message": "Servidor online",
+  "server_offline_message": "Servidor offline",
+  "toast_data_sync_failed": "Sincronização falhou",
+  "toast_data_sync_succeeded": "Dados sincronizados com sucesso",
+  "settings_language_section_title": "Idioma",
+  "settings_language_section_summary": "Idioma é o idioma de exibição de todo o texto.",
+  "settings_language_section_label_language_picker": "Selecionar idioma",
+  "settings_sync_section_title": "Sincronização",
+  "settings_sync_section_summary_paragraph1": "Todas as alterações feitas no PlayAtlas são salvas localmente, permitindo que você continue usando o aplicativo mesmo offline. Periodicamente, suas alterações são sincronizadas com o servidor sempre que possível, garantindo que seus dados não sejam perdidos e que você possa acessar o PlayAtlas de qualquer dispositivo, retomando exatamente de onde parou.",
+  "settings_sync_section_summary_paragraph2": "Se estiver enfrentando problemas com a sincronização, você pode realizá-la manualmente clicando no botão abaixo. Nota: os dados do servidor serão importados e irão sobrescrever quaisquer dados presentes localmente.",
+  "settings_sync_section_label_sync": "Sincronizar Dados"
 }

@@ -51,5 +51,8 @@ export interface IGameNotesRepository {
 	 * @throws {IndexedDBNotInitializedError} If the DB is not ready
 	 * @throws {DOMException} If a transaction fails
 	 */
-	upsertOrDeleteManyAsync: (notes: GameNote[]) => Promise<void>;
+	upsertOrDeleteManyAsync: (
+		notes: GameNote[],
+		{ override }?: { override?: boolean },
+	) => Promise<void>;
 }

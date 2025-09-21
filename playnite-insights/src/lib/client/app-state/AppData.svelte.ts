@@ -1,5 +1,4 @@
 import {
-	AppError,
 	FetchClientStrategyError,
 	getAllCompaniesResponseSchema,
 	getAllGameNotesResponseSchema,
@@ -203,7 +202,7 @@ export const loadPlatforms = async () => {
 const getLastServerSync = (): string | null => {
 	const lastSync = localStorage.getItem('lastServerSync');
 	if (!lastSync) return null;
-	if (isNaN(Date.parse(lastSync))) throw new AppError('lastSync is a not a valid date');
+	if (isNaN(Date.parse(lastSync))) return null;
 	return new Date(lastSync).toISOString();
 };
 
@@ -212,13 +211,18 @@ const setLastServerSync = () => {
 	localStorage.setItem('lastServerSync', new Date(serverNow).toISOString());
 };
 
+const clearLastServerSync = () => {
+	localStorage.setItem('lastServerSync', '');
+};
+
 /**
  * Loads game notes from the server
  * Cached by SW: No
  * Offline-safe: No
  */
-export const loadGameNotesFromServer = async () => {
-	if (!clientServiceLocator.serverHeartbeat.isAlive) return null;
+export const loadGameNotesFromServer = async (override?: boolean) => {
+	if (!clientServiceLocator.serverHeartbeat.isAlive) return { notes: null, success: true };
+	if (override) clearLastServerSync();
 	try {
 		return await withHttpClient(async ({ client }) => {
 			const lastSync = getLastServerSync();
@@ -227,8 +231,8 @@ export const loadGameNotesFromServer = async () => {
 				strategy: new JsonStrategy(getAllGameNotesResponseSchema),
 			});
 			setLastServerSync();
-			await clientServiceLocator.repository.gameNote.upsertOrDeleteManyAsync(notes);
-			return notes;
+			await clientServiceLocator.repository.gameNote.upsertOrDeleteManyAsync(notes, { override });
+			return { notes, success: true };
 		});
 	} catch (err) {
 		if (
@@ -236,9 +240,9 @@ export const loadGameNotesFromServer = async () => {
 			(err.statusCode === 304 || err.statusCode === 204)
 		) {
 			setLastServerSync();
-			return null;
+			return { notes: null, success: true };
 		}
 		handleClientErrors(err, `[loadGameNotesFromServer] failed to fetch /api/note`);
-		return null;
+		return { notes: null, success: false };
 	}
 };

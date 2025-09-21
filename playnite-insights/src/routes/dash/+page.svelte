@@ -4,17 +4,15 @@
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
-	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import GamesOwnedOverTime from '$lib/client/components/charts/GamesOwnedOverTime.svelte';
 	import DailyActivityTable from '$lib/client/components/dash-page/DailyActivityTable.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
-	import Header from '$lib/client/components/Header.svelte';
+	import Header from '$lib/client/components/header/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import { getPlayniteGameImageUrl } from '$lib/client/utils/playnite-game.js';
 	import { DashPageViewModel } from '$lib/client/viewmodel/dashPageViewModel.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import { ArrowLeft } from '@lucide/svelte';
 
 	const vm = new DashPageViewModel({
 		gameSignal: gameSignal,
@@ -31,12 +29,10 @@
 {/snippet}
 
 <BaseAppLayout>
-	<Header>
-		{#snippet action()}
-			<LightButton onclick={() => history.back()}>
-				<ArrowLeft class={['size-md']} />
-			</LightButton>
-		{/snippet}
+	<Header class={['flex items-center justify-center']}>
+		<h1 class="block h-fit w-fit text-lg underline">
+			{m.bottom_nav_label_dash()}
+		</h1>
 	</Header>
 	<Main class="flex flex-col gap-6">
 		<div>

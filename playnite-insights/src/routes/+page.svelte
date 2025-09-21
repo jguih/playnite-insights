@@ -14,7 +14,7 @@
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import Select from '$lib/client/components/forms/Select.svelte';
-	import Header from '$lib/client/components/Header.svelte';
+	import Header from '$lib/client/components/header/Header.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
@@ -183,20 +183,18 @@
 	{/snippet}
 </FiltersSidebar>
 <BaseAppLayout>
-	<Header>
-		{#snippet action()}
-			<a
-				class=""
-				href={`/?${page.url.searchParams.toString()}`}
-			>
-				<img
-					src="/app-icon.png"
-					class="aspect-auto h-8 w-10 rounded-md object-contain"
-					alt="app icon"
-				/>
-			</a>
-		{/snippet}
-		<div class="flex flex-row items-center gap-2">
+	<Header class={['flex flex-row items-center gap-2']}>
+		<a
+			href={`/?${page.url.searchParams.toString()}`}
+			class="h-fit w-fit"
+		>
+			<img
+				src="/app-icon.png"
+				class="aspect-auto h-8 w-10 rounded-md object-contain"
+				alt="app icon"
+			/>
+		</a>
+		<div class="flex grow flex-row items-center gap-2">
 			<SearchBar
 				value={vm.filter.query}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
