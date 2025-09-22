@@ -6,12 +6,12 @@ import {
 	type GameSortOrder,
 } from '@playnite-insights/lib/client';
 import type { PageProps } from '../../../routes/$types';
-import type { GameSignal } from '../app-state/AppData.types';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
+import type { GameListViewModel } from './gameListViewModel.svelte';
 
 export type HomePageViewModelProps = {
 	getPageData: () => PageProps['data'];
-	gameSignal: GameSignal;
+	gameListViewlModel: GameListViewModel;
 };
 
 export class HomePageViewModel {
@@ -24,11 +24,11 @@ export class HomePageViewModel {
 	#totalPages: number;
 	#pages: (number | null)[];
 
-	constructor({ getPageData, gameSignal }: HomePageViewModelProps) {
+	constructor({ getPageData, gameListViewlModel }: HomePageViewModelProps) {
 		this.#getPageData = getPageData;
 
 		this.#games = $derived.by(() => {
-			const games = gameSignal.raw;
+			const games = gameListViewlModel.gameList;
 			let resolved = this.applyFilters(games);
 			resolved = this.applySorting(resolved);
 			return resolved;

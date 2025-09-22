@@ -46,6 +46,7 @@ export const clientServiceLocator = new ClientServiceLocator({
 	httpClientSignal,
 	indexedDbSignal,
 	serverTimeSignal,
+	gameSignal,
 });
 
 export async function withHttpClient<T>(

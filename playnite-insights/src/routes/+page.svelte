@@ -2,6 +2,7 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
+		clientServiceLocator,
 		gameSignal,
 		recentGameSessionSignal,
 		serverTimeSignal,
@@ -44,7 +45,10 @@
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
 	});
-	const vm = new HomePageViewModel({ getPageData: () => data, gameSignal: gameSignal });
+	const vm = new HomePageViewModel({
+		getPageData: () => data,
+		gameListViewlModel: clientServiceLocator.gameListViewModel,
+	});
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;

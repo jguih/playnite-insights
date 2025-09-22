@@ -1,10 +1,11 @@
 import { monthNames } from '$lib/utils/date';
 import type { FullGame } from '@playnite-insights/lib/client';
-import type { GameSignal, LibraryMetricsSignal } from '../app-state/AppData.types';
+import type { LibraryMetricsSignal } from '../app-state/AppData.types';
 import { getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
+import type { GameListViewModel } from './gameListViewModel.svelte';
 
 export type DashPageViewModelProps = {
-	gameSignal: GameSignal;
+	gameListViewlModel: GameListViewModel;
 	libraryMetricsSignal: LibraryMetricsSignal;
 };
 
@@ -27,13 +28,13 @@ export type DashPageChartsData = {
 };
 
 export class DashPageViewModel {
-	#gameSignal: GameSignal;
+	#gameListViewlModel: GameListViewModel;
 	#libraryMetricsSignal: LibraryMetricsSignal;
 	#libraryMetrics: DashPageLibraryMetrics;
 	#chartsData: DashPageChartsData | null;
 
-	constructor({ gameSignal, libraryMetricsSignal }: DashPageViewModelProps) {
-		this.#gameSignal = gameSignal;
+	constructor({ gameListViewlModel, libraryMetricsSignal }: DashPageViewModelProps) {
+		this.#gameListViewlModel = gameListViewlModel;
 		this.#libraryMetricsSignal = libraryMetricsSignal;
 
 		this.#libraryMetrics = $derived.by(() => {
@@ -46,7 +47,7 @@ export class DashPageViewModel {
 	}
 
 	private getLibraryMetrics = (): DashPageLibraryMetrics => {
-		const games = this.#gameSignal?.raw ?? [];
+		const games = this.#gameListViewlModel.gameList;
 		const totalGamesInLibrary = games.length;
 		const totalPlaytimeSeconds = games.reduce((prev, current) => prev + current.Playtime, 0);
 		const totalPlaytime = getPlaytimeInHoursAndMinutes(totalPlaytimeSeconds);
