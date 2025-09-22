@@ -18,6 +18,8 @@ const developerSchema = genreSchema;
 
 const publisherSchema = developerSchema;
 
+const completionStatusSchema = publisherSchema.nullable().optional();
+
 export const incomingPlayniteGameDtoSchema = z.object({
   Id: z.string(),
   Name: z.string().optional().nullable(),
@@ -40,6 +42,8 @@ export const incomingPlayniteGameDtoSchema = z.object({
   BackgroundImage: z.string().optional().nullable(),
   CoverImage: z.string().optional().nullable(),
   Icon: z.string().optional().nullable(),
+  Hidden: z.boolean(),
+  CompletionStatus: completionStatusSchema,
   ContentHash: z.string(),
 });
 

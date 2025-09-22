@@ -7,6 +7,7 @@ import type {
   PlayniteGameRepository,
   PlayniteLibrarySyncRepository,
 } from "../types";
+import { CompletionStatusRepository } from "../types/completion-status.types";
 import { type FileSystemService } from "../types/file-system.types";
 import { type GameSessionRepository } from "../types/game-session.types";
 import { type LogService } from "../types/log.types";
@@ -21,6 +22,7 @@ export type PlayniteLibraryImporterServiceDeps = {
   streamUtilsService: StreamUtilsService;
   logService: LogService;
   FILES_DIR: string;
+  completionStatusRepository: CompletionStatusRepository;
 };
 
 export type PlayniteLibraryImporterService = {

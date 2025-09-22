@@ -1,16 +1,18 @@
-import { join } from "path";
-import type { IncomingHttpHeaders } from "http";
 import type {
+  IncomingPlayniteGameDTO,
   PlayniteGame,
   SyncGameListCommand,
   ValidationResult,
 } from "@playnite-insights/lib/client";
+import busboy from "busboy";
+import type { IncomingHttpHeaders } from "http";
+import { join } from "path";
 import { ReadableStream } from "stream/web";
+import { AddOrUpdatePlayniteGameArgs } from "../types";
 import {
   type PlayniteLibraryImporterService,
   type PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
-import busboy from "busboy";
 
 export const makePlayniteLibraryImporterService = ({
   playniteGameRepository,
@@ -21,7 +23,60 @@ export const makePlayniteLibraryImporterService = ({
   streamUtilsService,
   logService,
   FILES_DIR,
+  completionStatusRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
+  const _ensureCompletionStatusExists = (game: IncomingPlayniteGameDTO) => {
+    if (!game.CompletionStatus) return;
+    const existing = completionStatusRepository.getById(
+      game.CompletionStatus.Id
+    );
+    if (existing) {
+      if (
+        completionStatusRepository.hasChanges(game.CompletionStatus, existing)
+      )
+        completionStatusRepository.update(game.CompletionStatus);
+    } else {
+      completionStatusRepository.add(game.CompletionStatus);
+    }
+  };
+
+  const _getAddOrUpdatePlayniteGameArgs = (
+    game: IncomingPlayniteGameDTO
+  ): AddOrUpdatePlayniteGameArgs => {
+    return {
+      game: {
+        Id: game.Id,
+        IsInstalled: +game.IsInstalled,
+        Playtime: game.Playtime,
+        Added: game.Added ?? null,
+        BackgroundImage: game.BackgroundImage ?? null,
+        CoverImage: game.CoverImage ?? null,
+        Description: game.Description ?? null,
+        Icon: game.Icon ?? null,
+        InstallDirectory: game.InstallDirectory ?? null,
+        LastActivity: game.LastActivity ?? null,
+        Name: game.Name ?? null,
+        ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
+        Hidden: +game.Hidden,
+        CompletionStatusId: game.CompletionStatus?.Id ?? null,
+        ContentHash: game.ContentHash,
+      },
+      developers: game.Developers ?? [],
+      platforms: game.Platforms?.map((plat) => {
+        return {
+          Id: plat.Id,
+          Name: plat.Name,
+          SpecificationId: plat.SpecificationId,
+          Background: plat.Background ?? null,
+          Cover: plat.Cover ?? null,
+          Icon: plat.Icon ?? null,
+        };
+      }),
+      genres: game.Genres ?? [],
+      publishers: game.Publishers ?? [],
+    };
+  };
+
   /**
    * Synchronizes game metadata from Playnite Insights Exporter with the database
    */
@@ -43,35 +98,9 @@ export const makePlayniteLibraryImporterService = ({
           logService.info(`Skipping existing game ${game.Name}`);
           continue;
         }
+        _ensureCompletionStatusExists(game);
         const result = playniteGameRepository.add(
-          {
-            Id: game.Id,
-            IsInstalled: Number(game.IsInstalled),
-            Playtime: game.Playtime,
-            Added: game.Added ?? null,
-            BackgroundImage: game.BackgroundImage ?? null,
-            CoverImage: game.CoverImage ?? null,
-            Description: game.Description ?? null,
-            Icon: game.Icon ?? null,
-            InstallDirectory: game.InstallDirectory ?? null,
-            LastActivity: game.LastActivity ?? null,
-            Name: game.Name ?? null,
-            ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
-            ContentHash: game.ContentHash,
-          },
-          game.Developers ?? [],
-          game.Platforms?.map((plat) => {
-            return {
-              Id: plat.Id,
-              Name: plat.Name,
-              SpecificationId: plat.SpecificationId,
-              Background: plat.Background ?? null,
-              Cover: plat.Cover ?? null,
-              Icon: plat.Icon ?? null,
-            };
-          }),
-          game.Genres ?? [],
-          game.Publishers ?? []
+          _getAddOrUpdatePlayniteGameArgs(game)
         );
         if (!result) {
           logService.error(`Failed to add game ${game.Name}`);
@@ -86,35 +115,9 @@ export const makePlayniteLibraryImporterService = ({
           );
           continue;
         }
+        _ensureCompletionStatusExists(game);
         const result = playniteGameRepository.update(
-          {
-            Id: game.Id,
-            IsInstalled: Number(game.IsInstalled),
-            Playtime: game.Playtime,
-            Added: game.Added ?? null,
-            BackgroundImage: game.BackgroundImage ?? null,
-            CoverImage: game.CoverImage ?? null,
-            Description: game.Description ?? null,
-            Icon: game.Icon ?? null,
-            InstallDirectory: game.InstallDirectory ?? null,
-            LastActivity: game.LastActivity ?? null,
-            Name: game.Name ?? null,
-            ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
-            ContentHash: game.ContentHash,
-          },
-          game.Developers ?? [],
-          game.Platforms?.map((plat) => {
-            return {
-              Id: plat.Id,
-              Name: plat.Name,
-              SpecificationId: plat.SpecificationId,
-              Background: plat.Background ?? null,
-              Cover: plat.Cover ?? null,
-              Icon: plat.Icon ?? null,
-            };
-          }),
-          game.Genres ?? [],
-          game.Publishers ?? []
+          _getAddOrUpdatePlayniteGameArgs(game)
         );
         if (!result) {
           logService.error(`Failed to update game ${game.Name}`);

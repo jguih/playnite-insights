@@ -9,6 +9,7 @@ import {
 	config,
 	getDb,
 	makeCompanyRepository,
+	makeCompletionStatusRepository,
 	makeFileSystemService,
 	makeGameNoteRepository,
 	makeGameSessionRepository,
@@ -38,6 +39,9 @@ export const setupServices = () => {
 	const genreRepository = makeGenreRepository({ logService: makeLogService('GenreRepository') });
 	const playniteGameRepository = makePlayniteGameRepository({
 		logService: makeLogService('PlayniteGameRepository'),
+		companyRepository,
+		genreRepository,
+		platformRepository,
 	});
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
 		logService: makeLogService('PlayniteLibrarySyncRepository'),
@@ -49,6 +53,9 @@ export const setupServices = () => {
 		logService: makeLogService('GameNoteRepository'),
 	});
 	const imageRepository = makeImageRepository({ logService: makeLogService('ImageRepository') });
+	const completionStatusRepository = makeCompletionStatusRepository({
+		logService: makeLogService('CompletionStatusRepository'),
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -58,6 +65,7 @@ export const setupServices = () => {
 		gameSessionRepository,
 		noteRepository,
 		imageRepository,
+		completionStatusRepository,
 	};
 	const commonDeps = {
 		getDb,

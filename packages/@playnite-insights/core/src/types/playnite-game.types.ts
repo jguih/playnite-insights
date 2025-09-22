@@ -8,21 +8,17 @@ import type {
   PlayniteGame,
 } from "@playnite-insights/lib/client";
 
+export type AddOrUpdatePlayniteGameArgs = {
+  game: PlayniteGame;
+  developers?: Array<Company>;
+  platforms?: Array<Platform>;
+  genres?: Array<Genre>;
+  publishers?: Array<Company>;
+};
+
 export type PlayniteGameRepository = {
-  add: (
-    game: PlayniteGame,
-    developers?: Array<Company>,
-    platforms?: Array<Platform>,
-    genres?: Array<Genre>,
-    publishers?: Array<Company>
-  ) => boolean;
-  update: (
-    game: PlayniteGame,
-    developers?: Array<Company>,
-    platforms?: Array<Platform>,
-    genres?: Array<Genre>,
-    publishers?: Array<Company>
-  ) => boolean;
+  add: (args: AddOrUpdatePlayniteGameArgs) => boolean;
+  update: (args: AddOrUpdatePlayniteGameArgs) => boolean;
   remove: (gameId: string) => boolean;
   exists: (gameId: string) => boolean;
   addDeveloperFor: (

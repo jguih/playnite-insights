@@ -270,13 +270,13 @@ export const makePlayniteGameRepository = (
     );
   };
 
-  const add: PlayniteGameRepository["add"] = (
+  const add: PlayniteGameRepository["add"] = ({
     game,
     developers,
     platforms,
     genres,
-    publishers
-  ) => {
+    publishers,
+  }) => {
     return repositoryCall(
       logService,
       () => {
@@ -295,8 +295,10 @@ export const makePlayniteGameRepository = (
           BackgroundImage, 
           CoverImage, 
           Icon, 
-          ContentHash
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+          ContentHash,
+          Hidden,
+          CompletionStatusId
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         `;
         const stmt = db.prepare(query);
         stmt.run(
@@ -312,7 +314,9 @@ export const makePlayniteGameRepository = (
           game.BackgroundImage ?? null,
           game.CoverImage ?? null,
           game.Icon ?? null,
-          game.ContentHash
+          game.ContentHash,
+          game.Hidden,
+          game.CompletionStatusId
         );
         logService.debug(`Created game ${game.Name}`);
         if (developers) {
@@ -369,13 +373,13 @@ export const makePlayniteGameRepository = (
     );
   };
 
-  const update: PlayniteGameRepository["update"] = (
+  const update: PlayniteGameRepository["update"] = ({
     game,
     developers,
     platforms,
     genres,
-    publishers
-  ) => {
+    publishers,
+  }) => {
     return repositoryCall(
       logService,
       () => {
@@ -394,7 +398,9 @@ export const makePlayniteGameRepository = (
             BackgroundImage = ?,
             CoverImage = ?,
             Icon = ?,
-            ContentHash = ?
+            ContentHash = ?,
+            Hidden = ?,
+            CompletionStatusId = ?
           WHERE Id = ?;
         `;
         const stmt = db.prepare(query);
@@ -411,6 +417,8 @@ export const makePlayniteGameRepository = (
           game.CoverImage ?? null,
           game.Icon ?? null,
           game.ContentHash,
+          game.Hidden,
+          game.CompletionStatusId,
           game.Id // WHERE Id
         );
         logService.debug(`Updated game ${game.Name}`);
