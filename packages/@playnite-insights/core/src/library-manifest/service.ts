@@ -77,16 +77,13 @@ export const makeLibraryManifestService = ({
 
   const get = async () => {
     try {
-      logService.debug(
-        `Reading library manifest file at ${LIBRARY_MANIFEST_FILE}`
-      );
       const content = await fileSystemService.readfile(
         LIBRARY_MANIFEST_FILE,
         "utf-8"
       );
       const asJson = JSON.parse(content.toString()) as PlayniteLibraryManifest;
       logService.debug(
-        `Read library manifest file succesfully, returning manifest`
+        `Read and parsed library manifest file at ${LIBRARY_MANIFEST_FILE}`
       );
       return asJson ?? null;
     } catch (error) {

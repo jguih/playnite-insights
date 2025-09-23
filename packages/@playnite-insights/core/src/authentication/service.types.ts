@@ -10,8 +10,8 @@ export type AuthenticationServiceDeps = {
 
 export type AuthenticationService = {
   verifyExtensionAuthorization: (args: {
-    headers: Headers;
-    extensionId: string;
-    payload: string;
+    request: Request;
+    url: URL;
+    payload?: string;
   }) => boolean;
 };
