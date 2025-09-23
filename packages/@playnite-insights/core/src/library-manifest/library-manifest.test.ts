@@ -3,7 +3,7 @@ import { join } from "path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { makeMocks } from "../../tests/mocks";
 import { makeLibraryManifestService } from "./service";
-import { LibraryManifestService } from "./service.types";
+import type { LibraryManifestService } from "./service.types";
 
 vi.mock("$lib/infrastructure/database", () => ({}));
 

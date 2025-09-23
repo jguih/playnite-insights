@@ -15,20 +15,26 @@ export const makeAuthenticationService = ({
     endpoint,
     extensionId,
     timestamp,
+    contentHash,
   }: {
     method: string;
     endpoint: string;
     extensionId: string;
     timestamp: string;
+    contentHash: string | null;
   }): string => {
+    if (contentHash) {
+      return `${method}|${endpoint}|${extensionId}|${timestamp}|${contentHash}`;
+    }
     return `${method}|${endpoint}|${extensionId}|${timestamp}`;
   };
 
   const verifyExtensionAuthorization: AuthenticationService["verifyExtensionAuthorization"] =
-    ({ request, url, payload }) => {
-      const extensionId = request.headers.get("X-ExtensionId");
-      const signatureBase64 = request.headers.get("X-Signature");
-      const timestamp = request.headers.get("X-Timestamp");
+    ({ headers, request, url, now }) => {
+      const extensionId = headers["X-ExtensionId"];
+      const signatureBase64 = headers["X-Signature"];
+      const timestamp = headers["X-Timestamp"];
+      const contentHash = headers["X-ContentHash"];
       const requestDescription = `${request.method} ${url.pathname}`;
 
       if (!extensionId) {
@@ -49,8 +55,13 @@ export const makeAuthenticationService = ({
         );
         return false;
       }
+      if (["POST", "PUT"].includes(request.method) && !contentHash) {
+        logService.warning(
+          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing or invalid X-ContentHash header`
+        );
+        return false;
+      }
 
-      const now = Date.now();
       const timestampMs = Date.parse(timestamp);
       if (timestampMs > now || now - timestampMs >= FIVE_MINUTES_MS) {
         logService.warning(
@@ -59,14 +70,13 @@ export const makeAuthenticationService = ({
         return false;
       }
 
-      const resolvedPayload =
-        payload ??
-        _getCanonicalString({
-          method: request.method,
-          endpoint: url.pathname,
-          extensionId,
-          timestamp,
-        });
+      const payload = _getCanonicalString({
+        method: request.method,
+        endpoint: url.pathname,
+        extensionId,
+        timestamp,
+        contentHash,
+      });
 
       const registration =
         extensionRegistrationRepository.getByExtensionId(extensionId);
@@ -79,7 +89,7 @@ export const makeAuthenticationService = ({
       const validSignature = signatureService.verifyExtensionSignature({
         signatureBase64,
         registration,
-        payload: resolvedPayload,
+        payload,
       });
       if (!validSignature) {
         logService.warning(

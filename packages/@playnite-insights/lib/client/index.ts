@@ -1,4 +1,5 @@
 export * from "./api";
+export * from "./authentication";
 export * from "./company";
 export * from "./completion-status";
 export * from "./extension-registration";

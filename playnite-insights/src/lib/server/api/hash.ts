@@ -21,3 +21,8 @@ export const createHashForObject = (data: unknown) => {
 	const jsonStr = JSON.stringify(sortKeys(data));
 	return createHash('sha1').update(jsonStr).digest('hex');
 };
+
+export const computeBase64HashAsync = async (str: string): Promise<string> => {
+	const hashBase64 = createHash('sha256').update(str, 'utf-8').digest('base64');
+	return hashBase64;
+};

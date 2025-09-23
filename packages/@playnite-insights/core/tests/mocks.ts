@@ -6,6 +6,7 @@ import type {
   ExtensionRegistrationRepository,
   PlayniteGameRepository,
   PlayniteLibrarySyncRepository,
+  SignatureService,
 } from "../src/types";
 import { CompletionStatusRepository } from "../src/types/completion-status.types";
 import type { FileSystemService } from "../src/types/file-system.types";
@@ -97,11 +98,18 @@ export const makeMocks = () => {
     all: vi.fn(),
   } satisfies CompletionStatusRepository;
 
+  const signatureService = {
+    generateKeyPairAsync: vi.fn(),
+    signAsync: vi.fn(),
+    verifyExtensionSignature: vi.fn(),
+  } satisfies SignatureService;
+
   return {
     logService,
     fileSystemService,
     streamUtilsService,
     libraryManifestService,
+    signatureService,
     playniteGameRepository,
     playniteLibrarySyncRepository,
     gameSessionRepository,
