@@ -3,7 +3,7 @@ import {
   type LogService,
   type SignatureService,
 } from "@playnite-insights/core";
-import { sign as cryptoSign, generateKeyPairSync } from "crypto";
+import { createVerify, sign as cryptoSign, generateKeyPairSync } from "crypto";
 import { join } from "path";
 import * as config from "../config/config";
 import { defaultFileSystemService } from "./file-system";
@@ -70,7 +70,21 @@ export const makeSignatureService = (
     return signature.toString("base64");
   };
 
-  return { generateKeyPairAsync, signAsync };
+  const verifyExtensionSignature: SignatureService["verifyExtensionSignature"] =
+    ({ registration, payload, signatureBase64 }) => {
+      const verify = createVerify("sha256");
+      verify.update(payload);
+      verify.end();
+
+      const isValid = verify.verify(
+        registration.PublicKey,
+        Buffer.from(signatureBase64, "base64")
+      );
+
+      return isValid;
+    };
+
+  return { generateKeyPairAsync, signAsync, verifyExtensionSignature };
 };
 
 export const defaultSignatureService: SignatureService = makeSignatureService();

@@ -1,4 +1,6 @@
 import {
+	makeAuthenticationService,
+	makeExtensionRegistrationService,
 	makeGameSessionService,
 	makeLibraryManifestService,
 	makeMediaFilesService,
@@ -10,6 +12,7 @@ import {
 	getDb,
 	makeCompanyRepository,
 	makeCompletionStatusRepository,
+	makeExtensionRegistrationRepository,
 	makeFileSystemService,
 	makeGameNoteRepository,
 	makeGameSessionRepository,
@@ -56,6 +59,9 @@ export const setupServices = () => {
 	const completionStatusRepository = makeCompletionStatusRepository({
 		logService: makeLogService('CompletionStatusRepository'),
 	});
+	const extensionRegistrationRepository = makeExtensionRegistrationRepository({
+		logService: makeLogService('ExtensionRegistrationRepository'),
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -66,6 +72,7 @@ export const setupServices = () => {
 		noteRepository,
 		imageRepository,
 		completionStatusRepository,
+		extensionRegistrationRepository,
 	};
 	const commonDeps = {
 		getDb,
@@ -109,6 +116,8 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('SignatureService'),
 	});
+	const extensionRegistrationService = makeExtensionRegistrationService({ ...commonDeps });
+	const authenticationService = makeAuthenticationService({ ...commonDeps, signatureService });
 	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 
 	const services = {
@@ -120,6 +129,8 @@ export const setupServices = () => {
 		gameSession: gameSessionService,
 		playniteLibrary: playniteLibraryService,
 		signature: signatureService,
+		extensionRegistration: extensionRegistrationService,
+		authentication: authenticationService,
 		playniteHostHttpClient,
 		config,
 	};
