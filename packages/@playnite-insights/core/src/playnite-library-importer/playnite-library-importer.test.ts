@@ -40,7 +40,13 @@ describe("Game Importer", () => {
     // Arrange
     const data: SyncGameListCommand = {
       AddedItems: [
-        { Id: "id1", Playtime: 12, ContentHash: "hash", IsInstalled: false },
+        {
+          Id: "id1",
+          Playtime: 12,
+          ContentHash: "hash",
+          IsInstalled: false,
+          Hidden: false,
+        },
       ],
       RemovedItems: [],
       UpdatedItems: [],
@@ -58,7 +64,13 @@ describe("Game Importer", () => {
     // Arrange
     const data: SyncGameListCommand = {
       AddedItems: [
-        { Id: "id1", Playtime: 12, ContentHash: "hash", IsInstalled: false },
+        {
+          Id: "id1",
+          Playtime: 12,
+          ContentHash: "hash",
+          IsInstalled: false,
+          Hidden: false,
+        },
       ],
       RemovedItems: [],
       UpdatedItems: [],
@@ -78,7 +90,13 @@ describe("Game Importer", () => {
       AddedItems: [],
       RemovedItems: [],
       UpdatedItems: [
-        { Id: "id1", Playtime: 12, ContentHash: "hash", IsInstalled: false },
+        {
+          Id: "id1",
+          Playtime: 12,
+          ContentHash: "hash",
+          IsInstalled: false,
+          Hidden: false,
+        },
       ],
     };
     vi.spyOn(deps.playniteGameRepository, "exists").mockReturnValueOnce(false);
@@ -96,7 +114,13 @@ describe("Game Importer", () => {
       AddedItems: [],
       RemovedItems: [],
       UpdatedItems: [
-        { Id: "id1", Playtime: 12, ContentHash: "hash", IsInstalled: false },
+        {
+          Id: "id1",
+          Playtime: 12,
+          ContentHash: "hash",
+          IsInstalled: false,
+          Hidden: false,
+        },
       ],
     };
     vi.spyOn(deps.playniteGameRepository, "exists").mockReturnValueOnce(true);

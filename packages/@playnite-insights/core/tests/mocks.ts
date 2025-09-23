@@ -3,9 +3,11 @@ import { constants } from "fs/promises";
 import { vi } from "vitest";
 import type { LibraryManifestService } from "../src/library-manifest";
 import type {
+  ExtensionRegistrationRepository,
   PlayniteGameRepository,
   PlayniteLibrarySyncRepository,
 } from "../src/types";
+import { CompletionStatusRepository } from "../src/types/completion-status.types";
 import type { FileSystemService } from "../src/types/file-system.types";
 import type { GameSessionRepository } from "../src/types/game-session.types";
 import type { LogService } from "../src/types/log.types";
@@ -32,6 +34,7 @@ export const makeMocks = () => {
     stat: vi.fn(),
     unlink: vi.fn(),
     writeFile: vi.fn(),
+    rename: vi.fn(),
   } satisfies FileSystemService;
 
   const streamUtilsService = {
@@ -80,6 +83,20 @@ export const makeMocks = () => {
     getGamesOwnedLastNMonths: vi.fn(),
   } satisfies PlayniteLibrarySyncRepository;
 
+  const extensionRegistrationRepository = {
+    add: vi.fn(),
+    update: vi.fn(),
+    getByExtensionId: vi.fn(),
+  } satisfies ExtensionRegistrationRepository;
+
+  const completionStatusRepository = {
+    add: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+  } satisfies CompletionStatusRepository;
+
   return {
     logService,
     fileSystemService,
@@ -88,5 +105,7 @@ export const makeMocks = () => {
     playniteGameRepository,
     playniteLibrarySyncRepository,
     gameSessionRepository,
+    extensionRegistrationRepository,
+    completionStatusRepository,
   };
 };

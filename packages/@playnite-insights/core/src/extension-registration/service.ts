@@ -6,6 +6,7 @@ import {
 
 export const makeExtensionRegistrationService = ({
   extensionRegistrationRepository,
+  logService,
 }: ExtensionRegistrationServiceDeps): ExtensionRegistrationService => {
   const register: ExtensionRegistrationService["register"] = (command) => {
     const existing = extensionRegistrationRepository.getByExtensionId(

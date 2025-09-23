@@ -5,18 +5,18 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const body = await request.json();
-		const command = baseExtensionCommandSchema.parse(body);
+		const rawBody = await request.text();
+		const command = baseExtensionCommandSchema.parse(JSON.parse(rawBody));
 		const isAuthorized = services.authentication.verifyExtensionAuthorization({
 			headers: request.headers,
-			payload: JSON.stringify(body),
+			payload: rawBody,
 			extensionId: command.ExtensionId,
 		});
 		if (!isAuthorized) {
-			return new Response(null, { status: 403 });
+			return json({ error: 'Unauthorized' }, { status: 403 });
 		}
 		return json({ status: 'OK' });
 	} catch (error) {
-		return handleApiError(error, `GET /api/health`);
+		return handleApiError(error, `GET /api/extension/health`);
 	}
 };

@@ -116,8 +116,15 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('SignatureService'),
 	});
-	const extensionRegistrationService = makeExtensionRegistrationService({ ...commonDeps });
-	const authenticationService = makeAuthenticationService({ ...commonDeps, signatureService });
+	const extensionRegistrationService = makeExtensionRegistrationService({
+		...commonDeps,
+		logService: makeLogService('ExtensionRegistrationService'),
+	});
+	const authenticationService = makeAuthenticationService({
+		...commonDeps,
+		signatureService,
+		logService: makeLogService('AuthenticationService'),
+	});
 	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 
 	const services = {
