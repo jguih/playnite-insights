@@ -37,34 +37,37 @@ export const makeAuthenticationService = ({
       const contentHash = headers["X-ContentHash"];
       const registrationId = headers["X-RegistrationId"];
       const requestDescription = `${request.method} ${url.pathname}`;
+      const extensionDescription = `extension (RegistrationId: ${
+        registrationId ?? "unknown"
+      }, ExtensionId: ${extensionId ?? "unknown"})`;
 
       if (!extensionId) {
         logService.warning(
-          `${requestDescription}: Extension (Id: unknown) request reject due to missing X-ExtensionId header`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing X-ExtensionId header`
         );
         return false;
       }
       if (!signatureBase64) {
         logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing X-Signature header`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing X-Signature header`
         );
         return false;
       }
       if (!timestamp || isNaN(Date.parse(timestamp))) {
         logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing or invalid X-Timestamp header`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-Timestamp header`
         );
         return false;
       }
       if (["POST", "PUT"].includes(request.method) && !contentHash) {
         logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing or invalid X-ContentHash header`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-ContentHash header`
         );
         return false;
       }
       if (!registrationId || isNaN(Number(registrationId))) {
         logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing or invalid X-RegistrationId header`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-RegistrationId header`
         );
         return false;
       }
@@ -72,7 +75,7 @@ export const makeAuthenticationService = ({
       const timestampMs = Date.parse(timestamp);
       if (timestampMs > now || now - timestampMs >= FIVE_MINUTES_MS) {
         logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to expired or invalid timestamp`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to expired or invalid timestamp`
         );
         return false;
       }
@@ -82,7 +85,7 @@ export const makeAuthenticationService = ({
       );
       if (!registration || registration.Status !== "trusted") {
         logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing, pending or not trusted registration`
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing, pending or not trusted registration`
         );
         return false;
       }
@@ -101,14 +104,14 @@ export const makeAuthenticationService = ({
         payload,
       });
       if (!validSignature) {
-        logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to invalid signature`
+        logService.error(
+          `${requestDescription}: Request rejected for ${extensionDescription} due to invalid signature`
         );
         return false;
       }
-      
+
       logService.debug(
-        `${requestDescription}: Extension (Id: ${extensionId}) request authorized`
+        `${requestDescription}: Request authorized for ${extensionDescription}`
       );
       return true;
     };
