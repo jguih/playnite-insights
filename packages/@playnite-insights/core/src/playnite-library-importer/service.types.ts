@@ -1,6 +1,6 @@
 import type {
+  PlayniteGame,
   SyncGameListCommand,
-  ValidationResult,
 } from "@playnite-insights/lib/client";
 import { type LibraryManifestService } from "../library-manifest/service.types";
 import type {
@@ -22,10 +22,22 @@ export type PlayniteLibraryImporterServiceDeps = {
   streamUtilsService: StreamUtilsService;
   logService: LogService;
   FILES_DIR: string;
+  TMP_DIR: string;
   completionStatusRepository: CompletionStatusRepository;
 };
 
 export type PlayniteLibraryImporterService = {
   sync: (data: SyncGameListCommand) => Promise<boolean>;
-  importMediaFiles: (request: Request) => Promise<ValidationResult<null>>;
+  importMediaFiles: (request: Request, url: URL) => Promise<void>;
+};
+
+export type ImportMediaFilesContext = {
+  requestId: string;
+  tmpDir: string;
+  gameId: string | null;
+  game: PlayniteGame | null;
+  mediaFilesHash: string | null;
+  uploadCount: number;
+  filesToHash: { filename: string; buffer: Buffer }[];
+  filePromises: Promise<string>[];
 };

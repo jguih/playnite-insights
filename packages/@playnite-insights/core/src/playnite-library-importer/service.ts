@@ -1,15 +1,17 @@
-import type {
-  IncomingPlayniteGameDTO,
-  PlayniteGame,
-  SyncGameListCommand,
-  ValidationResult,
+import {
+  ApiError,
+  validAuthenticationHeaders,
+  type IncomingPlayniteGameDTO,
+  type SyncGameListCommand,
 } from "@playnite-insights/lib/client";
 import busboy from "busboy";
+import { createHash } from "crypto";
 import type { IncomingHttpHeaders } from "http";
 import { join } from "path";
 import { ReadableStream } from "stream/web";
 import { AddOrUpdatePlayniteGameArgs } from "../types";
 import {
+  ImportMediaFilesContext,
   type PlayniteLibraryImporterService,
   type PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
@@ -23,6 +25,7 @@ export const makePlayniteLibraryImporterService = ({
   streamUtilsService,
   logService,
   FILES_DIR,
+  TMP_DIR,
   completionStatusRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
   const _ensureCompletionStatusExists = (game: IncomingPlayniteGameDTO) => {
@@ -170,140 +173,165 @@ export const makePlayniteLibraryImporterService = ({
     }
   };
 
-  /**
-   *
-   * @param dir
-   * @param game
-   * @throws Error
-   */
-  const cleanupUploadDir = async (dir: string, game: PlayniteGame) => {
-    try {
-      await fileSystemService.rm(dir, { force: true, recursive: true });
-      await fileSystemService.mkdir(dir, { recursive: true });
-      logService.debug(`Media folder for ${game?.Name} cleaned up: ${dir}`);
-    } catch (error) {
-      logService.error(
-        `Failed to clean up media folder ${dir}`,
-        error as Error
-      );
-      throw error;
-    }
+  const _getImportMediaFilesContext = (): ImportMediaFilesContext => {
+    const requestId = crypto.randomUUID();
+    return {
+      requestId: crypto.randomUUID(),
+      tmpDir: join(TMP_DIR, requestId),
+      gameId: null,
+      game: null,
+      mediaFilesHash: null,
+      uploadCount: 0,
+      filesToHash: [],
+      filePromises: [],
+    };
   };
 
   /**
-   * Imports library files (Playnite media files) from a FormData object.
+   * Downloads Playnite library media files from the request
    */
-  const importMediaFiles = async (
-    request: Request
-  ): Promise<ValidationResult<null>> => {
-    const headers: IncomingHttpHeaders = Object.fromEntries(
-      request.headers as unknown as Iterable<string[]>
-    );
-    const bb = busboy({ headers });
-    let gameId: string | null = null;
-    let contentHash: string | null = null;
-    let uploadDir: string | null = null;
-    let game: PlayniteGame | null = null;
-    let fileCount = 0;
-    let cleanupPromise: Promise<void> | null = null;
-    const filePromises: Promise<void>[] = [];
-    const start = performance.now();
+  const importMediaFiles: PlayniteLibraryImporterService["importMediaFiles"] =
+    async (request, url) => {
+      return new Promise(async (resolve, reject) => {
+        const requestDescription = `${request.method} ${url.pathname}`;
+        const headers: IncomingHttpHeaders = Object.fromEntries(
+          request.headers as unknown as Iterable<string[]>
+        );
+        const bb = busboy({ headers });
+        const stream = streamUtilsService.readableFromWeb(
+          request.body! as unknown as ReadableStream
+        );
+        const ctx: ImportMediaFilesContext = _getImportMediaFilesContext();
+        const contentHash = request.headers.get(
+          validAuthenticationHeaders["X-ContentHash"]
+        );
+        const start = performance.now();
 
-    bb.on("field", async (name, val) => {
-      if (name === "gameId" && !cleanupPromise) {
-        gameId = val;
-        game = playniteGameRepository.getById(gameId) ?? null;
-        if (game === null) {
-          bb.destroy(new Error(`Game with id ${gameId} not found`));
-          return;
-        }
-        uploadDir = join(FILES_DIR, gameId);
-        cleanupPromise = cleanupUploadDir(uploadDir, game).catch((e) => {
-          bb.destroy(e);
-        });
-      }
-      if (name === "contentHash" && uploadDir && cleanupPromise) {
-        contentHash = val;
-        await cleanupPromise;
         try {
-          const contentHashPath = join(uploadDir, "contentHash.txt");
-          await fileSystemService.writeFile(
-            contentHashPath,
-            contentHash,
-            "utf-8"
-          );
-          logService.debug(
-            `contentHash.txt created at ${contentHashPath} with content ${contentHash}`
-          );
+          await fileSystemService.mkdir(ctx.tmpDir, { recursive: true });
         } catch (error) {
-          logService.error(
-            `Failed to write contentHash.txt file`,
-            error as Error
-          );
-          bb.destroy(new Error(`Failed to write contentHash.txt file`));
+          reject(error);
         }
-      }
-    });
 
-    bb.on("file", async (fieldname, fileStream, { filename }) => {
-      if (!filename || !uploadDir || !cleanupPromise)
-        return fileStream.resume();
-      await cleanupPromise;
-      const savePath = join(uploadDir, filename);
-
-      const filePromise = new Promise<void>((resolve, reject) => {
-        const writeStream = streamUtilsService.createWriteStream(savePath);
-        writeStream.on("finish", () => {
-          logService.debug(`Saved file ${savePath} to disk`);
-          resolve();
+        bb.on("field", async (name, val) => {
+          if (name === "gameId") {
+            ctx.gameId = val;
+          }
+          if (name === "contentHash") {
+            ctx.mediaFilesHash = val;
+          }
         });
-        writeStream.on("error", (error) => {
-          logService.error(`Failed to save file ${savePath} to disk`, error);
+
+        bb.on("file", async (_, fileStream, { filename }) => {
+          const tmpFilePath = join(ctx.tmpDir, filename);
+
+          const filePromise = new Promise<string>((resolve, reject) => {
+            const writeStream =
+              streamUtilsService.createWriteStream(tmpFilePath);
+            writeStream.on("finish", () => {
+              logService.debug(`Saved file ${tmpFilePath} to disk`);
+              resolve(tmpFilePath);
+            });
+            writeStream.on("error", (error) => {
+              logService.error(
+                `Failed to save file ${tmpFilePath} to disk`,
+                error
+              );
+              reject(error);
+            });
+            const chunks: Buffer[] = [];
+            fileStream.on("data", (chunk) => chunks.push(chunk));
+            fileStream.pipe(writeStream);
+            fileStream.on("end", () => {
+              ctx.filesToHash.push({ filename, buffer: Buffer.concat(chunks) });
+              ctx.uploadCount++;
+            });
+          });
+
+          ctx.filePromises.push(filePromise);
+        });
+
+        bb.on("finish", async () => {
+          try {
+            await Promise.all(ctx.filePromises);
+
+            if (ctx.uploadCount === 0)
+              throw new ApiError("No images uploaded", 400);
+            if (!ctx.gameId) throw new ApiError("Missing gameId", 400);
+            if (!ctx.mediaFilesHash)
+              throw new ApiError("Missing media file hash", 400);
+
+            ctx.game = playniteGameRepository.getById(ctx.gameId) ?? null;
+            if (!ctx.game) throw new ApiError("Game not found", 404);
+
+            const canonicalHash = createHash("sha256");
+            canonicalHash.update(Buffer.from(ctx.gameId, "utf-8"));
+            canonicalHash.update(Buffer.from(ctx.mediaFilesHash, "utf-8"));
+            ctx.filesToHash.sort((a, b) =>
+              a.filename.localeCompare(b.filename, undefined, {
+                sensitivity: "variant",
+              })
+            );
+            for (const file of ctx.filesToHash) {
+              canonicalHash.update(file.buffer);
+            }
+            const canonicalDigest = canonicalHash.digest("base64");
+
+            if (canonicalDigest !== contentHash) {
+              logService.warning(
+                `${requestDescription}: Request rejected bacause calculated content hash does not match received one`
+              );
+              throw new ApiError(
+                "Request rejected bacause calculated content hash does not match received one",
+                403
+              );
+            }
+
+            // Save media files hash into a file
+            const contentHashPath = join(ctx.tmpDir, "contentHash.txt");
+            await fileSystemService.writeFile(
+              contentHashPath,
+              ctx.mediaFilesHash,
+              "utf-8"
+            );
+            // Transfer files from temporary to upload dir
+            const uploadDir = join(FILES_DIR, ctx.gameId);
+            await fileSystemService.rm(uploadDir, {
+              recursive: true,
+              force: true,
+            });
+            await fileSystemService.rename(ctx.tmpDir, uploadDir);
+            logService.debug(
+              `Moved all files in ${ctx.tmpDir} to ${uploadDir}`
+            );
+
+            await libraryManifestService.write();
+            const duration = performance.now() - start;
+            logService.success(
+              `Saved ${ctx.uploadCount} media files to disk for ${
+                ctx.game!.Name ?? ""
+              } in ${duration.toFixed(1)}ms`
+            );
+            resolve();
+          } catch (error) {
+            try {
+              await fileSystemService.rm(ctx.tmpDir, {
+                recursive: true,
+                force: true,
+              });
+            } catch {}
+            bb.destroy(error as Error);
+            reject(error);
+          }
+        });
+
+        bb.on("error", (error) => {
           reject(error);
         });
-        fileStream.pipe(writeStream);
-        fileStream.on("end", () => {
-          fileCount++;
-        });
-      });
 
-      filePromises.push(filePromise);
-    });
-
-    try {
-      await new Promise((resolve, reject) => {
-        streamUtilsService
-          .readableFromWeb(request.body! as unknown as ReadableStream)
-          .pipe(bb);
-        bb.on("finish", resolve);
-        bb.on("error", reject);
+        stream.pipe(bb);
       });
-      await Promise.all(filePromises);
-      await libraryManifestService.write();
-      const duration = performance.now() - start;
-      logService.success(
-        `Saved ${fileCount} media files to disk for ${
-          game!.Name ?? ""
-        } in ${duration.toFixed(1)}ms`
-      );
-      return {
-        isValid: true,
-        message: `Saved ${fileCount} files successfully`,
-        httpCode: 200,
-        data: null,
-      };
-    } catch (error) {
-      logService.error(
-        `Error saving files to disk for game with Id: ${gameId}`,
-        error as Error
-      );
-      return {
-        isValid: false,
-        message: `Error saving files to disk`,
-        httpCode: 500,
-      };
-    }
-  };
+    };
 
   return {
     sync,
