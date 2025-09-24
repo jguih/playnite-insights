@@ -15,4 +15,5 @@ export type ExtensionRegistrationRepository = {
     id: ExtensionRegistration["Id"]
   ) => ExtensionRegistration | null;
   remove: (id: ExtensionRegistration["Id"]) => void;
+  all: () => ExtensionRegistration[];
 };

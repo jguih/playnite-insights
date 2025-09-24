@@ -9,7 +9,7 @@
 	{...props}
 	class={['bg-background-1 p-4 shadow', props.class]}
 >
-	<h1 class="text-lg font-bold">{title}</h1>
+	<h1 class="text-xl font-bold">{title}</h1>
 	<Divider class={['border-1 mb-4']} />
 	{@render props.children?.()}
 </section>

@@ -76,15 +76,18 @@
   /* Warning variant */
   --color-warning-bg: var(--color-yellow-700);
 	--color-warning-fg: var(--color-foreground);
-  /* Error variant */
-  --color-error-bg: var(--color-red-700);
-	--color-error-fg: var(--color-foreground);
-  /* Info variant */
-  --color-info-bg: var(--pl-color-primary-800);
-	--color-info-fg: var(--color-foreground);
 	/* Warning light variant */
 	--color-warning-light-bg: transparent;
 	--color-warning-light-fg: var(--color-yellow-600);
+  /* Error variant */
+  --color-error-bg: var(--color-red-700);
+	--color-error-fg: var(--color-foreground);
+  /* Error light variant */
+  --color-error-light-bg: transparent;
+	--color-error-light-fg: var(--color-red-600);
+  /* Info variant */
+  --color-info-bg: var(--pl-color-primary-800);
+	--color-info-fg: var(--color-foreground);
 	/* END: Dark Theme */
 }
 
@@ -140,15 +143,18 @@
   /* Warning variant */
   --color-warning-bg: var(--color-yellow-700);
 	--color-warning-fg: var(--color-foreground);
-  /* Error variant */
-  --color-error-bg: var(--color-red-700);
-	--color-error-fg: var(--color-foreground);
-  /* Info variant */
-  --color-info-bg: var(--pl-color-primary-800);
-	--color-info-fg: var(--color-foreground);
 	/* Warning light variant */
 	--color-warning-light-bg: transparent;
 	--color-warning-light-fg: var(--color-yellow-600);
+  /* Error variant */
+  --color-error-bg: var(--color-red-700);
+	--color-error-fg: var(--color-foreground);
+  /* Error light variant */
+  --color-error-light-bg: transparent;
+	--color-error-light-fg: var(--color-red-600);
+  /* Info variant */
+  --color-info-bg: var(--pl-color-primary-800);
+	--color-info-fg: var(--color-foreground);
 	/* END: Dark Theme */
 }
 

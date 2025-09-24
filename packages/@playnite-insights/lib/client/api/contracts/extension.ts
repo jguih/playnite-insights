@@ -1,4 +1,5 @@
 import z from "zod";
+import { extensionRegistrationSchema } from "../../extension-registration";
 import { ISODateSchema } from "../../schemas";
 
 export const baseExtensionCommandSchema = z.object({
@@ -18,4 +19,11 @@ export const registerExtensionCommandSchema = z.object({
 
 export type RegisterExtensionCommand = z.infer<
   typeof registerExtensionCommandSchema
+>;
+
+export const getAllExtensionRegistrationsSchema = z.array(
+  extensionRegistrationSchema
+);
+export type GetAllExtensionRegistrationsResponse = z.infer<
+  typeof getAllExtensionRegistrationsSchema
 >;

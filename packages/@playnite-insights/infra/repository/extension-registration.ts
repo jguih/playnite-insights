@@ -134,7 +134,25 @@ export const makeExtensionRegistrationRepository = (
     );
   };
 
-  return { add, update, getByExtensionId, getByRegistrationId, remove };
+  const all: ExtensionRegistrationRepository["all"] = () => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `SELECT * FROM ${TABLE_NAME} ORDER BY Id DESC`;
+        const stmt = db.prepare(query);
+        const result = stmt.all();
+        const registrations = z
+          .array(extensionRegistrationSchema)
+          .parse(result);
+        logService.debug(`Found ${registrations?.length ?? 0} registrations`);
+        return registrations;
+      },
+      `all()`
+    );
+  };
+
+  return { add, update, getByExtensionId, getByRegistrationId, remove, all };
 };
 
 export const defaultExtensionRegistrationRepository: ExtensionRegistrationRepository =
