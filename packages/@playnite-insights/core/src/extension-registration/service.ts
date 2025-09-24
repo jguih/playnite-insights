@@ -12,13 +12,16 @@ export const makeExtensionRegistrationService = ({
     const existing = extensionRegistrationRepository.getByExtensionId(
       command.ExtensionId
     );
-    if (existing)
+    if (existing && existing.Status !== "rejected")
       throw new ApiError(
-        "Extension already registered or pending approval",
+        "Extension already registered, pending approval or trusted",
         400
       );
+    else if (existing) {
+      extensionRegistrationRepository.remove(existing.Id);
+    }
 
-    extensionRegistrationRepository.add({
+    return extensionRegistrationRepository.add({
       ExtensionId: command.ExtensionId,
       PublicKey: command.PublicKey,
       ExtensionVersion: command.ExtensionVersion ?? null,

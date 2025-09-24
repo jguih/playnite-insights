@@ -88,6 +88,8 @@ export const makeMocks = () => {
     add: vi.fn(),
     update: vi.fn(),
     getByExtensionId: vi.fn(),
+    getByRegistrationId: vi.fn(),
+    remove: vi.fn(),
   } satisfies ExtensionRegistrationRepository;
 
   const completionStatusRepository = {

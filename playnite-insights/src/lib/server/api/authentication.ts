@@ -18,6 +18,7 @@ export const withExtensionAuth = async (
 				'X-Signature': request.headers.get(validAuthenticationHeaders['X-Signature']),
 				'X-Timestamp': request.headers.get(validAuthenticationHeaders['X-Timestamp']),
 				'X-ContentHash': request.headers.get(validAuthenticationHeaders['X-ContentHash']),
+				'X-RegistrationId': request.headers.get(validAuthenticationHeaders['X-RegistrationId']),
 			},
 			request: { method: request.method },
 			url: { pathname: url.pathname },

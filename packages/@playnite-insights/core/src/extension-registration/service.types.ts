@@ -8,5 +8,5 @@ export type ExtensionRegistrationServiceDeps = {
 };
 
 export type ExtensionRegistrationService = {
-  register: (command: RegisterExtensionCommand) => void;
+  register: (command: RegisterExtensionCommand) => number;
 };

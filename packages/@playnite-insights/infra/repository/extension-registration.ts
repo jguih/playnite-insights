@@ -33,7 +33,7 @@ export const makeExtensionRegistrationRepository = (
         const now = new Date().toISOString();
         const db = getDb();
         const stmt = db.prepare(query);
-        stmt.run(
+        const result = stmt.run(
           data.ExtensionId,
           data.PublicKey,
           data.Hostname,
@@ -43,6 +43,7 @@ export const makeExtensionRegistrationRepository = (
           now,
           now
         );
+        return result.lastInsertRowid as number;
       },
       `add(${data.ExtensionId}, ${data.Hostname})`
     );
@@ -100,7 +101,40 @@ export const makeExtensionRegistrationRepository = (
       );
     };
 
-  return { add, update, getByExtensionId };
+  const getByRegistrationId: ExtensionRegistrationRepository["getByRegistrationId"] =
+    (id) => {
+      const query = `SELECT * FROM ${TABLE_NAME} WHERE Id = ?`;
+      return repositoryCall(
+        logService,
+        () => {
+          const db = getDb();
+          const stmt = db.prepare(query);
+          const result = stmt.get(id);
+          const extensionRegistration = z
+            .optional(extensionRegistrationSchema)
+            .parse(result);
+          return extensionRegistration ?? null;
+        },
+        `getByRegistrationId(${id})`
+      );
+    };
+
+  const remove: ExtensionRegistrationRepository["remove"] = (id) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `DELETE FROM ${TABLE_NAME} WHERE Id = ?;`;
+        const now = new Date().toISOString();
+        const stmt = db.prepare(query);
+        stmt.run(id);
+        logService.debug(`Deleted extension registration (${id})`);
+      },
+      `remove(${id})`
+    );
+  };
+
+  return { add, update, getByExtensionId, getByRegistrationId, remove };
 };
 
 export const defaultExtensionRegistrationRepository: ExtensionRegistrationRepository =

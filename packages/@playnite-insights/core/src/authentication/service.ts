@@ -35,6 +35,7 @@ export const makeAuthenticationService = ({
       const signatureBase64 = headers["X-Signature"];
       const timestamp = headers["X-Timestamp"];
       const contentHash = headers["X-ContentHash"];
+      const registrationId = headers["X-RegistrationId"];
       const requestDescription = `${request.method} ${url.pathname}`;
 
       if (!extensionId) {
@@ -61,11 +62,27 @@ export const makeAuthenticationService = ({
         );
         return false;
       }
+      if (!registrationId || isNaN(Number(registrationId))) {
+        logService.warning(
+          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing or invalid X-RegistrationId header`
+        );
+        return false;
+      }
 
       const timestampMs = Date.parse(timestamp);
       if (timestampMs > now || now - timestampMs >= FIVE_MINUTES_MS) {
         logService.warning(
           `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to expired or invalid timestamp`
+        );
+        return false;
+      }
+
+      const registration = extensionRegistrationRepository.getByRegistrationId(
+        Number(registrationId)
+      );
+      if (!registration || registration.Status !== "trusted") {
+        logService.warning(
+          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing, pending or not trusted registration`
         );
         return false;
       }
@@ -78,14 +95,6 @@ export const makeAuthenticationService = ({
         contentHash,
       });
 
-      const registration =
-        extensionRegistrationRepository.getByExtensionId(extensionId);
-      if (!registration || registration.Status !== "trusted") {
-        logService.warning(
-          `${requestDescription}: Extension (Id: ${extensionId}) request rejected due to missing, pending or not trusted registration`
-        );
-        return false;
-      }
       const validSignature = signatureService.verifyExtensionSignature({
         signatureBase64,
         registration,
@@ -97,6 +106,7 @@ export const makeAuthenticationService = ({
         );
         return false;
       }
+      
       logService.debug(
         `${requestDescription}: Extension (Id: ${extensionId}) request authorized`
       );

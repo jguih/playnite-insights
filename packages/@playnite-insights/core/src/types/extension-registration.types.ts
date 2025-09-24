@@ -6,9 +6,13 @@ export type ExtensionRegistrationRepository = {
       ExtensionRegistration,
       "Id" | "LastUpdatedAt" | "CreatedAt"
     >
-  ) => void;
+  ) => ExtensionRegistration["Id"];
   update: (registration: ExtensionRegistration) => void;
   getByExtensionId: (
     extensionId: ExtensionRegistration["ExtensionId"]
   ) => ExtensionRegistration | null;
+  getByRegistrationId: (
+    id: ExtensionRegistration["Id"]
+  ) => ExtensionRegistration | null;
+  remove: (id: ExtensionRegistration["Id"]) => void;
 };
