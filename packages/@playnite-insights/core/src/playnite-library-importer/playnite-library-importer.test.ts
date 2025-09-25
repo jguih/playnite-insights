@@ -28,6 +28,7 @@ describe("Game Importer", () => {
     service = makePlayniteLibraryImporterService(deps);
 
     deps.genreRepository.upsertMany.mockImplementation(() => {});
+    deps.platformRepository.upsertMany.mockImplementation(() => {});
   });
 
   it("should return error when importing invalid json body", async () => {

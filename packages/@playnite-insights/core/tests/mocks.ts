@@ -5,6 +5,7 @@ import type { LibraryManifestService } from "../src/library-manifest";
 import type {
   ExtensionRegistrationRepository,
   GenreRepository,
+  PlatformRepository,
   PlayniteGameRepository,
   PlayniteLibrarySyncRepository,
   SignatureService,
@@ -112,6 +113,16 @@ export const makeMocks = () => {
     upsertMany: vi.fn(),
   } satisfies GenreRepository;
 
+  const platformRepository = {
+    add: vi.fn(),
+    exists: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+    upsertMany: vi.fn(),
+  } satisfies PlatformRepository;
+
   const signatureService = {
     generateKeyPairAsync: vi.fn(),
     signAsync: vi.fn(),
@@ -130,5 +141,6 @@ export const makeMocks = () => {
     extensionRegistrationRepository,
     completionStatusRepository,
     genreRepository,
+    platformRepository,
   };
 };

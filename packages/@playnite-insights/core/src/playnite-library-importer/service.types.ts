@@ -5,6 +5,7 @@ import type {
 import { type LibraryManifestService } from "../library-manifest/service.types";
 import type {
   GenreRepository,
+  PlatformRepository,
   PlayniteGameRepository,
   PlayniteLibrarySyncRepository,
 } from "../types";
@@ -26,6 +27,7 @@ export type PlayniteLibraryImporterServiceDeps = {
   TMP_DIR: string;
   completionStatusRepository: CompletionStatusRepository;
   genreRepository: GenreRepository;
+  platformRepository: PlatformRepository;
 };
 
 export type PlayniteLibraryImporterService = {

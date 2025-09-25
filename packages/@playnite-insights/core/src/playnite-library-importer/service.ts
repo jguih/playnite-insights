@@ -1,5 +1,6 @@
 import {
   ApiError,
+  Platform,
   validAuthenticationHeaders,
   type IncomingPlayniteGameDTO,
   type SyncGameListCommand,
@@ -28,6 +29,7 @@ export const makePlayniteLibraryImporterService = ({
   TMP_DIR,
   completionStatusRepository,
   genreRepository,
+  platformRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
   const _ensureCompletionStatusExists = (game: IncomingPlayniteGameDTO) => {
     if (!game.CompletionStatus) return;
@@ -96,13 +98,31 @@ export const makePlayniteLibraryImporterService = ({
         data.UpdatedItems.length +
         data.RemovedItems.length;
 
-      const genres = [...data.AddedItems, ...data.UpdatedItems]
-        .map((g) => g.Genres ?? [])
-        .flat();
+      const addedOrUpdated = [...data.AddedItems, ...data.UpdatedItems];
+
+      const genres = addedOrUpdated.map((g) => g.Genres ?? []).flat();
       const uniqueGenres = Array.from(
         new Map(genres.map((g) => [g.Id, g])).values()
       );
       genreRepository.upsertMany(uniqueGenres);
+
+      const platforms = addedOrUpdated
+        .map((g) => g.Platforms ?? [])
+        .flat()
+        .map((p) => {
+          return {
+            Id: p.Id,
+            SpecificationId: p.SpecificationId,
+            Name: p.Name,
+            Background: p.Background ?? null,
+            Cover: p.Cover ?? null,
+            Icon: p.Icon ?? null,
+          } as Platform;
+        });
+      const uniquePlatforms = Array.from(
+        new Map(platforms.map((p) => [p.Id, p])).values()
+      );
+      platformRepository.upsertMany(uniquePlatforms);
 
       // Games to add
       for (const game of data.AddedItems) {

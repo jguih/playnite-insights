@@ -7,4 +7,5 @@ export type PlatformRepository = {
   getById: (id: string) => Platform | undefined;
   hasChanges: (oldPlatform: Platform, newPlatform: Platform) => boolean;
   all: () => Platform[] | undefined;
+  upsertMany: (genres: Platform[]) => void;
 };
