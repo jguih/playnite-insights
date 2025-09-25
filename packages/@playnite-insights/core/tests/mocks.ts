@@ -53,23 +53,15 @@ export const makeMocks = () => {
   } satisfies LibraryManifestService;
 
   const playniteGameRepository = {
-    add: vi.fn(),
-    update: vi.fn(),
     remove: vi.fn(),
     exists: vi.fn(),
-    addDeveloperFor: vi.fn(),
-    deleteDevelopersFor: vi.fn(),
-    addPlatformFor: vi.fn(),
-    deletePlatformsFor: vi.fn(),
-    addGenreFor: vi.fn(),
-    deleteGenresFor: vi.fn(),
-    addPublisherFor: vi.fn(),
-    deletePublishersFor: vi.fn(),
     getById: vi.fn(),
     getManifestData: vi.fn(),
     getTotal: vi.fn(),
     getTotalPlaytimeSeconds: vi.fn(),
     all: vi.fn(),
+    upsertMany: vi.fn(),
+    updateManyGenres: vi.fn(),
   } satisfies PlayniteGameRepository;
 
   const gameSessionRepository = {

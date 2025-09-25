@@ -1,9 +1,10 @@
 import {
   ApiError,
-  CompletionStatus,
-  Platform,
   validAuthenticationHeaders,
+  type CompletionStatus,
   type IncomingPlayniteGameDTO,
+  type Platform,
+  type PlayniteGame,
   type SyncGameListCommand,
 } from "@playnite-insights/lib/client";
 import busboy from "busboy";
@@ -11,9 +12,8 @@ import { createHash } from "crypto";
 import type { IncomingHttpHeaders } from "http";
 import { join } from "path";
 import { ReadableStream } from "stream/web";
-import { AddOrUpdatePlayniteGameArgs } from "../types";
 import {
-  ImportMediaFilesContext,
+  type ImportMediaFilesContext,
   type PlayniteLibraryImporterService,
   type PlayniteLibraryImporterServiceDeps,
 } from "./service.types";
@@ -33,40 +33,25 @@ export const makePlayniteLibraryImporterService = ({
   platformRepository,
   companyRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
-  const _getAddOrUpdatePlayniteGameArgs = (
+  const _fromDtoToPlayniteGame = (
     game: IncomingPlayniteGameDTO
-  ): AddOrUpdatePlayniteGameArgs => {
+  ): PlayniteGame => {
     return {
-      game: {
-        Id: game.Id,
-        IsInstalled: +game.IsInstalled,
-        Playtime: game.Playtime,
-        Added: game.Added ?? null,
-        BackgroundImage: game.BackgroundImage ?? null,
-        CoverImage: game.CoverImage ?? null,
-        Description: game.Description ?? null,
-        Icon: game.Icon ?? null,
-        InstallDirectory: game.InstallDirectory ?? null,
-        LastActivity: game.LastActivity ?? null,
-        Name: game.Name ?? null,
-        ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
-        Hidden: +game.Hidden,
-        CompletionStatusId: game.CompletionStatus?.Id ?? null,
-        ContentHash: game.ContentHash,
-      },
-      developers: game.Developers ?? [],
-      platforms: game.Platforms?.map((plat) => {
-        return {
-          Id: plat.Id,
-          Name: plat.Name,
-          SpecificationId: plat.SpecificationId,
-          Background: plat.Background ?? null,
-          Cover: plat.Cover ?? null,
-          Icon: plat.Icon ?? null,
-        };
-      }),
-      genres: game.Genres ?? [],
-      publishers: game.Publishers ?? [],
+      Id: game.Id,
+      IsInstalled: +game.IsInstalled,
+      Playtime: game.Playtime,
+      Added: game.Added ?? null,
+      BackgroundImage: game.BackgroundImage ?? null,
+      CoverImage: game.CoverImage ?? null,
+      Description: game.Description ?? null,
+      Icon: game.Icon ?? null,
+      InstallDirectory: game.InstallDirectory ?? null,
+      LastActivity: game.LastActivity ?? null,
+      Name: game.Name ?? null,
+      ReleaseDate: game.ReleaseDate?.ReleaseDate ?? null,
+      Hidden: +game.Hidden,
+      CompletionStatusId: game.CompletionStatus?.Id ?? null,
+      ContentHash: game.ContentHash,
     };
   };
 
@@ -129,31 +114,16 @@ export const makePlayniteLibraryImporterService = ({
       );
       completionStatusRepository.upsertMany(uniqueCompletionStatuses);
 
-      // Games to add
-      for (const game of data.AddedItems) {
-        const exists = playniteGameRepository.exists(game.Id);
-        if (exists) {
-          logService.info(`Skipping existing game ${game.Name}`);
-          continue;
-        }
-        playniteGameRepository.add(_getAddOrUpdatePlayniteGameArgs(game));
-      }
-      // Games to update
-      for (const game of data.UpdatedItems) {
-        const exists = playniteGameRepository.exists(game.Id);
-        if (!exists) {
-          logService.info(
-            `Skipping game to update ${game.Name}, as it doesn't exist`
-          );
-          continue;
-        }
-        const result = playniteGameRepository.update(
-          _getAddOrUpdatePlayniteGameArgs(game)
-        );
-        if (!result) {
-          logService.error(`Failed to update game ${game.Name}`);
-        }
-      }
+      const gamesToUpsert: PlayniteGame[] = addedOrUpdated.map(
+        _fromDtoToPlayniteGame
+      );
+      playniteGameRepository.upsertMany(gamesToUpsert);
+
+      const gameGenresMap = new Map(
+        addedOrUpdated.map((g) => [g.Id, g.Genres?.map((g) => g.Id) ?? []])
+      );
+      playniteGameRepository.updateManyGenres(gameGenresMap);
+
       // Games to delete
       for (const gameId of data.RemovedItems) {
         const game = playniteGameRepository.getById(gameId);

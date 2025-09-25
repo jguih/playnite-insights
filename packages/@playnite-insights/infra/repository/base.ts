@@ -22,10 +22,22 @@ export const repositoryCall = <T>(
   fn: () => T,
   context?: string
 ): T => {
+  const start = performance.now();
   try {
-    return fn();
+    const result = fn();
+    const duration = performance.now() - start;
+    logService.debug(
+      `Repository call ${context ? context : ""} took ${duration.toFixed(1)}ms`
+    );
+    return result;
   } catch (error) {
-    logService.error(`Repository call failed ${context ? context : ""}`, error);
+    const duration = performance.now() - start;
+    logService.error(
+      `Repository call ${
+        context ? context : ""
+      } failed after ${duration.toFixed(1)}ms`,
+      error
+    );
     if (error instanceof ApiError) throw error;
     if (error instanceof ZodError) {
       throw new ValidationError({ details: error.errors });

@@ -1,4 +1,7 @@
 {
+  "extends": [
+    "./playnite-insights/tsconfig.json"
+  ],
   "compilerOptions": {
     "paths": {
       "@playnite-insights/lib": [
@@ -16,16 +19,6 @@
       "@playnite-insights/testing": [
         "./packages/@playnite-insights/testing"
       ]
-    },
-    "strict": true,
-    "strictNullChecks": true,
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "moduleResolution": "bundler"
+    }
   }
 }

@@ -189,43 +189,6 @@ export const makePlayniteGameRepository = (
     );
   };
 
-  const addGenreFor: PlayniteGameRepository["addGenreFor"] = (game, genre) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `
-          INSERT INTO playnite_game_genre
-            (GameId, GenreId)
-          VALUES
-            (?, ?)
-        `;
-        const stmt = db.prepare(query);
-        stmt.run(game.Id, genre.Id);
-        logService.debug(`Added genre ${genre.Name} for game ${game.Name}`);
-        return true;
-      },
-      `addGenreFor(${game.Id}, ${game.Name}, ${genre.Name})`
-    );
-  };
-
-  const deleteGenresFor: PlayniteGameRepository["deleteGenresFor"] = (game) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `DELETE FROM playnite_game_genre WHERE GameId = (?)`;
-        const stmt = db.prepare(query);
-        const result = stmt.run(game.Id);
-        logService.debug(
-          `Deleted ${result.changes} genre relationships for ${game.Name}`
-        );
-        return true;
-      },
-      `deleteGenresFor(${game.Id}, ${game.Name})`
-    );
-  };
-
   const addPublisherFor: PlayniteGameRepository["addPublisherFor"] = (
     game,
     publisher
@@ -270,16 +233,11 @@ export const makePlayniteGameRepository = (
     );
   };
 
-  const add: PlayniteGameRepository["add"] = ({
-    game,
-    developers,
-    platforms,
-    genres,
-    publishers,
-  }) => {
+  const upsertMany: PlayniteGameRepository["upsertMany"] = (games) => {
     return repositoryCall(
       logService,
       () => {
+        const start = performance.now();
         const db = getDb();
         const query = `
         INSERT INTO playnite_game (
@@ -298,205 +256,103 @@ export const makePlayniteGameRepository = (
           ContentHash,
           Hidden,
           CompletionStatusId
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ) VALUES (
+          ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+        ) ON CONFLICT(Id) DO UPDATE SET
+          Name = excluded.Name,
+          Description = excluded.Description,
+          ReleaseDate = excluded.ReleaseDate,
+          Playtime = excluded.Playtime,
+          LastActivity = excluded.LastActivity,
+          Added = excluded.Added,
+          InstallDirectory = excluded.InstallDirectory,
+          IsInstalled = excluded.IsInstalled,
+          BackgroundImage = excluded.BackgroundImage,
+          CoverImage = excluded.CoverImage,
+          Icon = excluded.Icon,
+          ContentHash = excluded.ContentHash,
+          Hidden = excluded.Hidden,
+          CompletionStatusId = excluded.CompletionStatusId;
         `;
         const stmt = db.prepare(query);
-        stmt.run(
-          game.Id,
-          game.Name ?? null,
-          game.Description ?? null,
-          game.ReleaseDate ?? null,
-          game.Playtime ?? null,
-          game.LastActivity ?? null,
-          game.Added ?? null,
-          game.InstallDirectory ?? null,
-          +game.IsInstalled,
-          game.BackgroundImage ?? null,
-          game.CoverImage ?? null,
-          game.Icon ?? null,
-          game.ContentHash,
-          game.Hidden,
-          game.CompletionStatusId
-        );
-        logService.debug(`Created game ${game.Name}`);
-        if (developers) {
-          const uniqueDevs = Array.from(
-            new Map(developers.map((dev) => [dev.Id, dev])).values()
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const game of games)
+            stmt.run(
+              game.Id,
+              game.Name,
+              game.Description,
+              game.ReleaseDate,
+              game.Playtime,
+              game.LastActivity,
+              game.Added,
+              game.InstallDirectory,
+              +game.IsInstalled,
+              game.BackgroundImage,
+              game.CoverImage,
+              game.Icon,
+              game.ContentHash,
+              game.Hidden,
+              game.CompletionStatusId
+            );
+          db.exec("COMMIT");
+          const duration = performance.now() - start;
+          logService.debug(
+            `Upserted ${games.length} game(s) in ${duration.toFixed(1)}ms`
           );
-          for (const developer of uniqueDevs) {
-            if (!companyRepository.exists(developer)) {
-              companyRepository.add(developer);
-            }
-            addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
-          }
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
         }
-        if (platforms) {
-          const uniquePlatforms = Array.from(
-            new Map(platforms.map((plat) => [plat.Id, plat])).values()
-          );
-          for (const platform of uniquePlatforms) {
-            if (!platformRepository.exists(platform)) {
-              platformRepository.add(platform);
-            }
-            addPlatformFor({ Id: game.Id, Name: game.Name }, platform);
-          }
-        }
-        if (genres) {
-          const uniqueGenres = Array.from(
-            new Map(genres.map((genre) => [genre.Id, genre])).values()
-          );
-          for (const genre of uniqueGenres) {
-            if (!genreRepository.exists(genre)) {
-              genreRepository.add(genre);
-            }
-            addGenreFor({ Id: game.Id, Name: game.Name }, genre);
-          }
-        }
-        if (publishers) {
-          const uniquePublishers = Array.from(
-            new Map(publishers.map((pub) => [pub.Id, pub])).values()
-          );
-          for (const publisher of uniquePublishers) {
-            if (!companyRepository.exists(publisher)) {
-              companyRepository.add(publisher);
-            }
-            addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
-          }
-        }
-        return true;
       },
-      `add(${game.Id}, ${game.Name}, developers: ${
-        developers?.length ?? 0
-      }, platforms: ${platforms?.length ?? 0}, genres: ${
-        genres?.length ?? 0
-      }, publishers: ${publishers?.length ?? 0})`
+      `upsertMany(${games.length} game(s))`
     );
   };
 
-  const update: PlayniteGameRepository["update"] = ({
-    game,
-    developers,
-    platforms,
-    genres,
-    publishers,
-  }) => {
+  const updateManyGenres: PlayniteGameRepository["updateManyGenres"] = (
+    genresMap
+  ) => {
     return repositoryCall(
       logService,
       () => {
         const db = getDb();
-        const query = `
-          UPDATE playnite_game
-          SET
-            Name = ?,
-            Description = ?,
-            ReleaseDate = ?,
-            Playtime = ?,
-            LastActivity = ?,
-            Added = ?,
-            InstallDirectory = ?,
-            IsInstalled = ?,
-            BackgroundImage = ?,
-            CoverImage = ?,
-            Icon = ?,
-            ContentHash = ?,
-            Hidden = ?,
-            CompletionStatusId = ?
-          WHERE Id = ?;
-        `;
-        const stmt = db.prepare(query);
-        stmt.run(
-          game.Name ?? null,
-          game.Description ?? null,
-          game.ReleaseDate ?? null,
-          game.Playtime ?? null,
-          game.LastActivity ?? null,
-          game.Added ?? null,
-          game.InstallDirectory ?? null,
-          +game.IsInstalled,
-          game.BackgroundImage ?? null,
-          game.CoverImage ?? null,
-          game.Icon ?? null,
-          game.ContentHash,
-          game.Hidden,
-          game.CompletionStatusId,
-          game.Id // WHERE Id
-        );
-        logService.debug(`Updated game ${game.Name}`);
-        if (developers) {
-          deleteDevelopersFor({ Id: game.Id, Name: game.Name });
-          const uniqueDevs = Array.from(
-            new Map(developers.map((dev) => [dev.Id, dev])).values()
-          );
-          for (const developer of uniqueDevs) {
-            const existing = companyRepository.getById(developer.Id);
-            if (existing) {
-              if (companyRepository.hasChanges(existing, developer)) {
-                companyRepository.update(developer);
-              }
-            } else {
-              companyRepository.add(developer);
+        const queries = {
+          getCurrentGenres: `SELECT GenreId FROM playnite_game_genre WHERE GameId = ?`,
+          removeGenre: `DELETE FROM playnite_game_genre WHERE GameId = ? AND GenreId = ?`,
+          addGenre: `INSERT INTO playnite_game_genre (GameId, GenreId) VALUES (?, ?)`,
+        };
+        const statements = {
+          getCurrentGenres: db.prepare(queries.getCurrentGenres),
+          removeGenre: db.prepare(queries.removeGenre),
+          addGenre: db.prepare(queries.addGenre),
+        };
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const [gameId, _newGenreIds] of genresMap) {
+            const _currentGenreIdsResult =
+              statements.getCurrentGenres.all(gameId);
+            const _currentGenreIds = _currentGenreIdsResult.map(
+              (v) => v.GenreId as string
+            );
+            const currentGenreIdsSet = new Set(_currentGenreIds);
+            const newGenreIdsSet = new Set(_newGenreIds);
+            for (const newGenreId of newGenreIdsSet) {
+              if (currentGenreIdsSet.has(newGenreId)) continue;
+              statements.addGenre.run(gameId, newGenreId);
             }
-            addDeveloperFor({ Id: game.Id, Name: game.Name }, developer);
-          }
-        }
-        if (platforms) {
-          deletePlatformsFor({ Id: game.Id, Name: game.Name });
-          const uniquePlatforms = Array.from(
-            new Map(platforms.map((plat) => [plat.Id, plat])).values()
-          );
-          for (const platform of uniquePlatforms) {
-            const existing = platformRepository.getById(platform.Id);
-            if (existing) {
-              if (platformRepository.hasChanges(existing, platform)) {
-                platformRepository.update(platform);
+            for (const currentGenreId of currentGenreIdsSet) {
+              if (!newGenreIdsSet.has(currentGenreId)) {
+                statements.removeGenre.run(gameId, currentGenreId);
               }
-            } else {
-              platformRepository.add(platform);
             }
-            addPlatformFor({ Id: game.Id, Name: game.Name }, platform);
           }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
         }
-        if (genres) {
-          deleteGenresFor({ Id: game.Id, Name: game.Name });
-          const uniqueGenres = Array.from(
-            new Map(genres.map((genre) => [genre.Id, genre])).values()
-          );
-          for (const genre of uniqueGenres) {
-            const existing = genreRepository.getById(genre.Id);
-            if (existing) {
-              if (genreRepository.hasChanges(existing, genre)) {
-                genreRepository.update(genre);
-              }
-            } else {
-              genreRepository.add(genre);
-            }
-            addGenreFor({ Id: game.Id, Name: game.Name }, genre);
-          }
-        }
-        if (publishers) {
-          deletePublishersFor({ Id: game.Id, Name: game.Name });
-          const uniquePublishers = Array.from(
-            new Map(publishers.map((pub) => [pub.Id, pub])).values()
-          );
-          for (const publisher of uniquePublishers) {
-            const existing = companyRepository.getById(publisher.Id);
-            if (existing) {
-              if (companyRepository.hasChanges(existing, publisher)) {
-                companyRepository.update(publisher);
-              }
-            } else {
-              companyRepository.add(publisher);
-            }
-            addPublisherFor({ Id: game.Id, Name: game.Name }, publisher);
-          }
-        }
-        return true;
       },
-      `update(${game.Id}, ${game.Name}, developers: ${
-        developers?.length ?? 0
-      }, platforms: ${platforms?.length ?? 0}, genres: ${
-        genres?.length ?? 0
-      }, publishers: ${publishers?.length ?? 0})`
+      `updateManyGenres(${genresMap.size} game(s))`
     );
   };
 
@@ -613,18 +469,10 @@ export const makePlayniteGameRepository = (
   };
 
   return {
-    add,
-    update,
+    upsertMany,
+    updateManyGenres,
     remove,
     exists,
-    addDeveloperFor,
-    addGenreFor,
-    addPlatformFor,
-    addPublisherFor,
-    deleteDevelopersFor,
-    deleteGenresFor,
-    deletePlatformsFor,
-    deletePublishersFor,
     getById,
     getTotalPlaytimeSeconds,
     getManifestData,

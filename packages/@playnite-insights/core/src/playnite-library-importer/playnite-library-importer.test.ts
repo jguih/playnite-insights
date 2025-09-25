@@ -26,10 +26,6 @@ describe("Game Importer", () => {
     vi.resetAllMocks();
     deps = createDeps();
     service = makePlayniteLibraryImporterService(deps);
-
-    deps.genreRepository.upsertMany.mockImplementation(() => {});
-    deps.platformRepository.upsertMany.mockImplementation(() => {});
-    deps.companyRepository.upsertMany.mockImplementation(() => {});
   });
 
   it("should return error when importing invalid json body", async () => {
@@ -39,102 +35,6 @@ describe("Game Importer", () => {
     const result = await service.sync(invalidJson);
     // Assert
     expect(result).toBe(false);
-  });
-
-  it("should check if a game exists before trying to add it", async () => {
-    // Arrange
-    const data: SyncGameListCommand = {
-      AddedItems: [
-        {
-          Id: "id1",
-          Playtime: 12,
-          ContentHash: "hash",
-          IsInstalled: false,
-          Hidden: false,
-        },
-      ],
-      RemovedItems: [],
-      UpdatedItems: [],
-    };
-    vi.spyOn(deps.playniteGameRepository, "exists").mockReturnValueOnce(true);
-    const addSpy = vi.spyOn(deps.playniteGameRepository, "add");
-    // Act
-    const result = await service.sync(data);
-    // Assert
-    expect(addSpy).not.toHaveBeenCalled();
-    expect(result).toBeTruthy();
-  });
-
-  it("should add a game if it doesnt exist", async () => {
-    // Arrange
-    const data: SyncGameListCommand = {
-      AddedItems: [
-        {
-          Id: "id1",
-          Playtime: 12,
-          ContentHash: "hash",
-          IsInstalled: false,
-          Hidden: false,
-        },
-      ],
-      RemovedItems: [],
-      UpdatedItems: [],
-    };
-    vi.spyOn(deps.playniteGameRepository, "exists").mockReturnValueOnce(false);
-    const addSpy = vi.spyOn(deps.playniteGameRepository, "add");
-    // Act
-    const result = await service.sync(data);
-    // Assert
-    expect(addSpy).toHaveBeenCalled();
-    expect(result).toBeTruthy();
-  });
-
-  it("should not update game if it doesnt exist", async () => {
-    // Arrange
-    const data: SyncGameListCommand = {
-      AddedItems: [],
-      RemovedItems: [],
-      UpdatedItems: [
-        {
-          Id: "id1",
-          Playtime: 12,
-          ContentHash: "hash",
-          IsInstalled: false,
-          Hidden: false,
-        },
-      ],
-    };
-    vi.spyOn(deps.playniteGameRepository, "exists").mockReturnValueOnce(false);
-    const updateSpy = vi.spyOn(deps.playniteGameRepository, "update");
-    // Act
-    const result = await service.sync(data);
-    // Assert
-    expect(updateSpy).not.toHaveBeenCalled();
-    expect(result).toBeTruthy();
-  });
-
-  it("should update a game if it exists", async () => {
-    // Arrange
-    const data: SyncGameListCommand = {
-      AddedItems: [],
-      RemovedItems: [],
-      UpdatedItems: [
-        {
-          Id: "id1",
-          Playtime: 12,
-          ContentHash: "hash",
-          IsInstalled: false,
-          Hidden: false,
-        },
-      ],
-    };
-    vi.spyOn(deps.playniteGameRepository, "exists").mockReturnValueOnce(true);
-    const updateSpy = vi.spyOn(deps.playniteGameRepository, "update");
-    // Act
-    const result = await service.sync(data);
-    // Assert
-    expect(updateSpy).toHaveBeenCalled();
-    expect(result).toBeTruthy();
   });
 
   it("should delete a game and its media folder", async () => {
