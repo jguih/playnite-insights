@@ -1,5 +1,8 @@
-import { ApiError } from "@playnite-insights/lib/client";
 import {
+  ApiError,
+  type ExtensionRegistration,
+} from "@playnite-insights/lib/client";
+import type {
   ExtensionRegistrationService,
   ExtensionRegistrationServiceDeps,
 } from "./service.types";
@@ -14,25 +17,29 @@ export const makeExtensionRegistrationService = ({
     );
     if (existing && existing.Status !== "rejected") {
       logService.debug(
-        `Attempted to register extension (Id: ${existing.Id}, ExtensionId: ${existing.ExtensionId}) more than once, returning 409 and existing id`
+        `Attempted to register extension (Id: ${existing.Id}, ExtensionId: ${existing.ExtensionId}) more than once`
       );
       return {
         status: 409,
-        registrationId: existing.Id,
+        registration: existing,
       };
     } else if (existing) {
       extensionRegistrationRepository.remove(existing.Id);
     }
 
-    const registrationId = extensionRegistrationRepository.add({
+    const newRegistration: ExtensionRegistration = {
+      Id: 0,
       ExtensionId: command.ExtensionId,
       PublicKey: command.PublicKey,
       ExtensionVersion: command.ExtensionVersion ?? null,
       Hostname: command.Hostname ?? null,
       Os: command.Os ?? null,
       Status: "pending",
-    });
-    return { status: 201, registrationId };
+      CreatedAt: new Date().toISOString(),
+      LastUpdatedAt: new Date().toISOString(),
+    };
+    extensionRegistrationRepository.add(newRegistration);
+    return { status: 201, registration: newRegistration };
   };
 
   const revoke: ExtensionRegistrationService["revoke"] = (registrationId) => {

@@ -1,9 +1,9 @@
-import {
+import type {
   ExtensionRegistration,
   RegisterExtensionCommand,
 } from "@playnite-insights/lib/client";
-import { ExtensionRegistrationRepository } from "../types/extension-registration.types";
-import { LogService } from "../types/log.types";
+import type { ExtensionRegistrationRepository } from "../types/extension-registration.types";
+import type { LogService } from "../types/log.types";
 
 export type ExtensionRegistrationServiceDeps = {
   extensionRegistrationRepository: ExtensionRegistrationRepository;
@@ -13,7 +13,7 @@ export type ExtensionRegistrationServiceDeps = {
 export type ExtensionRegistrationService = {
   register: (command: RegisterExtensionCommand) => {
     status: 201 | 409;
-    registrationId: number;
+    registration: ExtensionRegistration;
   };
   revoke: (registrationId: ExtensionRegistration["Id"]) => void;
   remove: (registrationId: ExtensionRegistration["Id"]) => void;

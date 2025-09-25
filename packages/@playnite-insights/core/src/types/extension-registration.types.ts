@@ -1,12 +1,7 @@
-import { ExtensionRegistration } from "@playnite-insights/lib/client";
+import type { ExtensionRegistration } from "@playnite-insights/lib/client";
 
 export type ExtensionRegistrationRepository = {
-  add: (
-    registration: Omit<
-      ExtensionRegistration,
-      "Id" | "LastUpdatedAt" | "CreatedAt"
-    >
-  ) => ExtensionRegistration["Id"];
+  add: (registration: ExtensionRegistration) => void;
   update: (registration: ExtensionRegistration) => void;
   getByExtensionId: (
     extensionId: ExtensionRegistration["ExtensionId"]

@@ -1,8 +1,8 @@
-import { ExtensionRegistrationRepository } from "@playnite-insights/core";
+import { type ExtensionRegistrationRepository } from "@playnite-insights/core";
 import { extensionRegistrationSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
-  BaseRepositoryDeps,
+  type BaseRepositoryDeps,
   getDefaultRepositoryDeps,
   repositoryCall,
 } from "./base";
@@ -13,7 +13,7 @@ export const makeExtensionRegistrationRepository = (
   const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
   const TABLE_NAME = `extension_registration`;
 
-  const add: ExtensionRegistrationRepository["add"] = (data) => {
+  const add: ExtensionRegistrationRepository["add"] = (newRegistration) => {
     const query = `
       INSERT INTO ${TABLE_NAME} (
         ExtensionId,
@@ -31,21 +31,23 @@ export const makeExtensionRegistrationRepository = (
       logService,
       () => {
         const now = new Date().toISOString();
+        newRegistration.CreatedAt = now;
+        newRegistration.LastUpdatedAt = now;
         const db = getDb();
         const stmt = db.prepare(query);
         const result = stmt.run(
-          data.ExtensionId,
-          data.PublicKey,
-          data.Hostname,
-          data.Os,
-          data.ExtensionVersion,
-          data.Status,
-          now,
-          now
+          newRegistration.ExtensionId,
+          newRegistration.PublicKey,
+          newRegistration.Hostname,
+          newRegistration.Os,
+          newRegistration.ExtensionVersion,
+          newRegistration.Status,
+          newRegistration.CreatedAt,
+          newRegistration.LastUpdatedAt
         );
-        return result.lastInsertRowid as number;
+        newRegistration.Id = result.lastInsertRowid as number;
       },
-      `add(${data.ExtensionId}, ${data.Hostname})`
+      `add(${newRegistration.ExtensionId}, ${newRegistration.Hostname})`
     );
   };
 

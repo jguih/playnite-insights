@@ -1,4 +1,5 @@
 import z from "zod";
+import { extensionRegistrationSchema } from "../extension-registration";
 
 export const apiSSEventDataSchema = {
   message: z.string(),
@@ -8,7 +9,7 @@ export const apiSSEventDataSchema = {
   sessionOpened: z.boolean(),
   sessionClosed: z.boolean(),
   heartbeat: z.boolean(),
-  createdExtensionRegistration: z.boolean(),
+  createdExtensionRegistration: extensionRegistrationSchema,
 } as const;
 
 export const apiSSEventType = Object.fromEntries(

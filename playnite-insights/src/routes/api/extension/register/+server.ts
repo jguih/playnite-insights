@@ -8,9 +8,9 @@ export const POST: RequestHandler = async ({ request, url }) => {
 	try {
 		const body = await request.json();
 		const command = registerExtensionCommandSchema.parse(body);
-		const { status, registrationId } = services.extensionRegistration.register(command);
-		defaultSSEManager.broadcast({ type: 'createdExtensionRegistration', data: true });
-		return json({ registrationId }, { status });
+		const { status, registration } = services.extensionRegistration.register(command);
+		defaultSSEManager.broadcast({ type: 'createdExtensionRegistration', data: registration });
+		return json({ registrationId: registration.Id }, { status });
 	} catch (error) {
 		return handleApiError(error, `${request.method} ${url.pathname}`);
 	}

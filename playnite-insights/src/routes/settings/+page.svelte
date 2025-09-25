@@ -74,7 +74,24 @@
 					body: {},
 				});
 			});
-			await loadExtensionRegistrations();
+			const index =
+				extensionRegistrationsSignal.registrations?.findIndex((r) => r.Id === registrationId) ?? -1;
+			if (index > -1) {
+				switch (action) {
+					case 'approve':
+						extensionRegistrationsSignal.registrations![index].Status = 'trusted';
+						break;
+					case 'revoke':
+					case 'reject':
+						extensionRegistrationsSignal.registrations![index].Status = 'rejected';
+						break;
+					case 'remove':
+						extensionRegistrationsSignal.registrations =
+							extensionRegistrationsSignal.registrations?.filter((r) => r.Id !== registrationId) ??
+							null;
+						break;
+				}
+			}
 		} catch (err) {
 			handleClientErrors(
 				err,
@@ -102,11 +119,23 @@
 		toast.success({ category: 'app', message: m.toast_data_sync_succeeded() });
 	};
 
+	const handleSSENewRegistration = (newRegistration: ExtensionRegistration) => {
+		let newRegistrations: ExtensionRegistration[] = [newRegistration];
+		const index =
+			extensionRegistrationsSignal.registrations?.findIndex((r) => r.Id === newRegistration.Id) ??
+			-1;
+		if (index > -1) {
+			newRegistrations = [...extensionRegistrationsSignal.registrations!];
+			newRegistrations[index] = newRegistration;
+		}
+		extensionRegistrationsSignal.registrations = newRegistrations;
+	};
+
 	onMount(() => {
 		loadExtensionRegistrations();
 		const unsub = clientServiceLocator.eventSourceManager.addListener({
 			type: 'createdExtensionRegistration',
-			cb: () => loadExtensionRegistrations(),
+			cb: ({ data }) => handleSSENewRegistration(data),
 		});
 		return () => {
 			unsub();
