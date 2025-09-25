@@ -9,6 +9,7 @@
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
+	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Select from '$lib/client/components/forms/Select.svelte';
@@ -22,6 +23,7 @@
 	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
 	import { AlertCircle, CheckCircle } from '@lucide/svelte';
 	import {
+		EmptyStrategy,
 		getAllExtensionRegistrationsSchema,
 		JsonStrategy,
 		type ExtensionRegistration,
@@ -44,12 +46,12 @@
 	const loadExtensionRegistrations = async () => {
 		try {
 			extensionRegistrationsSignal.isLoading = true;
-			return await withHttpClient(async ({ client }) => {
+			await withHttpClient(async ({ client }) => {
 				const result = await client.httpGetAsync({
 					endpoint: '/api/extension-registration',
 					strategy: new JsonStrategy(getAllExtensionRegistrationsSchema),
 				});
-				extensionRegistrationsSignal.registrations = result;
+				extensionRegistrationsSignal.registrations = result.registrations;
 			});
 		} catch (err) {
 			handleClientErrors(
@@ -58,6 +60,27 @@
 			);
 		} finally {
 			extensionRegistrationsSignal.isLoading = false;
+		}
+	};
+
+	const handleOnChangeRegistration = async (
+		registrationId: ExtensionRegistration['Id'],
+		action: 'revoke' | 'remove' | 'reject' | 'approve',
+	) => {
+		try {
+			await withHttpClient(async ({ client }) => {
+				await client.httpPostAsync({
+					endpoint: `/api/extension-registration/${registrationId}/${action}`,
+					strategy: new EmptyStrategy(),
+					body: {},
+				});
+			});
+			await loadExtensionRegistrations();
+		} catch (err) {
+			handleClientErrors(
+				err,
+				`[handleOnRevokeRegistration] failed to ${action} registration /api/extension-registration/${registrationId}/${action}`,
+			);
 		}
 	};
 
@@ -82,6 +105,13 @@
 
 	onMount(() => {
 		loadExtensionRegistrations();
+		const unsub = clientServiceLocator.eventSourceManager.addListener({
+			type: 'createdExtensionRegistration',
+			cb: () => loadExtensionRegistrations(),
+		});
+		return () => {
+			unsub();
+		};
 	});
 </script>
 
@@ -114,12 +144,34 @@
 		{@render registrationInfo('Atualizado', new Date(registration.LastUpdatedAt).toLocaleString())}
 		<div class="mt-2 flex justify-end gap-2">
 			{#if registration.Status === 'pending'}
-				<SolidButton class={['w-20']}>Aprovar</SolidButton>
-				<SolidButton class={['w-20']}>Rejeitar</SolidButton>
+				<LightButton
+					class={['w-20']}
+					color="neutral"
+					onclick={() => handleOnChangeRegistration(registration.Id, 'approve')}
+				>
+					Aprovar
+				</LightButton>
+				<LightButton
+					class={['w-20']}
+					color="neutral"
+					onclick={() => handleOnChangeRegistration(registration.Id, 'reject')}
+				>
+					Rejeitar
+				</LightButton>
 			{:else if registration.Status === 'rejected'}
-				<SolidButton class={['w-20']}>Excluir</SolidButton>
+				<LightButton
+					class={['w-20']}
+					onclick={() => handleOnChangeRegistration(registration.Id, 'remove')}
+				>
+					Excluir
+				</LightButton>
 			{:else}
-				<SolidButton class={['w-20']}>Revogar</SolidButton>
+				<LightButton
+					class={['w-20']}
+					onclick={() => handleOnChangeRegistration(registration.Id, 'revoke')}
+				>
+					Revogar
+				</LightButton>
 			{/if}
 		</div>
 	</div>
@@ -147,14 +199,14 @@
 		</div>
 		<ConfigSection title="PlayAtlas Exporter">
 			<p class="mb-4 text-sm">
-				PlayAtlas Exporter é a extensão do Playnite responsável pela sincronização dos dados da sua
+				O <strong>PlayAtlas Exporter</strong> é a extensão do Playnite que sincroniza os dados da sua
 				biblioteca com o PlayAtlas.
 			</p>
-			<h2 class="text-lg">Registros de extensão</h2>
+			<h2 class="text-lg">Registros da extensão</h2>
 			<Divider class={['border-1 mb-4']} />
 			<p class="mb-4 text-sm">
-				Para que a extensão possa enviar dados ao PlayAtlas, é necessário que seu registro esteja
-				aprovado.
+				Para que a extensão possa enviar dados ao PlayAtlas, é necessário que seu registro seja
+				<strong>aprovado</strong>.
 			</p>
 			<div class="flex max-h-[56dvh] flex-col gap-4 overflow-y-auto">
 				{#if extensionRegistrationsSignal.isLoading}
@@ -163,6 +215,10 @@
 					{#each extensionRegistrationsSignal.registrations as registration (registration.Id)}
 						{@render registrationCard(registration)}
 					{/each}
+				{:else}
+					<div class="bg-background-2 p-2">
+						<p class="block w-full text-center">Nenhum registro encontrado</p>
+					</div>
 				{/if}
 			</div>
 		</ConfigSection>

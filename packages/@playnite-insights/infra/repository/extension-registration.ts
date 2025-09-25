@@ -125,7 +125,6 @@ export const makeExtensionRegistrationRepository = (
       () => {
         const db = getDb();
         const query = `DELETE FROM ${TABLE_NAME} WHERE Id = ?;`;
-        const now = new Date().toISOString();
         const stmt = db.prepare(query);
         stmt.run(id);
         logService.debug(`Deleted extension registration (${id})`);

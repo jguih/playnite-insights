@@ -8,6 +8,7 @@ export const apiSSEventDataSchema = {
   sessionOpened: z.boolean(),
   sessionClosed: z.boolean(),
   heartbeat: z.boolean(),
+  createdExtensionRegistration: z.boolean(),
 } as const;
 
 export const apiSSEventType = Object.fromEntries(
@@ -44,4 +45,8 @@ export type APISSEvent =
   | {
       type: typeof apiSSEventType.heartbeat;
       data: z.infer<typeof apiSSEventDataSchema.heartbeat>;
+    }
+  | {
+      type: typeof apiSSEventType.createdExtensionRegistration;
+      data: z.infer<typeof apiSSEventDataSchema.createdExtensionRegistration>;
     };

@@ -21,9 +21,9 @@ export type RegisterExtensionCommand = z.infer<
   typeof registerExtensionCommandSchema
 >;
 
-export const getAllExtensionRegistrationsSchema = z.array(
-  extensionRegistrationSchema
-);
+export const getAllExtensionRegistrationsSchema = z.object({
+  registrations: z.array(extensionRegistrationSchema),
+});
 export type GetAllExtensionRegistrationsResponse = z.infer<
   typeof getAllExtensionRegistrationsSchema
 >;
