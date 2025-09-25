@@ -1,4 +1,4 @@
-import { CompletionStatusRepository } from "@playnite-insights/core/src/types/completion-status.types";
+import type { CompletionStatusRepository } from "@playnite-insights/core";
 import { completionStatusSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
@@ -35,11 +35,10 @@ export const makeCompletionStatusRepository = (
 
   const upsertMany: CompletionStatusRepository["upsertMany"] = (
     completionStatuses
-  ): boolean => {
+  ) => {
     return repositoryCall(
       logService,
       () => {
-        const start = performance.now();
         const db = getDb();
         const query = `
             INSERT INTO ${TABLE_NAME}
@@ -51,16 +50,14 @@ export const makeCompletionStatusRepository = (
             `;
         const stmt = db.prepare(query);
         db.exec("BEGIN TRANSACTION");
-        for (const completionStatus of completionStatuses)
-          stmt.run(completionStatus.Id, completionStatus.Name);
-        db.exec("COMMIT");
-        const duration = performance.now() - start;
-        logService.debug(
-          `Upserted ${
-            completionStatuses.length
-          } completionStatus(es) in ${duration.toFixed(1)}ms`
-        );
-        return true;
+        try {
+          for (const completionStatus of completionStatuses)
+            stmt.run(completionStatus.Id, completionStatus.Name);
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
       },
       `upsertMany(${completionStatuses.length} completionStatus(es))`
     );

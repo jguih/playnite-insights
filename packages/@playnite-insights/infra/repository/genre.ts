@@ -32,11 +32,10 @@ export const makeGenreRepository = (
     );
   };
 
-  const upsertMany: GenreRepository["upsertMany"] = (genres): boolean => {
+  const upsertMany: GenreRepository["upsertMany"] = (genres) => {
     return repositoryCall(
       logService,
       () => {
-        const start = performance.now();
         const db = getDb();
         const query = `
         INSERT INTO genre
@@ -48,13 +47,13 @@ export const makeGenreRepository = (
         `;
         const stmt = db.prepare(query);
         db.exec("BEGIN TRANSACTION");
-        for (const genre of genres) stmt.run(genre.Id, genre.Name);
-        db.exec("COMMIT");
-        const duration = performance.now() - start;
-        logService.debug(
-          `Upserted ${genres.length} genres in ${duration.toFixed(1)}ms`
-        );
-        return true;
+        try {
+          for (const genre of genres) stmt.run(genre.Id, genre.Name);
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
       },
       `upsertMany(${genres.length} genres)`
     );

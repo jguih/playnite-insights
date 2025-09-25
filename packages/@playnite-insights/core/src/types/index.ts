@@ -1,4 +1,5 @@
 export type * from "./company.types";
+export type * from "./completion-status.types";
 export type * from "./extension-registration.types";
 export type * from "./file-system.types";
 export type * from "./game-note.types";

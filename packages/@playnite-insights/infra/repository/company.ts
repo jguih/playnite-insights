@@ -33,11 +33,10 @@ export const makeCompanyRepository = (
     );
   };
 
-  const upsertMany: CompanyRepository["upsertMany"] = (companies): boolean => {
+  const upsertMany: CompanyRepository["upsertMany"] = (companies) => {
     return repositoryCall(
       logService,
       () => {
-        const start = performance.now();
         const db = getDb();
         const query = `
           INSERT INTO ${TABLE_NAME}
@@ -49,13 +48,13 @@ export const makeCompanyRepository = (
           `;
         const stmt = db.prepare(query);
         db.exec("BEGIN TRANSACTION");
-        for (const company of companies) stmt.run(company.Id, company.Name);
-        db.exec("COMMIT");
-        const duration = performance.now() - start;
-        logService.debug(
-          `Upserted ${companies.length} companies in ${duration.toFixed(1)}ms`
-        );
-        return true;
+        try {
+          for (const company of companies) stmt.run(company.Id, company.Name);
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
       },
       `upsertMany(${companies.length} companies)`
     );

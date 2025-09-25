@@ -40,11 +40,10 @@ export const makePlatformRepository = (
     );
   };
 
-  const upsertMany: PlatformRepository["upsertMany"] = (platforms): boolean => {
+  const upsertMany: PlatformRepository["upsertMany"] = (platforms) => {
     return repositoryCall(
       logService,
       () => {
-        const start = performance.now();
         const db = getDb();
         const query = `
           INSERT INTO ${TABLE_NAME}
@@ -60,21 +59,21 @@ export const makePlatformRepository = (
           `;
         const stmt = db.prepare(query);
         db.exec("BEGIN TRANSACTION");
-        for (const platform of platforms)
-          stmt.run(
-            platform.Id,
-            platform.Name,
-            platform.SpecificationId,
-            platform.Icon,
-            platform.Cover,
-            platform.Background
-          );
-        db.exec("COMMIT");
-        const duration = performance.now() - start;
-        logService.debug(
-          `Upserted ${platforms.length} platforms in ${duration.toFixed(1)}ms`
-        );
-        return true;
+        try {
+          for (const platform of platforms)
+            stmt.run(
+              platform.Id,
+              platform.Name,
+              platform.SpecificationId,
+              platform.Icon,
+              platform.Cover,
+              platform.Background
+            );
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
       },
       `upsertMany(${platforms.length} platforms)`
     );
