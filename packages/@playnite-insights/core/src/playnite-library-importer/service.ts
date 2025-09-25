@@ -30,6 +30,7 @@ export const makePlayniteLibraryImporterService = ({
   completionStatusRepository,
   genreRepository,
   platformRepository,
+  companyRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
   const _ensureCompletionStatusExists = (game: IncomingPlayniteGameDTO) => {
     if (!game.CompletionStatus) return;
@@ -123,6 +124,14 @@ export const makePlayniteLibraryImporterService = ({
         new Map(platforms.map((p) => [p.Id, p])).values()
       );
       platformRepository.upsertMany(uniquePlatforms);
+
+      const companies = addedOrUpdated
+        .map((g) => [...(g.Publishers ?? []), ...(g.Developers ?? [])])
+        .flat();
+      const uniqueCompanies = Array.from(
+        new Map(companies.map((c) => [c.Id, c])).values()
+      );
+      companyRepository.upsertMany(uniqueCompanies);
 
       // Games to add
       for (const game of data.AddedItems) {

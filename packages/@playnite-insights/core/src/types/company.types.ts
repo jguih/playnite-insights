@@ -7,4 +7,5 @@ export type CompanyRepository = {
   getById: (id: string) => Company | undefined;
   hasChanges: (oldCompany: Company, newCompany: Company) => boolean;
   all: () => Company[] | undefined;
+  upsertMany: (companies: Company[]) => void;
 };

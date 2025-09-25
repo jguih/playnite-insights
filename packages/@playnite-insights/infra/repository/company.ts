@@ -11,10 +11,11 @@ export const makeCompanyRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): CompanyRepository => {
   const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+  const TABLE_NAME = "company";
 
   const add = (company: Company): boolean => {
     const query = `
-      INSERT INTO company
+      INSERT INTO ${TABLE_NAME}
         (Id, Name)
       VALUES
         (?, ?);
@@ -29,6 +30,34 @@ export const makeCompanyRepository = (
         return true;
       },
       `add()`
+    );
+  };
+
+  const upsertMany: CompanyRepository["upsertMany"] = (companies): boolean => {
+    return repositoryCall(
+      logService,
+      () => {
+        const start = performance.now();
+        const db = getDb();
+        const query = `
+          INSERT INTO ${TABLE_NAME}
+            (Id, Name)
+          VALUES
+            (?, ?)
+          ON CONFLICT DO UPDATE SET
+            Name = excluded.Name;
+          `;
+        const stmt = db.prepare(query);
+        db.exec("BEGIN TRANSACTION");
+        for (const company of companies) stmt.run(company.Id, company.Name);
+        db.exec("COMMIT");
+        const duration = performance.now() - start;
+        logService.debug(
+          `Upserted ${companies.length} companies in ${duration.toFixed(1)}ms`
+        );
+        return true;
+      },
+      `upsertMany(${companies.length} companies)`
     );
   };
 
@@ -116,6 +145,7 @@ export const makeCompanyRepository = (
 
   return {
     add,
+    upsertMany,
     update,
     exists,
     getById,

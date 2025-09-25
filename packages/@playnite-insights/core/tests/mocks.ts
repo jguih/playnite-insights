@@ -3,6 +3,7 @@ import { constants } from "fs/promises";
 import { vi } from "vitest";
 import type { LibraryManifestService } from "../src/library-manifest";
 import type {
+  CompanyRepository,
   ExtensionRegistrationRepository,
   GenreRepository,
   PlatformRepository,
@@ -123,6 +124,16 @@ export const makeMocks = () => {
     upsertMany: vi.fn(),
   } satisfies PlatformRepository;
 
+  const companyRepository = {
+    add: vi.fn(),
+    exists: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+    upsertMany: vi.fn(),
+  } satisfies CompanyRepository;
+
   const signatureService = {
     generateKeyPairAsync: vi.fn(),
     signAsync: vi.fn(),
@@ -142,5 +153,6 @@ export const makeMocks = () => {
     completionStatusRepository,
     genreRepository,
     platformRepository,
+    companyRepository,
   };
 };

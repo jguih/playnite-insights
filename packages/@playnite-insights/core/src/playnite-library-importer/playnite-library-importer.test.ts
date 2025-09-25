@@ -29,6 +29,7 @@ describe("Game Importer", () => {
 
     deps.genreRepository.upsertMany.mockImplementation(() => {});
     deps.platformRepository.upsertMany.mockImplementation(() => {});
+    deps.companyRepository.upsertMany.mockImplementation(() => {});
   });
 
   it("should return error when importing invalid json body", async () => {

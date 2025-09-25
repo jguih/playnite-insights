@@ -14,11 +14,22 @@ const genreSchema = z.object({
   Name: z.string(),
 });
 
-const developerSchema = genreSchema;
+const companySchema = z.object({
+  Id: z.string(),
+  Name: z.string(),
+});
 
-const publisherSchema = developerSchema;
+const developerSchema = companySchema;
 
-const completionStatusSchema = publisherSchema.nullable().optional();
+const publisherSchema = companySchema;
+
+const completionStatusSchema = z
+  .object({
+    Id: z.string(),
+    Name: z.string(),
+  })
+  .nullable()
+  .optional();
 
 export const incomingPlayniteGameDtoSchema = z.object({
   Id: z.string(),

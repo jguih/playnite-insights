@@ -4,6 +4,7 @@ import type {
 } from "@playnite-insights/lib/client";
 import { type LibraryManifestService } from "../library-manifest/service.types";
 import type {
+  CompanyRepository,
   GenreRepository,
   PlatformRepository,
   PlayniteGameRepository,
@@ -28,6 +29,7 @@ export type PlayniteLibraryImporterServiceDeps = {
   completionStatusRepository: CompletionStatusRepository;
   genreRepository: GenreRepository;
   platformRepository: PlatformRepository;
+  companyRepository: CompanyRepository;
 };
 
 export type PlayniteLibraryImporterService = {
