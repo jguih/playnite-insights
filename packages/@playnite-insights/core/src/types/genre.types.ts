@@ -7,4 +7,5 @@ export type GenreRepository = {
   getById: (id: string) => Genre | undefined;
   hasChanges: (oldGenre: Genre, newGenre: Genre) => boolean;
   all: () => Genre[] | undefined;
+  upsertMany: (genres: Genre[]) => void;
 };

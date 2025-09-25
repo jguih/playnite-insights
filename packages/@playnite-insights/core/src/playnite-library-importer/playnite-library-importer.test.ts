@@ -15,6 +15,7 @@ const createDeps = () => {
   return {
     ...mocks,
     FILES_DIR: "/files_dir",
+    TMP_DIR: "/tmp",
   } satisfies PlayniteLibraryImporterServiceDeps;
 };
 let deps: ReturnType<typeof createDeps>;
@@ -25,6 +26,8 @@ describe("Game Importer", () => {
     vi.resetAllMocks();
     deps = createDeps();
     service = makePlayniteLibraryImporterService(deps);
+
+    deps.genreRepository.upsertMany.mockImplementation(() => {});
   });
 
   it("should return error when importing invalid json body", async () => {

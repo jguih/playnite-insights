@@ -27,6 +27,7 @@ export const makePlayniteLibraryImporterService = ({
   FILES_DIR,
   TMP_DIR,
   completionStatusRepository,
+  genreRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
   const _ensureCompletionStatusExists = (game: IncomingPlayniteGameDTO) => {
     if (!game.CompletionStatus) return;
@@ -94,6 +95,15 @@ export const makePlayniteLibraryImporterService = ({
         data.AddedItems.length +
         data.UpdatedItems.length +
         data.RemovedItems.length;
+
+      const genres = [...data.AddedItems, ...data.UpdatedItems]
+        .map((g) => g.Genres ?? [])
+        .flat();
+      const uniqueGenres = Array.from(
+        new Map(genres.map((g) => [g.Id, g])).values()
+      );
+      genreRepository.upsertMany(uniqueGenres);
+
       // Games to add
       for (const game of data.AddedItems) {
         const exists = playniteGameRepository.exists(game.Id);
@@ -102,12 +112,7 @@ export const makePlayniteLibraryImporterService = ({
           continue;
         }
         _ensureCompletionStatusExists(game);
-        const result = playniteGameRepository.add(
-          _getAddOrUpdatePlayniteGameArgs(game)
-        );
-        if (!result) {
-          logService.error(`Failed to add game ${game.Name}`);
-        }
+        playniteGameRepository.add(_getAddOrUpdatePlayniteGameArgs(game));
       }
       // Games to update
       for (const game of data.UpdatedItems) {
