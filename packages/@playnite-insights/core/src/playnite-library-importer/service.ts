@@ -60,7 +60,7 @@ export const makePlayniteLibraryImporterService = ({
    */
   const sync = async (data: SyncGameListCommand) => {
     try {
-      logService.info(`Library sync started`);
+      logService.info(`Syncing game library...`);
       logService.info(`Games to add: ${data.AddedItems.length}`);
       logService.info(`Games to update: ${data.UpdatedItems.length}`);
       logService.info(`Games to delete: ${data.RemovedItems.length}`);
@@ -123,6 +123,21 @@ export const makePlayniteLibraryImporterService = ({
         addedOrUpdated.map((g) => [g.Id, g.Genres?.map((g) => g.Id) ?? []])
       );
       playniteGameRepository.updateManyGenres(gameGenresMap);
+
+      const gamePublishersMap = new Map(
+        addedOrUpdated.map((g) => [g.Id, g.Publishers?.map((p) => p.Id) ?? []])
+      );
+      playniteGameRepository.updateManyPublishers(gamePublishersMap);
+
+      const gameDevelopersMap = new Map(
+        addedOrUpdated.map((g) => [g.Id, g.Developers?.map((d) => d.Id) ?? []])
+      );
+      playniteGameRepository.updateManyDevelopers(gameDevelopersMap);
+
+      const gamePlatformsMap = new Map(
+        addedOrUpdated.map((g) => [g.Id, g.Platforms?.map((p) => p.Id) ?? []])
+      );
+      playniteGameRepository.updateManyPlatforms(gamePlatformsMap);
 
       // Games to delete
       for (const gameId of data.RemovedItems) {

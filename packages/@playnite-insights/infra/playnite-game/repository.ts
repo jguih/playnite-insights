@@ -1,9 +1,4 @@
-import type {
-  CompanyRepository,
-  GenreRepository,
-  PlatformRepository,
-  PlayniteGameRepository,
-} from "@playnite-insights/core";
+import type { PlayniteGameRepository } from "@playnite-insights/core";
 import {
   fullGameRawSchema,
   playniteGameSchema,
@@ -16,34 +11,18 @@ import {
   repositoryCall,
   type BaseRepositoryDeps,
 } from "../repository/base";
-import { defaultCompanyRepository } from "../repository/company";
-import { defaultGenreRepository } from "../repository/genre";
-import { defaultPlatformRepository } from "../repository/platform";
 import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
 
-type PlayniteGameRepositoryDeps = BaseRepositoryDeps & {
-  platformRepository: PlatformRepository;
-  genreRepository: GenreRepository;
-  companyRepository: CompanyRepository;
-};
+type PlayniteGameRepositoryDeps = BaseRepositoryDeps;
 
 const defaultDeps: Required<PlayniteGameRepositoryDeps> = {
   ...getDefaultRepositoryDeps(),
-  platformRepository: defaultPlatformRepository,
-  genreRepository: defaultGenreRepository,
-  companyRepository: defaultCompanyRepository,
 };
 
 export const makePlayniteGameRepository = (
   deps: Partial<PlayniteGameRepositoryDeps> = {}
 ): PlayniteGameRepository => {
-  const {
-    getDb,
-    logService,
-    platformRepository,
-    genreRepository,
-    companyRepository,
-  } = { ...defaultDeps, ...deps };
+  const { getDb, logService } = { ...defaultDeps, ...deps };
 
   const getTotal: PlayniteGameRepository["getTotal"] = (filters) => {
     return repositoryCall(
@@ -60,7 +39,7 @@ export const makePlayniteGameRepository = (
         const total = (db.prepare(query).get(...params)?.Total as number) ?? 0;
         return total;
       },
-      `getTotal(${JSON.stringify(filters)})`
+      `getTotal(${filters ? JSON.stringify(filters) : ""})`
     );
   };
 
@@ -101,143 +80,10 @@ export const makePlayniteGameRepository = (
     );
   };
 
-  const addDeveloperFor: PlayniteGameRepository["addDeveloperFor"] = (
-    game,
-    developer
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `
-          INSERT INTO playnite_game_developer
-            (GameId, DeveloperId)
-          VALUES
-            (?, ?)
-        `;
-        const stmt = db.prepare(query);
-        stmt.run(game.Id, developer.Id);
-        logService.debug(
-          `Added developer ${developer.Name} for game ${game.Name}`
-        );
-        return true;
-      },
-      `addDeveloperFor(${game.Id}, ${game.Name}, ${developer.Name})`
-    );
-  };
-
-  const deleteDevelopersFor: PlayniteGameRepository["deleteDevelopersFor"] = (
-    game
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `DELETE FROM playnite_game_developer WHERE GameId = (?)`;
-        const stmt = db.prepare(query);
-        const result = stmt.run(game.Id);
-        logService.debug(
-          `Deleted ${result.changes} developer relationships for ${game.Name}`
-        );
-        return true;
-      },
-      `deleteDevelopersFor(${game.Id}, ${game.Name})`
-    );
-  };
-
-  const addPlatformFor: PlayniteGameRepository["addPlatformFor"] = (
-    game,
-    platform
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `
-          INSERT INTO playnite_game_platform
-            (GameId, PlatformId)
-          VALUES
-            (?, ?)
-        `;
-        const stmt = db.prepare(query);
-        stmt.run(game.Id, platform.Id);
-        logService.debug(
-          `Added platform ${platform.Name} for game ${game.Name}`
-        );
-        return true;
-      },
-      `addPlatformFor(${game.Id}, ${game.Name}, ${platform.Name})`
-    );
-  };
-
-  const deletePlatformsFor: PlayniteGameRepository["deletePlatformsFor"] = (
-    game
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `DELETE FROM playnite_game_platform WHERE GameId = (?)`;
-        const stmt = db.prepare(query);
-        const result = stmt.run(game.Id);
-        logService.debug(
-          `Deleted ${result.changes} platform relationships for ${game.Name}`
-        );
-        return true;
-      },
-      `deletePlatformsFor(${game.Id}, ${game.Name})`
-    );
-  };
-
-  const addPublisherFor: PlayniteGameRepository["addPublisherFor"] = (
-    game,
-    publisher
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `
-        INSERT INTO playnite_game_publisher
-          (GameId, PublisherId)
-        VALUES
-          (?, ?)
-        `;
-        const stmt = db.prepare(query);
-        stmt.run(game.Id, publisher.Id);
-        logService.debug(
-          `Added publisher ${publisher.Name} for game ${game.Name}`
-        );
-        return true;
-      },
-      `addPublisherFor(${game.Id}, ${game.Name}, ${publisher.Name})`
-    );
-  };
-
-  const deletePublishersFor: PlayniteGameRepository["deletePublishersFor"] = (
-    game
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const db = getDb();
-        const query = `DELETE FROM playnite_game_publisher WHERE GameId = (?)`;
-        const stmt = db.prepare(query);
-        const result = stmt.run(game.Id);
-        logService.debug(
-          `Deleted ${result.changes} publisher relationships for ${game.Name}`
-        );
-        return true;
-      },
-      `deletePublishersFor(${game.Id}, ${game.Name})`
-    );
-  };
-
   const upsertMany: PlayniteGameRepository["upsertMany"] = (games) => {
     return repositoryCall(
       logService,
       () => {
-        const start = performance.now();
         const db = getDb();
         const query = `
         INSERT INTO playnite_game (
@@ -296,10 +142,6 @@ export const makePlayniteGameRepository = (
               game.CompletionStatusId
             );
           db.exec("COMMIT");
-          const duration = performance.now() - start;
-          logService.debug(
-            `Upserted ${games.length} game(s) in ${duration.toFixed(1)}ms`
-          );
         } catch (error) {
           db.exec("ROLLBACK");
           throw error;
@@ -353,6 +195,147 @@ export const makePlayniteGameRepository = (
         }
       },
       `updateManyGenres(${genresMap.size} game(s))`
+    );
+  };
+
+  const updateManyDevelopers: PlayniteGameRepository["updateManyDevelopers"] = (
+    developersMap
+  ) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const queries = {
+          getCurrentDevelopers: `SELECT DeveloperId FROM playnite_game_developer WHERE GameId = ?`,
+          removeDeveloper: `DELETE FROM playnite_game_developer WHERE GameId = ? AND DeveloperId = ?`,
+          addDeveloper: `INSERT INTO playnite_game_developer (GameId, DeveloperId) VALUES (?, ?)`,
+        };
+        const statements = {
+          getCurrentDevelopers: db.prepare(queries.getCurrentDevelopers),
+          removeDeveloper: db.prepare(queries.removeDeveloper),
+          addDeveloper: db.prepare(queries.addDeveloper),
+        };
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const [gameId, _newDeveloperIds] of developersMap) {
+            const _currentDeveloperIdsResult =
+              statements.getCurrentDevelopers.all(gameId);
+            const _currentDeveloperIds = _currentDeveloperIdsResult.map(
+              (v) => v.DeveloperId as string
+            );
+            const currentDeveloperIdsSet = new Set(_currentDeveloperIds);
+            const newDeveloperIdsSet = new Set(_newDeveloperIds);
+            for (const newDeveloperId of newDeveloperIdsSet) {
+              if (currentDeveloperIdsSet.has(newDeveloperId)) continue;
+              statements.addDeveloper.run(gameId, newDeveloperId);
+            }
+            for (const currentDeveloperId of currentDeveloperIdsSet) {
+              if (!newDeveloperIdsSet.has(currentDeveloperId)) {
+                statements.removeDeveloper.run(gameId, currentDeveloperId);
+              }
+            }
+          }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `updateManyDevelopers(${developersMap.size} game(s))`
+    );
+  };
+
+  const updateManyPublishers: PlayniteGameRepository["updateManyPublishers"] = (
+    publishersMap
+  ) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const queries = {
+          getCurrentPublishers: `SELECT PublisherId FROM playnite_game_publisher WHERE GameId = ?`,
+          removePublisher: `DELETE FROM playnite_game_publisher WHERE GameId = ? AND PublisherId = ?`,
+          addPublisher: `INSERT INTO playnite_game_publisher (GameId, PublisherId) VALUES (?, ?)`,
+        };
+        const statements = {
+          getCurrentPublishers: db.prepare(queries.getCurrentPublishers),
+          removePublisher: db.prepare(queries.removePublisher),
+          addPublisher: db.prepare(queries.addPublisher),
+        };
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const [gameId, _newPublisherIds] of publishersMap) {
+            const _currentPublisherIdsResult =
+              statements.getCurrentPublishers.all(gameId);
+            const _currentPublisherIds = _currentPublisherIdsResult.map(
+              (v) => v.PublisherId as string
+            );
+            const currentPublisherIdsSet = new Set(_currentPublisherIds);
+            const newPublisherIdsSet = new Set(_newPublisherIds);
+            for (const newPublisherId of newPublisherIdsSet) {
+              if (currentPublisherIdsSet.has(newPublisherId)) continue;
+              statements.addPublisher.run(gameId, newPublisherId);
+            }
+            for (const currentPublisherId of currentPublisherIdsSet) {
+              if (!newPublisherIdsSet.has(currentPublisherId)) {
+                statements.removePublisher.run(gameId, currentPublisherId);
+              }
+            }
+          }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `updateManyPublishers(${publishersMap.size} game(s))`
+    );
+  };
+
+  const updateManyPlatforms: PlayniteGameRepository["updateManyPlatforms"] = (
+    platformsMap
+  ) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const queries = {
+          getCurrentPlatforms: `SELECT PlatformId FROM playnite_game_platform WHERE GameId = ?`,
+          removePlatform: `DELETE FROM playnite_game_platform WHERE GameId = ? AND PlatformId = ?`,
+          addPlatform: `INSERT INTO playnite_game_platform (GameId, PlatformId) VALUES (?, ?)`,
+        };
+        const statements = {
+          getCurrentPlatforms: db.prepare(queries.getCurrentPlatforms),
+          removePlatform: db.prepare(queries.removePlatform),
+          addPlatform: db.prepare(queries.addPlatform),
+        };
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const [gameId, _newPlatformIds] of platformsMap) {
+            const _currentPlatformIdsResult =
+              statements.getCurrentPlatforms.all(gameId);
+            const _currentPlatformIds = _currentPlatformIdsResult.map(
+              (v) => v.PlatformId as string
+            );
+            const currentPlatformIdsSet = new Set(_currentPlatformIds);
+            const newPlatformIdsSet = new Set(_newPlatformIds);
+            for (const newPlatformId of newPlatformIdsSet) {
+              if (currentPlatformIdsSet.has(newPlatformId)) continue;
+              statements.addPlatform.run(gameId, newPlatformId);
+            }
+            for (const currentPlatformId of currentPlatformIdsSet) {
+              if (!newPlatformIdsSet.has(currentPlatformId)) {
+                statements.removePlatform.run(gameId, currentPlatformId);
+              }
+            }
+          }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `updateManyPlatforms(${platformsMap.size} game(s))`
     );
   };
 
@@ -471,6 +454,9 @@ export const makePlayniteGameRepository = (
   return {
     upsertMany,
     updateManyGenres,
+    updateManyDevelopers,
+    updateManyPublishers,
+    updateManyPlatforms,
     remove,
     exists,
     getById,

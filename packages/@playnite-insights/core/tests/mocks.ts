@@ -62,6 +62,9 @@ export const makeMocks = () => {
     all: vi.fn(),
     upsertMany: vi.fn(),
     updateManyGenres: vi.fn(),
+    updateManyDevelopers: vi.fn(),
+    updateManyPlatforms: vi.fn(),
+    updateManyPublishers: vi.fn(),
   } satisfies PlayniteGameRepository;
 
   const gameSessionRepository = {
