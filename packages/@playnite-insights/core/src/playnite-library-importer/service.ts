@@ -1,5 +1,6 @@
 import {
   ApiError,
+  CompletionStatus,
   Platform,
   validAuthenticationHeaders,
   type IncomingPlayniteGameDTO,
@@ -32,21 +33,6 @@ export const makePlayniteLibraryImporterService = ({
   platformRepository,
   companyRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
-  const _ensureCompletionStatusExists = (game: IncomingPlayniteGameDTO) => {
-    if (!game.CompletionStatus) return;
-    const existing = completionStatusRepository.getById(
-      game.CompletionStatus.Id
-    );
-    if (existing) {
-      if (
-        completionStatusRepository.hasChanges(game.CompletionStatus, existing)
-      )
-        completionStatusRepository.update(game.CompletionStatus);
-    } else {
-      completionStatusRepository.add(game.CompletionStatus);
-    }
-  };
-
   const _getAddOrUpdatePlayniteGameArgs = (
     game: IncomingPlayniteGameDTO
   ): AddOrUpdatePlayniteGameArgs => {
@@ -133,6 +119,16 @@ export const makePlayniteLibraryImporterService = ({
       );
       companyRepository.upsertMany(uniqueCompanies);
 
+      const completionStatuses: CompletionStatus[] = addedOrUpdated
+        .map((g) => g.CompletionStatus)
+        .filter((c): c is CompletionStatus => {
+          return c !== undefined && c !== null;
+        });
+      const uniqueCompletionStatuses: CompletionStatus[] = Array.from(
+        new Map(completionStatuses.map((c) => [c.Id, c])).values()
+      );
+      completionStatusRepository.upsertMany(uniqueCompletionStatuses);
+
       // Games to add
       for (const game of data.AddedItems) {
         const exists = playniteGameRepository.exists(game.Id);
@@ -140,7 +136,6 @@ export const makePlayniteLibraryImporterService = ({
           logService.info(`Skipping existing game ${game.Name}`);
           continue;
         }
-        _ensureCompletionStatusExists(game);
         playniteGameRepository.add(_getAddOrUpdatePlayniteGameArgs(game));
       }
       // Games to update
@@ -152,7 +147,6 @@ export const makePlayniteLibraryImporterService = ({
           );
           continue;
         }
-        _ensureCompletionStatusExists(game);
         const result = playniteGameRepository.update(
           _getAddOrUpdatePlayniteGameArgs(game)
         );

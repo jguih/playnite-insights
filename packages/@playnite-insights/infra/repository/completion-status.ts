@@ -33,6 +33,39 @@ export const makeCompletionStatusRepository = (
     );
   };
 
+  const upsertMany: CompletionStatusRepository["upsertMany"] = (
+    completionStatuses
+  ): boolean => {
+    return repositoryCall(
+      logService,
+      () => {
+        const start = performance.now();
+        const db = getDb();
+        const query = `
+            INSERT INTO ${TABLE_NAME}
+              (Id, Name)
+            VALUES
+              (?, ?)
+            ON CONFLICT DO UPDATE SET
+              Name = excluded.Name;
+            `;
+        const stmt = db.prepare(query);
+        db.exec("BEGIN TRANSACTION");
+        for (const completionStatus of completionStatuses)
+          stmt.run(completionStatus.Id, completionStatus.Name);
+        db.exec("COMMIT");
+        const duration = performance.now() - start;
+        logService.debug(
+          `Upserted ${
+            completionStatuses.length
+          } completionStatus(es) in ${duration.toFixed(1)}ms`
+        );
+        return true;
+      },
+      `upsertMany(${completionStatuses.length} completionStatus(es))`
+    );
+  };
+
   const update: CompletionStatusRepository["update"] = (completionStatus) => {
     return repositoryCall(
       logService,
@@ -97,7 +130,7 @@ export const makeCompletionStatusRepository = (
           .optional(z.array(completionStatusSchema))
           .parse(result);
         logService.debug(
-          `Found ${completionStatuses?.length ?? 0} completion statuses`
+          `Found ${completionStatuses?.length ?? 0} completion status(es)`
         );
         return completionStatuses;
       },
@@ -107,6 +140,7 @@ export const makeCompletionStatusRepository = (
 
   return {
     add,
+    upsertMany,
     update,
     getById,
     hasChanges,

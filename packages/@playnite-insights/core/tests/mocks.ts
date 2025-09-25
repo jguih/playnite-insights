@@ -102,6 +102,7 @@ export const makeMocks = () => {
     getById: vi.fn(),
     hasChanges: vi.fn(),
     all: vi.fn(),
+    upsertMany: vi.fn(),
   } satisfies CompletionStatusRepository;
 
   const genreRepository = {

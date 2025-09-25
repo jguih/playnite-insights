@@ -9,4 +9,5 @@ export type CompletionStatusRepository = {
     newCompletionStatus: CompletionStatus
   ) => boolean;
   all: () => CompletionStatus[] | undefined;
+  upsertMany: (completionStatusRepository: CompletionStatus[]) => void;
 };
