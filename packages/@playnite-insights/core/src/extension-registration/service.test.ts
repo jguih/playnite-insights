@@ -1,5 +1,4 @@
 import {
-  ApiError,
   ExtensionRegistration,
   RegisterExtensionCommand,
 } from "@playnite-insights/lib/client";
@@ -31,7 +30,6 @@ describe("Extension Registration Service", () => {
     const command: RegisterExtensionCommand = {
       ExtensionId: crypto.randomUUID(),
       PublicKey: "",
-      Timestamp: now.toISOString(),
       ExtensionVersion: crypto.randomUUID(),
       Hostname: "TESTHOST",
       Os: "Windows 12",
@@ -47,8 +45,10 @@ describe("Extension Registration Service", () => {
       CreatedAt: "",
       LastUpdatedAt: "",
     } satisfies ExtensionRegistration);
+    // Act
+    service.register(command);
     // Act & Assert
-    expect(() => service.register(command)).toThrow(ApiError);
+    expect(deps.extensionRegistrationRepository.add).not.toHaveBeenCalled();
   });
 
   it("on register, create new registration", () => {
@@ -57,7 +57,6 @@ describe("Extension Registration Service", () => {
     const command: RegisterExtensionCommand = {
       ExtensionId: crypto.randomUUID(),
       PublicKey: "",
-      Timestamp: now.toISOString(),
       ExtensionVersion: crypto.randomUUID(),
       Hostname: "TESTHOST",
       Os: "Windows 12",
@@ -78,7 +77,6 @@ describe("Extension Registration Service", () => {
     const command: RegisterExtensionCommand = {
       ExtensionId: crypto.randomUUID(),
       PublicKey: "",
-      Timestamp: now.toISOString(),
       ExtensionVersion: crypto.randomUUID(),
       Hostname: "TESTHOST",
       Os: "Windows 12",

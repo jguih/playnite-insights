@@ -12,16 +12,19 @@ export const makeExtensionRegistrationService = ({
     const existing = extensionRegistrationRepository.getByExtensionId(
       command.ExtensionId
     );
-    if (existing && existing.Status !== "rejected")
-      throw new ApiError(
-        "Extension already registered, pending approval or trusted",
-        400
+    if (existing && existing.Status !== "rejected") {
+      logService.debug(
+        `Attempted to register extension (Id: ${existing.Id}, ExtensionId: ${existing.ExtensionId}) more than once, returning 409 and existing id`
       );
-    else if (existing) {
+      return {
+        status: 409,
+        registrationId: existing.Id,
+      };
+    } else if (existing) {
       extensionRegistrationRepository.remove(existing.Id);
     }
 
-    return extensionRegistrationRepository.add({
+    const registrationId = extensionRegistrationRepository.add({
       ExtensionId: command.ExtensionId,
       PublicKey: command.PublicKey,
       ExtensionVersion: command.ExtensionVersion ?? null,
@@ -29,6 +32,7 @@ export const makeExtensionRegistrationService = ({
       Os: command.Os ?? null,
       Status: "pending",
     });
+    return { status: 201, registrationId };
   };
 
   const revoke: ExtensionRegistrationService["revoke"] = (registrationId) => {

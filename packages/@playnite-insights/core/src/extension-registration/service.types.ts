@@ -11,7 +11,10 @@ export type ExtensionRegistrationServiceDeps = {
 };
 
 export type ExtensionRegistrationService = {
-  register: (command: RegisterExtensionCommand) => number;
+  register: (command: RegisterExtensionCommand) => {
+    status: 201 | 409;
+    registrationId: number;
+  };
   revoke: (registrationId: ExtensionRegistration["Id"]) => void;
   remove: (registrationId: ExtensionRegistration["Id"]) => void;
   approve: (registrationId: ExtensionRegistration["Id"]) => void;

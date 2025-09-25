@@ -1,9 +1,7 @@
 import z from "zod";
 import { extensionRegistrationSchema } from "../../extension-registration";
-import { ISODateSchema } from "../../schemas";
 
 export const baseExtensionCommandSchema = z.object({
-  Timestamp: ISODateSchema,
   ExtensionId: z.string(),
 });
 
