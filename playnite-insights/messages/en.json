@@ -110,5 +110,22 @@
   "settings_sync_section_title": "Synchronization",
   "settings_sync_section_summary_paragraph1": "All changes made in PlayAtlas are saved locally, allowing you to continue using the app even when offline. Periodically, your changes are synchronized with the server whenever possible, ensuring your data is not lost and that you can access PlayAtlas from any device, resuming exactly where you left off.",
   "settings_sync_section_summary_paragraph2": "If you are experiencing issues with synchronization, you can perform it manually by clicking the button below. Note: server data will be imported and will overwrite any data stored locally.",
-  "settings_sync_section_label_sync": "Synchronize Data"
+  "settings_sync_section_label_sync": "Synchronize Data",
+  "settings_playatlas_exporter_section_title": "PlayAtlas Exporter",
+  "settings_playatlas_exporter_section_summary": "{begin_strong}PlayAtlas Exporter{end_strong} is the Playnite extension that syncs your library data with PlayAtlas.",
+  "settings_playatlas_exporter_section_registration_subsection_title": "Extension registrations",
+  "settings_playatlas_exporter_section_registration_subsection_summary": "For the extension to send data to PlayAtlas, its registration must be {begin_strong}approved{end_strong}.",
+  "exporter_registration_status": "Status",
+  "exporter_registration_status_pending": "Pending",
+  "exporter_registration_status_rejected": "Rejected",
+  "exporter_registration_status_approved": "Approved",
+  "label_exporter_registration_approve": "Approve",
+  "label_exporter_registration_reject": "Reject",
+  "label_exporter_registration_rekove": "Revoke",
+  "label_exporter_registration_delete": "Delete",
+  "extension_registration_info_id": "Registration id",
+  "extension_registration_info_extension_id": "Extension id",
+  "extension_registration_info_version": "Version",
+  "created_at": "Created",
+  "updated_at": "Updated"
 }

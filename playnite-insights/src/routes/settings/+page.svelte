@@ -154,22 +154,31 @@
 {#snippet registrationCard(registration: ExtensionRegistration)}
 	<div class="bg-background-2 flex flex-col p-4">
 		<div class="flex flex-row justify-between gap-4">
-			<p>Status</p>
+			<p>{m.exporter_registration_status()}</p>
 			{#if registration.Status === 'pending'}
-				<p class="text-warning-light-fg">Pendente</p>
+				<p class="text-warning-light-fg">{m.exporter_registration_status_pending()}</p>
 			{:else if registration.Status === 'rejected'}
-				<p class="text-error-light-fg">Rejeitada</p>
+				<p class="text-error-light-fg">{m.exporter_registration_status_rejected()}</p>
 			{:else}
-				<p class="text-success-light-fg">Aprovada</p>
+				<p class="text-success-light-fg">{m.exporter_registration_status_approved()}</p>
 			{/if}
 		</div>
 		<Divider class={['border-background-3']} />
-		{@render registrationInfo('Id de registro', registration.Id)}
-		{@render registrationInfo('Id de extensão', registration.ExtensionId)}
+		{@render registrationInfo(m.extension_registration_info_id(), registration.Id)}
+		{@render registrationInfo(
+			m.extension_registration_info_extension_id(),
+			registration.ExtensionId,
+		)}
 		{@render registrationInfo('OS', registration.Os ?? '')}
-		{@render registrationInfo('Versão', registration.ExtensionVersion ?? '')}
-		{@render registrationInfo('Criado', new Date(registration.CreatedAt).toLocaleString())}
-		{@render registrationInfo('Atualizado', new Date(registration.LastUpdatedAt).toLocaleString())}
+		{@render registrationInfo(
+			m.extension_registration_info_version(),
+			registration.ExtensionVersion ?? '',
+		)}
+		{@render registrationInfo(m.created_at(), new Date(registration.CreatedAt).toLocaleString())}
+		{@render registrationInfo(
+			m.updated_at(),
+			new Date(registration.LastUpdatedAt).toLocaleString(),
+		)}
 		<div class="mt-2 flex justify-end gap-2">
 			{#if registration.Status === 'pending'}
 				<SolidButton
@@ -177,14 +186,14 @@
 					color="error"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'reject')}
 				>
-					Rejeitar
+					{m.label_exporter_registration_reject()}
 				</SolidButton>
 				<SolidButton
 					class={['w-20']}
 					color="primary"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'approve')}
 				>
-					Aprovar
+					{m.label_exporter_registration_approve()}
 				</SolidButton>
 			{:else if registration.Status === 'rejected'}
 				<SolidButton
@@ -192,7 +201,7 @@
 					color="neutral"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'remove')}
 				>
-					Excluir
+					{m.label_exporter_registration_delete()}
 				</SolidButton>
 			{:else}
 				<SolidButton
@@ -200,7 +209,7 @@
 					color="error"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'revoke')}
 				>
-					Revogar
+					{m.label_exporter_registration_rekove()}
 				</SolidButton>
 			{/if}
 		</div>
@@ -209,7 +218,7 @@
 
 <BaseAppLayout>
 	<Header class={['flex items-center justify-center']}>
-		<h1 class="block h-fit w-fit text-lg underline">
+		<h1 class="block h-fit w-fit text-lg">
 			{m.bottom_nav_label_settings()}
 		</h1>
 	</Header>
@@ -227,16 +236,22 @@
 				</p>
 			{/if}
 		</div>
-		<ConfigSection title="PlayAtlas Exporter">
+		<ConfigSection title={m.settings_playatlas_exporter_section_title()}>
 			<p class="mb-4 text-sm">
-				O <strong>PlayAtlas Exporter</strong> é a extensão do Playnite que sincroniza os dados da sua
-				biblioteca com o PlayAtlas.
+				{@html m.settings_playatlas_exporter_section_summary({
+					begin_strong: '<strong>',
+					end_strong: '</strong>',
+				})}
 			</p>
-			<h2 class="text-lg">Registros da extensão</h2>
+			<h2 class="text-lg">
+				{m.settings_playatlas_exporter_section_registration_subsection_title()}
+			</h2>
 			<Divider class={['border-1 mb-4']} />
 			<p class="mb-4 text-sm">
-				Para que a extensão possa enviar dados ao PlayAtlas, é necessário que seu registro seja
-				<strong>aprovado</strong>.
+				{@html m.settings_playatlas_exporter_section_registration_subsection_summary({
+					begin_strong: '<strong>',
+					end_strong: '</strong>',
+				})}
 			</p>
 			<div class="flex max-h-[56dvh] flex-col gap-4 overflow-y-auto">
 				{#if extensionRegistrationsSignal.isLoading}

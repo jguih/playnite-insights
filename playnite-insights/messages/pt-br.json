@@ -111,5 +111,22 @@
   "settings_sync_section_title": "Sincronização",
   "settings_sync_section_summary_paragraph1": "Todas as alterações feitas no PlayAtlas são salvas localmente, permitindo que você continue usando o aplicativo mesmo offline. Periodicamente, suas alterações são sincronizadas com o servidor sempre que possível, garantindo que seus dados não sejam perdidos e que você possa acessar o PlayAtlas de qualquer dispositivo, retomando exatamente de onde parou.",
   "settings_sync_section_summary_paragraph2": "Se estiver enfrentando problemas com a sincronização, você pode realizá-la manualmente clicando no botão abaixo. Nota: os dados do servidor serão importados e irão sobrescrever quaisquer dados presentes localmente.",
-  "settings_sync_section_label_sync": "Sincronizar Dados"
+  "settings_sync_section_label_sync": "Sincronizar Dados",
+  "settings_playatlas_exporter_section_title": "PlayAtlas Exporter",
+  "settings_playatlas_exporter_section_summary": "O {begin_strong}PlayAtlas Exporter{end_strong} é a extensão do Playnite que sincroniza os dados da sua biblioteca com o PlayAtlas.",
+  "settings_playatlas_exporter_section_registration_subsection_title": "Registros de extensão",
+  "settings_playatlas_exporter_section_registration_subsection_summary": "Para que a extensão possa enviar dados ao PlayAtlas, é necessário que seu registro seja {begin_strong}aprovado{end_strong}.",
+  "exporter_registration_status": "Status",
+  "exporter_registration_status_pending": "Pendente",
+  "exporter_registration_status_rejected": "Rejeitada",
+  "exporter_registration_status_approved": "Aprovada",
+  "label_exporter_registration_approve": "Aprovar",
+  "label_exporter_registration_reject": "Rejeitar",
+  "label_exporter_registration_rekove": "Revogar",
+  "label_exporter_registration_delete": "Excluir",
+  "extension_registration_info_id": "Id de registro",
+  "extension_registration_info_extension_id": "Id de extensão",
+  "extension_registration_info_version": "Versão",
+  "created_at": "Criado",
+  "updated_at": "Atualizado"
 }
