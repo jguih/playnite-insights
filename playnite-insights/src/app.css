@@ -82,6 +82,12 @@
   /* Error variant */
   --color-error-bg: var(--color-red-700);
 	--color-error-fg: var(--color-foreground);
+  --color-error-hover-bg: var(--color-red-600);
+	--color-error-hover-fg: var(--color-red-100);
+	--color-error-active-bg: var(--color-red-800);
+	--color-error-active-fg: var(--color-foreground);
+	--color-error-disabled-bg: var(--color-neutral-800);
+	--color-error-disabled-fg: var(--color-neutral-400);
   /* Error light variant */
   --color-error-light-bg: transparent;
 	--color-error-light-fg: var(--color-red-600);
@@ -149,6 +155,12 @@
   /* Error variant */
   --color-error-bg: var(--color-red-700);
 	--color-error-fg: var(--color-foreground);
+  --color-error-hover-bg: var(--color-red-600);
+	--color-error-hover-fg: var(--color-red-100);
+	--color-error-active-bg: var(--color-red-800);
+	--color-error-active-fg: var(--color-foreground);
+	--color-error-disabled-bg: var(--color-neutral-800);
+	--color-error-disabled-fg: var(--color-neutral-400);
   /* Error light variant */
   --color-error-light-bg: transparent;
 	--color-error-light-fg: var(--color-red-600);

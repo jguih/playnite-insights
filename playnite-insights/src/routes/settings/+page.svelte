@@ -9,7 +9,6 @@
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
-	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
 	import Select from '$lib/client/components/forms/Select.svelte';
@@ -117,8 +116,8 @@
 
 {#snippet registrationInfo(label: string, value: string | number)}
 	<div class="flex flex-row justify-between gap-4">
-		<p class="text-nowrap">{label}</p>
-		<p class="break-all">{value}</p>
+		<p class="text-nowrap text-sm">{label}</p>
+		<p class="break-all text-sm opacity-80">{value}</p>
 	</div>
 	<Divider class={['border-background-3']} />
 {/snippet}
@@ -144,34 +143,36 @@
 		{@render registrationInfo('Atualizado', new Date(registration.LastUpdatedAt).toLocaleString())}
 		<div class="mt-2 flex justify-end gap-2">
 			{#if registration.Status === 'pending'}
-				<LightButton
+				<SolidButton
 					class={['w-20']}
-					color="neutral"
-					onclick={() => handleOnChangeRegistration(registration.Id, 'approve')}
-				>
-					Aprovar
-				</LightButton>
-				<LightButton
-					class={['w-20']}
-					color="neutral"
+					color="error"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'reject')}
 				>
 					Rejeitar
-				</LightButton>
-			{:else if registration.Status === 'rejected'}
-				<LightButton
+				</SolidButton>
+				<SolidButton
 					class={['w-20']}
+					color="primary"
+					onclick={() => handleOnChangeRegistration(registration.Id, 'approve')}
+				>
+					Aprovar
+				</SolidButton>
+			{:else if registration.Status === 'rejected'}
+				<SolidButton
+					class={['w-20']}
+					color="neutral"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'remove')}
 				>
 					Excluir
-				</LightButton>
+				</SolidButton>
 			{:else}
-				<LightButton
+				<SolidButton
 					class={['w-20']}
+					color="error"
 					onclick={() => handleOnChangeRegistration(registration.Id, 'revoke')}
 				>
 					Revogar
-				</LightButton>
+				</SolidButton>
 			{/if}
 		</div>
 	</div>

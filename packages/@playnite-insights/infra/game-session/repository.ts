@@ -125,7 +125,7 @@ export const makeGameSessionRepository = (
         const sessions = z.array(gameSessionSchema).parse(result);
         return sessions;
       },
-      `findAllBy(${JSON.stringify(args.filters)})`
+      `findAllBy()`
     );
   };
 

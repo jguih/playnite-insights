@@ -24,6 +24,14 @@
 			'focus:ring-neutral-active-bg focus:ring-2',
 			'disabled:bg-neutral-disabled-bg disabled:text-neutral-disabled-fg',
 		],
+		color === 'error' && [
+			selected ? 'text-error-active-fg' : 'text-error-fg',
+			'bg-error-bg',
+			'hover:text-error-hover-fg hover:bg-error-hover-bg',
+			'active:text-error-active-fg active:bg-error-active-bg',
+			'focus:ring-error-active-bg focus:ring-2',
+			'disabled:bg-error-disabled-bg disabled:text-error-disabled-fg',
+		],
 		'p-1 disabled:cursor-not-allowed',
 		props.class,
 	]}
