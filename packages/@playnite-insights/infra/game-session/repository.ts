@@ -106,27 +106,6 @@ export const makeGameSessionRepository = (
     );
   };
 
-  const unlinkSessionsForGame: GameSessionRepository["unlinkSessionsForGame"] =
-    (gameId) => {
-      return repositoryCall(
-        logService,
-        () => {
-          const db = getDb();
-          const query = `
-          UPDATE game_session
-          SET
-            GameId = NULL
-          WHERE
-            GameId = ?
-        `;
-          const stmt = db.prepare(query);
-          stmt.run(gameId);
-          return true;
-        },
-        `unlinkSessionsForGame(${gameId})`
-      );
-    };
-
   const findAllBy: GameSessionRepository["findAllBy"] = (args) => {
     return repositoryCall(
       logService,
@@ -150,5 +129,5 @@ export const makeGameSessionRepository = (
     );
   };
 
-  return { getById, add, update, all, unlinkSessionsForGame, findAllBy };
+  return { getById, add, update, all, findAllBy };
 };

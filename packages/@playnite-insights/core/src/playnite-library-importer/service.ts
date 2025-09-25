@@ -5,7 +5,6 @@ import {
   type IncomingPlayniteGameDTO,
   type Platform,
   type PlayniteGame,
-  type SyncGameListCommand,
 } from "@playnite-insights/lib/client";
 import busboy from "busboy";
 import { createHash } from "crypto";
@@ -58,13 +57,13 @@ export const makePlayniteLibraryImporterService = ({
   /**
    * Synchronizes game metadata from Playnite Insights Exporter with the database
    */
-  const sync = async (data: SyncGameListCommand) => {
+  const sync: PlayniteLibraryImporterService["sync"] = async (data) => {
+    const start = performance.now();
     try {
       logService.info(`Syncing game library...`);
       logService.info(`Games to add: ${data.AddedItems.length}`);
       logService.info(`Games to update: ${data.UpdatedItems.length}`);
       logService.info(`Games to delete: ${data.RemovedItems.length}`);
-      const start = performance.now();
       const totalGamesToChange =
         data.AddedItems.length +
         data.UpdatedItems.length +
@@ -76,7 +75,7 @@ export const makePlayniteLibraryImporterService = ({
       const uniqueGenres = Array.from(
         new Map(genres.map((g) => [g.Id, g])).values()
       );
-      genreRepository.upsertMany(uniqueGenres);
+      uniqueGenres.length > 0 && genreRepository.upsertMany(uniqueGenres);
 
       const platforms = addedOrUpdated
         .map((g) => g.Platforms ?? [])
@@ -94,7 +93,8 @@ export const makePlayniteLibraryImporterService = ({
       const uniquePlatforms = Array.from(
         new Map(platforms.map((p) => [p.Id, p])).values()
       );
-      platformRepository.upsertMany(uniquePlatforms);
+      uniquePlatforms.length > 0 &&
+        platformRepository.upsertMany(uniquePlatforms);
 
       const companies = addedOrUpdated
         .map((g) => [...(g.Publishers ?? []), ...(g.Developers ?? [])])
@@ -102,7 +102,8 @@ export const makePlayniteLibraryImporterService = ({
       const uniqueCompanies = Array.from(
         new Map(companies.map((c) => [c.Id, c])).values()
       );
-      companyRepository.upsertMany(uniqueCompanies);
+      uniqueCompanies.length > 0 &&
+        companyRepository.upsertMany(uniqueCompanies);
 
       const completionStatuses: CompletionStatus[] = addedOrUpdated
         .map((g) => g.CompletionStatus)
@@ -112,61 +113,67 @@ export const makePlayniteLibraryImporterService = ({
       const uniqueCompletionStatuses: CompletionStatus[] = Array.from(
         new Map(completionStatuses.map((c) => [c.Id, c])).values()
       );
-      completionStatusRepository.upsertMany(uniqueCompletionStatuses);
+      uniqueCompletionStatuses.length > 0 &&
+        completionStatusRepository.upsertMany(uniqueCompletionStatuses);
 
       const gamesToUpsert: PlayniteGame[] = addedOrUpdated.map(
         _fromDtoToPlayniteGame
       );
-      playniteGameRepository.upsertMany(gamesToUpsert);
+      gamesToUpsert.length > 0 &&
+        playniteGameRepository.upsertMany(gamesToUpsert);
 
       const gameGenresMap = new Map(
         addedOrUpdated.map((g) => [g.Id, g.Genres?.map((g) => g.Id) ?? []])
       );
-      playniteGameRepository.updateManyGenres(gameGenresMap);
+      gameGenresMap.size > 0 &&
+        playniteGameRepository.updateManyGenres(gameGenresMap);
 
       const gamePublishersMap = new Map(
         addedOrUpdated.map((g) => [g.Id, g.Publishers?.map((p) => p.Id) ?? []])
       );
-      playniteGameRepository.updateManyPublishers(gamePublishersMap);
+      gamePublishersMap.size > 0 &&
+        playniteGameRepository.updateManyPublishers(gamePublishersMap);
 
       const gameDevelopersMap = new Map(
         addedOrUpdated.map((g) => [g.Id, g.Developers?.map((d) => d.Id) ?? []])
       );
-      playniteGameRepository.updateManyDevelopers(gameDevelopersMap);
+      gameDevelopersMap.size > 0 &&
+        playniteGameRepository.updateManyDevelopers(gameDevelopersMap);
 
       const gamePlatformsMap = new Map(
         addedOrUpdated.map((g) => [g.Id, g.Platforms?.map((p) => p.Id) ?? []])
       );
-      playniteGameRepository.updateManyPlatforms(gamePlatformsMap);
+      gamePlatformsMap.size > 0 &&
+        playniteGameRepository.updateManyPlatforms(gamePlatformsMap);
 
-      // Games to delete
-      for (const gameId of data.RemovedItems) {
-        const game = playniteGameRepository.getById(gameId);
-        if (!game) {
-          logService.warning(
-            `Skipping deleting non existing game with id ${gameId}`
-          );
-          continue;
+      if (data.RemovedItems.length > 0) {
+        playniteGameRepository.removeMany(data.RemovedItems);
+        let deletedMediaFolders = 0;
+        const startDeleteMediaFolders = performance.now();
+        for (const gameId of data.RemovedItems) {
+          const gameMediaFolderDir = join(FILES_DIR, gameId);
+          try {
+            await fileSystemService.rm(gameMediaFolderDir, {
+              recursive: true,
+              force: true,
+            });
+            deletedMediaFolders++;
+          } catch (error) {
+            logService.error(
+              `Failed to delete media folder ${gameMediaFolderDir}`,
+              error as Error
+            );
+          }
         }
-        if (!gameSessionRepository.unlinkSessionsForGame(gameId)) continue;
-        if (!playniteGameRepository.remove(gameId)) continue;
-        logService.info(`Deleted game ${game.Name}`);
-        const gameMediaFolderDir = join(FILES_DIR, gameId);
-        try {
-          await fileSystemService.rm(gameMediaFolderDir, {
-            recursive: true,
-            force: true,
-          });
-          logService.info(
-            `Deleted media folder ${gameMediaFolderDir} for ${game.Name}`
-          );
-        } catch (error) {
-          logService.error(
-            `Failed to delete media folder ${gameMediaFolderDir} for ${game.Name}`,
-            error as Error
-          );
-        }
+        const startDeleteMediaFoldersDuration =
+          performance.now() - startDeleteMediaFolders;
+        logService.debug(
+          `Finished deleting media folders for ${
+            data.RemovedItems.length
+          } game(s) in ${startDeleteMediaFoldersDuration.toFixed(1)}ms`
+        );
       }
+
       if (totalGamesToChange > 0) {
         const totalPlaytimeHours =
           playniteGameRepository.getTotalPlaytimeSeconds();
@@ -177,12 +184,16 @@ export const makePlayniteLibraryImporterService = ({
         );
         await libraryManifestService.write();
       }
+
       const duration = performance.now() - start;
       logService.success(`Completed library sync in ${duration.toFixed(1)}ms`);
-      return true;
     } catch (error) {
-      logService.error(`Failed to import game list`, error as Error);
-      return false;
+      const duration = performance.now() - start;
+      logService.error(
+        `Library sync failed after ${duration.toFixed(1)}ms`,
+        error as Error
+      );
+      throw error;
     }
   };
 

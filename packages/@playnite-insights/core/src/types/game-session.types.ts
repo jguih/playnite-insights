@@ -8,6 +8,5 @@ export type GameSessionRepository = {
   add: (newSession: GameSession) => boolean;
   update: (session: GameSession) => boolean;
   all: () => GameSession[];
-  unlinkSessionsForGame: (gameId: string) => boolean;
   findAllBy: (params: { filters?: GameSessionFilters }) => GameSession[];
 };

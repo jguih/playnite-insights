@@ -29,4 +29,5 @@ export type PlayniteGameRepository = {
   updateManyPlatforms: (
     gamePlatformsMap: Map<PlayniteGame["Id"], Platform["Id"][]>
   ) => void;
+  removeMany: (gameIds: PlayniteGame["Id"][]) => void;
 };

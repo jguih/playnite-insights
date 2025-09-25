@@ -1,4 +1,4 @@
-import { ValidAuthenticationHeader } from "@playnite-insights/lib/client";
+import type { ValidAuthenticationHeader } from "@playnite-insights/lib/client";
 import type { ExtensionRegistrationRepository } from "../types/extension-registration.types";
 import type { LogService } from "../types/log.types";
 import type { SignatureService } from "../types/signature.types";

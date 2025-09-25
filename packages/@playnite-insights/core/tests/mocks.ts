@@ -65,6 +65,7 @@ export const makeMocks = () => {
     updateManyDevelopers: vi.fn(),
     updateManyPlatforms: vi.fn(),
     updateManyPublishers: vi.fn(),
+    removeMany: vi.fn(),
   } satisfies PlayniteGameRepository;
 
   const gameSessionRepository = {
@@ -72,7 +73,6 @@ export const makeMocks = () => {
     add: vi.fn(),
     update: vi.fn(),
     all: vi.fn(),
-    unlinkSessionsForGame: vi.fn(),
     findAllBy: vi.fn(),
   } satisfies GameSessionRepository;
 

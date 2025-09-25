@@ -354,6 +354,33 @@ export const makePlayniteGameRepository = (
     );
   };
 
+  const removeMany: PlayniteGameRepository["removeMany"] = (gameIds) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmt = {
+          unlinkSessions: db.prepare(
+            `UPDATE game_session SET GameId = NULL WHERE GameId = ?`
+          ),
+          removeGame: db.prepare(`DELETE FROM playnite_game WHERE Id = (?)`),
+        };
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const gameId of gameIds) {
+            stmt.unlinkSessions.run(gameId);
+            stmt.removeGame.run(gameId);
+          }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `remove(${gameIds.length} game(s))`
+    );
+  };
+
   const getManifestData: PlayniteGameRepository["getManifestData"] = () => {
     return repositoryCall(
       logService,
@@ -458,6 +485,7 @@ export const makePlayniteGameRepository = (
     updateManyPublishers,
     updateManyPlatforms,
     remove,
+    removeMany,
     exists,
     getById,
     getTotalPlaytimeSeconds,

@@ -10,10 +10,7 @@ export const POST: RequestHandler = async ({ request, url }) =>
 			return json({ error: 'Empty body' }, { status: 400 });
 		}
 		const games = syncGameListCommandSchema.parse(JSON.parse(bodyRaw));
-		const result = await services.playniteLibraryImporter.sync(games);
-		if (result) {
-			defaultSSEManager.broadcast({ type: 'gameLibraryUpdated', data: true });
-			return json({ status: 'OK' }, { status: 200 });
-		}
-		return json(null, { status: 500 });
+		await services.playniteLibraryImporter.sync(games);
+		defaultSSEManager.broadcast({ type: 'gameLibraryUpdated', data: true });
+		return json({ status: 'OK' }, { status: 200 });
 	});

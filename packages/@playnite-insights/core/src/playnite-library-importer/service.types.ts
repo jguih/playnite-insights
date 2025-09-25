@@ -33,7 +33,7 @@ export type PlayniteLibraryImporterServiceDeps = {
 };
 
 export type PlayniteLibraryImporterService = {
-  sync: (data: SyncGameListCommand) => Promise<boolean>;
+  sync: (data: SyncGameListCommand) => Promise<void>;
   importMediaFiles: (request: Request, url: URL) => Promise<void>;
 };
 

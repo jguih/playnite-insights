@@ -28,15 +28,6 @@ describe("Game Importer", () => {
     service = makePlayniteLibraryImporterService(deps);
   });
 
-  it("should return error when importing invalid json body", async () => {
-    // Arrange
-    const invalidJson = { invalid: "data" } as unknown as SyncGameListCommand;
-    // Act
-    const result = await service.sync(invalidJson);
-    // Assert
-    expect(result).toBe(false);
-  });
-
   it("should delete a game and its media folder", async () => {
     // Arrange
     const data: SyncGameListCommand = {
@@ -49,14 +40,12 @@ describe("Game Importer", () => {
       Name: "test-game",
     });
     deps.playniteGameRepository.remove.mockReturnValueOnce(true);
-    deps.gameSessionRepository.unlinkSessionsForGame.mockReturnValueOnce(true);
     // Act
-    const result = await service.sync(data);
+    await service.sync(data);
     // Assert
     expect(deps.fileSystemService.rm).toHaveBeenCalledWith(
       join(deps.FILES_DIR, "id1"),
       expect.anything()
     );
-    expect(result).toBeTruthy();
   });
 });
