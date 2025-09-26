@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { locator, serverTimeSignal } from '$lib/client/app-state/AppData.svelte.js';
+	import { locator } from '$lib/client/app-state/AppData.svelte.js';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home, { updateBottomNavHomeHref } from '$lib/client/components/bottom-nav/Home.svelte';
@@ -16,7 +16,6 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import SearchBar from '$lib/client/components/SearchBar.svelte';
-	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 	import { HomePageViewModel } from '$lib/client/viewmodel/homePageViewModel.svelte';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages.js';
@@ -34,11 +33,10 @@
 
 	let { data }: PageProps = $props();
 	let main: HTMLElement | undefined = $state();
-	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const recentActivityVm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
 		gameSessionStore: locator.gameSessionStore,
-		dateTimeHandler: dateTimeHandler,
+		dateTimeHandler: locator.dateTimeHandler,
 	});
 	const vm = new HomePageViewModel({
 		getPageData: () => data,

@@ -6,12 +6,15 @@ import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte'
 import { ServiceWorkerUpdater } from '../sw-updater.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
-import type { HttpClientSignal, IndexedDbSignal, ServerTimeSignal } from './AppData.types';
+import type { HttpClientSignal, IndexedDbSignal } from './AppData.types';
 import { CompanyStore } from './stores/companyStore.svelte';
 import { GameNoteStore } from './stores/gameNoteStore.svelte';
 import { GameSessionStore } from './stores/gameSessionStore.svelte';
 import { GameStore } from './stores/gameStore.svelte';
+import { GenreStore } from './stores/genreStore.svelte';
 import { LibraryMetricsStore } from './stores/libraryMetricsStore.svelte';
+import { PlatformStore } from './stores/platformStore.svelte';
+import { ServerTimeStore } from './stores/serverTimeStore.svelte';
 
 export type ClientServiceLocatorFactory = {
 	syncQueue: SyncQueueFactory;
@@ -25,7 +28,6 @@ export type ClientServiceLocatorRepository = {
 
 export type ClientServiceLocatorDeps = {
 	indexedDbSignal: IndexedDbSignal;
-	serverTimeSignal: ServerTimeSignal;
 	httpClientSignal: HttpClientSignal;
 };
 
@@ -33,6 +35,7 @@ export class ClientServiceLocator {
 	#dateTimeHandler: DateTimeHandler;
 	#factory: ClientServiceLocatorFactory;
 	#repository: ClientServiceLocatorRepository;
+	#serverTimeStore: ServerTimeStore;
 	#syncQueue: SyncQueue;
 	#eventSourceManager: EventSourceManager;
 	#serviceWorkerUpdater: ServiceWorkerUpdater;
@@ -42,9 +45,18 @@ export class ClientServiceLocator {
 	#gameSessionStore: GameSessionStore;
 	#gameNoteStore: GameNoteStore;
 	#libraryMetricsStore: LibraryMetricsStore;
+	#genreStore: GenreStore;
+	#platformStore: PlatformStore;
 
-	constructor({ indexedDbSignal, serverTimeSignal, httpClientSignal }: ClientServiceLocatorDeps) {
-		this.#dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
+	constructor({ indexedDbSignal, httpClientSignal }: ClientServiceLocatorDeps) {
+		this.#eventSourceManager = new EventSourceManager();
+		this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
+		this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.#eventSourceManager });
+		this.#serverTimeStore = new ServerTimeStore({
+			httpClientSignal,
+			serverHeartbeat: this.#serverHeartbeat,
+		});
+		this.#dateTimeHandler = new DateTimeHandler({ serverTimeStore: this.#serverTimeStore });
 		this.#factory = {
 			gameNote: new GameNoteFactory(),
 			syncQueue: new SyncQueueFactory(),
@@ -62,9 +74,6 @@ export class ClientServiceLocator {
 			syncQueueRepository: this.#repository.syncQueue,
 			httpClientSignal,
 		});
-		this.#eventSourceManager = new EventSourceManager();
-		this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
-		this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.#eventSourceManager });
 		this.#gameStore = new GameStore({ httpClientSignal });
 		this.#companyStore = new CompanyStore({ httpClientSignal });
 		this.#gameSessionStore = new GameSessionStore({ httpClientSignal });
@@ -75,6 +84,8 @@ export class ClientServiceLocator {
 			dateTimeHandler: this.#dateTimeHandler,
 		});
 		this.#libraryMetricsStore = new LibraryMetricsStore({ httpClientSignal });
+		this.#genreStore = new GenreStore({ httpClientSignal });
+		this.#platformStore = new PlatformStore({ httpClientSignal });
 	}
 
 	loadStoresData = () => {
@@ -82,6 +93,9 @@ export class ClientServiceLocator {
 		this.#companyStore.loadCompanies();
 		this.#gameSessionStore.loadRecentSessions();
 		this.#libraryMetricsStore.loadLibraryMetrics();
+		this.#genreStore.loadGenres();
+		this.#platformStore.loadPlatforms();
+		this.#serverTimeStore.loadServerTime();
 	};
 
 	get dateTimeHandler() {
@@ -130,5 +144,17 @@ export class ClientServiceLocator {
 
 	get libraryMetricsStore() {
 		return this.#libraryMetricsStore;
+	}
+
+	get genreStore() {
+		return this.#genreStore;
+	}
+
+	get platformStore() {
+		return this.#platformStore;
+	}
+
+	get serverTimeStore() {
+		return this.#serverTimeStore;
 	}
 }

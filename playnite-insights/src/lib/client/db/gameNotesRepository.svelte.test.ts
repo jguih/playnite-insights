@@ -1,21 +1,16 @@
 import { GameNoteFactory, SyncQueueFactory, type GameNote } from '@playnite-insights/lib/client';
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IndexedDbSignal, ServerTimeSignal } from '../app-state/AppData.types';
-import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
+import type { IndexedDbSignal } from '../app-state/AppData.types';
+import { type IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { GameNoteRepository } from './gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from './indexeddb';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 const indexedDbSignal: IndexedDbSignal = { db: null, dbReady: null };
-const serverTimeSignal: ServerTimeSignal = {
-	isLoading: false,
-	syncPoint: Date.now(),
-	utcNow: Date.now(),
-};
 const syncQueueFactory = new SyncQueueFactory();
 const gameNoteFactory = new GameNoteFactory();
-const dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
+const dateTimeHandler: IDateTimeHandler = { getUtcNow: () => Date.now() };
 
 const baseNote = (overrides: Partial<GameNote> = {}) => {
 	return {

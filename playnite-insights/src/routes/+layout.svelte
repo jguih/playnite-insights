@@ -2,9 +2,6 @@
 	import {
 		httpClientSignal,
 		indexedDbSignal,
-		loadGenres,
-		loadPlatforms,
-		loadServerTime,
 		locator,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import Toast from '$lib/client/components/Toast.svelte';
@@ -23,7 +20,10 @@
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
 
 	const appProcessingHandler = () => {
-		return Promise.all([loadServerTime(), locator.syncQueue.processQueueAsync()]);
+		return Promise.all([
+			locator.serverTimeStore.loadServerTime(),
+			locator.syncQueue.processQueueAsync(),
+		]);
 	};
 
 	const handleFocus = () => {
@@ -42,7 +42,7 @@
 			locator.gameNoteStore.loadNotesFromServerAsync();
 		});
 		// Background data loading
-		Promise.all([locator.loadStoresData(), loadGenres(), loadPlatforms(), loadServerTime()]);
+		locator.loadStoresData();
 		// Periodic data processing
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
 		locator.eventSourceManager.connect();

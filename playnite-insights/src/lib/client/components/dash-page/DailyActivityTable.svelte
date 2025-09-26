@@ -1,17 +1,15 @@
 <script lang="ts">
-	import { locator, serverTimeSignal } from '$lib/client/app-state/AppData.svelte.js';
-	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
+	import { locator } from '$lib/client/app-state/AppData.svelte.js';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import type { GameSessionStatus } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
-	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const vm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
 		gameSessionStore: locator.gameSessionStore,
-		dateTimeHandler: dateTimeHandler,
+		dateTimeHandler: locator.dateTimeHandler,
 	});
 	let expandedActivitySessions = $state(new Set<string>());
 

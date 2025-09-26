@@ -4,7 +4,11 @@ export type ServerHeartbeatDeps = {
 	eventSourceManager: EventSourceManager;
 };
 
-export class ServerHeartbeat {
+export interface IServerHeartbeat {
+	isAlive: boolean;
+}
+
+export class ServerHeartbeat implements IServerHeartbeat {
 	#eventSourceManager: ServerHeartbeatDeps['eventSourceManager'];
 	#isAlive: boolean;
 

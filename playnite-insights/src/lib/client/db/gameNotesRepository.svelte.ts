@@ -4,7 +4,7 @@ import {
 	type GameNote,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
-import type { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
+import type { IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import type { IGameNotesRepository } from './IGameNotesRepository';
 import { runRequest, runTransaction } from './indexeddb';
 import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
@@ -12,7 +12,7 @@ import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 export type GameNotesRepositoryDeps = {
 	syncQueueFactory: SyncQueueFactory;
-	dateTimeHandler: DateTimeHandler;
+	dateTimeHandler: IDateTimeHandler;
 } & IndexedDBRepositoryDeps;
 
 export class GameNoteRepository extends IndexedDBRepository implements IGameNotesRepository {

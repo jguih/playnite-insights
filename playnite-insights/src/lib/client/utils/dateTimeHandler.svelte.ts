@@ -1,19 +1,23 @@
-import type { ServerTimeSignal } from '../app-state/AppData.types';
+import type { ServerTimeStore } from '../app-state/stores/serverTimeStore.svelte';
 
 export type DateTimeHandlerProps = {
-	serverTimeSignal: ServerTimeSignal;
+	serverTimeStore: ServerTimeStore;
 };
 
-export class DateTimeHandler {
-	#serverTimeSignal: DateTimeHandlerProps['serverTimeSignal'];
+export interface IDateTimeHandler {
+	getUtcNow: () => number;
+}
 
-	constructor({ serverTimeSignal }: DateTimeHandlerProps) {
-		this.#serverTimeSignal = serverTimeSignal;
+export class DateTimeHandler implements IDateTimeHandler {
+	#serverTimeStore: DateTimeHandlerProps['serverTimeStore'];
+
+	constructor({ serverTimeStore }: DateTimeHandlerProps) {
+		this.#serverTimeStore = serverTimeStore;
 	}
 
 	getUtcNow = () => {
-		if (!this.#serverTimeSignal.syncPoint || !this.#serverTimeSignal.utcNow) return Date.now();
-		const elapsed = performance.now() - this.#serverTimeSignal.syncPoint;
-		return this.#serverTimeSignal.utcNow + elapsed;
+		if (!this.#serverTimeStore.syncPoint || !this.#serverTimeStore.utcNow) return Date.now();
+		const elapsed = performance.now() - this.#serverTimeStore.syncPoint;
+		return this.#serverTimeStore.utcNow + elapsed;
 	};
 }

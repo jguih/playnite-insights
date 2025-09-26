@@ -35,7 +35,7 @@ const serverTimeSignal: ServerTimeSignal = {
 const syncQueueFactory = new SyncQueueFactory();
 const gameNoteFactory = new GameNoteFactory();
 const syncQueueRepository = new SyncQueueRepository({ indexedDbSignal });
-const dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
+const dateTimeHandler = new DateTimeHandler({ serverTimeStore: serverTimeSignal });
 const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory, dateTimeHandler });
 
 class TestSyncQueue extends SyncQueue {

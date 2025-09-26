@@ -1,15 +1,4 @@
-import type {
-	GetAllGenresResponse,
-	GetAllPlatformsResponse,
-	IFetchClient,
-} from '@playnite-insights/lib/client';
+import type { IFetchClient } from '@playnite-insights/lib/client';
 
 export type HttpClientSignal = { client: IFetchClient | null };
-export type ServerTimeSignal = {
-	utcNow: number | null;
-	syncPoint: number | null;
-	isLoading: boolean;
-};
-export type GenreSignal = { raw: GetAllGenresResponse | null; isLoading: boolean };
-export type PlatformSignal = { raw: GetAllPlatformsResponse | null; isLoading: boolean };
 export type IndexedDbSignal = { db: IDBDatabase | null; dbReady: Promise<void> | null };
