@@ -28,7 +28,7 @@ import { ClientServiceLocator } from './serviceLocator';
 
 export const httpClientSignal = $state<HttpClientSignal>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
-export const companySignal = $state<CompanySignal>({ raw: null, isLoading: true });
+export const companySignal = $state<CompanySignal>({ raw: null, isLoading: false });
 export const gameSignal = $state<GameSignal>({ raw: null, isLoading: false });
 export const recentGameSessionSignal = $state<RecentGameSessionSignal>({
 	raw: null,

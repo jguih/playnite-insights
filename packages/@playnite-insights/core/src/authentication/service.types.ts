@@ -1,5 +1,8 @@
 import type { ValidAuthenticationHeader } from "@playnite-insights/lib/client";
-import type { CryptographyService } from "../types";
+import type {
+  CryptographyService,
+  InstanceAuthenticationRepository,
+} from "../types";
 import type { ExtensionRegistrationRepository } from "../types/extension-registration.types";
 import type { LogService } from "../types/log.types";
 import type { SignatureService } from "../types/signature.types";
@@ -9,6 +12,7 @@ export type AuthenticationServiceDeps = {
   signatureService: SignatureService;
   logService: LogService;
   cryptographyService: CryptographyService;
+  instanceAuthenticationRepository: InstanceAuthenticationRepository;
 };
 
 export type AuthenticationService = {

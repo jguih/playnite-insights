@@ -1,4 +1,8 @@
 import {
+  ApiError,
+  type InstanceAuthentication,
+} from "@playnite-insights/lib/client";
+import {
   type AuthenticationService,
   type AuthenticationServiceDeps,
 } from "./service.types";
@@ -8,6 +12,7 @@ export const makeAuthenticationService = ({
   signatureService,
   logService,
   cryptographyService,
+  instanceAuthenticationRepository,
 }: AuthenticationServiceDeps): AuthenticationService => {
   const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
@@ -119,7 +124,17 @@ export const makeAuthenticationService = ({
 
   const registerInstanceAsync: AuthenticationService["registerInstanceAsync"] =
     async (password) => {
+      const existing = instanceAuthenticationRepository.get();
+      if (existing) throw new ApiError("Instance password already set.", 400);
       const hash = await cryptographyService.hashPasswordAsync(password);
+      const now = new Date();
+      const instanceAuth: InstanceAuthentication = {
+        Id: 1,
+        PasswordHash: hash,
+        CreatedAt: now.toISOString(),
+        LastUpdatedAt: now.toISOString(),
+      };
+      instanceAuthenticationRepository.set(instanceAuth);
     };
 
   return {

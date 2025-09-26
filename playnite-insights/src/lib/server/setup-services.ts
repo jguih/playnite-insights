@@ -12,12 +12,14 @@ import {
 	getDb,
 	makeCompanyRepository,
 	makeCompletionStatusRepository,
+	makeCryptographyService,
 	makeExtensionRegistrationRepository,
 	makeFileSystemService,
 	makeGameNoteRepository,
 	makeGameSessionRepository,
 	makeGenreRepository,
 	makeImageRepository,
+	makeInstanceAuthenticationRepository,
 	makeLogService,
 	makePlatformRepository,
 	makePlayniteGameRepository,
@@ -42,9 +44,6 @@ export const setupServices = () => {
 	const genreRepository = makeGenreRepository({ logService: makeLogService('GenreRepository') });
 	const playniteGameRepository = makePlayniteGameRepository({
 		logService: makeLogService('PlayniteGameRepository'),
-		companyRepository,
-		genreRepository,
-		platformRepository,
 	});
 	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
 		logService: makeLogService('PlayniteLibrarySyncRepository'),
@@ -62,6 +61,9 @@ export const setupServices = () => {
 	const extensionRegistrationRepository = makeExtensionRegistrationRepository({
 		logService: makeLogService('ExtensionRegistrationRepository'),
 	});
+	const instanceAuthenticationRepository = makeInstanceAuthenticationRepository({
+		logService: makeLogService('InstanceAuthenticationRepository'),
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -73,6 +75,7 @@ export const setupServices = () => {
 		imageRepository,
 		completionStatusRepository,
 		extensionRegistrationRepository,
+		instanceAuthenticationRepository,
 	};
 	const commonDeps = {
 		getDb,
@@ -82,6 +85,7 @@ export const setupServices = () => {
 		...repositories,
 	};
 	// Services
+	const cryptographyService = makeCryptographyService({ ...commonDeps });
 	const libraryManifestService = makeLibraryManifestService({
 		...commonDeps,
 		getManifestData: playniteGameRepository.getManifestData,
@@ -89,13 +93,11 @@ export const setupServices = () => {
 	});
 	const playniteLibraryImporterService = makePlayniteLibraryImporterService({
 		...commonDeps,
-		...repositories,
 		libraryManifestService: libraryManifestService,
 		logService: makeLogService('PlayniteLibraryImporterService'),
 	});
 	const uploadService = makeUploadService({
 		...commonDeps,
-		...repositories,
 		logService: makeLogService('UploadService'),
 	});
 	const mediaFilesService = makeMediaFilesService({
@@ -124,6 +126,7 @@ export const setupServices = () => {
 		...commonDeps,
 		signatureService,
 		logService: makeLogService('AuthenticationService'),
+		cryptographyService,
 	});
 	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 

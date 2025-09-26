@@ -1,4 +1,5 @@
 export * from "./action";
+export * from "./authentication";
 export * from "./company";
 export * from "./extension";
 export * from "./game";
