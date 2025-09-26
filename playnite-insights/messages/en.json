@@ -55,6 +55,7 @@
   "error_http_client_not_set": "Http client is not set, please reload the app",
   "error_db_not_ready": "Database not ready, please refresh the app",
   "error_save_game_note": "Failed to save game note",
+  "error_resource_not_found": "Resource not found",
   "yes": "Yes",
   "no": "No",
   "option_sort_ascending": "Ascending",

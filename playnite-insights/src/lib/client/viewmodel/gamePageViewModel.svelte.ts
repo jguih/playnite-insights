@@ -4,7 +4,7 @@ import type { CompanySignal, GameSignal } from '../app-state/AppData.types';
 import { getPlayniteGameImageUrl, getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
 type GamePageViewModelProps = {
-	getGameId: () => string;
+	getGameId: () => string | null;
 	gamesSignal: GameSignal;
 	companySignal: CompanySignal;
 };
@@ -22,6 +22,7 @@ export class GamePageViewModel {
 
 		this.#game = $derived.by(() => {
 			const gameId = this.#getGameId();
+			if (!gameId) return null;
 			const gameList = this.#gamesSignal.raw ? this.#gamesSignal.raw : [];
 			return gameList?.find((g) => g.Id === gameId) ?? null;
 		});

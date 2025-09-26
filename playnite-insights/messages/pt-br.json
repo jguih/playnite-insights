@@ -56,6 +56,7 @@
   "error_load_library_metrics": "Falha ao carregar métricas da biblioteca",
   "error_db_not_ready": "Base de dados não disponível, por favor recarregue o app",
   "error_save_game_note": "Falha ao salvar nota de jogo",
+  "error_resource_not_found": "Recurso não encontrado",
   "yes": "Sim",
   "no": "Não",
   "option_sort_ascending": "Crescente",

@@ -59,8 +59,10 @@
 	const screenshotGallery = new ScreenshotsGallery();
 	const playniteRemoteAction = new PlayniteRemoteAction({ httpClientSignal });
 	const isThisGameActive = $derived.by(() => {
+		const gameId = data.gameId;
+		if (!gameId) return false;
 		const inProgressActivity = activityVm.inProgressActivity;
-		return inProgressActivity?.gameId === data.gameId;
+		return inProgressActivity?.gameId === gameId;
 	});
 	const activeSessionForThisGame = $derived.by(() => {
 		if (!isThisGameActive) return null;
@@ -68,8 +70,10 @@
 		return session;
 	});
 	const todaySessionsCount = $derived.by(() => {
+		const gameId = data.gameId;
+		if (!gameId) return 0;
 		const recentActivityMap = activityVm.recentActivityMap;
-		const activityForThisGame = recentActivityMap.get(data.gameId);
+		const activityForThisGame = recentActivityMap.get(gameId);
 		return activityForThisGame?.sessions.length ?? 0;
 	});
 	const notesSignal = $state<{ notes: GameNote[]; isLoading: boolean }>({
@@ -80,6 +84,7 @@
 
 	const loadNotes = async () => {
 		const gameId = data.gameId;
+		if (!gameId) return;
 		try {
 			notesSignal.isLoading = true;
 			const notes = await clientServiceLocator.repository.gameNote.getAllAsync({
@@ -282,6 +287,8 @@
 					</small>
 				</div>
 			</div>
+		{:else}
+			<p class="text-error-light-fg mb-4 w-full text-center">{m.error_resource_not_found()}</p>
 		{/if}
 		<section class="mb-6">
 			<Dropdown initialState={true}>
@@ -292,6 +299,7 @@
 							class={['w-full']}
 							size="md"
 							justify="between"
+							disabled={!pageVm.game}
 						>
 							<h1 class="text-xl font-semibold">{m.game_journal_title_notes()}</h1>
 							{#if show}
@@ -304,6 +312,7 @@
 							size="md"
 							onclick={handleOnAddNote}
 							aria-label={m.game_journal_label_add_note()}
+							disabled={!pageVm.game}
 						>
 							<PlusIcon />
 						</LightButton>
@@ -334,6 +343,7 @@
 							{onclick}
 							class={['w-full p-2']}
 							justify="between"
+							disabled={!pageVm.game}
 						>
 							<h1 class="text-xl font-semibold">{m.game_journal_title_links()}</h1>
 							{#if show}
@@ -346,6 +356,7 @@
 							size="md"
 							onclick={() => {}}
 							aria-label={m.game_journal_label_add_link()}
+							disabled={!pageVm.game}
 						>
 							<PlusIcon />
 						</LightButton>
