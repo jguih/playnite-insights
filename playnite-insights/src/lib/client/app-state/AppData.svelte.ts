@@ -1,6 +1,4 @@
 import {
-	FetchClientStrategyError,
-	getAllGameNotesResponseSchema,
 	getAllGenresResponseSchema,
 	getAllPlatformsResponseSchema,
 	getPlayniteLibraryMetricsResponseSchema,
@@ -124,53 +122,5 @@ export const loadPlatforms = async () => {
 		return null;
 	} finally {
 		platformSignal.isLoading = false;
-	}
-};
-
-const getLastServerSync = (): string | null => {
-	const lastSync = localStorage.getItem('lastServerSync');
-	if (!lastSync) return null;
-	if (isNaN(Date.parse(lastSync))) return null;
-	return new Date(lastSync).toISOString();
-};
-
-const setLastServerSync = () => {
-	const serverNow = locator.dateTimeHandler.getUtcNow();
-	localStorage.setItem('lastServerSync', new Date(serverNow).toISOString());
-};
-
-const clearLastServerSync = () => {
-	localStorage.setItem('lastServerSync', '');
-};
-
-/**
- * Loads game notes from the server
- * Cached by SW: No
- * Offline-safe: No
- */
-export const loadGameNotesFromServer = async (override?: boolean) => {
-	if (!locator.serverHeartbeat.isAlive) return { notes: null, success: true };
-	if (override) clearLastServerSync();
-	try {
-		return await withHttpClient(async ({ client }) => {
-			const lastSync = getLastServerSync();
-			const notes = await client.httpGetAsync({
-				endpoint: `/api/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
-				strategy: new JsonStrategy(getAllGameNotesResponseSchema),
-			});
-			setLastServerSync();
-			await locator.repository.gameNote.upsertOrDeleteManyAsync(notes, { override });
-			return { notes, success: true };
-		});
-	} catch (err) {
-		if (
-			err instanceof FetchClientStrategyError &&
-			(err.statusCode === 304 || err.statusCode === 204)
-		) {
-			setLastServerSync();
-			return { notes: null, success: true };
-		}
-		handleClientErrors(err, `[loadGameNotesFromServer] failed to fetch /api/note`);
-		return { notes: null, success: false };
 	}
 };

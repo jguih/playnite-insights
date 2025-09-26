@@ -8,6 +8,7 @@ import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import type { HttpClientSignal, IndexedDbSignal, ServerTimeSignal } from './AppData.types';
 import { CompanyStore } from './stores/companyStore.svelte';
+import { GameNoteStore } from './stores/gameNoteStore.svelte';
 import { GameSessionStore } from './stores/gameSessionStore.svelte';
 import { GameStore } from './stores/gameStore.svelte';
 
@@ -38,6 +39,7 @@ export class ClientServiceLocator {
 	#gameStore: GameStore;
 	#companyStore: CompanyStore;
 	#gameSessionStore: GameSessionStore;
+	#gameNoteStore: GameNoteStore;
 
 	constructor({ indexedDbSignal, serverTimeSignal, httpClientSignal }: ClientServiceLocatorDeps) {
 		this.#dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
@@ -64,6 +66,12 @@ export class ClientServiceLocator {
 		this.#gameStore = new GameStore({ httpClientSignal });
 		this.#companyStore = new CompanyStore({ httpClientSignal });
 		this.#gameSessionStore = new GameSessionStore({ httpClientSignal });
+		this.#gameNoteStore = new GameNoteStore({
+			httpClientSignal,
+			serverHeartbeat: this.#serverHeartbeat,
+			gameNoteRepository: this.#repository.gameNote,
+			dateTimeHandler: this.#dateTimeHandler,
+		});
 	}
 
 	loadStoresData = () => {
@@ -110,5 +118,9 @@ export class ClientServiceLocator {
 
 	get gameSessionStore() {
 		return this.#gameSessionStore;
+	}
+
+	get gameNoteStore() {
+		return this.#gameNoteStore;
 	}
 }

@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		loadGameNotesFromServer,
-		locator,
-		withHttpClient,
-	} from '$lib/client/app-state/AppData.svelte';
+	import { locator, withHttpClient } from '$lib/client/app-state/AppData.svelte';
 	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
@@ -108,7 +104,9 @@
 
 	const handleOnDataSync = async () => {
 		const syncResult = await locator.syncQueue.processQueueAsync();
-		const loadResult = syncResult ? await loadGameNotesFromServer(true) : false;
+		const loadResult = syncResult
+			? await locator.gameNoteStore.loadNotesFromServerAsync(true)
+			: false;
 		if (!syncResult || !loadResult) {
 			toast.error({ category: 'app', message: m.toast_data_sync_failed() });
 			return;

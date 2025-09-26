@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		httpClientSignal,
-		loadGameNotesFromServer,
-		locator,
-	} from '$lib/client/app-state/AppData.svelte.js';
+	import { httpClientSignal, locator } from '$lib/client/app-state/AppData.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
@@ -135,7 +131,7 @@
 	};
 
 	const handleFocus = () => {
-		loadGameNotesFromServer().then((notes) => {
+		locator.gameNoteStore.loadNotesFromServerAsync().then((notes) => {
 			if (notes) loadNotes();
 		});
 	};
@@ -188,7 +184,7 @@
 	onMount(() => {
 		// Load notes from indexedDb to hydrate UI faster
 		loadNotes();
-		loadGameNotesFromServer().then((result) => {
+		locator.gameNoteStore.loadNotesFromServerAsync().then((result) => {
 			if (result.notes) loadNotes();
 			// If notes = `null` nothing was changed since last sync
 		});

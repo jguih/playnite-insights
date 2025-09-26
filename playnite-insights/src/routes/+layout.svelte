@@ -2,7 +2,6 @@
 	import {
 		httpClientSignal,
 		indexedDbSignal,
-		loadGameNotesFromServer,
 		loadGenres,
 		loadLibraryMetrics,
 		loadPlatforms,
@@ -41,7 +40,7 @@
 			version: INDEXEDDB_CURRENT_VERSION,
 		}).then((db) => {
 			indexedDbSignal.db = db;
-			loadGameNotesFromServer();
+			locator.gameNoteStore.loadNotesFromServerAsync();
 		});
 		// Background data loading
 		Promise.all([
