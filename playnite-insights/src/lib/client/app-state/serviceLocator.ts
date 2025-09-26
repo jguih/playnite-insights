@@ -6,13 +6,8 @@ import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte'
 import { ServiceWorkerUpdater } from '../sw-updater.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
-import { GameListViewModel } from '../viewmodel/gameListViewModel.svelte';
-import type {
-	GameSignal,
-	HttpClientSignal,
-	IndexedDbSignal,
-	ServerTimeSignal,
-} from './AppData.types';
+import type { HttpClientSignal, IndexedDbSignal, ServerTimeSignal } from './AppData.types';
+import { GameStore } from './stores/gameStore.svelte';
 
 export type ClientServiceLocatorFactory = {
 	syncQueue: SyncQueueFactory;
@@ -28,7 +23,6 @@ export type ClientServiceLocatorDeps = {
 	indexedDbSignal: IndexedDbSignal;
 	serverTimeSignal: ServerTimeSignal;
 	httpClientSignal: HttpClientSignal;
-	gameSignal: GameSignal;
 };
 
 export class ClientServiceLocator {
@@ -39,14 +33,9 @@ export class ClientServiceLocator {
 	#eventSourceManager: EventSourceManager;
 	#serviceWorkerUpdater: ServiceWorkerUpdater;
 	#serverHeartbeat: ServerHeartbeat;
-	#gameListViewModel: GameListViewModel;
+	#gameStore: GameStore;
 
-	constructor({
-		indexedDbSignal,
-		serverTimeSignal,
-		httpClientSignal,
-		gameSignal,
-	}: ClientServiceLocatorDeps) {
+	constructor({ indexedDbSignal, serverTimeSignal, httpClientSignal }: ClientServiceLocatorDeps) {
 		this.#dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
 		this.#factory = {
 			gameNote: new GameNoteFactory(),
@@ -68,7 +57,7 @@ export class ClientServiceLocator {
 		this.#eventSourceManager = new EventSourceManager();
 		this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
 		this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.#eventSourceManager });
-		this.#gameListViewModel = new GameListViewModel({ gameSignal });
+		this.#gameStore = new GameStore({ httpClientSignal });
 	}
 
 	get dateTimeHandler() {
@@ -99,7 +88,7 @@ export class ClientServiceLocator {
 		return this.#serverHeartbeat;
 	}
 
-	get gameListViewModel() {
-		return this.#gameListViewModel;
+	get gameStore() {
+		return this.#gameStore;
 	}
 }

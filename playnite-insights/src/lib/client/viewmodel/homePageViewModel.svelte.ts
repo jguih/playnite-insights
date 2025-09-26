@@ -6,16 +6,17 @@ import {
 	type GameSortOrder,
 } from '@playnite-insights/lib/client';
 import type { PageProps } from '../../../routes/$types';
+import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
-import type { GameListViewModel } from './gameListViewModel.svelte';
 
 export type HomePageViewModelProps = {
 	getPageData: () => PageProps['data'];
-	gameListViewlModel: GameListViewModel;
+	gameStore: GameStore;
 };
 
 export class HomePageViewModel {
 	#getPageData: HomePageViewModelProps['getPageData'];
+	#gameStore: HomePageViewModelProps['gameStore'];
 	#games: FullGame[] | null;
 	#gamesPaginated: FullGame[] | null;
 	#gamesCountFrom: number;
@@ -24,11 +25,12 @@ export class HomePageViewModel {
 	#totalPages: number;
 	#pages: (number | null)[];
 
-	constructor({ getPageData, gameListViewlModel }: HomePageViewModelProps) {
+	constructor({ getPageData, gameStore }: HomePageViewModelProps) {
 		this.#getPageData = getPageData;
+		this.#gameStore = gameStore;
 
 		this.#games = $derived.by(() => {
-			const games = gameListViewlModel.gameList;
+			const games = gameStore.gameList;
 			let resolved = this.applyFilters(games);
 			resolved = this.applySorting(resolved);
 			return resolved;
@@ -225,6 +227,10 @@ export class HomePageViewModel {
 
 	get games() {
 		return this.#gamesPaginated;
+	}
+
+	get isLoading() {
+		return this.#gameStore.isLoading || this.#games === null;
 	}
 
 	get pagination() {

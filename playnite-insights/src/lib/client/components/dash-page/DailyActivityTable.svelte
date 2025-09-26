@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-		gameSignal,
+		locator,
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
@@ -13,7 +13,7 @@
 
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const vm = new RecentActivityViewModel({
-		gameSignal: gameSignal,
+		gameStore: locator.gameStore,
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
 	});

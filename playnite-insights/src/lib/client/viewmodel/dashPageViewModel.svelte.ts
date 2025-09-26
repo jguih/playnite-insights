@@ -1,11 +1,11 @@
 import { monthNames } from '$lib/utils/date';
 import type { FullGame } from '@playnite-insights/lib/client';
 import type { LibraryMetricsSignal } from '../app-state/AppData.types';
+import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import { getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
-import type { GameListViewModel } from './gameListViewModel.svelte';
 
 export type DashPageViewModelProps = {
-	gameListViewlModel: GameListViewModel;
+	gameStore: GameStore;
 	libraryMetricsSignal: LibraryMetricsSignal;
 };
 
@@ -28,13 +28,13 @@ export type DashPageChartsData = {
 };
 
 export class DashPageViewModel {
-	#gameListViewlModel: GameListViewModel;
+	#gameStore: GameStore;
 	#libraryMetricsSignal: LibraryMetricsSignal;
 	#libraryMetrics: DashPageLibraryMetrics;
 	#chartsData: DashPageChartsData | null;
 
-	constructor({ gameListViewlModel, libraryMetricsSignal }: DashPageViewModelProps) {
-		this.#gameListViewlModel = gameListViewlModel;
+	constructor({ gameStore, libraryMetricsSignal }: DashPageViewModelProps) {
+		this.#gameStore = gameStore;
 		this.#libraryMetricsSignal = libraryMetricsSignal;
 
 		this.#libraryMetrics = $derived.by(() => {
@@ -47,7 +47,7 @@ export class DashPageViewModel {
 	}
 
 	private getLibraryMetrics = (): DashPageLibraryMetrics => {
-		const games = this.#gameListViewlModel.gameList;
+		const games = this.#gameStore.gameList ?? [];
 		const totalGamesInLibrary = games.length;
 		const totalPlaytimeSeconds = games.reduce((prev, current) => prev + current.Playtime, 0);
 		const totalPlaytime = getPlaytimeInHoursAndMinutes(totalPlaytimeSeconds);
@@ -97,6 +97,10 @@ export class DashPageViewModel {
 		return this.#libraryMetrics.totalGamesInLibrary > 0
 			? Math.floor((this.#libraryMetrics.played * 100) / this.#libraryMetrics.totalGamesInLibrary)
 			: 0;
+	}
+
+	get isLoading() {
+		return this.#gameStore.isLoading || this.#gameStore.gameList === null;
 	}
 
 	getPlaytime = (playtime: number): string => getPlaytimeInHoursAndMinutes(playtime);

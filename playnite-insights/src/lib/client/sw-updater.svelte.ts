@@ -1,11 +1,11 @@
 import { m } from '$lib/paraglide/messages';
 import {
 	loadCompanies,
-	loadGames,
 	loadGenres,
 	loadLibraryMetrics,
 	loadPlatforms,
 	loadRecentGameSessions,
+	locator,
 } from './app-state/AppData.svelte';
 import { toast } from './app-state/toast.svelte';
 
@@ -21,7 +21,7 @@ export class ServiceWorkerUpdater {
 		const type = event.data.type;
 		switch (type) {
 			case 'GAMES_UPDATE': {
-				loadGames();
+				locator.gameStore.loadGames();
 				break;
 			}
 			case 'COMPANY_UPDATE': {

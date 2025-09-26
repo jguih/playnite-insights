@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
-		clientServiceLocator,
 		loadGameNotesFromServer,
+		locator,
 		withHttpClient,
 	} from '$lib/client/app-state/AppData.svelte';
 	import { toast } from '$lib/client/app-state/toast.svelte';
@@ -31,19 +31,15 @@
 	import type { ChangeEventHandler } from 'svelte/elements';
 
 	let currentLocale = $state(getLocale());
-	let serverConnectionStatusText = $derived(
-		clientServiceLocator.eventSourceManager.serverConnectionStatusText,
-	);
-	let serverConnectionStatus = $derived(
-		clientServiceLocator.eventSourceManager.serverConnectionStatus,
-	);
+	let serverConnectionStatusText = $derived(locator.eventSourceManager.serverConnectionStatusText);
+	let serverConnectionStatus = $derived(locator.eventSourceManager.serverConnectionStatus);
 	let extensionRegistrationsSignal = $state<{
 		isLoading: boolean;
 		registrations: ExtensionRegistration[] | null;
 	}>({ isLoading: false, registrations: null });
 
 	const loadExtensionRegistrations = async () => {
-		if (!clientServiceLocator.serverHeartbeat.isAlive) return;
+		if (!locator.serverHeartbeat.isAlive) return;
 		try {
 			extensionRegistrationsSignal.isLoading = true;
 			await withHttpClient(async ({ client }) => {
@@ -111,7 +107,7 @@
 	};
 
 	const handleOnDataSync = async () => {
-		const syncResult = await clientServiceLocator.syncQueue.processQueueAsync();
+		const syncResult = await locator.syncQueue.processQueueAsync();
 		const loadResult = syncResult ? await loadGameNotesFromServer(true) : false;
 		if (!syncResult || !loadResult) {
 			toast.error({ category: 'app', message: m.toast_data_sync_failed() });
@@ -134,7 +130,7 @@
 
 	onMount(() => {
 		loadExtensionRegistrations();
-		const unsub = clientServiceLocator.eventSourceManager.addListener({
+		const unsub = locator.eventSourceManager.addListener({
 			type: 'createdExtensionRegistration',
 			cb: ({ data }) => handleSSENewRegistration(data),
 		});
@@ -299,7 +295,7 @@
 			<SolidButton
 				class={['w-full']}
 				onclick={handleOnDataSync}
-				disabled={!clientServiceLocator.serverHeartbeat.isAlive}
+				disabled={!locator.serverHeartbeat.isAlive}
 			>
 				{m.settings_sync_section_label_sync()}
 			</SolidButton>

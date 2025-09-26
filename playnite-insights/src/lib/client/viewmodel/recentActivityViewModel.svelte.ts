@@ -1,15 +1,16 @@
 import type { FullGame, GameActivity, GameSession } from '@playnite-insights/lib/client';
-import type { GameSignal, RecentGameSessionSignal } from '../app-state/AppData.types';
+import type { RecentGameSessionSignal } from '../app-state/AppData.types';
+import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import type { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 
 export type RecentActivityViewModelProps = {
-	gameSignal: GameSignal;
+	gameStore: GameStore;
 	recentGameSessionSignal: RecentGameSessionSignal;
 	dateTimeHandler: DateTimeHandler;
 };
 
 export class RecentActivityViewModel {
-	#gameSignal: RecentActivityViewModelProps['gameSignal'];
+	#gameStore: RecentActivityViewModelProps['gameStore'];
 	#recentGameSessionSignal: RecentActivityViewModelProps['recentGameSessionSignal'];
 	#dateTimeHandler: RecentActivityViewModelProps['dateTimeHandler'];
 
@@ -24,11 +25,11 @@ export class RecentActivityViewModel {
 	#tickInterval: ReturnType<typeof setInterval> | null;
 
 	constructor({
-		gameSignal,
+		gameStore,
 		recentGameSessionSignal,
 		dateTimeHandler,
 	}: RecentActivityViewModelProps) {
-		this.#gameSignal = gameSignal;
+		this.#gameStore = gameStore;
 		this.#recentGameSessionSignal = recentGameSessionSignal;
 		this.#dateTimeHandler = dateTimeHandler;
 		this.#tick = $state(dateTimeHandler.getUtcNow());
@@ -77,7 +78,7 @@ export class RecentActivityViewModel {
 
 		this.#inProgressGame = $derived.by(() => {
 			const activity = this.#inProgressActivity;
-			const games = this.#gameSignal.raw ?? [];
+			const games = this.#gameStore.gameList ?? [];
 			if (!activity) return null;
 			return games.find((g) => g.Id === activity.gameId) ?? null;
 		});

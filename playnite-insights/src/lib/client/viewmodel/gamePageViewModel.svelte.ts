@@ -1,29 +1,30 @@
 import { m } from '$lib/paraglide/messages';
 import type { FullGame } from '@playnite-insights/lib/client';
-import type { CompanySignal, GameSignal } from '../app-state/AppData.types';
+import type { CompanySignal } from '../app-state/AppData.types';
+import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl, getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
 type GamePageViewModelProps = {
 	getGameId: () => string | null;
-	gamesSignal: GameSignal;
+	gameStore: GameStore;
 	companySignal: CompanySignal;
 };
 
 export class GamePageViewModel {
 	#getGameId: GamePageViewModelProps['getGameId'];
-	#gamesSignal: GamePageViewModelProps['gamesSignal'];
+	#gameStore: GamePageViewModelProps['gameStore'];
 	#companySignal: GamePageViewModelProps['companySignal'];
 	#game: FullGame | null;
 
-	constructor({ getGameId, gamesSignal, companySignal }: GamePageViewModelProps) {
+	constructor({ getGameId, gameStore, companySignal }: GamePageViewModelProps) {
 		this.#getGameId = getGameId;
-		this.#gamesSignal = gamesSignal;
+		this.#gameStore = gameStore;
 		this.#companySignal = companySignal;
 
 		this.#game = $derived.by(() => {
 			const gameId = this.#getGameId();
 			if (!gameId) return null;
-			const gameList = this.#gamesSignal.raw ? this.#gamesSignal.raw : [];
+			const gameList = this.#gameStore.gameList ?? [];
 			return gameList?.find((g) => g.Id === gameId) ?? null;
 		});
 	}

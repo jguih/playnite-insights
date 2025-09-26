@@ -3,11 +3,11 @@ import { apiSSEventDataSchema, type APISSEventType } from '@playnite-insights/li
 import z from 'zod';
 import {
 	loadCompanies,
-	loadGames,
 	loadGenres,
 	loadLibraryMetrics,
 	loadPlatforms,
 	loadRecentGameSessions,
+	locator,
 } from '../app-state/AppData.svelte';
 
 export type EventSourceManagerListenerCallback<T extends APISSEventType> = (args: {
@@ -143,7 +143,7 @@ export class EventSourceManager {
 				type: 'gameLibraryUpdated',
 				cb: async () =>
 					await Promise.all([
-						loadGames(),
+						locator.gameStore.loadGames(),
 						loadCompanies(),
 						loadGenres(),
 						loadPlatforms(),

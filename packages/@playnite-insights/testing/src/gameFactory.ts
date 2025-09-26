@@ -38,6 +38,8 @@ export class FullGameFactory {
       Platforms: props?.Platforms ?? [
         faker.helpers.arrayElement(["PC", "Linux", "Xbox", "PS"]),
       ],
+      Hidden: props?.Hidden ?? 0,
+      CompletionStatusId: props?.CompletionStatusId ?? faker.string.uuid(),
     };
   };
 

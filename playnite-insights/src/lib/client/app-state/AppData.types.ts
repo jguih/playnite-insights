@@ -1,6 +1,5 @@
 import type {
 	GetAllCompaniesResponse,
-	GetAllGamesResponse,
 	GetAllGenresResponse,
 	GetAllPlatformsResponse,
 	GetPlayniteLibraryMetricsResponse,
@@ -9,7 +8,6 @@ import type {
 } from '@playnite-insights/lib/client';
 
 export type HttpClientSignal = { client: IFetchClient | null };
-export type GameSignal = { raw: GetAllGamesResponse | null; isLoading: boolean };
 export type CompanySignal = { raw: GetAllCompaniesResponse | null; isLoading: boolean };
 export type ServerTimeSignal = {
 	utcNow: number | null;

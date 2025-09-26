@@ -2,7 +2,6 @@ import {
 	FetchClientStrategyError,
 	getAllCompaniesResponseSchema,
 	getAllGameNotesResponseSchema,
-	getAllGamesResponseSchema,
 	getAllGenresResponseSchema,
 	getAllPlatformsResponseSchema,
 	getPlayniteLibraryMetricsResponseSchema,
@@ -15,7 +14,6 @@ import {
 import { handleClientErrors } from '../utils/handleClientErrors.svelte';
 import type {
 	CompanySignal,
-	GameSignal,
 	GenreSignal,
 	HttpClientSignal,
 	IndexedDbSignal,
@@ -29,7 +27,6 @@ import { ClientServiceLocator } from './serviceLocator';
 export const httpClientSignal = $state<HttpClientSignal>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
 export const companySignal = $state<CompanySignal>({ raw: null, isLoading: false });
-export const gameSignal = $state<GameSignal>({ raw: null, isLoading: false });
 export const recentGameSessionSignal = $state<RecentGameSessionSignal>({
 	raw: null,
 	isLoading: false,
@@ -42,11 +39,10 @@ export const serverTimeSignal = $state<ServerTimeSignal>({
 	isLoading: false,
 });
 export const libraryMetricsSignal = $state<LibraryMetricsSignal>({ raw: null, isLoading: false });
-export const clientServiceLocator = new ClientServiceLocator({
+export const locator = new ClientServiceLocator({
 	httpClientSignal,
 	indexedDbSignal,
 	serverTimeSignal,
-	gameSignal,
 });
 
 export async function withHttpClient<T>(
@@ -95,25 +91,6 @@ export const loadCompanies = async () => {
 	}
 };
 
-export const loadGames = async () => {
-	try {
-		return await withHttpClient(async ({ client }) => {
-			gameSignal.isLoading = true;
-			const result = await client.httpGetAsync({
-				endpoint: '/api/game',
-				strategy: new JsonStrategy(getAllGamesResponseSchema),
-			});
-			gameSignal.raw = result;
-			return result;
-		});
-	} catch (err) {
-		handleClientErrors(err, `[loadGames] failed to fetch /api/game`);
-		return null;
-	} finally {
-		gameSignal.isLoading = false;
-	}
-};
-
 /**
  * Loads all game sessions that overlaps the last 7 days
  */
@@ -142,7 +119,7 @@ export const loadRecentGameSessions = async () => {
  * Offline-safe: No
  */
 export const loadServerTime = async () => {
-	if (!clientServiceLocator.serverHeartbeat.isAlive) return null;
+	if (!locator.serverHeartbeat.isAlive) return null;
 	try {
 		return await withHttpClient(async ({ client }) => {
 			serverTimeSignal.isLoading = true;
@@ -208,7 +185,7 @@ const getLastServerSync = (): string | null => {
 };
 
 const setLastServerSync = () => {
-	const serverNow = clientServiceLocator.dateTimeHandler.getUtcNow();
+	const serverNow = locator.dateTimeHandler.getUtcNow();
 	localStorage.setItem('lastServerSync', new Date(serverNow).toISOString());
 };
 
@@ -222,7 +199,7 @@ const clearLastServerSync = () => {
  * Offline-safe: No
  */
 export const loadGameNotesFromServer = async (override?: boolean) => {
-	if (!clientServiceLocator.serverHeartbeat.isAlive) return { notes: null, success: true };
+	if (!locator.serverHeartbeat.isAlive) return { notes: null, success: true };
 	if (override) clearLastServerSync();
 	try {
 		return await withHttpClient(async ({ client }) => {
@@ -232,7 +209,7 @@ export const loadGameNotesFromServer = async (override?: boolean) => {
 				strategy: new JsonStrategy(getAllGameNotesResponseSchema),
 			});
 			setLastServerSync();
-			await clientServiceLocator.repository.gameNote.upsertOrDeleteManyAsync(notes, { override });
+			await locator.repository.gameNote.upsertOrDeleteManyAsync(notes, { override });
 			return { notes, success: true };
 		});
 	} catch (err) {

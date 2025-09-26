@@ -2,8 +2,7 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
-		clientServiceLocator,
-		gameSignal,
+		locator,
 		recentGameSessionSignal,
 		serverTimeSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
@@ -41,13 +40,13 @@
 	let main: HTMLElement | undefined = $state();
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const recentActivityVm = new RecentActivityViewModel({
-		gameSignal: gameSignal,
+		gameStore: locator.gameStore,
 		recentGameSessionSignal: recentGameSessionSignal,
 		dateTimeHandler: dateTimeHandler,
 	});
 	const vm = new HomePageViewModel({
 		getPageData: () => data,
-		gameListViewlModel: clientServiceLocator.gameListViewModel,
+		gameStore: locator.gameStore,
 	});
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
@@ -161,6 +160,19 @@
 	</li>
 {/snippet}
 
+{#snippet gameCardSkeleton()}
+	<li
+		class={['m-0 aspect-[1/1.6] p-0 shadow outline-0', 'border-background-1 border-4 border-solid']}
+	>
+		<div class="h-7/8 bg-background-3 w-full animate-pulse"></div>
+		<div
+			class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
+		>
+			<div class="bg-background-3 h-4 w-3/4 animate-pulse rounded"></div>
+		</div>
+	</li>
+{/snippet}
+
 <FiltersSidebar
 	{setSearchParam}
 	{appendSearchParam}
@@ -203,13 +215,18 @@
 				value={vm.filter.query}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
-			<FiltersButton counter={vm.filtersCount} />
+			<FiltersButton
+				counter={vm.filtersCount}
+				disabled={vm.isLoading}
+			/>
 		</div>
 	</Header>
 	<Main bind:main>
 		<h1 class="text-lg">{m.home_title()}</h1>
 		<div class="mb-2">
-			{#if vm.totalGamesCount === 0}
+			{#if vm.isLoading}
+				<div class="mt-1 h-4 w-48 animate-pulse bg-neutral-300/60"></div>
+			{:else if vm.totalGamesCount === 0}
 				<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
 			{/if}
 			{#if vm.totalGamesCount > 0}
@@ -232,6 +249,7 @@
 				value={vm.pagination.pageSize}
 				id="page_size"
 				class={['bg-background-1!']}
+				disabled={vm.isLoading}
 			>
 				{#each vm.pageSizes as option (option)}
 					<option value={option}>{option}</option>
@@ -240,7 +258,13 @@
 		</label>
 
 		{#key vm.pagination.currentPage}
-			{#if vm.games}
+			{#if vm.isLoading}
+				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+					{#each new Array(Number(vm.pagination.pageSize)).fill(null) as _}
+						{@render gameCardSkeleton()}
+					{/each}
+				</ul>
+			{:else if vm.games}
 				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
 					{#each vm.games as game (game.Id)}
 						{@render gameCard(game)}

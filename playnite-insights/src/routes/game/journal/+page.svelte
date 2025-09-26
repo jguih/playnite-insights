@@ -1,10 +1,9 @@
 <script lang="ts">
 	import {
-		clientServiceLocator,
 		companySignal,
-		gameSignal,
 		httpClientSignal,
 		loadGameNotesFromServer,
+		locator,
 		recentGameSessionSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
@@ -42,17 +41,17 @@
 	const { data } = $props();
 	const pageVm = new GamePageViewModel({
 		getGameId: () => data.gameId,
-		gamesSignal: gameSignal,
+		gameStore: locator.gameStore,
 		companySignal: companySignal,
 	});
 	const activityVm = new RecentActivityViewModel({
-		gameSignal: gameSignal,
+		gameStore: locator.gameStore,
 		recentGameSessionSignal: recentGameSessionSignal,
-		dateTimeHandler: clientServiceLocator.dateTimeHandler,
+		dateTimeHandler: locator.dateTimeHandler,
 	});
 	const noteEditor = new GameNoteEditor({
-		gameNoteFactory: clientServiceLocator.factory.gameNote,
-		gameNoteRepository: clientServiceLocator.repository.gameNote,
+		gameNoteFactory: locator.factory.gameNote,
+		gameNoteRepository: locator.repository.gameNote,
 	});
 	const noteExtras = new NoteExtras();
 	const imageOptions = new ImageOptions();
@@ -87,7 +86,7 @@
 		if (!gameId) return;
 		try {
 			notesSignal.isLoading = true;
-			const notes = await clientServiceLocator.repository.gameNote.getAllAsync({
+			const notes = await locator.repository.gameNote.getAllAsync({
 				filterBy: 'byGameId',
 				GameId: gameId,
 			});
@@ -121,7 +120,7 @@
 	const handleOnAddNote = async () => {
 		const gameId = data.gameId;
 		const sessionId = activeSessionForThisGame?.SessionId ?? null;
-		const newNote = clientServiceLocator.factory.gameNote.create({
+		const newNote = locator.factory.gameNote.create({
 			Title: null,
 			Content: null,
 			GameId: gameId,
@@ -196,7 +195,7 @@
 			// If notes = `null` nothing was changed since last sync
 		});
 
-		const unsub = clientServiceLocator.eventSourceManager.addListener({
+		const unsub = locator.eventSourceManager.addListener({
 			type: 'screenshotTaken',
 			cb: handleOnScreenshotTakenSSE,
 		});
@@ -229,8 +228,8 @@
 	onAddAvailableScreenshot={screenshotGallery.open}
 	isOptionDisabled={{
 		addAvailableScreenshot: false,
-		takeScreenshotFromPlayniteHost: !clientServiceLocator.serverHeartbeat.isAlive,
-		uploadImage: !clientServiceLocator.serverHeartbeat.isAlive,
+		takeScreenshotFromPlayniteHost: !locator.serverHeartbeat.isAlive,
+		uploadImage: !locator.serverHeartbeat.isAlive,
 	}}
 />
 <NoteEditor

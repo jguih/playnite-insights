@@ -1,18 +1,16 @@
 <script lang="ts">
 	import {
-		clientServiceLocator,
 		httpClientSignal,
 		indexedDbSignal,
 		loadCompanies,
 		loadGameNotesFromServer,
-		loadGames,
 		loadGenres,
 		loadLibraryMetrics,
 		loadPlatforms,
 		loadRecentGameSessions,
 		loadServerTime,
+		locator,
 	} from '$lib/client/app-state/AppData.svelte.js';
-	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
 	import {
 		INDEXEDDB_CURRENT_VERSION,
@@ -26,11 +24,10 @@
 
 	let { children, data }: { children: Snippet } & LayoutProps = $props();
 	let appName = $derived(data.appName);
-	let isLoading: boolean = $state(true);
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
 
 	const appProcessingHandler = () => {
-		return Promise.all([loadServerTime(), clientServiceLocator.syncQueue.processQueueAsync()]);
+		return Promise.all([loadServerTime(), locator.syncQueue.processQueueAsync()]);
 	};
 
 	const handleFocus = () => {
@@ -46,34 +43,31 @@
 			version: INDEXEDDB_CURRENT_VERSION,
 		}).then((db) => {
 			indexedDbSignal.db = db;
+			loadGameNotesFromServer();
 		});
-		// Load core app data (cached by sw)
-		isLoading = true;
-		const core = Promise.all([
-			loadGames(),
+		// Background data loading
+		Promise.all([
+			locator.gameStore.loadGames(),
 			loadCompanies(),
 			loadRecentGameSessions(),
 			loadGenres(),
 			loadPlatforms(),
 			loadLibraryMetrics(),
+			loadServerTime(),
 		]);
-		// Network only requests
-		const extras = Promise.all([loadServerTime(), loadGameNotesFromServer()]);
-		core.then(() => (isLoading = false));
-		extras.catch(() => {});
 		// Periodic data processing
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
-		clientServiceLocator.eventSourceManager.connect();
-		clientServiceLocator.eventSourceManager.setupGlobalListeners();
-		clientServiceLocator.serviceWorkerUpdater.setupGlobalListeners();
-		clientServiceLocator.serviceWorkerUpdater.watchServiceWorkerUpdates();
+		locator.eventSourceManager.connect();
+		locator.eventSourceManager.setupGlobalListeners();
+		locator.serviceWorkerUpdater.setupGlobalListeners();
+		locator.serviceWorkerUpdater.watchServiceWorkerUpdates();
 		window.addEventListener('focus', handleFocus);
 		return () => {
 			window.removeEventListener('focus', handleFocus);
 			if (appProcessingInterval) clearInterval(appProcessingInterval);
-			clientServiceLocator.serviceWorkerUpdater.clearGlobalListeners();
-			clientServiceLocator.eventSourceManager.clearGlobalListeners();
-			clientServiceLocator.eventSourceManager.close();
+			locator.serviceWorkerUpdater.clearGlobalListeners();
+			locator.eventSourceManager.clearGlobalListeners();
+			locator.eventSourceManager.close();
 		};
 	});
 </script>
@@ -91,8 +85,4 @@
 </svelte:head>
 
 <Toast />
-{#if isLoading}
-	<Loading />
-{:else}
-	{@render children()}
-{/if}
+{@render children()}

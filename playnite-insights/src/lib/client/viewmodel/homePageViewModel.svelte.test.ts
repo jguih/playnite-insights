@@ -1,8 +1,8 @@
 import type { FullGame } from '@playnite-insights/lib/client';
-import { FullGameFactory, testUtils } from '@playnite-insights/testing';
-import { describe, expect, it } from 'vitest';
+import { FullGameFactory, makeFetchClientMock, testUtils } from '@playnite-insights/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PageProps } from '../../../routes/$types';
-import { GameListViewModel } from './gameListViewModel.svelte';
+import { GameStore } from '../app-state/stores/gameStore.svelte';
 import { HomePageViewModel } from './homePageViewModel.svelte';
 
 const defaultPageData: PageProps['data'] = {
@@ -20,15 +20,21 @@ const defaultPageData: PageProps['data'] = {
 	sortOrder: 'desc',
 };
 const factory = new FullGameFactory();
+const fetchClient = makeFetchClientMock();
+const gameStore = new GameStore({ httpClientSignal: { client: fetchClient } });
 
 describe('HomePageViewModel', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
 	it.each([
 		{ name: 'Grim Dawn', query: 'grim' },
 		{ name: 'Grim Dawn', query: 'dawn' },
 		{ name: 'Cyberpunk 2077', query: 'cyberpunk' },
 		{ name: 'Titanfall 2', query: 'TitanfaLL 2' },
 		{ name: 'The Witcher 3', query: 'wItChEr 3' },
-	])('filters by query: $query', ({ name, query }) => {
+	])('filters by query: $query', async ({ name, query }) => {
 		// Arrange
 		const data: PageProps['data'] = {
 			...defaultPageData,
@@ -37,9 +43,11 @@ describe('HomePageViewModel', () => {
 		const game: FullGame = factory.getGame({ Name: name });
 		const games: FullGame[] = factory.getGames(20).map((g) => ({ ...g, Name: 'Other Game' }));
 		games.push(game);
+		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+		await gameStore.loadGames();
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
+			gameStore: gameStore,
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -53,7 +61,7 @@ describe('HomePageViewModel', () => {
 
 	it.each([{ query: '' }, { query: null }])(
 		'when filtering by query, returns all games if query is: $query',
-		({ query }) => {
+		async ({ query }) => {
 			// Arrange
 			const data: PageProps['data'] = {
 				...defaultPageData,
@@ -61,9 +69,11 @@ describe('HomePageViewModel', () => {
 			};
 			const gamesCount = 20;
 			const games: FullGame[] = factory.getGames(gamesCount);
+			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+			await gameStore.loadGames();
 			const vm = new HomePageViewModel({
 				getPageData: () => data,
-				gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
+				gameStore: gameStore,
 			});
 			// Act
 			const filteredGames = vm.games;
@@ -75,7 +85,7 @@ describe('HomePageViewModel', () => {
 
 	it.each([{ installed: true }, { installed: false }])(
 		'filters by installation status: $installed',
-		({ installed }) => {
+		async ({ installed }) => {
 			// Arrange
 			const data: PageProps['data'] = {
 				...defaultPageData,
@@ -86,9 +96,11 @@ describe('HomePageViewModel', () => {
 			const gameUnderTest: FullGame = factory.getGame({ IsInstalled: +installed });
 			const games: FullGame[] = factory.getGames(gamesCount, { IsInstalled: +!installed });
 			games.push(gameUnderTest);
+			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+			await gameStore.loadGames();
 			const vm = new HomePageViewModel({
 				getPageData: () => data,
-				gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
+				gameStore: gameStore,
 			});
 			// Act
 			const filteredGames = vm.games;
@@ -132,37 +144,42 @@ describe('HomePageViewModel', () => {
 			filterDeveloperIds: [],
 			expectedMatch: 20 + 5, // 20 games plus 5 under testing
 		},
-	])('filters by developers: $title', ({ gameDeveloperIds, filterDeveloperIds, expectedMatch }) => {
-		// Arrange
-		const data: PageProps['data'] = {
-			...defaultPageData,
-			developers: filterDeveloperIds,
-		};
-		const gamesUnderTest: FullGame[] =
-			gameDeveloperIds.length === 1
-				? factory.getGames(5, { Developers: [gameDeveloperIds[0]] })
-				: [
-						...factory.getGames(2, { Developers: [gameDeveloperIds[0]] }),
-						...factory.getGames(2, { Developers: [gameDeveloperIds[1]] }),
-						factory.getGame({ Developers: gameDeveloperIds }),
-					];
-		const otherGames: FullGame[] = factory.getGames(20, {
-			Developers: ['dev1', 'dev2', 'dev3', 'dev4'],
-		});
-		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
-		const vm = new HomePageViewModel({
-			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
-		});
-		// Act
-		const filteredGames = vm.games;
-		// Assert
-		expect(filteredGames).toHaveLength(expectedMatch);
-		expect(
-			filterDeveloperIds.length === 0 ||
-				filteredGames?.every((g) => g.Developers.some((d) => filterDeveloperIds.includes(d))),
-		).toBe(true);
-	});
+	])(
+		'filters by developers: $title',
+		async ({ gameDeveloperIds, filterDeveloperIds, expectedMatch }) => {
+			// Arrange
+			const data: PageProps['data'] = {
+				...defaultPageData,
+				developers: filterDeveloperIds,
+			};
+			const gamesUnderTest: FullGame[] =
+				gameDeveloperIds.length === 1
+					? factory.getGames(5, { Developers: [gameDeveloperIds[0]] })
+					: [
+							...factory.getGames(2, { Developers: [gameDeveloperIds[0]] }),
+							...factory.getGames(2, { Developers: [gameDeveloperIds[1]] }),
+							factory.getGame({ Developers: gameDeveloperIds }),
+						];
+			const otherGames: FullGame[] = factory.getGames(20, {
+				Developers: ['dev1', 'dev2', 'dev3', 'dev4'],
+			});
+			const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
+			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+			await gameStore.loadGames();
+			const vm = new HomePageViewModel({
+				getPageData: () => data,
+				gameStore: gameStore,
+			});
+			// Act
+			const filteredGames = vm.games;
+			// Assert
+			expect(filteredGames).toHaveLength(expectedMatch);
+			expect(
+				filterDeveloperIds.length === 0 ||
+					filteredGames?.every((g) => g.Developers.some((d) => filterDeveloperIds.includes(d))),
+			).toBe(true);
+		},
+	);
 
 	it.each([
 		// Number of games under test is always 5
@@ -196,37 +213,42 @@ describe('HomePageViewModel', () => {
 			filterPublisherIds: [],
 			expectedMatch: 20 + 5, // 20 games plus 5 under testing
 		},
-	])('filters by publishers: $title', ({ gamePublisherIds, filterPublisherIds, expectedMatch }) => {
-		// Arrange
-		const data: PageProps['data'] = {
-			...defaultPageData,
-			publishers: filterPublisherIds,
-		};
-		const gamesUnderTest: FullGame[] =
-			gamePublisherIds.length === 1
-				? factory.getGames(5, { Publishers: [gamePublisherIds[0]] })
-				: [
-						...factory.getGames(2, { Publishers: [gamePublisherIds[0]] }),
-						...factory.getGames(2, { Publishers: [gamePublisherIds[1]] }),
-						factory.getGame({ Publishers: gamePublisherIds }),
-					];
-		const otherGames: FullGame[] = factory.getGames(20, {
-			Publishers: ['pub1', 'pub2', 'pub3'],
-		});
-		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
-		const vm = new HomePageViewModel({
-			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
-		});
-		// Act
-		const filteredGames = vm.games;
-		// Assert
-		expect(filteredGames).toHaveLength(expectedMatch);
-		expect(
-			filterPublisherIds.length === 0 ||
-				filteredGames?.every((g) => g.Publishers.some((d) => filterPublisherIds.includes(d))),
-		).toBe(true);
-	});
+	])(
+		'filters by publishers: $title',
+		async ({ gamePublisherIds, filterPublisherIds, expectedMatch }) => {
+			// Arrange
+			const data: PageProps['data'] = {
+				...defaultPageData,
+				publishers: filterPublisherIds,
+			};
+			const gamesUnderTest: FullGame[] =
+				gamePublisherIds.length === 1
+					? factory.getGames(5, { Publishers: [gamePublisherIds[0]] })
+					: [
+							...factory.getGames(2, { Publishers: [gamePublisherIds[0]] }),
+							...factory.getGames(2, { Publishers: [gamePublisherIds[1]] }),
+							factory.getGame({ Publishers: gamePublisherIds }),
+						];
+			const otherGames: FullGame[] = factory.getGames(20, {
+				Publishers: ['pub1', 'pub2', 'pub3'],
+			});
+			const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
+			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+			await gameStore.loadGames();
+			const vm = new HomePageViewModel({
+				getPageData: () => data,
+				gameStore: gameStore,
+			});
+			// Act
+			const filteredGames = vm.games;
+			// Assert
+			expect(filteredGames).toHaveLength(expectedMatch);
+			expect(
+				filterPublisherIds.length === 0 ||
+					filteredGames?.every((g) => g.Publishers.some((d) => filterPublisherIds.includes(d))),
+			).toBe(true);
+		},
+	);
 
 	it.each([
 		// Number of games under test is always 5
@@ -260,37 +282,42 @@ describe('HomePageViewModel', () => {
 			filterPlatformIds: [],
 			expectedMatch: 20 + 5, // 20 games plus 5 under testing
 		},
-	])('filters by platforms: $title', ({ gamePlatformIds, filterPlatformIds, expectedMatch }) => {
-		// Arrange
-		const data: PageProps['data'] = {
-			...defaultPageData,
-			platforms: filterPlatformIds,
-		};
-		const gamesUnderTest: FullGame[] =
-			gamePlatformIds.length === 1
-				? factory.getGames(5, { Platforms: [gamePlatformIds[0]] })
-				: [
-						...factory.getGames(2, { Platforms: [gamePlatformIds[0]] }),
-						...factory.getGames(2, { Platforms: [gamePlatformIds[1]] }),
-						factory.getGame({ Platforms: gamePlatformIds }),
-					];
-		const otherGames: FullGame[] = factory.getGames(20, {
-			Platforms: ['plat1', 'plat2', 'plat3'],
-		});
-		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
-		const vm = new HomePageViewModel({
-			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
-		});
-		// Act
-		const filteredGames = vm.games;
-		// Assert
-		expect(filteredGames).toHaveLength(expectedMatch);
-		expect(
-			filterPlatformIds.length === 0 ||
-				filteredGames?.every((g) => g.Platforms.some((d) => filterPlatformIds.includes(d))),
-		).toBe(true);
-	});
+	])(
+		'filters by platforms: $title',
+		async ({ gamePlatformIds, filterPlatformIds, expectedMatch }) => {
+			// Arrange
+			const data: PageProps['data'] = {
+				...defaultPageData,
+				platforms: filterPlatformIds,
+			};
+			const gamesUnderTest: FullGame[] =
+				gamePlatformIds.length === 1
+					? factory.getGames(5, { Platforms: [gamePlatformIds[0]] })
+					: [
+							...factory.getGames(2, { Platforms: [gamePlatformIds[0]] }),
+							...factory.getGames(2, { Platforms: [gamePlatformIds[1]] }),
+							factory.getGame({ Platforms: gamePlatformIds }),
+						];
+			const otherGames: FullGame[] = factory.getGames(20, {
+				Platforms: ['plat1', 'plat2', 'plat3'],
+			});
+			const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
+			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+			await gameStore.loadGames();
+			const vm = new HomePageViewModel({
+				getPageData: () => data,
+				gameStore: gameStore,
+			});
+			// Act
+			const filteredGames = vm.games;
+			// Assert
+			expect(filteredGames).toHaveLength(expectedMatch);
+			expect(
+				filterPlatformIds.length === 0 ||
+					filteredGames?.every((g) => g.Platforms.some((d) => filterPlatformIds.includes(d))),
+			).toBe(true);
+		},
+	);
 
 	it.each([
 		// Number of games under test is always 5
@@ -324,7 +351,7 @@ describe('HomePageViewModel', () => {
 			filterGenreIds: [],
 			expectedMatch: 20 + 5, // 20 games plus 5 under testing
 		},
-	])('filters by genres: $title', ({ gameGenreIds, filterGenreIds, expectedMatch }) => {
+	])('filters by genres: $title', async ({ gameGenreIds, filterGenreIds, expectedMatch }) => {
 		// Arrange
 		const data: PageProps['data'] = {
 			...defaultPageData,
@@ -342,9 +369,11 @@ describe('HomePageViewModel', () => {
 			Genres: ['genre1', 'genre2', 'genre3'],
 		});
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
+		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+		await gameStore.loadGames();
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
+			gameStore: gameStore,
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -356,7 +385,7 @@ describe('HomePageViewModel', () => {
 		).toBe(true);
 	});
 
-	it('returns all games if filtering by installed and not installed', () => {
+	it('returns all games if filtering by installed and not installed', async () => {
 		// Arrange
 		const data: PageProps['data'] = {
 			...defaultPageData,
@@ -370,9 +399,11 @@ describe('HomePageViewModel', () => {
 		];
 		const otherGames: FullGame[] = factory.getGames(20);
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
+		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+		await gameStore.loadGames();
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
+			gameStore: gameStore,
 		});
 		// Act
 		const filteredGames = vm.games;
@@ -380,7 +411,7 @@ describe('HomePageViewModel', () => {
 		expect(filteredGames).toHaveLength(games.length);
 	});
 
-	it('paginates game list', () => {
+	it('paginates game list', async () => {
 		// Arrange
 		const data: PageProps['data'] = {
 			...defaultPageData,
@@ -392,9 +423,11 @@ describe('HomePageViewModel', () => {
 		const gamesUnderTest: FullGame[] = factory.getGames(30);
 		const games: FullGame[] = testUtils.shuffleArray([...gamesUnderTest]);
 		const gameIds = games.map((g) => g.Id);
+		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
+		await gameStore.loadGames();
 		const vm = new HomePageViewModel({
 			getPageData: () => data,
-			gameListViewlModel: new GameListViewModel({ gameSignal: { raw: games, isLoading: false } }),
+			gameStore: gameStore,
 		});
 		// Act
 		const paginatedGames = vm.games;

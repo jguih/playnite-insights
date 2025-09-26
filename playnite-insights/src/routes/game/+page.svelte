@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { companySignal, gameSignal } from '$lib/client/app-state/AppData.svelte.js';
+	import { companySignal, locator } from '$lib/client/app-state/AppData.svelte.js';
 	import SolidAnchor from '$lib/client/components/anchors/SolidAnchor.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
@@ -13,7 +13,7 @@
 	const { data } = $props();
 	const vm = new GamePageViewModel({
 		getGameId: () => data.gameId,
-		gamesSignal: gameSignal,
+		gameStore: locator.gameStore,
 		companySignal: companySignal,
 	});
 </script>
