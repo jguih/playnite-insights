@@ -1,5 +1,5 @@
 import type { CryptographyService } from "@playnite-insights/core";
-import * as bcrypt from "bcrypt";
+import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
 export type CryptographyServiceDeps = {};
 
@@ -9,9 +9,18 @@ export const makeCryptographyService = (
   const hashPasswordAsync: CryptographyService["hashPasswordAsync"] = async (
     password
   ) => {
-    const pass = await bcrypt.hash(password, 10);
-    return pass;
+    const salt = randomBytes(256);
+    const derivedKey = scryptSync(password, salt, 64);
+    return { salt: salt.toString("hex"), hash: derivedKey.toString("hex") };
   };
 
-  return { hashPasswordAsync };
+  const verifyInstancePassword: CryptographyService["verifyInstancePassword"] =
+    (password) => {
+      const salt = "";
+      const hash = "";
+      const derivedKey = scryptSync(password, Buffer.from(salt, "hex"), 64);
+      return timingSafeEqual(Buffer.from(hash, "hex"), derivedKey);
+    };
+
+  return { hashPasswordAsync, verifyInstancePassword };
 };

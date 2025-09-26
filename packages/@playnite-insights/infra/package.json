@@ -13,7 +13,6 @@
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/lib": "workspace:*",
     "@types/busboy": "^1.5.4",
-    "bcrypt": "^6.0.0",
     "busboy": "^1.6.0",
     "sharp": "^0.34.3",
     "zod": "^3.25.76"

@@ -11,7 +11,7 @@ import { createHash } from "crypto";
 import type { IncomingHttpHeaders } from "http";
 import { extname, join } from "path";
 import sharp from "sharp";
-import { ReadableStream } from "stream/web";
+import { type ReadableStream } from "stream/web";
 import { config } from "../config";
 import { defaultImageRepository } from "../repository/image";
 import { defaultFileSystemService } from "./file-system";

@@ -10,7 +10,7 @@ import busboy from "busboy";
 import { createHash } from "crypto";
 import type { IncomingHttpHeaders } from "http";
 import { join } from "path";
-import { ReadableStream } from "stream/web";
+import { type ReadableStream } from "stream/web";
 import {
   type ImportMediaFilesContext,
   type PlayniteLibraryImporterService,

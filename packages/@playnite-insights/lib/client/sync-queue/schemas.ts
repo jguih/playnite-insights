@@ -1,5 +1,5 @@
 import z from "zod";
-import { gameNoteSchema } from "../game-notes";
+import { gameNoteSchema } from "../game-notes/schemas";
 import { ISODateSchema } from "../schemas";
 
 const baseQueueItem = {

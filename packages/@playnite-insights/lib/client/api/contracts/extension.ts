@@ -1,5 +1,5 @@
 import z from "zod";
-import { extensionRegistrationSchema } from "../../extension-registration";
+import { extensionRegistrationSchema } from "../../extension-registration/schemas";
 
 export const baseExtensionCommandSchema = z.object({
   ExtensionId: z.string(),

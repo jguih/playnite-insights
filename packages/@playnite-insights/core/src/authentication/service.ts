@@ -126,11 +126,14 @@ export const makeAuthenticationService = ({
     async (password) => {
       const existing = instanceAuthenticationRepository.get();
       if (existing) throw new ApiError("Instance password already set.", 400);
-      const hash = await cryptographyService.hashPasswordAsync(password);
+      const { hash, salt } = await cryptographyService.hashPasswordAsync(
+        password
+      );
       const now = new Date();
       const instanceAuth: InstanceAuthentication = {
         Id: 1,
         PasswordHash: hash,
+        Salt: salt,
         CreatedAt: now.toISOString(),
         LastUpdatedAt: now.toISOString(),
       };

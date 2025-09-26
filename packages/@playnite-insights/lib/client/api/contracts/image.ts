@@ -1,5 +1,5 @@
 import z from "zod";
-import { imageSchema } from "../../image";
+import { imageSchema } from "../../image/schemas";
 
 export const uploadScreenshotResponseSchema = z.object({
   uploaded: z.array(z.string()),

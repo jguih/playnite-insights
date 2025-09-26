@@ -12,6 +12,7 @@ export const validAuthenticationHeaders = {
 export const instanceAuthenticationSchema = z.object({
   Id: z.literal(1),
   PasswordHash: z.string(),
+  Salt: z.string(),
   CreatedAt: ISODateSchema,
   LastUpdatedAt: ISODateSchema,
 });
