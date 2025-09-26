@@ -4,6 +4,7 @@ import { vi } from "vitest";
 import type { LibraryManifestService } from "../src/library-manifest";
 import type {
   CompanyRepository,
+  CryptographyService,
   ExtensionRegistrationRepository,
   GenreRepository,
   PlatformRepository,
@@ -136,6 +137,10 @@ export const makeMocks = () => {
     verifyExtensionSignature: vi.fn(),
   } satisfies SignatureService;
 
+  const cryptographyService = {
+    hashPasswordAsync: vi.fn(),
+  } satisfies CryptographyService;
+
   return {
     logService,
     fileSystemService,
@@ -150,5 +155,6 @@ export const makeMocks = () => {
     genreRepository,
     platformRepository,
     companyRepository,
+    cryptographyService,
   };
 };

@@ -1,4 +1,4 @@
-import { ExtensionRegistration } from "@playnite-insights/lib/client";
+import type { ExtensionRegistration } from "@playnite-insights/lib/client";
 
 export type SignatureService = {
   generateKeyPairAsync: () => Promise<void>;

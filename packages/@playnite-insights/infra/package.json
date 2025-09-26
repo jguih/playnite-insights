@@ -5,6 +5,7 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^24.0.14"
   },
   "dependencies": {
@@ -12,9 +13,10 @@
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/lib": "workspace:*",
     "@types/busboy": "^1.5.4",
+    "bcrypt": "^6.0.0",
     "busboy": "^1.6.0",
-    "zod": "^3.25.76",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "zod": "^3.25.76"
   },
   "engines": {
     "node": "^24.3.0",

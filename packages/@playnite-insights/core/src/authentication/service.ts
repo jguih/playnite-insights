@@ -7,6 +7,7 @@ export const makeAuthenticationService = ({
   extensionRegistrationRepository,
   signatureService,
   logService,
+  cryptographyService,
 }: AuthenticationServiceDeps): AuthenticationService => {
   const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
@@ -116,5 +117,13 @@ export const makeAuthenticationService = ({
       return true;
     };
 
-  return { verifyExtensionAuthorization };
+  const registerInstanceAsync: AuthenticationService["registerInstanceAsync"] =
+    async (password) => {
+      const hash = await cryptographyService.hashPasswordAsync(password);
+    };
+
+  return {
+    verifyExtensionAuthorization,
+    registerInstanceAsync,
+  };
 };

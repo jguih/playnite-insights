@@ -1,4 +1,4 @@
-import { CompletionStatus } from "@playnite-insights/lib/client";
+import { type CompletionStatus } from "@playnite-insights/lib/client";
 
 export type CompletionStatusRepository = {
   add: (completionStatus: CompletionStatus) => boolean;
