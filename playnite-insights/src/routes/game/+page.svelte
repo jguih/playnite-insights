@@ -52,7 +52,7 @@
 				<div class="mb-4">
 					<SolidAnchor
 						type="button"
-						href={`/game/${data.gameId}/journal`}
+						href={`/game/journal?id=${data.gameId}`}
 						class={['block w-full text-center']}
 					>
 						{m.game_label_journal()}

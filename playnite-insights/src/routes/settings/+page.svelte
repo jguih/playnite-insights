@@ -43,6 +43,7 @@
 	}>({ isLoading: false, registrations: null });
 
 	const loadExtensionRegistrations = async () => {
+		if (!clientServiceLocator.serverHeartbeat.isAlive) return;
 		try {
 			extensionRegistrationsSignal.isLoading = true;
 			await withHttpClient(async ({ client }) => {

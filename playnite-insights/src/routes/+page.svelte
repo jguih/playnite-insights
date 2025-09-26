@@ -145,7 +145,7 @@
 			'focus:border-primary-light-active-fg',
 		]}
 	>
-		<a href={`/game/${game.Id}`}>
+		<a href={`/game/?id=${game.Id}`}>
 			<img
 				src={vm.getImageURL(game.CoverImage)}
 				alt={`${game.Name} cover image`}

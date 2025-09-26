@@ -68,6 +68,11 @@ const apiRoutes = [
 	],
 ];
 
+/**
+ * @type {string[]}
+ */
+const shellRoutes = ['/', '/game', '/game/journal', '/dash', '/settings'];
+
 const ASSETS = [
 	...build, // the app itself
 	...files, // everything in `static`
@@ -78,6 +83,19 @@ sw.addEventListener('install', (event) => {
 	async function addFilesToCache() {
 		const cache = await caches.open(CacheKeys.APP);
 		await cache.addAll(ASSETS);
+		for (const shellRoute of shellRoutes) {
+			try {
+				const response = await fetch(shellRoute);
+				if (!(response instanceof Response)) {
+					throw new Error('Invalid response from fetch');
+				}
+				if (shouldCache(response)) {
+					await cache.put(shellRoute, response.clone());
+				}
+			} catch (error) {
+				console.error(`Failed to pre-cache shell route ${shellRoute}`, error);
+			}
+		}
 	}
 
 	event.waitUntil(addFilesToCache());
@@ -166,6 +184,9 @@ async function networkFirst(request, cacheName) {
 
 	try {
 		const networkResponse = await fetch(request);
+		if (!(networkResponse instanceof Response)) {
+			throw new Error('Invalid response from fetch');
+		}
 		if (shouldCache(networkResponse)) {
 			cache.put(request, networkResponse.clone());
 		}
@@ -181,34 +202,62 @@ async function networkFirst(request, cacheName) {
 	}
 }
 
+/**
+ *
+ * @param {string} pathname
+ * @param {string} cacheName
+ * @param {Request} request
+ */
+async function shellRouteStrategy(pathname, cacheName, request) {
+	const cache = await caches.open(cacheName);
+	try {
+		const networkResponse = await fetch(request);
+		if (!(networkResponse instanceof Response)) {
+			throw new Error('Invalid response from fetch');
+		}
+		if (shouldCache(networkResponse)) {
+			cache.put(pathname, networkResponse.clone());
+		}
+		return networkResponse;
+	} catch {
+		const cachedResponse = await cache.match(pathname);
+		if (cachedResponse) {
+			return cachedResponse;
+		}
+		return new Response('Service Unavailable', { status: 503 });
+	}
+}
+
 sw.addEventListener('fetch', async (event) => {
 	if (event.request.method !== 'GET') return;
 	if (event.request.headers.get('Accept')?.includes('text/event-stream')) return;
 
 	const url = new URL(event.request.url);
 
-	if (ASSETS.includes(url.pathname) || !url.pathname.startsWith('/api')) {
-		const returnCachedAssets = async () => {
+	// Always return cached assets
+	if (ASSETS.includes(url.pathname)) {
+		const serveCachedAssets = async () => {
 			const cache = await caches.open(CacheKeys.APP);
-			const cachedResponse = await cache.match(event.request);
-			if (cachedResponse) return cachedResponse;
-			try {
-				const response = await fetch(event.request);
-				if (shouldCache(response)) {
-					cache.put(url.pathname, response.clone());
-				}
-				return response;
-			} catch {
-				if (event.request.mode === 'navigate') {
-					return cache.match('/');
-				}
-				return new Response('Service Unavailable', { status: 503 });
-			}
+			const response = await cache.match(url.pathname);
+			if (response) return response;
+			return fetch(event.request);
 		};
-		event.respondWith(returnCachedAssets());
+		event.respondWith(serveCachedAssets());
 		return;
 	}
 
+	if (shellRoutes.includes(url.pathname)) {
+		event.respondWith(shellRouteStrategy(url.pathname, CacheKeys.APP, event.request));
+		return;
+	}
+
+	// Network first for everything that is not from api
+	if (!url.pathname.startsWith('/api')) {
+		event.respondWith(networkFirst(event.request, CacheKeys.APP));
+		return;
+	}
+
+	// Handle api caching
 	for (const [prefix, cacheKey, updateMessage, strategy] of apiRoutes) {
 		if (url.pathname.startsWith(prefix)) {
 			event.respondWith(strategy(event.request, cacheKey, updateMessage));
