@@ -4,7 +4,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 export type CryptographyServiceDeps = {};
 
 export const makeCryptographyService = (
-  deps: CryptographyServiceDeps
+  deps: CryptographyServiceDeps = {}
 ): CryptographyService => {
   const hashPasswordAsync: CryptographyService["hashPasswordAsync"] = async (
     password
@@ -14,13 +14,17 @@ export const makeCryptographyService = (
     return { salt: salt.toString("hex"), hash: derivedKey.toString("hex") };
   };
 
-  const verifyInstancePassword: CryptographyService["verifyInstancePassword"] =
-    (password) => {
-      const salt = "";
-      const hash = "";
-      const derivedKey = scryptSync(password, Buffer.from(salt, "hex"), 64);
-      return timingSafeEqual(Buffer.from(hash, "hex"), derivedKey);
-    };
+  const verifyPassword: CryptographyService["verifyPassword"] = (
+    password,
+    { hash, salt }
+  ) => {
+    const derivedKey = scryptSync(password, Buffer.from(salt, "hex"), 64);
+    return timingSafeEqual(Buffer.from(hash, "hex"), derivedKey);
+  };
 
-  return { hashPasswordAsync, verifyInstancePassword };
+  const createSessionId: CryptographyService["createSessionId"] = () => {
+    return randomBytes(32).toString("hex");
+  };
+
+  return { hashPasswordAsync, verifyPassword, createSessionId };
 };

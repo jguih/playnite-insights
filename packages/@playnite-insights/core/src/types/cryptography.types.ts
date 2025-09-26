@@ -2,5 +2,9 @@ export type CryptographyService = {
   hashPasswordAsync: (
     password: string
   ) => Promise<{ salt: string; hash: string }>;
-  verifyInstancePassword: (password: string) => boolean;
+  verifyPassword: (
+    password: string,
+    args: { salt: string; hash: string }
+  ) => boolean;
+  createSessionId: () => string;
 };

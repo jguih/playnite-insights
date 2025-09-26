@@ -1,6 +1,7 @@
 import {
   ApiError,
   type InstanceAuthentication,
+  type InstanceSession,
 } from "@playnite-insights/lib/client";
 import {
   type AuthenticationService,
@@ -13,6 +14,7 @@ export const makeAuthenticationService = ({
   logService,
   cryptographyService,
   instanceAuthenticationRepository,
+  instanceSessionsRepository,
 }: AuthenticationServiceDeps): AuthenticationService => {
   const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
@@ -140,8 +142,29 @@ export const makeAuthenticationService = ({
       instanceAuthenticationRepository.set(instanceAuth);
     };
 
+  const loginInstanceAsync: AuthenticationService["loginInstanceAsync"] =
+    async (password) => {
+      const existing = instanceAuthenticationRepository.get();
+      if (!existing) throw new ApiError("Instance not registered", 403);
+      const isValid = cryptographyService.verifyPassword(password, {
+        hash: existing.PasswordHash,
+        salt: existing.Salt,
+      });
+      if (!isValid) throw new ApiError("Invalid credentials", 403);
+      const now = new Date();
+      const sessionId = cryptographyService.createSessionId();
+      const newSession: InstanceSession = {
+        Id: sessionId,
+        CreatedAt: now.toISOString(),
+        LastUsedAt: now.toISOString(),
+      };
+      instanceSessionsRepository.add(newSession);
+      return sessionId;
+    };
+
   return {
     verifyExtensionAuthorization,
     registerInstanceAsync,
+    loginInstanceAsync,
   };
 };

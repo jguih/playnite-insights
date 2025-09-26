@@ -16,3 +16,9 @@ export const instanceAuthenticationSchema = z.object({
   CreatedAt: ISODateSchema,
   LastUpdatedAt: ISODateSchema,
 });
+
+export const instanceSessionSchema = z.object({
+  Id: z.string(),
+  CreatedAt: ISODateSchema,
+  LastUsedAt: ISODateSchema,
+});

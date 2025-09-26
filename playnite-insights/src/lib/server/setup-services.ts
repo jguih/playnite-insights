@@ -20,6 +20,7 @@ import {
 	makeGenreRepository,
 	makeImageRepository,
 	makeInstanceAuthenticationRepository,
+	makeInstanceSessionsRepository,
 	makeLogService,
 	makePlatformRepository,
 	makePlayniteGameRepository,
@@ -64,6 +65,9 @@ export const setupServices = () => {
 	const instanceAuthenticationRepository = makeInstanceAuthenticationRepository({
 		logService: makeLogService('InstanceAuthenticationRepository'),
 	});
+	const instanceSessionsRepository = makeInstanceSessionsRepository({
+		logService: makeLogService('InstanceSessionsRepository'),
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -76,6 +80,7 @@ export const setupServices = () => {
 		completionStatusRepository,
 		extensionRegistrationRepository,
 		instanceAuthenticationRepository,
+		instanceSessionsRepository,
 	};
 	const commonDeps = {
 		getDb,

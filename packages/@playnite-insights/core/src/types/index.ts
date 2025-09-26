@@ -8,6 +8,7 @@ export type * from "./game-session.types";
 export type * from "./genre.types";
 export type * from "./image.types";
 export type * from "./instance-authentication.types";
+export type * from "./instance-sessions.types";
 export type * from "./log.types";
 export type * from "./platform.types";
 export type * from "./playnite-game.types";

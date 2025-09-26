@@ -4,5 +4,6 @@ export * from "./extension-registration";
 export * from "./genre";
 export * from "./image";
 export * from "./instance-authentication";
+export * from "./instance-sessions";
 export * from "./platform";
 export * from "./playnite-library-sync";
