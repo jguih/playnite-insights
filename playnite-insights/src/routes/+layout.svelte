@@ -2,7 +2,6 @@
 	import {
 		httpClientSignal,
 		indexedDbSignal,
-		loadCompanies,
 		loadGameNotesFromServer,
 		loadGenres,
 		loadLibraryMetrics,
@@ -47,8 +46,7 @@
 		});
 		// Background data loading
 		Promise.all([
-			locator.gameStore.loadGames(),
-			loadCompanies(),
+			locator.loadStoresData(),
 			loadRecentGameSessions(),
 			loadGenres(),
 			loadPlatforms(),

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		companySignal,
 		httpClientSignal,
 		loadGameNotesFromServer,
 		locator,
@@ -42,7 +41,7 @@
 	const pageVm = new GamePageViewModel({
 		getGameId: () => data.gameId,
 		gameStore: locator.gameStore,
-		companySignal: companySignal,
+		companyStore: locator.companyStore,
 	});
 	const activityVm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,

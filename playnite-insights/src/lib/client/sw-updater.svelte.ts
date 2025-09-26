@@ -1,6 +1,5 @@
 import { m } from '$lib/paraglide/messages';
 import {
-	loadCompanies,
 	loadGenres,
 	loadLibraryMetrics,
 	loadPlatforms,
@@ -25,7 +24,7 @@ export class ServiceWorkerUpdater {
 				break;
 			}
 			case 'COMPANY_UPDATE': {
-				loadCompanies();
+				locator.companyStore.loadCompanies();
 				break;
 			}
 			case 'RECENT_SESSION_UPDATE': {

@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		companySignal,
-		genreSignal,
-		platformSignal,
-	} from '$lib/client/app-state/AppData.svelte.js';
+	import { genreSignal, locator, platformSignal } from '$lib/client/app-state/AppData.svelte.js';
 	import { m } from '$lib/paraglide/messages';
 	import { XIcon } from '@lucide/svelte';
 	import type {
@@ -60,7 +56,7 @@
 
 	const MAX_RENDER_OPTIONS = 30;
 
-	const companyList = $derived(companySignal.raw);
+	const companyList = $derived(locator.companyStore.companyList);
 	const platformList = $derived(platformSignal.raw);
 	const genreList = $derived(genreSignal.raw);
 

@@ -7,6 +7,7 @@ import { ServiceWorkerUpdater } from '../sw-updater.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import type { HttpClientSignal, IndexedDbSignal, ServerTimeSignal } from './AppData.types';
+import { CompanyStore } from './stores/companyStore.svelte';
 import { GameStore } from './stores/gameStore.svelte';
 
 export type ClientServiceLocatorFactory = {
@@ -34,6 +35,7 @@ export class ClientServiceLocator {
 	#serviceWorkerUpdater: ServiceWorkerUpdater;
 	#serverHeartbeat: ServerHeartbeat;
 	#gameStore: GameStore;
+	#companyStore: CompanyStore;
 
 	constructor({ indexedDbSignal, serverTimeSignal, httpClientSignal }: ClientServiceLocatorDeps) {
 		this.#dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
@@ -58,7 +60,13 @@ export class ClientServiceLocator {
 		this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
 		this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.#eventSourceManager });
 		this.#gameStore = new GameStore({ httpClientSignal });
+		this.#companyStore = new CompanyStore({ httpClientSignal });
 	}
+
+	loadStoresData = () => {
+		this.#gameStore.loadGames();
+		this.#companyStore.loadCompanies();
+	};
 
 	get dateTimeHandler() {
 		return this.#dateTimeHandler;
@@ -90,5 +98,9 @@ export class ClientServiceLocator {
 
 	get gameStore() {
 		return this.#gameStore;
+	}
+
+	get companyStore() {
+		return this.#companyStore;
 	}
 }

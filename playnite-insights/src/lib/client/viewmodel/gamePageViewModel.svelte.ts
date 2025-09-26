@@ -1,25 +1,25 @@
 import { m } from '$lib/paraglide/messages';
 import type { FullGame } from '@playnite-insights/lib/client';
-import type { CompanySignal } from '../app-state/AppData.types';
+import type { CompanyStore } from '../app-state/stores/companyStore.svelte';
 import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl, getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
 type GamePageViewModelProps = {
 	getGameId: () => string | null;
 	gameStore: GameStore;
-	companySignal: CompanySignal;
+	companyStore: CompanyStore;
 };
 
 export class GamePageViewModel {
 	#getGameId: GamePageViewModelProps['getGameId'];
 	#gameStore: GamePageViewModelProps['gameStore'];
-	#companySignal: GamePageViewModelProps['companySignal'];
+	#companyStore: GamePageViewModelProps['companyStore'];
 	#game: FullGame | null;
 
-	constructor({ getGameId, gameStore, companySignal }: GamePageViewModelProps) {
+	constructor({ getGameId, gameStore, companyStore }: GamePageViewModelProps) {
 		this.#getGameId = getGameId;
 		this.#gameStore = gameStore;
-		this.#companySignal = companySignal;
+		this.#companyStore = companyStore;
 
 		this.#game = $derived.by(() => {
 			const gameId = this.#getGameId();
@@ -67,7 +67,7 @@ export class GamePageViewModel {
 	};
 
 	getDevelopers = (): string => {
-		const companies = this.#companySignal.raw;
+		const companies = this.#companyStore.companyList;
 		if (!this.#game || !companies) return '';
 		const fullDevs = companies.filter((dev) => this.#game?.Developers.includes(dev.Id));
 		return fullDevs.map((d) => d.Name).join(', ');

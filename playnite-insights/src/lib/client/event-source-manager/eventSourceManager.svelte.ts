@@ -2,7 +2,6 @@ import { m } from '$lib/paraglide/messages';
 import { apiSSEventDataSchema, type APISSEventType } from '@playnite-insights/lib/client';
 import z from 'zod';
 import {
-	loadCompanies,
 	loadGenres,
 	loadLibraryMetrics,
 	loadPlatforms,
@@ -144,7 +143,7 @@ export class EventSourceManager {
 				cb: async () =>
 					await Promise.all([
 						locator.gameStore.loadGames(),
-						loadCompanies(),
+						locator.companyStore.loadCompanies(),
 						loadGenres(),
 						loadPlatforms(),
 						loadLibraryMetrics(),

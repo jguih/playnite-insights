@@ -1,6 +1,5 @@
 import {
 	FetchClientStrategyError,
-	getAllCompaniesResponseSchema,
 	getAllGameNotesResponseSchema,
 	getAllGenresResponseSchema,
 	getAllPlatformsResponseSchema,
@@ -13,7 +12,6 @@ import {
 } from '@playnite-insights/lib/client';
 import { handleClientErrors } from '../utils/handleClientErrors.svelte';
 import type {
-	CompanySignal,
 	GenreSignal,
 	HttpClientSignal,
 	IndexedDbSignal,
@@ -26,7 +24,6 @@ import { ClientServiceLocator } from './serviceLocator';
 
 export const httpClientSignal = $state<HttpClientSignal>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
-export const companySignal = $state<CompanySignal>({ raw: null, isLoading: false });
 export const recentGameSessionSignal = $state<RecentGameSessionSignal>({
 	raw: null,
 	isLoading: false,
@@ -69,25 +66,6 @@ export const loadLibraryMetrics = async () => {
 		return null;
 	} finally {
 		libraryMetricsSignal.isLoading = false;
-	}
-};
-
-export const loadCompanies = async () => {
-	try {
-		return await withHttpClient(async ({ client }) => {
-			companySignal.isLoading = true;
-			const result = await client.httpGetAsync({
-				endpoint: '/api/company',
-				strategy: new JsonStrategy(getAllCompaniesResponseSchema),
-			});
-			companySignal.raw = result;
-			return result;
-		});
-	} catch (err) {
-		handleClientErrors(err, `[loadCompanies] failed to fetch /api/company`);
-		return null;
-	} finally {
-		companySignal.isLoading = false;
 	}
 };
 
