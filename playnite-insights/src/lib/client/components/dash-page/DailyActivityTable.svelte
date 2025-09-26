@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		locator,
-		recentGameSessionSignal,
-		serverTimeSignal,
-	} from '$lib/client/app-state/AppData.svelte.js';
+	import { locator, serverTimeSignal } from '$lib/client/app-state/AppData.svelte.js';
 	import { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
@@ -14,7 +10,7 @@
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const vm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
-		recentGameSessionSignal: recentGameSessionSignal,
+		gameSessionStore: locator.gameSessionStore,
 		dateTimeHandler: dateTimeHandler,
 	});
 	let expandedActivitySessions = $state(new Set<string>());

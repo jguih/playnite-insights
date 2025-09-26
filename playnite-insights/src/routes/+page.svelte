@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import {
-		locator,
-		recentGameSessionSignal,
-		serverTimeSignal,
-	} from '$lib/client/app-state/AppData.svelte.js';
+	import { locator, serverTimeSignal } from '$lib/client/app-state/AppData.svelte.js';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home, { updateBottomNavHomeHref } from '$lib/client/components/bottom-nav/Home.svelte';
@@ -41,7 +37,7 @@
 	const dateTimeHandler = new DateTimeHandler({ serverTimeSignal: serverTimeSignal });
 	const recentActivityVm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
-		recentGameSessionSignal: recentGameSessionSignal,
+		gameSessionStore: locator.gameSessionStore,
 		dateTimeHandler: dateTimeHandler,
 	});
 	const vm = new HomePageViewModel({

@@ -1,17 +1,17 @@
 import type { FullGame, GameActivity, GameSession } from '@playnite-insights/lib/client';
-import type { RecentGameSessionSignal } from '../app-state/AppData.types';
+import type { GameSessionStore } from '../app-state/stores/gameSessionStore.svelte';
 import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import type { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 
 export type RecentActivityViewModelProps = {
 	gameStore: GameStore;
-	recentGameSessionSignal: RecentGameSessionSignal;
+	gameSessionStore: GameSessionStore;
 	dateTimeHandler: DateTimeHandler;
 };
 
 export class RecentActivityViewModel {
 	#gameStore: RecentActivityViewModelProps['gameStore'];
-	#recentGameSessionSignal: RecentActivityViewModelProps['recentGameSessionSignal'];
+	#gameSessionStore: RecentActivityViewModelProps['gameSessionStore'];
 	#dateTimeHandler: RecentActivityViewModelProps['dateTimeHandler'];
 
 	#sessionsForToday: GameSession[];
@@ -24,13 +24,9 @@ export class RecentActivityViewModel {
 	#tick: number;
 	#tickInterval: ReturnType<typeof setInterval> | null;
 
-	constructor({
-		gameStore,
-		recentGameSessionSignal,
-		dateTimeHandler,
-	}: RecentActivityViewModelProps) {
+	constructor({ gameStore, gameSessionStore, dateTimeHandler }: RecentActivityViewModelProps) {
 		this.#gameStore = gameStore;
-		this.#recentGameSessionSignal = recentGameSessionSignal;
+		this.#gameSessionStore = gameSessionStore;
 		this.#dateTimeHandler = dateTimeHandler;
 		this.#tick = $state(dateTimeHandler.getUtcNow());
 		this.#tickInterval = $state(null);
@@ -39,7 +35,7 @@ export class RecentActivityViewModel {
 			/**
 			 * @var sessions contains game sessions for the last 7 days
 			 */
-			const sessions = this.#recentGameSessionSignal.raw ?? [];
+			const sessions = this.#gameSessionStore.recentSessions ?? [];
 			const now = new Date();
 			const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 			const todayEnd = new Date(todayStart);

@@ -3,7 +3,6 @@
 		httpClientSignal,
 		loadGameNotesFromServer,
 		locator,
-		recentGameSessionSignal,
 	} from '$lib/client/app-state/AppData.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
@@ -45,7 +44,7 @@
 	});
 	const activityVm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
-		recentGameSessionSignal: recentGameSessionSignal,
+		gameSessionStore: locator.gameSessionStore,
 		dateTimeHandler: locator.dateTimeHandler,
 	});
 	const noteEditor = new GameNoteEditor({

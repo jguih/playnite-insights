@@ -8,6 +8,7 @@ import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import type { HttpClientSignal, IndexedDbSignal, ServerTimeSignal } from './AppData.types';
 import { CompanyStore } from './stores/companyStore.svelte';
+import { GameSessionStore } from './stores/gameSessionStore.svelte';
 import { GameStore } from './stores/gameStore.svelte';
 
 export type ClientServiceLocatorFactory = {
@@ -36,6 +37,7 @@ export class ClientServiceLocator {
 	#serverHeartbeat: ServerHeartbeat;
 	#gameStore: GameStore;
 	#companyStore: CompanyStore;
+	#gameSessionStore: GameSessionStore;
 
 	constructor({ indexedDbSignal, serverTimeSignal, httpClientSignal }: ClientServiceLocatorDeps) {
 		this.#dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
@@ -61,11 +63,13 @@ export class ClientServiceLocator {
 		this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.#eventSourceManager });
 		this.#gameStore = new GameStore({ httpClientSignal });
 		this.#companyStore = new CompanyStore({ httpClientSignal });
+		this.#gameSessionStore = new GameSessionStore({ httpClientSignal });
 	}
 
 	loadStoresData = () => {
 		this.#gameStore.loadGames();
 		this.#companyStore.loadCompanies();
+		this.#gameSessionStore.loadRecentSessions();
 	};
 
 	get dateTimeHandler() {
@@ -102,5 +106,9 @@ export class ClientServiceLocator {
 
 	get companyStore() {
 		return this.#companyStore;
+	}
+
+	get gameSessionStore() {
+		return this.#gameSessionStore;
 	}
 }

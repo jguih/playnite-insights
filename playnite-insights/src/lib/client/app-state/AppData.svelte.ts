@@ -4,7 +4,6 @@ import {
 	getAllGenresResponseSchema,
 	getAllPlatformsResponseSchema,
 	getPlayniteLibraryMetricsResponseSchema,
-	getRecentSessionsResponseSchema,
 	getServerUtcNowResponseSchema,
 	HttpClientNotSetError,
 	JsonStrategy,
@@ -17,17 +16,12 @@ import type {
 	IndexedDbSignal,
 	LibraryMetricsSignal,
 	PlatformSignal,
-	RecentGameSessionSignal,
 	ServerTimeSignal,
 } from './AppData.types';
 import { ClientServiceLocator } from './serviceLocator';
 
 export const httpClientSignal = $state<HttpClientSignal>({ client: null });
 export const indexedDbSignal = $state<IndexedDbSignal>({ db: null, dbReady: null });
-export const recentGameSessionSignal = $state<RecentGameSessionSignal>({
-	raw: null,
-	isLoading: false,
-});
 export const genreSignal = $state<GenreSignal>({ raw: null, isLoading: false });
 export const platformSignal = $state<PlatformSignal>({ raw: null, isLoading: false });
 export const serverTimeSignal = $state<ServerTimeSignal>({
@@ -66,28 +60,6 @@ export const loadLibraryMetrics = async () => {
 		return null;
 	} finally {
 		libraryMetricsSignal.isLoading = false;
-	}
-};
-
-/**
- * Loads all game sessions that overlaps the last 7 days
- */
-export const loadRecentGameSessions = async () => {
-	try {
-		return await withHttpClient(async ({ client }) => {
-			recentGameSessionSignal.isLoading = true;
-			const result = await client.httpGetAsync({
-				endpoint: '/api/session/recent',
-				strategy: new JsonStrategy(getRecentSessionsResponseSchema),
-			});
-			recentGameSessionSignal.raw = result;
-			return result;
-		});
-	} catch (err) {
-		handleClientErrors(err, `[loadRecentGameSessions] failed to fetch /api/session/recent`);
-		return null;
-	} finally {
-		recentGameSessionSignal.isLoading = false;
 	}
 };
 

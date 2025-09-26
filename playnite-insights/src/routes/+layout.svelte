@@ -6,7 +6,6 @@
 		loadGenres,
 		loadLibraryMetrics,
 		loadPlatforms,
-		loadRecentGameSessions,
 		loadServerTime,
 		locator,
 	} from '$lib/client/app-state/AppData.svelte.js';
@@ -30,7 +29,7 @@
 	};
 
 	const handleFocus = () => {
-		loadRecentGameSessions();
+		locator.gameSessionStore.loadRecentSessions();
 	};
 
 	onMount(() => {
@@ -47,7 +46,6 @@
 		// Background data loading
 		Promise.all([
 			locator.loadStoresData(),
-			loadRecentGameSessions(),
 			loadGenres(),
 			loadPlatforms(),
 			loadLibraryMetrics(),

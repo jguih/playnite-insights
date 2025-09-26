@@ -5,7 +5,6 @@ import {
 	loadGenres,
 	loadLibraryMetrics,
 	loadPlatforms,
-	loadRecentGameSessions,
 	locator,
 } from '../app-state/AppData.svelte';
 
@@ -151,11 +150,11 @@ export class EventSourceManager {
 			}),
 			this.addListener({
 				type: 'sessionOpened',
-				cb: async () => await loadRecentGameSessions(),
+				cb: async () => await locator.gameSessionStore.loadRecentSessions(),
 			}),
 			this.addListener({
 				type: 'sessionClosed',
-				cb: async () => await loadRecentGameSessions(),
+				cb: async () => await locator.gameSessionStore.loadRecentSessions(),
 			}),
 		);
 	};
