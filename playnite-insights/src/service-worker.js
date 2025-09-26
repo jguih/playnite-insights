@@ -177,7 +177,7 @@ async function networkFirst(request, cacheName) {
 			return cachedResponse;
 		}
 
-		return new Response('Network error and no cache available', { status: 503 });
+		return new Response('Service Unavailable', { status: 503 });
 	}
 }
 
@@ -190,13 +190,20 @@ sw.addEventListener('fetch', async (event) => {
 	if (ASSETS.includes(url.pathname) || !url.pathname.startsWith('/api')) {
 		const returnCachedAssets = async () => {
 			const cache = await caches.open(CacheKeys.APP);
-			const cachedResponse = await cache.match(url.pathname);
+			const cachedResponse = await cache.match(event.request);
 			if (cachedResponse) return cachedResponse;
-			const response = await fetch(event.request);
-			if (shouldCache(response)) {
-				cache.put(url.pathname, response.clone());
+			try {
+				const response = await fetch(event.request);
+				if (shouldCache(response)) {
+					cache.put(url.pathname, response.clone());
+				}
+				return response;
+			} catch {
+				if (event.request.mode === 'navigate') {
+					return cache.match('/');
+				}
+				return new Response('Service Unavailable', { status: 503 });
 			}
-			return response;
 		};
 		event.respondWith(returnCachedAssets());
 		return;
