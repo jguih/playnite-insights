@@ -1,7 +1,6 @@
 import type {
 	GetAllGenresResponse,
 	GetAllPlatformsResponse,
-	GetPlayniteLibraryMetricsResponse,
 	IFetchClient,
 } from '@playnite-insights/lib/client';
 
@@ -9,10 +8,6 @@ export type HttpClientSignal = { client: IFetchClient | null };
 export type ServerTimeSignal = {
 	utcNow: number | null;
 	syncPoint: number | null;
-	isLoading: boolean;
-};
-export type LibraryMetricsSignal = {
-	raw: GetPlayniteLibraryMetricsResponse | null;
 	isLoading: boolean;
 };
 export type GenreSignal = { raw: GetAllGenresResponse | null; isLoading: boolean };

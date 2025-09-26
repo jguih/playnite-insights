@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { loadGenres, loadLibraryMetrics, loadPlatforms, locator } from './app-state/AppData.svelte';
+import { loadGenres, loadPlatforms, locator } from './app-state/AppData.svelte';
 import { toast } from './app-state/toast.svelte';
 
 export class ServiceWorkerUpdater {
@@ -34,7 +34,7 @@ export class ServiceWorkerUpdater {
 				break;
 			}
 			case 'LIBRARY_METRICS_UPDATE': {
-				loadLibraryMetrics();
+				locator.libraryMetricsStore.loadLibraryMetrics();
 				break;
 			}
 		}

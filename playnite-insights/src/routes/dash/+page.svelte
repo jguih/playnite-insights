@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { libraryMetricsSignal, locator } from '$lib/client/app-state/AppData.svelte.js';
+	import { locator } from '$lib/client/app-state/AppData.svelte.js';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -16,7 +16,7 @@
 
 	const vm = new DashPageViewModel({
 		gameStore: locator.gameStore,
-		libraryMetricsSignal: libraryMetricsSignal,
+		libraryMetricsStore: locator.libraryMetricsStore,
 	});
 </script>
 

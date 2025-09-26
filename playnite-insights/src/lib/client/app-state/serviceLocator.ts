@@ -11,6 +11,7 @@ import { CompanyStore } from './stores/companyStore.svelte';
 import { GameNoteStore } from './stores/gameNoteStore.svelte';
 import { GameSessionStore } from './stores/gameSessionStore.svelte';
 import { GameStore } from './stores/gameStore.svelte';
+import { LibraryMetricsStore } from './stores/libraryMetricsStore.svelte';
 
 export type ClientServiceLocatorFactory = {
 	syncQueue: SyncQueueFactory;
@@ -40,6 +41,7 @@ export class ClientServiceLocator {
 	#companyStore: CompanyStore;
 	#gameSessionStore: GameSessionStore;
 	#gameNoteStore: GameNoteStore;
+	#libraryMetricsStore: LibraryMetricsStore;
 
 	constructor({ indexedDbSignal, serverTimeSignal, httpClientSignal }: ClientServiceLocatorDeps) {
 		this.#dateTimeHandler = new DateTimeHandler({ serverTimeSignal });
@@ -72,12 +74,14 @@ export class ClientServiceLocator {
 			gameNoteRepository: this.#repository.gameNote,
 			dateTimeHandler: this.#dateTimeHandler,
 		});
+		this.#libraryMetricsStore = new LibraryMetricsStore({ httpClientSignal });
 	}
 
 	loadStoresData = () => {
 		this.#gameStore.loadGames();
 		this.#companyStore.loadCompanies();
 		this.#gameSessionStore.loadRecentSessions();
+		this.#libraryMetricsStore.loadLibraryMetrics();
 	};
 
 	get dateTimeHandler() {
@@ -122,5 +126,9 @@ export class ClientServiceLocator {
 
 	get gameNoteStore() {
 		return this.#gameNoteStore;
+	}
+
+	get libraryMetricsStore() {
+		return this.#libraryMetricsStore;
 	}
 }

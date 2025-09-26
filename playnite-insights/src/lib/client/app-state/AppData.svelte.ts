@@ -1,7 +1,6 @@
 import {
 	getAllGenresResponseSchema,
 	getAllPlatformsResponseSchema,
-	getPlayniteLibraryMetricsResponseSchema,
 	getServerUtcNowResponseSchema,
 	HttpClientNotSetError,
 	JsonStrategy,
@@ -12,7 +11,6 @@ import type {
 	GenreSignal,
 	HttpClientSignal,
 	IndexedDbSignal,
-	LibraryMetricsSignal,
 	PlatformSignal,
 	ServerTimeSignal,
 } from './AppData.types';
@@ -27,7 +25,6 @@ export const serverTimeSignal = $state<ServerTimeSignal>({
 	utcNow: null,
 	isLoading: false,
 });
-export const libraryMetricsSignal = $state<LibraryMetricsSignal>({ raw: null, isLoading: false });
 export const locator = new ClientServiceLocator({
 	httpClientSignal,
 	indexedDbSignal,
@@ -41,25 +38,6 @@ export async function withHttpClient<T>(
 	if (!client) throw new HttpClientNotSetError();
 	return cb({ client });
 }
-
-export const loadLibraryMetrics = async () => {
-	try {
-		libraryMetricsSignal.isLoading = true;
-		return await withHttpClient(async ({ client }) => {
-			const result = await client.httpGetAsync({
-				endpoint: '/api/library/metrics',
-				strategy: new JsonStrategy(getPlayniteLibraryMetricsResponseSchema),
-			});
-			libraryMetricsSignal.raw = result;
-			return result;
-		});
-	} catch (err) {
-		handleClientErrors(err, `[loadLibraryMetrics] failed to fetch /api/library/metrics`);
-		return null;
-	} finally {
-		libraryMetricsSignal.isLoading = false;
-	}
-};
 
 /**
  * Loads server time

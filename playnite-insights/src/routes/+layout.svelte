@@ -3,7 +3,6 @@
 		httpClientSignal,
 		indexedDbSignal,
 		loadGenres,
-		loadLibraryMetrics,
 		loadPlatforms,
 		loadServerTime,
 		locator,
@@ -43,13 +42,7 @@
 			locator.gameNoteStore.loadNotesFromServerAsync();
 		});
 		// Background data loading
-		Promise.all([
-			locator.loadStoresData(),
-			loadGenres(),
-			loadPlatforms(),
-			loadLibraryMetrics(),
-			loadServerTime(),
-		]);
+		Promise.all([locator.loadStoresData(), loadGenres(), loadPlatforms(), loadServerTime()]);
 		// Periodic data processing
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
 		locator.eventSourceManager.connect();
