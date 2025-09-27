@@ -310,7 +310,7 @@
 			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-20 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
-					href={`/game/${recentActivityVm.inProgressGame.Id}/journal`}
+					href={`/game/journal?id=${recentActivityVm.inProgressGame.Id}`}
 				>
 					<img
 						src={vm.getImageURL(recentActivityVm.inProgressGame.CoverImage)}

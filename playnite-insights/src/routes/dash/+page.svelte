@@ -98,7 +98,7 @@
 								'm-0 p-0 shadow outline-0',
 							]}
 						>
-							<a href={`/game/${game.Id}`}>
+							<a href={`/game?id=${game.Id}`}>
 								<div class="bg-background-1 flex flex-row gap-3 p-2">
 									<img
 										src={getPlayniteGameImageUrl(game.CoverImage)}
