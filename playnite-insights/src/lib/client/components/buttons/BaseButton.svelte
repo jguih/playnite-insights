@@ -19,8 +19,8 @@
 		justify === 'between' && 'justify-between',
 		rounded && 'rounded-full p-2',
 		size === 'sm' && 'p-1',
-		size === 'md' && 'p-2',
-		size === 'lg' && 'p-4',
+		size === 'md' && 'px-1 py-2',
+		size === 'lg' && 'px-3 py-2 text-lg',
 		props.class,
 	]}
 	bind:this={button}

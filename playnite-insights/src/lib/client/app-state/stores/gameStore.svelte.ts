@@ -11,6 +11,7 @@ export type GameStoreDeps = ApiDataStoreDeps;
 export type GameListSignal = {
 	list: GetAllGamesResponse | null;
 	isLoading: boolean;
+	hasLoaded: boolean;
 };
 
 export class GameStore extends ApiDataStore {
@@ -18,7 +19,7 @@ export class GameStore extends ApiDataStore {
 
 	constructor({ httpClient }: GameStoreDeps) {
 		super({ httpClient });
-		this.#dataSignal = $state({ list: null, isLoading: false });
+		this.#dataSignal = $state({ list: null, isLoading: false, hasLoaded: false });
 	}
 
 	loadGames = async () => {
@@ -37,6 +38,7 @@ export class GameStore extends ApiDataStore {
 			return null;
 		} finally {
 			this.#dataSignal.isLoading = false;
+			this.#dataSignal.hasLoaded = true;
 		}
 	};
 
@@ -46,5 +48,9 @@ export class GameStore extends ApiDataStore {
 
 	get isLoading() {
 		return this.#dataSignal.isLoading;
+	}
+
+	get hasLoaded() {
+		return this.#dataSignal.hasLoaded;
 	}
 }

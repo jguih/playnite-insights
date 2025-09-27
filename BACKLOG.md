@@ -27,21 +27,24 @@
 - Active session page:
   - Display current game being played
   - Allow user to manage notes linked to the current session
+- Screenshot gallery improvements:
+  - Store metadata in database
+  - Compare image hashes to avoid duplicates
 
 ## 🛠️ In Progress
 
 - Screenshot gallery improvements:
   - Delete images
-  - Store metadata in database
   - Restore images from trash
-  - Compare image hashes to avoid duplicates
+- Instance authentication system
 
 ## 📌 To Do
 
-- Image caching limit
 - Display game trailer in game page
 - Display related owned games in game page
-- Settings page (change language)
+- Settings page:
+  - Global filter to hide hidden games
+  - Option to automatically redirect to current active game journal when a session is in progress
 
 ## 💡 Ideas
 

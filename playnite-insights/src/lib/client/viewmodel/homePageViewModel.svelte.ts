@@ -230,7 +230,7 @@ export class HomePageViewModel {
 	}
 
 	get isLoading() {
-		return this.#gameStore.isLoading || this.#games === null;
+		return !this.#gameStore.hasLoaded;
 	}
 
 	get pagination() {
