@@ -5,19 +5,18 @@ import {
 	type IFetchClient,
 	type RemoteAction,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../app-state/AppData.types';
 import { toast } from '../app-state/toast.svelte';
 
 export type PlayniteRemoteActionDeps = {
-	httpClientSignal: HttpClientSignal;
+	httpClient: IFetchClient | null;
 };
 
 export class PlayniteRemoteAction {
-	#httpClientSignal: PlayniteRemoteActionDeps['httpClientSignal'];
+	#httpClient: PlayniteRemoteActionDeps['httpClient'];
 	#actionLoadingState: { takeScreenShot: boolean };
 
-	constructor({ httpClientSignal }: PlayniteRemoteActionDeps) {
-		this.#httpClientSignal = httpClientSignal;
+	constructor({ httpClient }: PlayniteRemoteActionDeps) {
+		this.#httpClient = httpClient;
 
 		this.#actionLoadingState = $state({ takeScreenShot: false });
 	}
@@ -25,7 +24,7 @@ export class PlayniteRemoteAction {
 	protected withHttpClient = async <T>(
 		cb: (props: { client: IFetchClient }) => Promise<T>,
 	): Promise<T> => {
-		const client = this.#httpClientSignal.client;
+		const client = this.#httpClient;
 		if (!client) throw new HttpClientNotSetError();
 		return cb({ client });
 	};

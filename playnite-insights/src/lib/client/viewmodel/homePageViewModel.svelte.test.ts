@@ -21,7 +21,7 @@ const defaultPageData: PageProps['data'] = {
 };
 const factory = new FullGameFactory();
 const fetchClient = makeFetchClientMock();
-const gameStore = new GameStore({ httpClientSignal: { client: fetchClient } });
+const gameStore = new GameStore({ httpClient: fetchClient });
 
 describe('HomePageViewModel', () => {
 	beforeEach(() => {

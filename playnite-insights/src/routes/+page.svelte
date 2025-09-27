@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { locator } from '$lib/client/app-state/AppData.svelte.js';
+	import { locator } from '$lib/client/app-state/serviceLocator';
 	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home, { updateBottomNavHomeHref } from '$lib/client/components/bottom-nav/Home.svelte';

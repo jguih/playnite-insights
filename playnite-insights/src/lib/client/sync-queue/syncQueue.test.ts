@@ -8,15 +8,11 @@ import {
 } from '@playnite-insights/lib/client';
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type {
-	HttpClientSignal,
-	IndexedDbSignal,
-	ServerTimeSignal,
-} from '../app-state/AppData.types';
+import type { IndexedDbSignal } from '../app-state/indexeddbManager.svelte';
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
-import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
+import { type IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { SyncQueue } from './syncQueue';
 
 const fakeFetchClient = {
@@ -26,16 +22,12 @@ const fakeFetchClient = {
 	httpDeleteAsync: vi.fn(),
 } satisfies IFetchClient;
 const indexedDbSignal: IndexedDbSignal = { db: null, dbReady: null };
-const httpClientSignal: HttpClientSignal = { client: fakeFetchClient };
-const serverTimeSignal: ServerTimeSignal = {
-	isLoading: false,
-	syncPoint: Date.now(),
-	utcNow: Date.now(),
-};
 const syncQueueFactory = new SyncQueueFactory();
 const gameNoteFactory = new GameNoteFactory();
 const syncQueueRepository = new SyncQueueRepository({ indexedDbSignal });
-const dateTimeHandler = new DateTimeHandler({ serverTimeStore: serverTimeSignal });
+const dateTimeHandler: IDateTimeHandler = {
+	getUtcNow: () => Date.now(),
+};
 const notesRepo = new GameNoteRepository({ indexedDbSignal, syncQueueFactory, dateTimeHandler });
 
 class TestSyncQueue extends SyncQueue {
@@ -53,7 +45,7 @@ class TestSyncQueue extends SyncQueue {
 }
 
 const syncQueue = new TestSyncQueue({
-	httpClientSignal,
+	httpClient: fakeFetchClient,
 	indexedDbSignal,
 	syncQueueRepository,
 });

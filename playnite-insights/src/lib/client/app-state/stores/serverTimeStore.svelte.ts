@@ -1,15 +1,9 @@
 import type { IServerHeartbeat } from '$lib/client/event-source-manager/serverHeartbeat.svelte';
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
-import {
-	getServerUtcNowResponseSchema,
-	HttpClientNotSetError,
-	JsonStrategy,
-	type IFetchClient,
-} from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../AppData.types';
+import { getServerUtcNowResponseSchema, JsonStrategy } from '@playnite-insights/lib/client';
+import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
-export type ServerTimeStoreDeps = {
-	httpClientSignal: HttpClientSignal;
+export type ServerTimeStoreDeps = ApiDataStoreDeps & {
 	serverHeartbeat: IServerHeartbeat;
 };
 
@@ -19,27 +13,20 @@ export type ServerTimeSignal = {
 	isLoading: boolean;
 };
 
-export class ServerTimeStore {
-	#httpClientSignal: ServerTimeStoreDeps['httpClientSignal'];
+export class ServerTimeStore extends ApiDataStore {
 	#serverHeartbeat: ServerTimeStoreDeps['serverHeartbeat'];
 	#dataSignal: ServerTimeSignal;
 
-	constructor({ httpClientSignal, serverHeartbeat }: ServerTimeStoreDeps) {
-		this.#httpClientSignal = httpClientSignal;
+	constructor({ httpClient, serverHeartbeat }: ServerTimeStoreDeps) {
+		super({ httpClient });
 		this.#serverHeartbeat = serverHeartbeat;
 		this.#dataSignal = $state({ utcNow: null, syncPoint: null, isLoading: false });
 	}
 
-	#withHttpClient = <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClientSignal.client;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	loadServerTime = async () => {
 		if (!this.#serverHeartbeat.isAlive) return null;
 		try {
-			return await this.#withHttpClient(async ({ client }) => {
+			return await this.withHttpClient(async ({ client }) => {
 				this.#dataSignal.isLoading = true;
 				const result = await client.httpGetAsync({
 					endpoint: '/api/time/now',

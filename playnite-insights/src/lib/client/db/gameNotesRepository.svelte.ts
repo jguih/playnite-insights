@@ -41,7 +41,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		const parseResult = gameNoteSchema.safeParse(note);
 		if (!parseResult.success) return null;
 
-		return this.withDb(async (db) => {
+		return await this.withDb(async (db) => {
 			const key = await runTransaction(
 				db,
 				['gameNotes', 'syncQueue'],
@@ -64,7 +64,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		if (!parseResult.success) return false;
 		const now = new Date(this.#dateTimeHandler.getUtcNow()).toISOString();
 
-		return this.withDb(async (db) => {
+		return await this.withDb(async (db) => {
 			await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
@@ -109,7 +109,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 	deleteAsync: IGameNotesRepository['deleteAsync'] = async (props) => {
 		const now = new Date(this.#dateTimeHandler.getUtcNow()).toISOString();
 
-		return this.withDb(async (db) => {
+		return await this.withDb(async (db) => {
 			return await runTransaction(db, ['gameNotes', 'syncQueue'], 'readwrite', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 				const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
@@ -133,7 +133,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 	};
 
 	getAsync: IGameNotesRepository['getAsync'] = async (props) => {
-		return this.withDb(async (db) => {
+		return await this.withDb(async (db) => {
 			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 
@@ -151,7 +151,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 	};
 
 	getAllAsync: IGameNotesRepository['getAllAsync'] = async (props = {}) => {
-		return this.withDb(async (db) => {
+		return await this.withDb(async (db) => {
 			return await runTransaction(db, 'gameNotes', 'readonly', async ({ tx }) => {
 				const notesStore = tx.objectStore(GameNoteRepository.STORE_NAME);
 				let notes: GameNote[] = [];

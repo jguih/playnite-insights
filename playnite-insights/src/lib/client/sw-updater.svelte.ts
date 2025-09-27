@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { locator } from './app-state/AppData.svelte';
+import { locator } from './app-state/serviceLocator';
 import { toast } from './app-state/toast.svelte';
 
 export class ServiceWorkerUpdater {

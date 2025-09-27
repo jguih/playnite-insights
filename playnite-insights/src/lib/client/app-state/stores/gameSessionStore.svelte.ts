@@ -1,40 +1,29 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
 	getRecentSessionsResponseSchema,
-	HttpClientNotSetError,
 	JsonStrategy,
 	type GetRecentSessionsResponse,
-	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../AppData.types';
+import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
-export type GameSessionStoreDeps = {
-	httpClientSignal: HttpClientSignal;
-};
+export type GameSessionStoreDeps = ApiDataStoreDeps;
 
 export type RecentSessionsSignal = {
 	list: GetRecentSessionsResponse | null;
 	isLoading: boolean;
 };
 
-export class GameSessionStore {
-	#httpClientSignal: GameSessionStoreDeps['httpClientSignal'];
+export class GameSessionStore extends ApiDataStore {
 	#recentSessionsSignal: RecentSessionsSignal;
 
-	constructor({ httpClientSignal }: GameSessionStoreDeps) {
-		this.#httpClientSignal = httpClientSignal;
+	constructor({ httpClient }: GameSessionStoreDeps) {
+		super({ httpClient });
 		this.#recentSessionsSignal = $state({ list: null, isLoading: false });
 	}
 
-	#withHttpClient = <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClientSignal.client;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	loadRecentSessions = async () => {
 		try {
-			return await this.#withHttpClient(async ({ client }) => {
+			return await this.withHttpClient(async ({ client }) => {
 				this.#recentSessionsSignal.isLoading = true;
 				const result = await client.httpGetAsync({
 					endpoint: '/api/session/recent',

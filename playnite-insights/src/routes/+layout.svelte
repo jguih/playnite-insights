@@ -1,16 +1,6 @@
 <script lang="ts">
-	import {
-		httpClientSignal,
-		indexedDbSignal,
-		locator,
-	} from '$lib/client/app-state/AppData.svelte.js';
+	import { locator } from '$lib/client/app-state/serviceLocator';
 	import Toast from '$lib/client/components/Toast.svelte';
-	import {
-		INDEXEDDB_CURRENT_VERSION,
-		INDEXEDDB_NAME,
-		openIndexedDbAsync,
-	} from '$lib/client/db/indexeddb';
-	import { FetchClient } from '@playnite-insights/lib/client';
 	import { onMount, type Snippet } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
@@ -31,19 +21,6 @@
 	};
 
 	onMount(() => {
-		// Setup http client
-		httpClientSignal.client = new FetchClient({ url: window.location.origin });
-		// Setup indexeddb connection
-		indexedDbSignal.dbReady = openIndexedDbAsync({
-			dbName: INDEXEDDB_NAME,
-			version: INDEXEDDB_CURRENT_VERSION,
-		}).then((db) => {
-			indexedDbSignal.db = db;
-			locator.gameNoteStore.loadNotesFromServerAsync();
-		});
-		// Background data loading
-		locator.loadStoresData();
-		// Periodic data processing
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
 		locator.eventSourceManager.connect();
 		locator.eventSourceManager.setupGlobalListeners();

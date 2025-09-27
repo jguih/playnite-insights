@@ -1,40 +1,29 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
 	getAllCompaniesResponseSchema,
-	HttpClientNotSetError,
 	JsonStrategy,
 	type GetAllCompaniesResponse,
-	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../AppData.types';
+import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
-export type CompanyStoreDeps = {
-	httpClientSignal: HttpClientSignal;
-};
+export type CompanyStoreDeps = ApiDataStoreDeps;
 
 export type CompanyListSignal = {
 	list: GetAllCompaniesResponse | null;
 	isLoading: boolean;
 };
 
-export class CompanyStore {
-	#httpClientSignal: CompanyStoreDeps['httpClientSignal'];
+export class CompanyStore extends ApiDataStore {
 	#dataSignal: CompanyListSignal;
 
-	constructor({ httpClientSignal }: CompanyStoreDeps) {
-		this.#httpClientSignal = httpClientSignal;
+	constructor({ httpClient }: CompanyStoreDeps) {
+		super({ httpClient });
 		this.#dataSignal = $state({ list: null, isLoading: false });
 	}
 
-	#withHttpClient = <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClientSignal.client;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	loadCompanies = async () => {
 		try {
-			return await this.#withHttpClient(async ({ client }) => {
+			return await this.withHttpClient(async ({ client }) => {
 				this.#dataSignal.isLoading = true;
 				const result = await client.httpGetAsync({
 					endpoint: '/api/company',

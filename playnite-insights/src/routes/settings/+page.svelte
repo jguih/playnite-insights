@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator, withHttpClient } from '$lib/client/app-state/AppData.svelte';
+	import { locator } from '$lib/client/app-state/serviceLocator';
 	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
@@ -20,6 +20,7 @@
 	import {
 		EmptyStrategy,
 		getAllExtensionRegistrationsSchema,
+		HttpClientNotSetError,
 		JsonStrategy,
 		type ExtensionRegistration,
 	} from '@playnite-insights/lib/client';
@@ -37,14 +38,13 @@
 	const loadExtensionRegistrations = async () => {
 		if (!locator.serverHeartbeat.isAlive) return;
 		try {
+			if (!locator.httpClient) throw new HttpClientNotSetError();
 			extensionRegistrationsSignal.isLoading = true;
-			await withHttpClient(async ({ client }) => {
-				const result = await client.httpGetAsync({
-					endpoint: '/api/extension-registration',
-					strategy: new JsonStrategy(getAllExtensionRegistrationsSchema),
-				});
-				extensionRegistrationsSignal.registrations = result.registrations;
+			const result = await locator.httpClient.httpGetAsync({
+				endpoint: '/api/extension-registration',
+				strategy: new JsonStrategy(getAllExtensionRegistrationsSchema),
 			});
+			extensionRegistrationsSignal.registrations = result.registrations;
 		} catch (err) {
 			handleClientErrors(
 				err,
@@ -60,12 +60,11 @@
 		action: 'revoke' | 'remove' | 'reject' | 'approve',
 	) => {
 		try {
-			await withHttpClient(async ({ client }) => {
-				await client.httpPostAsync({
-					endpoint: `/api/extension-registration/${registrationId}/${action}`,
-					strategy: new EmptyStrategy(),
-					body: {},
-				});
+			if (!locator.httpClient) throw new HttpClientNotSetError();
+			await locator.httpClient.httpPostAsync({
+				endpoint: `/api/extension-registration/${registrationId}/${action}`,
+				strategy: new EmptyStrategy(),
+				body: {},
 			});
 			const index =
 				extensionRegistrationsSignal.registrations?.findIndex((r) => r.Id === registrationId) ?? -1;

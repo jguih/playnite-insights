@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { httpClientSignal, locator } from '$lib/client/app-state/AppData.svelte.js';
+	import { locator } from '$lib/client/app-state/serviceLocator.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
@@ -44,13 +44,13 @@
 		dateTimeHandler: locator.dateTimeHandler,
 	});
 	const noteEditor = new GameNoteEditor({
-		gameNoteFactory: locator.factory.gameNote,
-		gameNoteRepository: locator.repository.gameNote,
+		gameNoteFactory: locator.gameNoteFactory,
+		gameNoteRepository: locator.gameNoteRepository,
 	});
-	const noteExtras = new NoteExtras();
+	const noteExtras = new NoteExtras({ httpClient: locator.httpClient });
 	const imageOptions = new ImageOptions();
 	const screenshotGallery = new ScreenshotsGallery();
-	const playniteRemoteAction = new PlayniteRemoteAction({ httpClientSignal });
+	const playniteRemoteAction = new PlayniteRemoteAction({ httpClient: locator.httpClient });
 	const isThisGameActive = $derived.by(() => {
 		const gameId = data.gameId;
 		if (!gameId) return false;
@@ -80,12 +80,13 @@
 		if (!gameId) return;
 		try {
 			notesSignal.isLoading = true;
-			const notes = await locator.repository.gameNote.getAllAsync({
+			const notes = await locator.gameNoteRepository.getAllAsync({
 				filterBy: 'byGameId',
 				GameId: gameId,
 			});
 			notesSignal.notes = notes;
 		} catch (err) {
+			console.error(err);
 			if (err instanceof IndexedDBNotInitializedError)
 				toast.error({ message: m.error_db_not_ready(), category: 'local-database' });
 		} finally {
@@ -114,7 +115,7 @@
 	const handleOnAddNote = async () => {
 		const gameId = data.gameId;
 		const sessionId = activeSessionForThisGame?.SessionId ?? null;
-		const newNote = locator.factory.gameNote.create({
+		const newNote = locator.gameNoteFactory.create({
 			Title: null,
 			Content: null,
 			GameId: gameId,

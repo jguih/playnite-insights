@@ -1,4 +1,4 @@
-import type { IndexedDbSignal } from '../app-state/AppData.types';
+import type { IndexedDbSignal } from '../app-state/indexeddbManager.svelte';
 import { IndexedDBNotInitializedError } from './errors/indexeddbNotInitialized';
 
 export type IndexedDBRepositoryDeps = {

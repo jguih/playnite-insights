@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { withHttpClient } from '$lib/client/app-state/AppData.svelte';
+	import { locator } from '$lib/client/app-state/serviceLocator';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { ArrowLeft } from '@lucide/svelte';
 	import {
 		getAllScreenshotsResponseSchema,
+		HttpClientNotSetError,
 		JsonStrategy,
 		type GetAllScreenshotsResponse,
 	} from '@playnite-insights/lib/client';
@@ -31,14 +32,13 @@
 
 	const loadScreenshots = async () => {
 		try {
-			await withHttpClient(async ({ client }) => {
-				screenshots.isLoading = true;
-				const response = await client.httpGetAsync({
-					endpoint: '/api/assets/image/screenshot/all',
-					strategy: new JsonStrategy(getAllScreenshotsResponseSchema),
-				});
-				screenshots.data = response.screenshots;
+			if (!locator.httpClient) throw new HttpClientNotSetError();
+			screenshots.isLoading = true;
+			const response = await locator.httpClient.httpGetAsync({
+				endpoint: '/api/assets/image/screenshot/all',
+				strategy: new JsonStrategy(getAllScreenshotsResponseSchema),
 			});
+			screenshots.data = response.screenshots;
 		} catch (error) {
 			handleClientErrors(
 				error,

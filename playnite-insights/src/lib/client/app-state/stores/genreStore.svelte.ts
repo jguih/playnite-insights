@@ -1,40 +1,29 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
 	getAllGenresResponseSchema,
-	HttpClientNotSetError,
 	JsonStrategy,
 	type GetAllGenresResponse,
-	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../AppData.types';
+import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
-export type GenreStoreDeps = {
-	httpClientSignal: HttpClientSignal;
-};
+export type GenreStoreDeps = ApiDataStoreDeps;
 
 export type GenreListSignal = {
 	list: GetAllGenresResponse | null;
 	isLoading: boolean;
 };
 
-export class GenreStore {
-	#httpClientSignal: GenreStoreDeps['httpClientSignal'];
+export class GenreStore extends ApiDataStore {
 	#dataSignal: GenreListSignal;
 
-	constructor({ httpClientSignal }: GenreStoreDeps) {
-		this.#httpClientSignal = httpClientSignal;
+	constructor({ httpClient }: GenreStoreDeps) {
+		super({ httpClient });
 		this.#dataSignal = $state({ list: null, isLoading: false });
 	}
 
-	#withHttpClient = <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClientSignal.client;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	loadGenres = async () => {
 		try {
-			return await this.#withHttpClient(async ({ client }) => {
+			return await this.withHttpClient(async ({ client }) => {
 				this.#dataSignal.isLoading = true;
 				const result = await client.httpGetAsync({
 					endpoint: '/api/genre',

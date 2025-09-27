@@ -1,4 +1,10 @@
-import { GameNoteFactory, SyncQueueFactory } from '@playnite-insights/lib/client';
+import { browser } from '$app/environment';
+import {
+	FetchClient,
+	GameNoteFactory,
+	SyncQueueFactory,
+	type IFetchClient,
+} from '@playnite-insights/lib/client';
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 import { EventSourceManager } from '../event-source-manager/eventSourceManager.svelte';
@@ -6,7 +12,7 @@ import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte'
 import { ServiceWorkerUpdater } from '../sw-updater.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
-import type { HttpClientSignal, IndexedDbSignal } from './AppData.types';
+import { IndexedDbManager, type IndexedDbSignal } from './indexeddbManager.svelte';
 import { CompanyStore } from './stores/companyStore.svelte';
 import { GameNoteStore } from './stores/gameNoteStore.svelte';
 import { GameSessionStore } from './stores/gameSessionStore.svelte';
@@ -16,145 +22,185 @@ import { LibraryMetricsStore } from './stores/libraryMetricsStore.svelte';
 import { PlatformStore } from './stores/platformStore.svelte';
 import { ServerTimeStore } from './stores/serverTimeStore.svelte';
 
-export type ClientServiceLocatorFactory = {
-	syncQueue: SyncQueueFactory;
-	gameNote: GameNoteFactory;
-};
-
-export type ClientServiceLocatorRepository = {
-	gameNote: GameNoteRepository;
-	syncQueue: SyncQueueRepository;
-};
-
-export type ClientServiceLocatorDeps = {
-	indexedDbSignal: IndexedDbSignal;
-	httpClientSignal: HttpClientSignal;
-};
-
 export class ClientServiceLocator {
-	#dateTimeHandler: DateTimeHandler;
-	#factory: ClientServiceLocatorFactory;
-	#repository: ClientServiceLocatorRepository;
-	#serverTimeStore: ServerTimeStore;
-	#syncQueue: SyncQueue;
-	#eventSourceManager: EventSourceManager;
-	#serviceWorkerUpdater: ServiceWorkerUpdater;
-	#serverHeartbeat: ServerHeartbeat;
-	#gameStore: GameStore;
-	#companyStore: CompanyStore;
-	#gameSessionStore: GameSessionStore;
-	#gameNoteStore: GameNoteStore;
-	#libraryMetricsStore: LibraryMetricsStore;
-	#genreStore: GenreStore;
-	#platformStore: PlatformStore;
+	// Services
+	#indexeddbManager: IndexedDbManager | null = null;
+	#dateTimeHandler: DateTimeHandler | null = null;
+	#syncQueue: SyncQueue | null = null;
+	#eventSourceManager: EventSourceManager | null = null;
+	#serviceWorkerUpdater: ServiceWorkerUpdater | null = null;
+	#serverHeartbeat: ServerHeartbeat | null = null;
+	#httpClient: IFetchClient | null = null;
+	// Stores
+	#gameStore: GameStore | null = null;
+	#serverTimeStore: ServerTimeStore | null = null;
+	#companyStore: CompanyStore | null = null;
+	#gameSessionStore: GameSessionStore | null = null;
+	#gameNoteStore: GameNoteStore | null = null;
+	#libraryMetricsStore: LibraryMetricsStore | null = null;
+	#genreStore: GenreStore | null = null;
+	#platformStore: PlatformStore | null = null;
+	// Repositories
+	#gameNoteRepository: GameNoteRepository | null = null;
+	#syncQueueRepository: SyncQueueRepository | null = null;
+	// Factories
+	#syncQueueFactory: SyncQueueFactory | null = null;
+	#gameNoteFactory: GameNoteFactory | null = null;
 
-	constructor({ indexedDbSignal, httpClientSignal }: ClientServiceLocatorDeps) {
-		this.#eventSourceManager = new EventSourceManager();
-		this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
-		this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.#eventSourceManager });
-		this.#serverTimeStore = new ServerTimeStore({
-			httpClientSignal,
-			serverHeartbeat: this.#serverHeartbeat,
-		});
-		this.#dateTimeHandler = new DateTimeHandler({ serverTimeStore: this.#serverTimeStore });
-		this.#factory = {
-			gameNote: new GameNoteFactory(),
-			syncQueue: new SyncQueueFactory(),
-		};
-		this.#repository = {
-			gameNote: new GameNoteRepository({
-				indexedDbSignal,
-				dateTimeHandler: this.#dateTimeHandler,
-				syncQueueFactory: this.#factory.syncQueue,
-			}),
-			syncQueue: new SyncQueueRepository({ indexedDbSignal }),
-		};
-		this.#syncQueue = new SyncQueue({
-			indexedDbSignal,
-			syncQueueRepository: this.#repository.syncQueue,
-			httpClientSignal,
-		});
-		this.#gameStore = new GameStore({ httpClientSignal });
-		this.#companyStore = new CompanyStore({ httpClientSignal });
-		this.#gameSessionStore = new GameSessionStore({ httpClientSignal });
-		this.#gameNoteStore = new GameNoteStore({
-			httpClientSignal,
-			serverHeartbeat: this.#serverHeartbeat,
-			gameNoteRepository: this.#repository.gameNote,
-			dateTimeHandler: this.#dateTimeHandler,
-		});
-		this.#libraryMetricsStore = new LibraryMetricsStore({ httpClientSignal });
-		this.#genreStore = new GenreStore({ httpClientSignal });
-		this.#platformStore = new PlatformStore({ httpClientSignal });
-	}
+	constructor() {}
 
 	loadStoresData = () => {
-		this.#gameStore.loadGames();
-		this.#companyStore.loadCompanies();
-		this.#gameSessionStore.loadRecentSessions();
-		this.#libraryMetricsStore.loadLibraryMetrics();
-		this.#genreStore.loadGenres();
-		this.#platformStore.loadPlatforms();
-		this.#serverTimeStore.loadServerTime();
+		this.gameStore.loadGames();
+		this.companyStore.loadCompanies();
+		this.gameSessionStore.loadRecentSessions();
+		this.libraryMetricsStore.loadLibraryMetrics();
+		this.genreStore.loadGenres();
+		this.platformStore.loadPlatforms();
+		this.serverTimeStore.loadServerTime();
 	};
 
-	get dateTimeHandler() {
+	get httpClient(): IFetchClient | null {
+		if (!this.#httpClient && browser) {
+			this.#httpClient = new FetchClient({ url: window.location.origin });
+		}
+		return this.#httpClient;
+	}
+	get dbSignal(): IndexedDbSignal {
+		if (!this.#indexeddbManager) {
+			this.#indexeddbManager = new IndexedDbManager({
+				onOpen: () => this.gameNoteStore.loadNotesFromServerAsync(),
+			});
+		}
+		return this.#indexeddbManager.dbSignal;
+	}
+	get dateTimeHandler(): DateTimeHandler {
+		if (!this.#dateTimeHandler) {
+			this.#dateTimeHandler = new DateTimeHandler({ serverTimeStore: this.serverTimeStore });
+		}
 		return this.#dateTimeHandler;
 	}
-
-	get factory() {
-		return this.#factory;
-	}
-
-	get repository() {
-		return this.#repository;
-	}
-
-	get syncQueue() {
+	get syncQueue(): SyncQueue {
+		if (!this.#syncQueue) {
+			this.#syncQueue = new SyncQueue({
+				indexedDbSignal: this.dbSignal,
+				syncQueueRepository: this.syncQueueRepository,
+				httpClient: this.#httpClient,
+			});
+		}
 		return this.#syncQueue;
 	}
-
-	get eventSourceManager() {
+	get eventSourceManager(): EventSourceManager {
+		if (!this.#eventSourceManager) {
+			this.#eventSourceManager = new EventSourceManager();
+		}
 		return this.#eventSourceManager;
 	}
-
-	get serviceWorkerUpdater() {
+	get serviceWorkerUpdater(): ServiceWorkerUpdater {
+		if (!this.#serviceWorkerUpdater) {
+			this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
+		}
 		return this.#serviceWorkerUpdater;
 	}
-
-	get serverHeartbeat() {
+	get serverHeartbeat(): ServerHeartbeat {
+		if (!this.#serverHeartbeat) {
+			this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.eventSourceManager });
+		}
 		return this.#serverHeartbeat;
 	}
 
-	get gameStore() {
+	// Repositories
+	get gameNoteRepository(): GameNoteRepository {
+		if (!this.#gameNoteRepository) {
+			this.#gameNoteRepository = new GameNoteRepository({
+				dateTimeHandler: this.dateTimeHandler,
+				indexedDbSignal: this.dbSignal,
+				syncQueueFactory: this.syncQueueFactory,
+			});
+		}
+		return this.#gameNoteRepository;
+	}
+	get syncQueueRepository(): SyncQueueRepository {
+		if (!this.#syncQueueRepository) {
+			this.#syncQueueRepository = new SyncQueueRepository({ indexedDbSignal: this.dbSignal });
+		}
+		return this.#syncQueueRepository;
+	}
+
+	// Factories
+	get syncQueueFactory(): SyncQueueFactory {
+		if (!this.#syncQueueFactory) {
+			this.#syncQueueFactory = new SyncQueueFactory();
+		}
+		return this.#syncQueueFactory;
+	}
+	get gameNoteFactory(): GameNoteFactory {
+		if (!this.#gameNoteFactory) {
+			this.#gameNoteFactory = new GameNoteFactory();
+		}
+		return this.#gameNoteFactory;
+	}
+
+	// Stores
+	get gameStore(): GameStore {
+		if (!this.#gameStore) {
+			this.#gameStore = new GameStore({ httpClient: this.httpClient });
+		}
 		return this.#gameStore;
 	}
-
-	get companyStore() {
+	get companyStore(): CompanyStore {
+		if (!this.#companyStore) {
+			this.#companyStore = new CompanyStore({ httpClient: this.httpClient });
+		}
 		return this.#companyStore;
 	}
-
-	get gameSessionStore() {
+	get gameSessionStore(): GameSessionStore {
+		if (!this.#gameSessionStore) {
+			this.#gameSessionStore = new GameSessionStore({ httpClient: this.httpClient });
+		}
 		return this.#gameSessionStore;
 	}
-
-	get gameNoteStore() {
+	get gameNoteStore(): GameNoteStore {
+		if (!this.#gameNoteStore) {
+			this.#gameNoteStore = new GameNoteStore({
+				httpClient: this.httpClient,
+				serverHeartbeat: this.serverHeartbeat,
+				dateTimeHandler: this.dateTimeHandler,
+				gameNoteRepository: this.gameNoteRepository,
+			});
+		}
 		return this.#gameNoteStore;
 	}
-
-	get libraryMetricsStore() {
+	get libraryMetricsStore(): LibraryMetricsStore {
+		if (!this.#libraryMetricsStore) {
+			this.#libraryMetricsStore = new LibraryMetricsStore({ httpClient: this.httpClient });
+		}
 		return this.#libraryMetricsStore;
 	}
-
-	get genreStore() {
+	get genreStore(): GenreStore {
+		if (!this.#genreStore) {
+			this.#genreStore = new GenreStore({ httpClient: this.httpClient });
+		}
 		return this.#genreStore;
 	}
-
-	get platformStore() {
+	get platformStore(): PlatformStore {
+		if (!this.#platformStore) {
+			this.#platformStore = new PlatformStore({ httpClient: this.httpClient });
+		}
 		return this.#platformStore;
 	}
-
-	get serverTimeStore() {
+	get serverTimeStore(): ServerTimeStore {
+		if (!this.#serverTimeStore) {
+			this.#serverTimeStore = new ServerTimeStore({
+				httpClient: this.httpClient,
+				serverHeartbeat: this.serverHeartbeat,
+			});
+		}
 		return this.#serverTimeStore;
 	}
+}
+
+export const locator = new ClientServiceLocator();
+
+if (browser) {
+	locator.loadStoresData();
 }

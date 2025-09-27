@@ -5,42 +5,32 @@ import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte'
 import {
 	FetchClientStrategyError,
 	getAllGameNotesResponseSchema,
-	HttpClientNotSetError,
 	JsonStrategy,
-	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../AppData.types';
+import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
-export type GameNoteStoreDeps = {
-	httpClientSignal: HttpClientSignal;
+export type GameNoteStoreDeps = ApiDataStoreDeps & {
 	serverHeartbeat: ServerHeartbeat;
 	gameNoteRepository: GameNoteRepository;
 	dateTimeHandler: DateTimeHandler;
 };
 
-export class GameNoteStore {
-	#httpClientSignal: GameNoteStoreDeps['httpClientSignal'];
+export class GameNoteStore extends ApiDataStore {
 	#serverHeartbeat: GameNoteStoreDeps['serverHeartbeat'];
 	#gameNoteRepository: GameNoteStoreDeps['gameNoteRepository'];
 	#dateTimeHandler: GameNoteStoreDeps['dateTimeHandler'];
 
 	constructor({
-		httpClientSignal,
+		httpClient,
 		serverHeartbeat,
 		gameNoteRepository,
 		dateTimeHandler,
 	}: GameNoteStoreDeps) {
-		this.#httpClientSignal = httpClientSignal;
+		super({ httpClient });
 		this.#serverHeartbeat = serverHeartbeat;
 		this.#gameNoteRepository = gameNoteRepository;
 		this.#dateTimeHandler = dateTimeHandler;
 	}
-
-	#withHttpClient = <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClientSignal.client;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
 
 	#getLastServerSync = (): string | null => {
 		const lastSync = localStorage.getItem('lastServerSync');
@@ -62,7 +52,7 @@ export class GameNoteStore {
 		if (!this.#serverHeartbeat.isAlive) return { notes: null, success: true };
 		if (override) this.#clearLastServerSync();
 		try {
-			return await this.#withHttpClient(async ({ client }) => {
+			return await this.withHttpClient(async ({ client }) => {
 				const lastSync = this.#getLastServerSync();
 				const notes = await client.httpGetAsync({
 					endpoint: `/api/note${lastSync ? `?lastSync=${lastSync}` : ''}`,

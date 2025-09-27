@@ -1,13 +1,23 @@
 import { pushState } from '$app/navigation';
 import { page } from '$app/state';
-import { withHttpClient } from '$lib/client/app-state/AppData.svelte';
-import { JsonStrategy, uploadScreenshotResponseSchema } from '@playnite-insights/lib/client';
+import {
+	HttpClientNotSetError,
+	JsonStrategy,
+	uploadScreenshotResponseSchema,
+	type IFetchClient,
+} from '@playnite-insights/lib/client';
+
+export type NoteExtrasDeps = {
+	httpClient: IFetchClient | null;
+};
 
 export class NoteExtras {
 	#isOpen: boolean;
+	#httpClient: NoteExtrasDeps['httpClient'];
 
-	constructor() {
+	constructor({ httpClient }: NoteExtrasDeps) {
 		this.#isOpen = $derived(Object.hasOwn(page.state, 'imagePicker'));
+		this.#httpClient = httpClient;
 	}
 
 	get isOpen() {
@@ -28,19 +38,18 @@ export class NoteExtras {
 	 * @returns Path of the uploaded image
 	 */
 	uploadImageAsync = async (file: File): Promise<string> => {
-		return await withHttpClient(async ({ client }) => {
-			const formData = new FormData();
-			formData.append('file', file);
-			const uploadedFiles = await client.httpPostAsync({
-				endpoint: '/api/assets/upload/screenshot',
-				body: formData,
-				strategy: new JsonStrategy(uploadScreenshotResponseSchema),
-				headers: {
-					'X-Upload-Source': 'web-ui',
-				},
-			});
-			const uploadedImage = uploadedFiles.uploaded[0];
-			return uploadedImage;
+		if (!this.#httpClient) throw new HttpClientNotSetError();
+		const formData = new FormData();
+		formData.append('file', file);
+		const uploadedFiles = await this.#httpClient.httpPostAsync({
+			endpoint: '/api/assets/upload/screenshot',
+			body: formData,
+			strategy: new JsonStrategy(uploadScreenshotResponseSchema),
+			headers: {
+				'X-Upload-Source': 'web-ui',
+			},
 		});
+		const uploadedImage = uploadedFiles.uploaded[0];
+		return uploadedImage;
 	};
 }

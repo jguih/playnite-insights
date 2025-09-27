@@ -12,7 +12,7 @@ import {
 	type IFetchClient,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal, IndexedDbSignal } from '../app-state/AppData.types';
+import type { IndexedDbSignal } from '../app-state/indexeddbManager.svelte';
 import { IndexedDBNotInitializedError } from '../db/errors/indexeddbNotInitialized';
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { runRequest, runTransaction } from '../db/indexeddb';
@@ -20,19 +20,19 @@ import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 
 export type SyncQueueDeps = {
 	syncQueueRepository: SyncQueueRepository;
-	httpClientSignal: HttpClientSignal;
+	httpClient: IFetchClient | null;
 	indexedDbSignal: IndexedDbSignal;
 };
 
 export class SyncQueue {
 	#syncQueueRepository: SyncQueueDeps['syncQueueRepository'];
-	#httpClientSignal: SyncQueueDeps['httpClientSignal'];
+	#httpClient: SyncQueueDeps['httpClient'];
 	#indexedDbSignal: SyncQueueDeps['indexedDbSignal'];
 	#permanentFailureCodes = [400, 401, 403, 404, 409, 422, 501];
 
 	constructor(deps: SyncQueueDeps) {
 		this.#syncQueueRepository = deps.syncQueueRepository;
-		this.#httpClientSignal = deps.httpClientSignal;
+		this.#httpClient = deps.httpClient;
 		this.#indexedDbSignal = deps.indexedDbSignal;
 	}
 
@@ -51,7 +51,7 @@ export class SyncQueue {
 	protected withHttpClient = async <T>(
 		cb: (props: { client: IFetchClient }) => Promise<T>,
 	): Promise<T> => {
-		const client = this.#httpClientSignal.client;
+		const client = this.#httpClient;
 		if (!client) throw new HttpClientNotSetError();
 		return cb({ client });
 	};

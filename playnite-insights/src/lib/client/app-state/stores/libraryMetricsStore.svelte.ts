@@ -1,41 +1,30 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
 	getPlayniteLibraryMetricsResponseSchema,
-	HttpClientNotSetError,
 	JsonStrategy,
 	type GetPlayniteLibraryMetricsResponse,
-	type IFetchClient,
 } from '@playnite-insights/lib/client';
-import type { HttpClientSignal } from '../AppData.types';
+import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
-export type LibraryMetricsStoreDeps = {
-	httpClientSignal: HttpClientSignal;
-};
+export type LibraryMetricsStoreDeps = ApiDataStoreDeps;
 
 export type LibraryMetricsSignal = {
 	data: GetPlayniteLibraryMetricsResponse | null;
 	isLoading: boolean;
 };
 
-export class LibraryMetricsStore {
-	#httpClientSignal: LibraryMetricsStoreDeps['httpClientSignal'];
+export class LibraryMetricsStore extends ApiDataStore {
 	#dataSignal: LibraryMetricsSignal;
 
-	constructor({ httpClientSignal }: LibraryMetricsStoreDeps) {
-		this.#httpClientSignal = httpClientSignal;
+	constructor({ httpClient }: LibraryMetricsStoreDeps) {
+		super({ httpClient });
 		this.#dataSignal = $state({ data: null, isLoading: false });
 	}
-
-	#withHttpClient = <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClientSignal.client;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
 
 	loadLibraryMetrics = async () => {
 		try {
 			this.#dataSignal.isLoading = true;
-			return await this.#withHttpClient(async ({ client }) => {
+			return await this.withHttpClient(async ({ client }) => {
 				const result = await client.httpGetAsync({
 					endpoint: '/api/library/metrics',
 					strategy: new JsonStrategy(getPlayniteLibraryMetricsResponseSchema),
