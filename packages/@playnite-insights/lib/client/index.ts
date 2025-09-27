@@ -9,6 +9,7 @@ export * from "./game-session";
 export * from "./genre";
 export * from "./home-page";
 export * from "./image";
+export * from "./key-value";
 export * from "./library-manifest";
 export * from "./log";
 export * from "./platform";

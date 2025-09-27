@@ -1,4 +1,6 @@
+import { toast } from '../app-state/toast.svelte';
 import { GameNoteRepository } from './gameNotesRepository.svelte';
+import { KeyValueRepository } from './keyValueRepository.svelte';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 export const INDEXEDDB_NAME = 'PlayAtlasDb';
@@ -18,6 +20,10 @@ export const openIndexedDbAsync: (props: {
 			db.onversionchange = () => {
 				db.close();
 				console.warn('Database is outdated, please reload the app');
+				toast.warning({
+					category: 'local-database',
+					message: 'Database is outdated, please reload the app',
+				});
 			};
 
 			resolve(request.result);
@@ -30,13 +36,15 @@ export const openIndexedDbAsync: (props: {
 
 			GameNoteRepository.defineSchema({ db, tx, oldVersion, newVersion });
 			SyncQueueRepository.defineSchema({ db, tx, oldVersion, newVersion });
+			KeyValueRepository.defineSchema({ db, tx, oldVersion, newVersion });
 		};
 	});
 };
 
 export type StoreNames =
 	| typeof SyncQueueRepository.STORE_NAME
-	| typeof GameNoteRepository.STORE_NAME;
+	| typeof GameNoteRepository.STORE_NAME
+	| typeof KeyValueRepository.STORE_NAME;
 
 export const runTransaction = <T>(
 	db: IDBDatabase,
