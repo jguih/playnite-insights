@@ -45,3 +45,24 @@ Content-Type: {{contentType}}
 ### Get all game sessions for today
 GET {{protocol}}://{{host}}/api/extension-registration
 Content-Type: {{contentType}}
+
+### Register instance
+POST {{protocol}}://{{host}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "password": "test123"
+}
+
+### Login instance
+POST {{protocol}}://{{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "password": "test123"
+}
+
+### Check health
+GET {{protocol}}://{{host}}/api/health
+Content-Type: {{contentType}}
+Authorization: Bearer b0db5ba50aae2170c5a887b64969f35b93c2027ad1c5e9c027d31bd50e2532f9

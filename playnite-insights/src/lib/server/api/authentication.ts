@@ -51,3 +51,24 @@ export const withExtensionAuth = async (
 		return handleApiError(error, requestDescription);
 	}
 };
+
+export const withInstanceAuth = async (
+	request: Request,
+	url: URL,
+	cb: () => Response | Promise<Response>,
+) => {
+	const requestDescription = `${request.method} ${url.pathname}`;
+	try {
+		const isAuthorized = services.authentication.verifyInstanceAuthorization({
+			headers: { Authorization: request.headers.get('Authorization') },
+			request: { method: request.method },
+			url: { pathname: url.pathname },
+		});
+		if (!isAuthorized) {
+			return json({ error: 'Unauthorized' }, { status: 403 });
+		}
+		return cb();
+	} catch (error) {
+		return handleApiError(error, requestDescription);
+	}
+};

@@ -124,6 +124,37 @@ export const makeAuthenticationService = ({
       return true;
     };
 
+  const verifyInstanceAuthorization: AuthenticationService["verifyInstanceAuthorization"] =
+    ({ headers, request, url }) => {
+      const requestDescription = `${request.method} ${url.pathname}`;
+      const authorization = headers.Authorization;
+      if (!authorization) {
+        logService.warning(
+          `${requestDescription}: Request rejected for instance due to missing Authorization header`
+        );
+        return false;
+      }
+      const sessionId = authorization.split(" ").at(1);
+      if (!sessionId) {
+        logService.warning(
+          `${requestDescription}: Request rejected for instance due to invalid Authorization header`
+        );
+        return false;
+      }
+      const existingSession = instanceSessionsRepository.getById(sessionId);
+      if (!existingSession) {
+        logService.error(
+          `${requestDescription}: Request rejected for instance due to non existent session`
+        );
+        return false;
+      }
+
+      logService.debug(
+        `${requestDescription}: Request authorized for instance`
+      );
+      return true;
+    };
+
   const registerInstanceAsync: AuthenticationService["registerInstanceAsync"] =
     async (password) => {
       const existing = instanceAuthenticationRepository.get();
@@ -164,6 +195,7 @@ export const makeAuthenticationService = ({
 
   return {
     verifyExtensionAuthorization,
+    verifyInstanceAuthorization,
     registerInstanceAsync,
     loginInstanceAsync,
   };

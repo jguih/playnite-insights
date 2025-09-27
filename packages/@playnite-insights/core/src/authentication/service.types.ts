@@ -26,6 +26,15 @@ export type AuthenticationService = {
     };
     now: number;
   }) => boolean;
+  verifyInstanceAuthorization: (args: {
+    headers: { Authorization: string | null };
+    request: {
+      method: string;
+    };
+    url: {
+      pathname: string;
+    };
+  }) => boolean;
   registerInstanceAsync: (password: string) => Promise<void>;
   loginInstanceAsync: (password: string) => Promise<string>;
 };

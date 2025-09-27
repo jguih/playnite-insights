@@ -10,13 +10,14 @@ export const makeInstanceAuthenticationRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): InstanceAuthenticationRepository => {
   const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+  const TABLE_NAME = "instance_authentication";
 
   const get: InstanceAuthenticationRepository["get"] = () => {
     return repositoryCall(
       logService,
       () => {
         const db = getDb();
-        const query = `SELECT * FROM instance_authentication`;
+        const query = `SELECT * FROM ${TABLE_NAME}`;
         const stmt = db.prepare(query);
         const result = stmt.get();
         if (!result) return null;
@@ -33,13 +34,14 @@ export const makeInstanceAuthenticationRepository = (
       () => {
         const db = getDb();
         const query = `
-          INSERT INTO instance_authentication (
+          INSERT INTO ${TABLE_NAME} (
             Id,
             PasswordHash,
+            Salt,
             CreatedAt,
             LastUpdatedAt
           ) VALUES (
-            ?, ?, ?, ?
+            ?, ?, ?, ?, ?
           );
         `;
         const stmt = db.prepare(query);
@@ -50,6 +52,7 @@ export const makeInstanceAuthenticationRepository = (
         stmt.run(
           auth.Id,
           auth.PasswordHash,
+          auth.Salt,
           auth.CreatedAt,
           auth.LastUpdatedAt
         );
