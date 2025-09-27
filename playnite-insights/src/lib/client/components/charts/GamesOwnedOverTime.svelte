@@ -16,6 +16,7 @@
 	let { xAxis, series }: Props = $props();
 
 	const id = 'chart-games-owned-over-time';
+	let chart: ReturnType<typeof echarts.init> | null = null;
 	const option: ComposeOption<BarSeriesOption> = $derived({
 		title: {
 			show: false,
@@ -47,11 +48,21 @@
 		],
 	});
 
-	onMount(async () => {
-		if (document) {
-			const myChart = echarts.init(document.getElementById(id));
-			myChart.setOption(option);
-		}
+	onMount(() => {
+		chart = echarts.init(document.getElementById(id));
+		chart.setOption(option);
+
+		const resize = () => chart?.resize();
+		window.addEventListener('resize', resize);
+		return () => {
+			window.removeEventListener('resize', resize);
+			chart?.dispose();
+		};
+	});
+
+	$effect(() => {
+		const _option = option;
+		chart?.setOption(_option);
 	});
 </script>
 

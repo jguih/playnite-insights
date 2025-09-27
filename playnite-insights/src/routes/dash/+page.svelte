@@ -30,7 +30,7 @@
 
 <BaseAppLayout>
 	<Header class={['flex items-center justify-center']}>
-		<h1 class="block h-fit w-fit text-lg underline">
+		<h1 class="block h-fit w-fit text-lg">
 			{m.bottom_nav_label_dash()}
 		</h1>
 	</Header>
