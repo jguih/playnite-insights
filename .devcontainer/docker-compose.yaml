@@ -8,9 +8,10 @@ services:
       target: dev
     environment:
       TZ: America/Sao_Paulo
-      ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
+      # ORIGIN: ${ORIGIN_DEV} # make sure there's no trailing slash
       LOG_LEVEL: 0
       PLAYNITE_HOST_ADDRESS: ${PLAYNITE_HOST_ADDRESS}
+      PLAYATLAS_INSTANCE_NAME: PlayAtlas Dev
     volumes:
       - playnite-insights-dev-data:/app/data
       - ..:/workspace:cached

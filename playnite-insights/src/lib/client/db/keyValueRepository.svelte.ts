@@ -14,7 +14,7 @@ export class KeyValueRepository extends IndexedDBRepository implements IKeyValue
 
 	putAsync: IKeyValueRepository['putAsync'] = ({ keyvalue }) => {
 		return this.withDb(async (db) => {
-			return await runTransaction(db, 'keyValue', 'readonly', async ({ tx }) => {
+			return await runTransaction(db, 'keyValue', 'readwrite', async ({ tx }) => {
 				const keyvalueStore = tx.objectStore(KeyValueRepository.STORE_NAME);
 				await runRequest(keyvalueStore.put(keyvalue));
 			});

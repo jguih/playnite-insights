@@ -1,13 +1,47 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { locator } from '$lib/client/app-state/serviceLocator';
+	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 
-	let { children, data }: { children: Snippet } & LayoutProps = $props();
+	let { children, data }: LayoutProps = $props();
 	let appName = $derived(data.appName);
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
+	let loading = $state<Set<string>>(new Set('all'));
+
+	const addLoading = (value: string) => {
+		const newLoading = new Set(loading);
+		newLoading.add(value);
+		loading = newLoading;
+	};
+
+	const removeLoading = (value: string) => {
+		const newLoading = new Set(loading);
+		newLoading.delete(value);
+		loading = newLoading;
+	};
+
+	const initInstance = async () => {
+		try {
+			addLoading('instanceRegistered');
+			var registered = await locator.instanceManager.isRegistered();
+			if (!registered) {
+				await goto('/auth/register', { replaceState: true });
+			}
+		} catch {
+		} finally {
+			removeLoading('instanceRegistered');
+		}
+		loading = new Set();
+	};
+
+	if (browser) {
+		initInstance();
+	}
 
 	const appProcessingHandler = () => {
 		return Promise.all([
@@ -24,13 +58,13 @@
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
 		locator.eventSourceManager.connect();
 		locator.eventSourceManager.setupGlobalListeners();
-		locator.serviceWorkerUpdater.setupGlobalListeners();
-		locator.serviceWorkerUpdater.watchServiceWorkerUpdates();
+		locator.serviceWorkerManager.setupGlobalListeners();
+		locator.serviceWorkerManager.watchServiceWorkerUpdates();
 		window.addEventListener('focus', handleFocus);
 		return () => {
 			window.removeEventListener('focus', handleFocus);
 			if (appProcessingInterval) clearInterval(appProcessingInterval);
-			locator.serviceWorkerUpdater.clearGlobalListeners();
+			locator.serviceWorkerManager.clearGlobalListeners();
 			locator.eventSourceManager.clearGlobalListeners();
 			locator.eventSourceManager.close();
 		};
@@ -50,4 +84,12 @@
 </svelte:head>
 
 <Toast />
-{@render children()}
+{#if loading.size > 0}
+	<main class="flex h-full w-full items-center justify-center">
+		<div class="block">
+			<Loading />
+		</div>
+	</main>
+{:else}
+	{@render children()}
+{/if}

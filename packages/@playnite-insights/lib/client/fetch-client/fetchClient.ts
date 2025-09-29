@@ -4,9 +4,17 @@ import type { IFetchClient } from "./fetchClient.types";
 
 export class FetchClient implements IFetchClient {
   private url: string;
+  private globalHeaders: Headers | undefined = undefined;
 
-  constructor({ url }: { url: string }) {
+  constructor({
+    url,
+    globalHeaders,
+  }: {
+    url: string;
+    globalHeaders?: Headers;
+  }) {
     this.url = url;
+    this.globalHeaders = globalHeaders;
   }
 
   private safeJoinUrlAndEndpoint = (url: string, endpoint?: string) => {
@@ -17,6 +25,18 @@ export class FetchClient implements IFetchClient {
     const parsedApiUrl = url.endsWith("/") ? url : `${url}/`;
     return `${parsedApiUrl}${parsedEndpoint}`;
   };
+
+  private mergeHeaders(...all: (HeadersInit | undefined)[]): Headers {
+    const merged = new Headers();
+    for (const h of all) {
+      if (!h) continue;
+      const current = new Headers(h);
+      current.forEach((value, key) => {
+        merged.append(key, value);
+      });
+    }
+    return merged;
+  }
 
   httpGetAsync: IFetchClient["httpGetAsync"] = async ({
     endpoint,
@@ -29,6 +49,7 @@ export class FetchClient implements IFetchClient {
       response = await fetch(parsedUrl, {
         ...props,
         method: "GET",
+        headers: this.mergeHeaders(this.globalHeaders, props.headers),
       });
       const result = await strategy.handleAsync(response);
       return result;
@@ -56,6 +77,7 @@ export class FetchClient implements IFetchClient {
           ...props,
           body: body,
           method: "DELETE",
+          headers: this.mergeHeaders(this.globalHeaders, props.headers),
         });
       } else {
         response = await fetch(parsedUrl, {
@@ -94,6 +116,7 @@ export class FetchClient implements IFetchClient {
           ...props,
           body: body,
           method: "POST",
+          headers: this.mergeHeaders(this.globalHeaders, props.headers),
         });
       } else {
         response = await fetch(parsedUrl, {
@@ -132,6 +155,7 @@ export class FetchClient implements IFetchClient {
           ...props,
           body: body,
           method: "PUT",
+          headers: this.mergeHeaders(this.globalHeaders, props.headers),
         });
       } else {
         response = await fetch(parsedUrl, {

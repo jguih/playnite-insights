@@ -59,13 +59,13 @@ export const withInstanceAuth = async (
 ) => {
 	const requestDescription = `${request.method} ${url.pathname}`;
 	try {
-		const isAuthorized = services.authentication.verifyInstanceAuthorization({
+		const verify = services.authentication.verifyInstanceAuthorization({
 			headers: { Authorization: request.headers.get('Authorization') },
 			request: { method: request.method },
 			url: { pathname: url.pathname },
 		});
-		if (!isAuthorized) {
-			return json({ error: 'Unauthorized' }, { status: 403 });
+		if (!verify.isAuthorized) {
+			return json({ error: { code: verify.code } }, { status: 403 });
 		}
 		return cb();
 	} catch (error) {

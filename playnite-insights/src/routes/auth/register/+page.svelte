@@ -1,6 +1,18 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import { locator } from '$lib/client/app-state/serviceLocator';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import BaseInput from '$lib/client/components/forms/BaseInput.svelte';
+
+	if (browser) {
+		locator.instanceManager
+			.isRegistered()
+			.then((registered) => {
+				if (registered) goto('/', { replaceState: true });
+			})
+			.catch(() => {});
+	}
 </script>
 
 <main class="flex h-full w-full items-center justify-center">

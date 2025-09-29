@@ -128,31 +128,46 @@ export const makeAuthenticationService = ({
     ({ headers, request, url }) => {
       const requestDescription = `${request.method} ${url.pathname}`;
       const authorization = headers.Authorization;
+
+      const instanceAuth = instanceAuthenticationRepository.get();
+      if (!instanceAuth) {
+        logService.warning(
+          `${requestDescription}: Request rejected for instance due to missing instance registration`
+        );
+        return { isAuthorized: false, code: "instance_not_registered" };
+      }
+
       if (!authorization) {
         logService.warning(
           `${requestDescription}: Request rejected for instance due to missing Authorization header`
         );
-        return false;
+        return { isAuthorized: false, code: "invalid_request" };
       }
       const sessionId = authorization.split(" ").at(1);
       if (!sessionId) {
         logService.warning(
           `${requestDescription}: Request rejected for instance due to invalid Authorization header`
         );
-        return false;
+        return { isAuthorized: false, code: "invalid_request" };
       }
       const existingSession = instanceSessionsRepository.getById(sessionId);
       if (!existingSession) {
         logService.error(
           `${requestDescription}: Request rejected for instance due to non existent session`
         );
-        return false;
+        return { isAuthorized: false, code: "not_authorized" };
       }
 
       logService.debug(
         `${requestDescription}: Request authorized for instance`
       );
-      return true;
+      return { isAuthorized: true };
+    };
+
+  const isInstanceRegistered: AuthenticationService["isInstanceRegistered"] =
+    () => {
+      const instanceAuth = instanceAuthenticationRepository.get();
+      return instanceAuth != null;
     };
 
   const registerInstanceAsync: AuthenticationService["registerInstanceAsync"] =
@@ -196,6 +211,7 @@ export const makeAuthenticationService = ({
   return {
     verifyExtensionAuthorization,
     verifyInstanceAuthorization,
+    isInstanceRegistered,
     registerInstanceAsync,
     loginInstanceAsync,
   };

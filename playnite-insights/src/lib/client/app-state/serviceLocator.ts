@@ -6,10 +6,12 @@ import {
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
+import { KeyValueRepository } from '../db/keyValueRepository.svelte';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 import { EventSourceManager } from '../event-source-manager/eventSourceManager.svelte';
 import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte';
-import { ServiceWorkerUpdater } from '../sw-updater.svelte';
+import { InstanceManager } from '../instanceManager.svelte';
+import { ServiceWorkerManager } from '../serviceWorkerManager.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { IndexedDbManager, type IndexedDbSignal } from './indexeddbManager.svelte';
@@ -28,9 +30,10 @@ export class ClientServiceLocator {
 	#dateTimeHandler: DateTimeHandler | null = null;
 	#syncQueue: SyncQueue | null = null;
 	#eventSourceManager: EventSourceManager | null = null;
-	#serviceWorkerUpdater: ServiceWorkerUpdater | null = null;
+	#serviceWorkerManager: ServiceWorkerManager | null = null;
 	#serverHeartbeat: ServerHeartbeat | null = null;
 	#httpClient: IFetchClient | null = null;
+	#instanceManager: InstanceManager | null = null;
 	// Stores
 	#gameStore: GameStore | null = null;
 	#serverTimeStore: ServerTimeStore | null = null;
@@ -43,6 +46,7 @@ export class ClientServiceLocator {
 	// Repositories
 	#gameNoteRepository: GameNoteRepository | null = null;
 	#syncQueueRepository: SyncQueueRepository | null = null;
+	#keyValueRepository: KeyValueRepository | null = null;
 	// Factories
 	#syncQueueFactory: SyncQueueFactory | null = null;
 	#gameNoteFactory: GameNoteFactory | null = null;
@@ -61,7 +65,9 @@ export class ClientServiceLocator {
 
 	get httpClient(): IFetchClient | null {
 		if (!this.#httpClient && browser) {
-			this.#httpClient = new FetchClient({ url: window.location.origin });
+			const headers = new Headers();
+			headers.set('Authorization', `Bearer 1234`);
+			this.#httpClient = new FetchClient({ url: window.location.origin, globalHeaders: headers });
 		}
 		return this.#httpClient;
 	}
@@ -95,17 +101,26 @@ export class ClientServiceLocator {
 		}
 		return this.#eventSourceManager;
 	}
-	get serviceWorkerUpdater(): ServiceWorkerUpdater {
-		if (!this.#serviceWorkerUpdater) {
-			this.#serviceWorkerUpdater = new ServiceWorkerUpdater();
+	get serviceWorkerManager(): ServiceWorkerManager {
+		if (!this.#serviceWorkerManager) {
+			this.#serviceWorkerManager = new ServiceWorkerManager();
 		}
-		return this.#serviceWorkerUpdater;
+		return this.#serviceWorkerManager;
 	}
 	get serverHeartbeat(): ServerHeartbeat {
 		if (!this.#serverHeartbeat) {
 			this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.eventSourceManager });
 		}
 		return this.#serverHeartbeat;
+	}
+	get instanceManager(): InstanceManager {
+		if (!this.#instanceManager) {
+			this.#instanceManager = new InstanceManager({
+				httpClient: this.httpClient,
+				keyValueRepository: this.keyValueRepository,
+			});
+		}
+		return this.#instanceManager;
 	}
 
 	// Repositories
@@ -124,6 +139,12 @@ export class ClientServiceLocator {
 			this.#syncQueueRepository = new SyncQueueRepository({ indexedDbSignal: this.dbSignal });
 		}
 		return this.#syncQueueRepository;
+	}
+	get keyValueRepository(): KeyValueRepository {
+		if (!this.#keyValueRepository) {
+			this.#keyValueRepository = new KeyValueRepository({ indexedDbSignal: this.dbSignal });
+		}
+		return this.#keyValueRepository;
 	}
 
 	// Factories

@@ -1,4 +1,4 @@
-import { type ZodIssue } from "zod";
+import z, { type ZodIssue } from "zod";
 
 export class ApiError extends Error {
   public readonly statusCode: number;
@@ -29,3 +29,18 @@ export class ValidationError extends ApiError {
     this.details = details;
   }
 }
+
+export const apiErrorSchema = z.object({
+  error: z.object({
+    message: z.string().optional(),
+    code: z.enum([
+      "instance_not_registered",
+      "invalid_request",
+      "not_authorized",
+    ]),
+  }),
+});
+
+export type ApiErrorCode = z.infer<
+  typeof apiErrorSchema.shape.error.shape.code
+>;

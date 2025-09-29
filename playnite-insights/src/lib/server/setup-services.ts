@@ -147,6 +147,7 @@ export const setupServices = () => {
 		extensionRegistration: extensionRegistrationService,
 		authentication: authenticationService,
 		playniteHostHttpClient,
+		fileSystem: fileSystemService,
 		config,
 	};
 

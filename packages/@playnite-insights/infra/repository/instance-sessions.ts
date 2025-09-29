@@ -1,4 +1,4 @@
-import { InstanceSessionsRepository } from "@playnite-insights/core";
+import { type InstanceSessionsRepository } from "@playnite-insights/core";
 import { instanceSessionSchema } from "@playnite-insights/lib/client";
 import {
   type BaseRepositoryDeps,

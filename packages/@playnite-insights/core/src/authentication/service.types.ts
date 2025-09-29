@@ -1,4 +1,7 @@
-import type { ValidAuthenticationHeader } from "@playnite-insights/lib/client";
+import type {
+  ApiErrorCode,
+  ValidAuthenticationHeader,
+} from "@playnite-insights/lib/client";
 import type { CryptographyService } from "../types/cryptography.types";
 import type { ExtensionRegistrationRepository } from "../types/extension-registration.types";
 import type { InstanceAuthenticationRepository } from "../types/instance-authentication.types";
@@ -34,7 +37,8 @@ export type AuthenticationService = {
     url: {
       pathname: string;
     };
-  }) => boolean;
+  }) => { isAuthorized: false; code: ApiErrorCode } | { isAuthorized: true };
+  isInstanceRegistered: () => boolean;
   registerInstanceAsync: (password: string) => Promise<void>;
   loginInstanceAsync: (password: string) => Promise<string>;
 };

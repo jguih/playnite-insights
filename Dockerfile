@@ -23,16 +23,16 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 WORKDIR /app
-ENV WORK_DIR=/app
+ENV PLAYATLAS_DATA_DIR=/app/data
 ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='PlayAtlas (Dev)'
+ENV PLAYATLAS_INSTANCE_NAME='PlayAtlas (Dev)'
 
 RUN apt update && apt install sqlite3 -y 
 
-RUN mkdir -p ./data/files ./data/tmp
-COPY ./playnite-insights/static/placeholder ./data/files/placeholder
-COPY ./packages/@playnite-insights/infra/migrations ./infra/migrations
+RUN mkdir -p /app/data/files /app/data/tmp
+COPY ./playnite-insights/static/placeholder /app/data/files/placeholder
+COPY ./packages/@playnite-insights/infra/migrations /app/infra/migrations
 
 EXPOSE 3000
 
@@ -46,18 +46,18 @@ ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "test:unit" ]
 
 FROM base AS prod
 WORKDIR /app
-ENV WORK_DIR=/app
+ENV PLAYATLAS_DATA_DIR=/app/data
 ENV NODE_ENV='production'
 ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='PlayAtlas'
+ENV PLAYATLAS_INSTANCE_NAME='PlayAtlas'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-RUN mkdir -p ./data/files ./data/tmp
-RUN chown -R playnite-insights:playnite-insights ./data
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json ./package.json
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
+RUN mkdir -p /app/data/files /app/data/tmp
+RUN chown -R playnite-insights:playnite-insights /app/data
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules /app/node_modules
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build /app/build
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json /app/package.json
+COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations /app/infra/migrations
 
 EXPOSE 3000
 

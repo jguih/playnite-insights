@@ -2,7 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import { locator } from './app-state/serviceLocator';
 import { toast } from './app-state/toast.svelte';
 
-export class ServiceWorkerUpdater {
+export class ServiceWorkerManager {
 	#newVersionAvailable: boolean;
 
 	constructor() {
