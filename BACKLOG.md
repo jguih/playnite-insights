@@ -30,6 +30,7 @@
 - Screenshot gallery improvements:
   - Store metadata in database
   - Compare image hashes to avoid duplicates
+- Improve home page performance by caching filtered game list instead of recomputing on every render
 
 ## 🛠️ In Progress
 

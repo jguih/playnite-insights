@@ -7,6 +7,11 @@ import {
   gameSortOrder,
 } from "../playnite-game";
 import { homePageSearchParamsKeys } from "./schemas";
+import type {
+  HomePageFilterParams,
+  HomePagePaginationParams,
+  HomePageSortingParams,
+} from "./types";
 
 export const isValidPage = (value: string | null) => {
   if (!value) return true;
@@ -40,7 +45,13 @@ export const isValidGamePageSize = (
   );
 };
 
-export const parseHomePageSearchParams = (params: URLSearchParams) => {
+export const parseHomePageSearchParams = (
+  params: URLSearchParams
+): {
+  pagination: HomePagePaginationParams;
+  filter: HomePageFilterParams;
+  sorting: HomePageSortingParams;
+} => {
   // Pagination
   const _pageSize = params.get(homePageSearchParamsKeys.pageSize);
   const pageSize: GamePageSize = isValidGamePageSize(_pageSize)
@@ -68,16 +79,16 @@ export const parseHomePageSearchParams = (params: URLSearchParams) => {
     : "asc";
 
   return {
-    pageSize,
-    page,
-    query,
-    installed,
-    notInstalled,
-    developers,
-    publishers,
-    genres,
-    platforms,
-    sortBy,
-    sortOrder,
+    pagination: { pageSize, page },
+    filter: {
+      query,
+      installed,
+      notInstalled,
+      developers,
+      publishers,
+      genres,
+      platforms,
+    },
+    sorting: { sortBy, sortOrder },
   };
 };

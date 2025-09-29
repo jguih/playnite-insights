@@ -3,7 +3,6 @@ import {
 	gameSortBy,
 	gameSortOrder,
 	homePageSearchParamsKeys as paramKeys,
-	parseHomePageSearchParams,
 } from '@playnite-insights/lib/client';
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
@@ -30,9 +29,4 @@ export const load: PageLoad = ({ url }) => {
 	if (changed) {
 		throw redirect(302, `${url.pathname}?${params.toString()}`);
 	}
-	const parsedValues = parseHomePageSearchParams(params);
-
-	return {
-		...parsedValues,
-	};
 };

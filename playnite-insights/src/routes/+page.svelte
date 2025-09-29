@@ -29,9 +29,7 @@
 		type PlayniteGame,
 	} from '@playnite-insights/lib/client';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
-	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
 	let main: HTMLElement | undefined = $state();
 	const recentActivityVm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
@@ -39,7 +37,7 @@
 		dateTimeHandler: locator.dateTimeHandler,
 	});
 	const vm = new HomePageViewModel({
-		getPageData: () => data,
+		getPageSearchParams: () => new URLSearchParams(page.url.searchParams),
 		gameStore: locator.gameStore,
 	});
 
@@ -123,7 +121,7 @@
 	// Save current applied filters before navigate
 	beforeNavigate(() => {
 		const params = new URLSearchParams(page.url.searchParams);
-		const newHref = `${page.url.pathname}?${params.toString()}`;
+		const newHref = params.size > 0 ? `${page.url.pathname}?${params.toString()}` : '';
 		updateBottomNavHomeHref(newHref);
 	});
 </script>
@@ -171,14 +169,14 @@
 	{setSearchParam}
 	{appendSearchParam}
 	{removeSearchParam}
-	installedParam={vm.filter.installed}
-	notInstalledParam={vm.filter.notInstalled}
-	sortByParam={vm.sort.by}
-	sortOrderParam={vm.sort.order}
-	developersParam={vm.filter.developers}
-	publishersParam={vm.filter.publishers}
-	platformsParam={vm.filter.platforms}
-	genresParam={vm.filter.genres}
+	installedParam={vm.pageParams.filter.installed}
+	notInstalledParam={vm.pageParams.filter.notInstalled}
+	sortByParam={vm.pageParams.sorting.sortBy}
+	sortOrderParam={vm.pageParams.sorting.sortOrder}
+	developersParam={vm.pageParams.filter.developers}
+	publishersParam={vm.pageParams.filter.publishers}
+	platformsParam={vm.pageParams.filter.platforms}
+	genresParam={vm.pageParams.filter.genres}
 	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
@@ -206,7 +204,7 @@
 		</a>
 		<div class="flex grow flex-row items-center gap-2">
 			<SearchBar
-				value={vm.filter.query}
+				value={vm.pageParams.filter.query}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
 			<FiltersButton
@@ -220,15 +218,15 @@
 		<div class="mb-2">
 			{#if vm.isLoading}
 				<div class="mt-1 h-4 w-48 animate-pulse bg-neutral-300/60"></div>
-			{:else if vm.totalGamesCount === 0}
+			{:else if vm.gamesCacheItem.total === 0}
 				<p class="text-sm text-neutral-300/60">{m.home_no_games_found()}</p>
 			{/if}
-			{#if vm.totalGamesCount > 0}
+			{#if vm.gamesCacheItem.total > 0}
 				<p class="text-sm text-neutral-300/60">
 					{m.home_showing_games_counter({
-						count1: vm.gamesCountFrom,
-						count2: vm.gamesCountTo,
-						totalCount: vm.totalGamesCount,
+						count1: vm.gamesCacheItem.countFrom,
+						count2: vm.gamesCacheItem.countTo,
+						totalCount: vm.gamesCacheItem.total,
 					})}
 				</p>
 			{/if}
@@ -240,7 +238,7 @@
 			{m.home_label_items_per_page()}
 			<Select
 				onchange={handleOnPageSizeChange}
-				value={vm.pagination.pageSize}
+				value={vm.pageParams.pagination.pageSize}
 				id="page_size"
 				class={['bg-background-1!']}
 				disabled={vm.isLoading}
@@ -251,37 +249,35 @@
 			</Select>
 		</label>
 
-		{#key vm.pagination.currentPage}
-			{#if vm.isLoading}
-				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-					{#each new Array(Number(vm.pagination.pageSize)).fill(null) as _}
-						{@render gameCardSkeleton()}
-					{/each}
-				</ul>
-			{:else if vm.games}
-				<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-					{#each vm.games as game (game.Id)}
-						{@render gameCard(game)}
-					{/each}
-				</ul>
-			{:else}
-				<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
-			{/if}
-		{/key}
+		{#if vm.isLoading}
+			<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+				{#each new Array(Number(vm.pageParams.pagination.pageSize)).fill(null) as _}
+					{@render gameCardSkeleton()}
+				{/each}
+			</ul>
+		{:else if vm.gamesCacheItem.total > 0}
+			<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+				{#each vm.gamesCacheItem.games as game (game.Id)}
+					{@render gameCard(game)}
+				{/each}
+			</ul>
+		{:else}
+			<p class="text-md w-full text-center">{m.home_no_games_found()}</p>
+		{/if}
 
 		<nav class="mt-4 flex flex-row justify-center gap-2">
 			<LightButton
-				disabled={vm.pagination.currentPage <= 1}
-				onclick={() => handleOnPageChange(vm.pagination.currentPage - 1)}
+				disabled={Number(vm.pageParams.pagination.page) <= 1}
+				onclick={() => handleOnPageChange(Number(vm.pageParams.pagination.page) - 1)}
 				class={['px-2 py-1']}
 				aria-label="previous page"
 			>
 				<ChevronLeft />
 			</LightButton>
-			{#each vm.pagination.pages as page (page)}
+			{#each vm.getPaginationSequence(Number(vm.pageParams.pagination.page), vm.gamesCacheItem.totalPages) as page (page)}
 				{#if page === null}
 					<span class="px-2">…</span>
-				{:else if page === vm.pagination.currentPage}
+				{:else if page === Number(vm.pageParams.pagination.page)}
 					<SolidButton
 						selected
 						class={['px-2 py-1']}
@@ -298,8 +294,8 @@
 				{/if}
 			{/each}
 			<LightButton
-				onclick={() => handleOnPageChange(vm.pagination.currentPage + 1)}
-				disabled={vm.pagination.currentPage >= vm.pagination.totalPages}
+				onclick={() => handleOnPageChange(Number(vm.pageParams.pagination.page) + 1)}
+				disabled={Number(vm.pageParams.pagination.page) >= vm.gamesCacheItem.totalPages}
 				class={['px-2 py-1']}
 				aria-label="next page"
 			>
