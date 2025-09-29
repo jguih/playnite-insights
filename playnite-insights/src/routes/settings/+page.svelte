@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator';
+	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
 	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';

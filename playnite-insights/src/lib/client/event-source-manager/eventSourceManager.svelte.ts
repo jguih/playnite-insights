@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { apiSSEventDataSchema, type APISSEventType } from '@playnite-insights/lib/client';
 import z from 'zod';
-import { locator } from '../app-state/serviceLocator';
+import { locator } from '../app-state/serviceLocator.svelte';
 
 export type EventSourceManagerListenerCallback<T extends APISSEventType> = (args: {
 	data: z.infer<(typeof apiSSEventDataSchema)[T]>;

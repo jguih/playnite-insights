@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator';
+	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { XIcon } from '@lucide/svelte';
 	import type {

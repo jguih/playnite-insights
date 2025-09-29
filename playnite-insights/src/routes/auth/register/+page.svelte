@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { locator } from '$lib/client/app-state/serviceLocator';
+	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import BaseInput from '$lib/client/components/forms/BaseInput.svelte';
 

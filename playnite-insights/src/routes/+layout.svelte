@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { locator } from '$lib/client/app-state/serviceLocator';
+	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
 	import { onMount } from 'svelte';

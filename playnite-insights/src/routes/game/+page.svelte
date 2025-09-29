@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.js';
+	import { locator } from '$lib/client/app-state/serviceLocator.svelte.jselte.js';
 	import SolidAnchor from '$lib/client/components/anchors/SolidAnchor.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
