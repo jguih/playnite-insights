@@ -130,6 +130,8 @@
   "created_at": "Created",
   "updated_at": "Updated",
   "label_save": "Save",
+  "label_login": "Login",
   "register_label_create_password": "Register a password for this {begin_span}PlayAtlas{end_span} instance",
-  "register_placeholder_create_password": "Instance password"
+  "auth_placeholder_instance_password": "Instance password",
+  "login_label_enter_password": "Login into this {begin_span}PlayAtlas{end_span} instance"
 }

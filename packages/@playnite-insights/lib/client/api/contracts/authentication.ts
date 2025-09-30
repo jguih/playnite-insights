@@ -9,3 +9,11 @@ export const registerInstanceCommandSchema = z.object({
 export type RegisterInstanceCommand = z.infer<
   typeof registerInstanceCommandSchema
 >;
+
+export type LoginInstanceCommand = z.infer<
+  typeof registerInstanceCommandSchema
+>;
+
+export const loginInstanceResponseSchema = z.object({
+  sessionId: z.string(),
+});

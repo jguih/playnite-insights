@@ -5,4 +5,8 @@ export const keyValueSchema = z.discriminatedUnion("Key", [
     Key: z.literal("instance-registered"),
     Value: z.boolean(),
   }),
+  z.object({
+    Key: z.literal("session-id"),
+    Value: z.string(),
+  }),
 ]);

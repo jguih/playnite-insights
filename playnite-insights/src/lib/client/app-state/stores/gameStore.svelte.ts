@@ -173,8 +173,18 @@ export class GameStore extends ApiDataStore {
 			return this.#cache.get(key)!;
 		}
 
+		const games = this.#dataSignal.list ? [...this.#dataSignal.list] : null;
+		if (games === null) {
+			return {
+				games: [],
+				countFrom: 0,
+				countTo: 0,
+				total: 0,
+				totalPages: 0,
+			};
+		}
+
 		const args = parseHomePageSearchParams(searchParams);
-		const games = this.#dataSignal.list ? [...this.#dataSignal.list] : [];
 		let filtered = this.#applyFilters(games, args.filter);
 		const total = filtered.length;
 		const countFrom = (Number(args.pagination.page) - 1) * Number(args.pagination.pageSize);
@@ -189,7 +199,7 @@ export class GameStore extends ApiDataStore {
 			total,
 			totalPages,
 		};
-		if (filtered) this.#cache.set(key, cacheItem);
+		this.#cache.set(key, cacheItem);
 		return cacheItem;
 	};
 }

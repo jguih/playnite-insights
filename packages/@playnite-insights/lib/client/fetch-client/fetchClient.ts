@@ -4,14 +4,15 @@ import type { IFetchClient } from "./fetchClient.types";
 
 export class FetchClient implements IFetchClient {
   private url: string;
-  private globalHeaders: Headers | undefined = undefined;
+  private globalHeaders: (() => Promise<Headers> | Headers) | undefined =
+    undefined;
 
   constructor({
     url,
     globalHeaders,
   }: {
     url: string;
-    globalHeaders?: Headers;
+    globalHeaders?: () => Promise<Headers> | Headers;
   }) {
     this.url = url;
     this.globalHeaders = globalHeaders;
@@ -46,10 +47,11 @@ export class FetchClient implements IFetchClient {
     const parsedUrl = this.safeJoinUrlAndEndpoint(this.url, endpoint);
     let response: Response | null = null;
     try {
+      const globalHeaders = await this.globalHeaders?.();
       response = await fetch(parsedUrl, {
         ...props,
         method: "GET",
-        headers: this.mergeHeaders(this.globalHeaders, props.headers),
+        headers: this.mergeHeaders(globalHeaders, props.headers),
       });
       const result = await strategy.handleAsync(response);
       return result;
@@ -72,22 +74,22 @@ export class FetchClient implements IFetchClient {
     const parsedUrl = this.safeJoinUrlAndEndpoint(this.url, endpoint);
     let response: Response | null = null;
     try {
+      const globalHeaders = await this.globalHeaders?.();
       if (body instanceof FormData) {
         response = await fetch(parsedUrl, {
           ...props,
           body: body,
           method: "DELETE",
-          headers: this.mergeHeaders(this.globalHeaders, props.headers),
+          headers: this.mergeHeaders(globalHeaders, props.headers),
         });
       } else {
         response = await fetch(parsedUrl, {
           ...props,
           body: JSON.stringify(body),
           method: "DELETE",
-          headers: {
-            ...props.headers,
+          headers: this.mergeHeaders(globalHeaders, props.headers, {
             "Content-Type": "application/json",
-          },
+          }),
         });
       }
       const result = await strategy.handleAsync(response);
@@ -111,22 +113,22 @@ export class FetchClient implements IFetchClient {
     const parsedUrl = this.safeJoinUrlAndEndpoint(this.url, endpoint);
     let response: Response | null = null;
     try {
+      const globalHeaders = await this.globalHeaders?.();
       if (body instanceof FormData) {
         response = await fetch(parsedUrl, {
           ...props,
           body: body,
           method: "POST",
-          headers: this.mergeHeaders(this.globalHeaders, props.headers),
+          headers: this.mergeHeaders(globalHeaders, props.headers),
         });
       } else {
         response = await fetch(parsedUrl, {
           ...props,
           body: JSON.stringify(body),
           method: "POST",
-          headers: {
-            ...props.headers,
+          headers: this.mergeHeaders(globalHeaders, props.headers, {
             "Content-Type": "application/json",
-          },
+          }),
         });
       }
       const result = await strategy.handleAsync(response);
@@ -150,22 +152,22 @@ export class FetchClient implements IFetchClient {
     const parsedUrl = this.safeJoinUrlAndEndpoint(this.url, endpoint);
     let response: Response | null = null;
     try {
+      const globalHeaders = await this.globalHeaders?.();
       if (body instanceof FormData) {
         response = await fetch(parsedUrl, {
           ...props,
           body: body,
           method: "PUT",
-          headers: this.mergeHeaders(this.globalHeaders, props.headers),
+          headers: this.mergeHeaders(globalHeaders, props.headers),
         });
       } else {
         response = await fetch(parsedUrl, {
           ...props,
           body: JSON.stringify(body),
           method: "PUT",
-          headers: {
-            ...props.headers,
+          headers: this.mergeHeaders(globalHeaders, props.headers, {
             "Content-Type": "application/json",
-          },
+          }),
         });
       }
       const result = await strategy.handleAsync(response);

@@ -131,6 +131,8 @@
   "created_at": "Criado",
   "updated_at": "Atualizado",
   "label_save": "Salvar",
+  "label_login": "Entrar",
   "register_label_create_password": "Registre uma senha para esta instância do {begin_span}PlayAtlas{end_span}",
-  "register_placeholder_create_password": "Senha de instância"
+  "auth_placeholder_instance_password": "Senha de instância",
+  "login_label_enter_password": "Entre nesta instância do {begin_span}PlayAtlas{end_span}"
 }

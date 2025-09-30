@@ -73,7 +73,7 @@
 				type="password"
 				id="instance-password"
 				name="password"
-				placeholder={m.register_placeholder_create_password()}
+				placeholder={m.auth_placeholder_instance_password()}
 				autocomplete="new-password"
 				bind:value={password}
 				minlength={4}

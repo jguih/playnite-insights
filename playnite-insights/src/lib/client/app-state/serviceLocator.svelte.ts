@@ -50,6 +50,7 @@ export class ClientServiceLocator {
 	// Factories
 	#syncQueueFactory: SyncQueueFactory | null = null;
 	#gameNoteFactory: GameNoteFactory | null = null;
+	#sessionId: string | null = null;
 
 	constructor() {}
 
@@ -63,11 +64,26 @@ export class ClientServiceLocator {
 		this.serverTimeStore.loadServerTime();
 	};
 
+	#getSessionId = async (): Promise<string | null> => {
+		if (this.#sessionId) return this.#sessionId;
+		const sessionId = await this.keyValueRepository.getAsync({ key: 'session-id' });
+		if (sessionId) this.#sessionId = sessionId.Value;
+		return this.#sessionId;
+	};
+
+	#getHttpClientGlobalHeaders = async (): Promise<Headers> => {
+		const headers = new Headers();
+		const sessionId = await this.#getSessionId();
+		if (sessionId) headers.set('Authorization', `Bearer ${sessionId}`);
+		return headers;
+	};
+
 	get httpClient(): IFetchClient | null {
 		if (!this.#httpClient && browser) {
-			const headers = new Headers();
-			headers.set('Authorization', `Bearer 1234`);
-			this.#httpClient = new FetchClient({ url: window.location.origin, globalHeaders: headers });
+			this.#httpClient = new FetchClient({
+				url: window.location.origin,
+				globalHeaders: this.#getHttpClientGlobalHeaders,
+			});
 		}
 		return this.#httpClient;
 	}
