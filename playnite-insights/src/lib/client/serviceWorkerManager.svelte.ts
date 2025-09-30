@@ -37,6 +37,10 @@ export class ServiceWorkerManager {
 				locator.libraryMetricsStore.loadLibraryMetrics();
 				break;
 			}
+			case 'ALL_SCREENSHOT_UPDATE': {
+				locator.screenshotStore.loadScreenshots();
+				break;
+			}
 		}
 	};
 

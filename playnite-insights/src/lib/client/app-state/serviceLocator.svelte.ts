@@ -22,6 +22,7 @@ import { GameStore } from './stores/gameStore.svelte';
 import { GenreStore } from './stores/genreStore.svelte';
 import { LibraryMetricsStore } from './stores/libraryMetricsStore.svelte';
 import { PlatformStore } from './stores/platformStore.svelte';
+import { ScreenshotStore } from './stores/screenshotStore.svelte';
 import { ServerTimeStore } from './stores/serverTimeStore.svelte';
 
 export class ClientServiceLocator {
@@ -43,6 +44,7 @@ export class ClientServiceLocator {
 	#libraryMetricsStore: LibraryMetricsStore | null = null;
 	#genreStore: GenreStore | null = null;
 	#platformStore: PlatformStore | null = null;
+	#screenshotStore: ScreenshotStore | null = null;
 	// Repositories
 	#gameNoteRepository: GameNoteRepository | null = null;
 	#syncQueueRepository: SyncQueueRepository | null = null;
@@ -63,6 +65,7 @@ export class ClientServiceLocator {
 			this.genreStore.loadGenres(),
 			this.platformStore.loadPlatforms(),
 			this.serverTimeStore.loadServerTime(),
+			this.screenshotStore.loadScreenshots(),
 		]);
 	};
 
@@ -235,6 +238,12 @@ export class ClientServiceLocator {
 			});
 		}
 		return this.#serverTimeStore;
+	}
+	get screenshotStore(): ScreenshotStore {
+		if (!this.#screenshotStore) {
+			this.#screenshotStore = new ScreenshotStore({ httpClient: this.httpClient });
+		}
+		return this.#screenshotStore;
 	}
 }
 
