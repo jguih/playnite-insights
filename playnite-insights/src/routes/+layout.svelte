@@ -52,6 +52,7 @@
 
 	const handleFocus = () => {
 		locator.gameSessionStore.loadRecentSessions();
+		locator.gameStore.loadGames();
 	};
 
 	onMount(() => {

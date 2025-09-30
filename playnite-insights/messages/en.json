@@ -128,5 +128,8 @@
   "extension_registration_info_extension_id": "Extension id",
   "extension_registration_info_version": "Version",
   "created_at": "Created",
-  "updated_at": "Updated"
+  "updated_at": "Updated",
+  "label_save": "Save",
+  "register_label_create_password": "Register a password for this {begin_span}PlayAtlas{end_span} instance",
+  "register_placeholder_create_password": "Instance password"
 }

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
+	import type { ComponentSize } from './types';
 
-	let { ...props }: HTMLAttributes<HTMLDivElement> = $props();
+	let { size = 'md', ...props }: HTMLAttributes<HTMLDivElement> & { size?: ComponentSize } =
+		$props();
 </script>
 
 <div
@@ -10,7 +12,10 @@
 >
 	<div
 		class={[
-			'border-primary-light-active-fg mx-auto h-10 w-10 animate-spin rounded-full border-4 border-t-transparent',
+			size === 'sm' && 'h-7 w-7',
+			size === 'md' && 'h-8 w-8',
+			size === 'lg' && 'h-10 w-10',
+			'border-primary-light-active-fg mx-auto animate-spin rounded-full border-4 border-t-transparent',
 		]}
 	></div>
 </div>

@@ -129,5 +129,8 @@
   "extension_registration_info_extension_id": "Id de extensão",
   "extension_registration_info_version": "Versão",
   "created_at": "Criado",
-  "updated_at": "Atualizado"
+  "updated_at": "Atualizado",
+  "label_save": "Salvar",
+  "register_label_create_password": "Registre uma senha para esta instância do {begin_span}PlayAtlas{end_span}",
+  "register_placeholder_create_password": "Senha de instância"
 }

@@ -8,6 +8,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		const jsonBody = await request.json();
 		const command = registerInstanceCommandSchema.parse(jsonBody);
 		const sessionId = await services.authentication.loginInstanceAsync(command.password);
+		services.log.info(`New instance login`);
 		return json({ sessionId });
 	} catch (error) {
 		return handleApiError(error, `${request.method} ${url.pathname}`);
