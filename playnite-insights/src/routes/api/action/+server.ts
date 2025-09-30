@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ request, url }) =>
 				`Make sure your Playnite host allows traffic through the port configured in PlayAtlas Exporter.`,
 			);
 			services.log.warning(
-				`It's worth checking if the host's IPv4/IPv6 address haven changed. To avoid this issue, make sure to reserve an address on your router.`,
+				`It's worth checking if the host's IPv4/IPv6 address have changed. To avoid this issue, make sure to reserve an address on your router.`,
 			);
 			throw error;
 		}
