@@ -31,13 +31,13 @@
   - Store metadata in database
   - Compare image hashes to avoid duplicates
 - Improve home page performance by caching filtered game list instead of recomputing on every render
+- Instance authentication system
 
 ## 🛠️ In Progress
 
 - Screenshot gallery improvements:
   - Delete images
   - Restore images from trash
-- Instance authentication system
 
 ## 📌 To Do
 
@@ -46,9 +46,9 @@
 - Settings page:
   - Global filter to hide hidden games
   - Option to automatically redirect to current active game journal when a session is in progress
+- Authentication system for ShareX integration endpoint /api/assets/upload/screenshot
 
 ## 💡 Ideas
 
 - Create a recomendation system that recommends both owned and not owned games
-- Show if Playnite Insights Exporter is currently reachable (Possibly through Websocket)
 - Allow remotely opening games from the Web UI

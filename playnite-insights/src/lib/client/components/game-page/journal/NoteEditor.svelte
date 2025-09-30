@@ -114,7 +114,7 @@
 		</AsideBody>
 		<AsideBottomNav>
 			<SolidButton
-				color="primary"
+				color="neutral"
 				rounded
 				aria-label="Add extras"
 				class={['h-fit grow-0']}
