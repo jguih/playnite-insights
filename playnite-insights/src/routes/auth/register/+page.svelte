@@ -28,31 +28,28 @@
 	}
 
 	const registerInstance = async () => {
-		try {
-			isLoading = true;
-			if (!password) throw new AppError('Instance password cannot be null');
-			if (!locator.httpClient) throw new HttpClientNotSetError();
-			const command: RegisterInstanceCommand = { password };
-			await locator.httpClient.httpPostAsync({
-				endpoint: '/api/auth/register',
-				strategy: new EmptyStrategy(),
-				body: command,
-			});
-			return true;
-		} catch (error) {
-			handleClientErrors(error, `[registerInstance] failed`);
-			toast.error({ category: 'app', message: 'Failed to register instance' });
-			return false;
-		} finally {
-			isLoading = false;
-		}
+		if (!password) throw new AppError('Instance password cannot be null');
+		if (!locator.httpClient) throw new HttpClientNotSetError();
+		const command: RegisterInstanceCommand = { password };
+		await locator.httpClient.httpPostAsync({
+			endpoint: '/api/auth/register',
+			strategy: new EmptyStrategy(),
+			body: command,
+		});
 	};
 
 	const handleOnSubmit: FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
-		registerInstance().then((value) => {
-			if (value) goto('/auth/login', { replaceState: true });
-		});
+		registerInstance()
+			.then(async () => {
+				await goto('/auth/login', { replaceState: true });
+				isLoading = false;
+			})
+			.catch((error) => {
+				handleClientErrors(error, `[registerInstance] failed`);
+				toast.error({ category: 'app', message: 'Failed to register instance' });
+				isLoading = false;
+			});
 	};
 </script>
 

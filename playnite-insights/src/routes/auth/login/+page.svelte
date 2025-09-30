@@ -40,10 +40,8 @@
 						keyvalue: { Key: 'session-id', Value: sessionId },
 					});
 					await goto('/', { replaceState: true });
-					isLoading = false;
-				} else {
-					isLoading = false;
 				}
+				isLoading = false;
 			})
 			.catch((error) => {
 				handleClientErrors(error, `[loginInstance] failed`);
