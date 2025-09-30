@@ -16,7 +16,6 @@ services:
       target: stage
     container_name: app-stage
     environment:
-      ORIGIN: ${ORIGIN_STAGE} # make sure there's no trailing slash
       TEST_DATA: true
       TZ: "America/Sao_Paulo"
 
@@ -49,7 +48,6 @@ services:
     container_name: app-prod
     restart: always
     environment:
-      ORIGIN: ${ORIGIN_PROD} # make sure there's no trailing slash
       PLAYNITE_HOST_ADDRESS: ${PLAYNITE_HOST_ADDRESS_PROD}
       PLAYATLAS_INSTANCE_NAME: "PlayAtlas"
       TZ: "America/Sao_Paulo"
