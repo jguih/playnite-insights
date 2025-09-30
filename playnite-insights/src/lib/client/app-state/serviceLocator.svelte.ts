@@ -67,7 +67,7 @@ export class ClientServiceLocator {
 	#getSessionId = async (): Promise<string | null> => {
 		if (this.#sessionId) return this.#sessionId;
 		const sessionId = await this.keyValueRepository.getAsync({ key: 'session-id' });
-		if (sessionId) this.#sessionId = sessionId.Value;
+		if (sessionId) this.#sessionId = sessionId;
 		return this.#sessionId;
 	};
 
@@ -237,7 +237,3 @@ export class ClientServiceLocator {
 }
 
 export const locator = new ClientServiceLocator();
-
-if (browser) {
-	locator.loadStoresData();
-}

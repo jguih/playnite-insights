@@ -1,4 +1,4 @@
-import type { KeyValue } from '@playnite-insights/lib/client';
+import type { KeyValue, KeyValueMap } from '@playnite-insights/lib/client';
 import type { IKeyValueRepository } from './IKeyValueRepository';
 import { runRequest, runTransaction } from './indexeddb';
 import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
@@ -30,12 +30,16 @@ export class KeyValueRepository extends IndexedDBRepository implements IKeyValue
 		});
 	};
 
-	getAsync: IKeyValueRepository['getAsync'] = ({ key }) => {
+	getAsync: IKeyValueRepository['getAsync'] = <K extends keyof KeyValueMap>({
+		key,
+	}: {
+		key: K;
+	}) => {
 		return this.withDb(async (db) => {
 			return await runTransaction(db, 'keyValue', 'readonly', async ({ tx }) => {
 				const keyvalueStore = tx.objectStore(KeyValueRepository.STORE_NAME);
 				const keyvalue = await runRequest<KeyValue | undefined>(keyvalueStore.get(key));
-				return keyvalue ?? null;
+				return (keyvalue?.Value as KeyValueMap[K]) ?? null;
 			});
 		});
 	};

@@ -28,6 +28,7 @@
 		type HomePageSearchParamKeys,
 		type PlayniteGame,
 	} from '@playnite-insights/lib/client';
+	import { onMount } from 'svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 
 	let main: HTMLElement | undefined = $state();
@@ -123,6 +124,10 @@
 		const params = new URLSearchParams(page.url.searchParams);
 		const newHref = params.size > 0 ? `${page.url.pathname}?${params.toString()}` : '';
 		updateBottomNavHomeHref(newHref);
+	});
+
+	onMount(() => {
+		locator.loadStoresData();
 	});
 </script>
 

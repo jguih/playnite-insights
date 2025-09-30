@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
@@ -51,8 +52,10 @@
 	};
 
 	const handleFocus = () => {
-		locator.gameSessionStore.loadRecentSessions();
-		locator.gameStore.loadGames();
+		if (!page.url.pathname.startsWith('/auth')) {
+			locator.gameSessionStore.loadRecentSessions();
+			locator.gameStore.loadGames();
+		}
 	};
 
 	onMount(() => {

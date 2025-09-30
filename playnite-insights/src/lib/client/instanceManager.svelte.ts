@@ -64,7 +64,7 @@ export class InstanceManager {
 		// Return from indexedDb if possible
 		const isRegistered = await this.#keyValueRepository.getAsync({ key: 'instance-registered' });
 		if (isRegistered !== null) {
-			return (this.#isRegistered = isRegistered.Value);
+			return (this.#isRegistered = isRegistered);
 		}
 		// Wait for healthcheck
 		return await healthCheckPromise;

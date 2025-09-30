@@ -35,12 +35,10 @@
 		isLoading = true;
 		loginInstance()
 			.then(async (sessionId) => {
-				if (sessionId) {
-					await locator.keyValueRepository.putAsync({
-						keyvalue: { Key: 'session-id', Value: sessionId },
-					});
-					await goto('/', { replaceState: true });
-				}
+				await locator.keyValueRepository.putAsync({
+					keyvalue: { Key: 'session-id', Value: sessionId },
+				});
+				await goto('/', { replaceState: true });
 				isLoading = false;
 			})
 			.catch((error) => {

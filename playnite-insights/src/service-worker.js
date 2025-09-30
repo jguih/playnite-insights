@@ -160,7 +160,7 @@ async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 
 				cache.put(request, networkResponse.clone());
 			}
 			const networkETag = networkResponse.headers.get('ETag');
-			if (!cachedResponse || (cachedETag && networkETag && cachedETag !== networkETag)) {
+			if (networkResponse.ok && cachedETag && networkETag && cachedETag !== networkETag) {
 				notifyClients(updateMessage);
 			}
 			return networkResponse;
