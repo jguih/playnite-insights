@@ -38,6 +38,8 @@
 				await locator.keyValueRepository.putAsync({
 					keyvalue: { Key: 'session-id', Value: sessionId },
 				});
+				await locator.eventSourceManager.connect();
+				await locator.loadStoresData();
 				await goto('/', { replaceState: true });
 				isLoading = false;
 			})

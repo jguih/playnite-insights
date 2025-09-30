@@ -1,7 +1,9 @@
+import { goto } from '$app/navigation';
 import { m } from '$lib/paraglide/messages';
 import { apiSSEventDataSchema, type APISSEventType } from '@playnite-insights/lib/client';
 import z from 'zod';
 import { locator } from '../app-state/serviceLocator.svelte';
+import { toast } from '../app-state/toast.svelte';
 
 export type EventSourceManagerListenerCallback<T extends APISSEventType> = (args: {
 	data: z.infer<(typeof apiSSEventDataSchema)[T]>;
@@ -12,6 +14,10 @@ export type EventSourceManagerListener<T extends APISSEventType = APISSEventType
 	cb: EventSourceManagerListenerCallback<T>;
 };
 
+export type EventSourceManagerDeps = {
+	getSessionId: () => string | null | Promise<string | null>;
+};
+
 export class EventSourceManager {
 	#eventSource: EventSource | null = null;
 	#globalListenersUnsub: Array<() => void>;
@@ -20,14 +26,17 @@ export class EventSourceManager {
 	#serverConnectionStatusText: string;
 	#listeners: Map<APISSEventType, Set<(e: MessageEvent<string>) => void>>;
 	#clearHeartbeatListener: ReturnType<typeof this.addListener> | null = null;
+	#getSessionId: EventSourceManagerDeps['getSessionId'];
+	#authFailed: boolean = false;
 
 	static EVENT_ENDPOINT = '/api/event';
 
-	constructor() {
+	constructor({ getSessionId }: EventSourceManagerDeps) {
 		this.#globalListenersUnsub = [];
 		this.#listeners = new Map();
 		this.#serverConnectionStatus = $state(false);
 		this.#serverConnectionStatusText = $state(m.server_offline_message());
+		this.#getSessionId = getSessionId;
 	}
 
 	#resetHeartbeat() {
@@ -78,13 +87,16 @@ export class EventSourceManager {
 		}
 	};
 
-	connect() {
+	async connect() {
 		if (this.#eventSource) {
 			this.#detachAllListeners();
 			this.#eventSource.close();
 		}
 
-		this.#eventSource = new EventSource(EventSourceManager.EVENT_ENDPOINT);
+		const sessionId = (await this.#getSessionId()) ?? '';
+		this.#eventSource = new EventSource(
+			`${EventSourceManager.EVENT_ENDPOINT}?sessionId=${sessionId}`,
+		);
 
 		for (const [type, set] of this.#listeners) {
 			for (const cb of set) this.#eventSource.addEventListener(type, cb);
@@ -98,6 +110,7 @@ export class EventSourceManager {
 			cb: () => {
 				if (this.serverConnectionStatus === false) {
 					this.#serverConnectionStatus = true;
+					this.#authFailed = false;
 					this.#serverConnectionStatusText = m.server_online_message();
 				}
 				this.#resetHeartbeat();
@@ -132,6 +145,26 @@ export class EventSourceManager {
 	setupGlobalListeners = () => {
 		this.clearGlobalListeners();
 		this.#globalListenersUnsub.push(
+			this.addListener({
+				type: 'authError',
+				cb: async () => {
+					if (!this.#authFailed) {
+						this.#authFailed = true;
+						toast.warning({
+							category: 'network',
+							title: m.toast_failed_to_connect_with_server_client_not_authorized_title(),
+							message: m.toast_failed_to_connect_with_server_client_not_authorized_message(),
+							durationMs: 60_000,
+							action: () => goto('/auth/login', { replaceState: true }),
+						});
+						if (this.#eventSource) {
+							this.#detachAllListeners();
+							this.#eventSource.close();
+						}
+						if (this.#heartbeatTimeout) clearTimeout(this.#heartbeatTimeout);
+					}
+				},
+			}),
 			this.addListener({
 				type: 'gameLibraryUpdated',
 				cb: async () =>

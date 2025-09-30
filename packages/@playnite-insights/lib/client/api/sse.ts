@@ -10,6 +10,7 @@ export const apiSSEventDataSchema = {
   sessionClosed: z.boolean(),
   heartbeat: z.boolean(),
   createdExtensionRegistration: extensionRegistrationSchema,
+  authError: z.object({ status: z.number(), message: z.string() }),
 } as const;
 
 export const apiSSEventType = Object.fromEntries(
@@ -50,4 +51,8 @@ export type APISSEvent =
   | {
       type: typeof apiSSEventType.createdExtensionRegistration;
       data: z.infer<typeof apiSSEventDataSchema.createdExtensionRegistration>;
+    }
+  | {
+      type: typeof apiSSEventType.authError;
+      data: z.infer<typeof apiSSEventDataSchema.authError>;
     };

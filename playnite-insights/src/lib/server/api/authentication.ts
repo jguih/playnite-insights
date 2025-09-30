@@ -55,19 +55,20 @@ export const withExtensionAuth = async (
 export const withInstanceAuth = async (
 	request: Request,
 	url: URL,
-	cb: () => Response | Promise<Response>,
+	cb: (isAuthorized: boolean) => Response | Promise<Response>,
+	passThroughAuth?: boolean,
 ) => {
 	const requestDescription = `${request.method} ${url.pathname}`;
 	try {
 		const verify = services.authentication.verifyInstanceAuthorization({
 			headers: { Authorization: request.headers.get('Authorization') },
 			request: { method: request.method },
-			url: { pathname: url.pathname },
+			url: { pathname: url.pathname, searchParams: new URLSearchParams(url.searchParams) },
 		});
-		if (!verify.isAuthorized) {
+		if (!passThroughAuth && !verify.isAuthorized) {
 			return json({ error: { code: verify.code } }, { status: 403 });
 		}
-		return cb();
+		return cb(verify.isAuthorized);
 	} catch (error) {
 		return handleApiError(error, requestDescription);
 	}

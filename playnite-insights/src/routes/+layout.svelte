@@ -60,10 +60,16 @@
 
 	onMount(() => {
 		appProcessingInterval = setInterval(appProcessingHandler, 60_000);
-		locator.eventSourceManager.connect();
 		locator.eventSourceManager.setupGlobalListeners();
 		locator.serviceWorkerManager.setupGlobalListeners();
 		locator.serviceWorkerManager.watchServiceWorkerUpdates();
+
+		if (!page.url.pathname.startsWith('/auth')) {
+			locator.eventSourceManager.connect().then(() => {
+				locator.loadStoresData();
+			});
+		}
+
 		window.addEventListener('focus', handleFocus);
 		return () => {
 			window.removeEventListener('focus', handleFocus);

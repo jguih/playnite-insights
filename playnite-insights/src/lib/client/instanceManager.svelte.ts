@@ -32,19 +32,21 @@ export class InstanceManager {
 			this.#isRegistered = true;
 			return this.#isRegistered;
 		} catch (error) {
-			if (error instanceof FetchClientStrategyError && error.statusCode === 403 && error.data) {
-				const apiError = apiErrorSchema.parse(error.data);
-				switch (apiError.error.code) {
-					case 'instance_not_registered':
-						this.#isRegistered = false;
-						break;
-					case 'not_authorized':
-					case 'invalid_request':
-					default:
-						this.#isRegistered = true;
-						break;
+			if (error instanceof FetchClientStrategyError && error.statusCode === 403) {
+				if (error.data) {
+					const apiError = apiErrorSchema.parse(error.data);
+					switch (apiError.error.code) {
+						case 'instance_not_registered':
+							this.#isRegistered = false;
+							break;
+						case 'not_authorized':
+						case 'invalid_request':
+						default:
+							this.#isRegistered = true;
+							break;
+					}
+					return this.#isRegistered;
 				}
-				return this.#isRegistered;
 			}
 			throw error;
 		} finally {

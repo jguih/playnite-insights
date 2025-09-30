@@ -105,6 +105,8 @@
   "server_offline_message": "Server offline",
   "toast_data_sync_failed": "Sync failed",
   "toast_data_sync_succeeded": "Data synchronized successfully",
+  "toast_failed_to_connect_with_server_client_not_authorized_title": "Failed to connect with server, client not authorized",
+  "toast_failed_to_connect_with_server_client_not_authorized_message": "Click here to login",
   "settings_language_section_title": "Language",
   "settings_language_section_summary": "Language is the display language for all text.",
   "settings_language_section_label_language_picker": "Select language",

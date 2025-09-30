@@ -1,14 +1,26 @@
 import { type APISSEvent } from "@playnite-insights/lib/client";
 
+export type EventStreamDeps = { onClose?: () => void; isAuthorized: boolean };
+
 export class EventStream {
   private controller: ReadableStreamDefaultController | null = null;
   private stream: ReadableStream;
   private heartBeatInterval: ReturnType<typeof setInterval> | null = null;
 
-  constructor({ onClose }: { onClose?: () => void } = {}) {
+  constructor({ onClose, isAuthorized }: EventStreamDeps) {
     this.stream = new ReadableStream({
       start: (controller) => {
         this.controller = controller;
+
+        if (!isAuthorized) {
+          this.send({
+            type: "authError",
+            data: { status: 403, message: "Not authorized" },
+          });
+          controller.close();
+          return;
+        }
+
         this.send({ data: true, type: "heartbeat" });
         this.heartBeatInterval = setInterval(() => {
           this.send({ data: true, type: "heartbeat" });
@@ -54,9 +66,13 @@ export class EventStream {
 export class SSEManager {
   private streams = new Set<EventStream>();
 
-  createStream(): EventStream {
+  createStream(args: EventStreamDeps): EventStream {
     const stream = new EventStream({
-      onClose: () => this.streams.delete(stream),
+      onClose: () => {
+        this.streams.delete(stream);
+        args.onClose?.();
+      },
+      isAuthorized: args.isAuthorized,
     });
     this.streams.add(stream);
     return stream;

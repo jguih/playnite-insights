@@ -18,6 +18,17 @@ export type AuthenticationServiceDeps = {
   instanceSessionsRepository: InstanceSessionsRepository;
 };
 
+export type VerifyInstanceAuthorizationArgs = {
+  headers: { Authorization: string | null };
+  request: {
+    method: string;
+  };
+  url: {
+    pathname: string;
+    searchParams: URLSearchParams;
+  };
+};
+
 export type AuthenticationService = {
   verifyExtensionAuthorization: (args: {
     headers: Record<ValidAuthenticationHeader, string | null>;
@@ -29,15 +40,14 @@ export type AuthenticationService = {
     };
     now: number;
   }) => boolean;
-  verifyInstanceAuthorization: (args: {
-    headers: { Authorization: string | null };
-    request: {
-      method: string;
-    };
-    url: {
-      pathname: string;
-    };
-  }) => { isAuthorized: false; code: ApiErrorCode } | { isAuthorized: true };
+  verifySessionId: (args: {
+    sessionId?: string;
+  }) =>
+    | { isAuthorized: false; code: ApiErrorCode; message: string }
+    | { isAuthorized: true };
+  verifyInstanceAuthorization: (
+    args: VerifyInstanceAuthorizationArgs
+  ) => { isAuthorized: false; code: ApiErrorCode } | { isAuthorized: true };
   isInstanceRegistered: () => boolean;
   registerInstanceAsync: (password: string) => Promise<void>;
   loginInstanceAsync: (password: string) => Promise<string>;

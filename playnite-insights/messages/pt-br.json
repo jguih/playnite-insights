@@ -102,6 +102,8 @@
   "toast_remote_action_take_screenshot_warn_no_screenshots_returned_message": "O servidor não retornou nenhuma screenshot",
   "toast_new_update_available_title": "Nova atualização disponível",
   "toast_new_update_available_message": "Clique aqui para atualizar",
+  "toast_failed_to_connect_with_server_client_not_authorized_title": "Falha ao conectar com o servidor, cliente não autorizado",
+  "toast_failed_to_connect_with_server_client_not_authorized_message": "Clique aqui para fazer login",
   "server_online_message": "Servidor online",
   "server_offline_message": "Servidor offline",
   "toast_data_sync_failed": "Sincronização falhou",

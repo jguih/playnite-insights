@@ -54,14 +54,16 @@ export class ClientServiceLocator {
 
 	constructor() {}
 
-	loadStoresData = () => {
-		this.gameStore.loadGames();
-		this.companyStore.loadCompanies();
-		this.gameSessionStore.loadRecentSessions();
-		this.libraryMetricsStore.loadLibraryMetrics();
-		this.genreStore.loadGenres();
-		this.platformStore.loadPlatforms();
-		this.serverTimeStore.loadServerTime();
+	loadStoresData = async () => {
+		return await Promise.all([
+			this.gameStore.loadGames(),
+			this.companyStore.loadCompanies(),
+			this.gameSessionStore.loadRecentSessions(),
+			this.libraryMetricsStore.loadLibraryMetrics(),
+			this.genreStore.loadGenres(),
+			this.platformStore.loadPlatforms(),
+			this.serverTimeStore.loadServerTime(),
+		]);
 	};
 
 	#getSessionId = async (): Promise<string | null> => {
@@ -113,7 +115,7 @@ export class ClientServiceLocator {
 	}
 	get eventSourceManager(): EventSourceManager {
 		if (!this.#eventSourceManager) {
-			this.#eventSourceManager = new EventSourceManager();
+			this.#eventSourceManager = new EventSourceManager({ getSessionId: this.#getSessionId });
 		}
 		return this.#eventSourceManager;
 	}

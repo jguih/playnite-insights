@@ -124,10 +124,43 @@ export const makeAuthenticationService = ({
       return true;
     };
 
+  const verifySessionId: AuthenticationService["verifySessionId"] = ({
+    sessionId,
+  }) => {
+    if (!sessionId) {
+      return {
+        isAuthorized: false,
+        code: "invalid_request",
+        message:
+          "Request rejected for instance due to invalid Authorization header",
+      };
+    }
+    const existingSession = instanceSessionsRepository.getById(sessionId);
+    if (!existingSession) {
+      return {
+        isAuthorized: false,
+        code: "not_authorized",
+        message: "Request rejected for instance due to non existent session",
+      };
+    }
+    return { isAuthorized: true };
+  };
+
   const verifyInstanceAuthorization: AuthenticationService["verifyInstanceAuthorization"] =
     ({ headers, request, url }) => {
       const requestDescription = `${request.method} ${url.pathname}`;
-      const authorization = headers.Authorization;
+      const authorization =
+        headers.Authorization ??
+        (url.searchParams.get("sessionId")
+          ? `Bearer ${url.searchParams.get("sessionId")}`
+          : null);
+
+      if (!authorization) {
+        logService.warning(
+          `${requestDescription}: Request rejected for instance due to missing Authorization param`
+        );
+        return { isAuthorized: false, code: "invalid_request" };
+      }
 
       const instanceAuth = instanceAuthenticationRepository.get();
       if (!instanceAuth) {
@@ -137,25 +170,11 @@ export const makeAuthenticationService = ({
         return { isAuthorized: false, code: "instance_not_registered" };
       }
 
-      if (!authorization) {
-        logService.warning(
-          `${requestDescription}: Request rejected for instance due to missing Authorization header`
-        );
-        return { isAuthorized: false, code: "invalid_request" };
-      }
       const sessionId = authorization.split(" ").at(1);
-      if (!sessionId) {
-        logService.warning(
-          `${requestDescription}: Request rejected for instance due to invalid Authorization header`
-        );
-        return { isAuthorized: false, code: "invalid_request" };
-      }
-      const existingSession = instanceSessionsRepository.getById(sessionId);
-      if (!existingSession) {
-        logService.error(
-          `${requestDescription}: Request rejected for instance due to non existent session`
-        );
-        return { isAuthorized: false, code: "not_authorized" };
+      const result = verifySessionId({ sessionId });
+      if (result.isAuthorized === false) {
+        logService.warning(`${requestDescription}: ${result.message}`);
+        return result;
       }
 
       logService.debug(
@@ -210,6 +229,7 @@ export const makeAuthenticationService = ({
 
   return {
     verifyExtensionAuthorization,
+    verifySessionId,
     verifyInstanceAuthorization,
     isInstanceRegistered,
     registerInstanceAsync,
