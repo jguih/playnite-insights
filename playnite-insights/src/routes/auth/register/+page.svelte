@@ -47,7 +47,11 @@
 			})
 			.catch((error) => {
 				handleClientErrors(error, `[registerInstance] failed`);
-				toast.error({ category: 'app', message: 'Failed to register instance' });
+				toast.error({
+					category: 'app',
+					message: m.toast_failed_to_create_instance_password_message(),
+					title: m.toast_failed_to_create_instance_password_title(),
+				});
 				isLoading = false;
 			});
 	};

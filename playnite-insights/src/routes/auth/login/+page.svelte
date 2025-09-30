@@ -45,7 +45,11 @@
 			})
 			.catch((error) => {
 				handleClientErrors(error, `[loginInstance] failed`);
-				toast.error({ category: 'app', message: 'Failed to login' });
+				toast.error({
+					category: 'app',
+					title: m.toast_failed_to_login_title(),
+					message: m.toast_failed_to_login_message(),
+				});
 				isLoading = false;
 			});
 	};
