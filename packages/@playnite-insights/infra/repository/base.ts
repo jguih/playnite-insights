@@ -5,6 +5,8 @@ import { ZodError } from "zod";
 import { getDb as _getDb } from "../database/database";
 import { defaultLogger } from "../services/log";
 
+const PERFORMANCE_WARN_THRESHSOLD_MS = 50;
+
 export type BaseRepositoryDeps = {
   getDb: () => DatabaseSync;
   logService: LogService;
@@ -26,9 +28,11 @@ export const repositoryCall = <T>(
   try {
     const result = fn();
     const duration = performance.now() - start;
-    logService.debug(
-      `Repository call ${context ? context : ""} took ${duration.toFixed(1)}ms`
-    );
+    const message = `Repository call ${
+      context ? context : ""
+    } took ${duration.toFixed(1)}ms`;
+    if (duration >= PERFORMANCE_WARN_THRESHSOLD_MS) logService.warning(message);
+    else logService.debug(message);
     return result;
   } catch (error) {
     const duration = performance.now() - start;

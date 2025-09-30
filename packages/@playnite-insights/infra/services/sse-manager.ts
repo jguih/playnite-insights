@@ -1,13 +1,22 @@
+import type { LogService } from "@playnite-insights/core";
 import { type APISSEvent } from "@playnite-insights/lib/client";
+import { makeLogService } from "./log";
 
-export type EventStreamDeps = { onClose?: () => void; isAuthorized: boolean };
+export type EventStreamDeps = {
+  onCancel?: () => void;
+  isAuthorized: boolean;
+  logService: LogService;
+};
 
 export class EventStream {
   private controller: ReadableStreamDefaultController | null = null;
   private stream: ReadableStream;
   private heartBeatInterval: ReturnType<typeof setInterval> | null = null;
+  private logService: LogService;
 
-  constructor({ onClose, isAuthorized }: EventStreamDeps) {
+  constructor({ onCancel, isAuthorized, logService }: EventStreamDeps) {
+    this.logService = logService;
+
     this.stream = new ReadableStream({
       start: (controller) => {
         this.controller = controller;
@@ -17,19 +26,23 @@ export class EventStream {
             type: "authError",
             data: { status: 403, message: "Not authorized" },
           });
-          controller.close();
+          this.logService.warning(
+            `Request to create new Event Stream not authorized`
+          );
+          this.cleanup();
           return;
         }
 
+        this.logService.info(`Created new Event Stream`);
         this.send({ data: true, type: "heartbeat" });
         this.heartBeatInterval = setInterval(() => {
           this.send({ data: true, type: "heartbeat" });
         }, 15_000);
       },
       cancel: () => {
-        if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
-        this.controller = null;
-        onClose?.();
+        this.logService.info(`Closed or aborted Event Stream`);
+        this.cleanup();
+        onCancel?.();
       },
     });
   }
@@ -42,6 +55,11 @@ export class EventStream {
         Connection: "keep-alive",
       },
     });
+  }
+
+  cleanup() {
+    if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
+    this.controller = null;
   }
 
   send(apiEvent: APISSEvent) {
@@ -63,26 +81,42 @@ export class EventStream {
   }
 }
 
+export type SSEManagerDeps = {
+  logService: LogService;
+};
+
 export class SSEManager {
   private streams = new Set<EventStream>();
+  private logService: LogService;
 
-  createStream(args: EventStreamDeps): EventStream {
+  constructor({ logService }: SSEManagerDeps) {
+    this.logService = logService;
+  }
+
+  createStream({
+    isAuthorized,
+    onCancel,
+  }: Omit<EventStreamDeps, "logService">): EventStream {
     const stream = new EventStream({
-      onClose: () => {
+      onCancel: () => {
         this.streams.delete(stream);
-        args.onClose?.();
+        onCancel?.();
       },
-      isAuthorized: args.isAuthorized,
+      isAuthorized: isAuthorized,
+      logService: this.logService,
     });
     this.streams.add(stream);
     return stream;
   }
 
   broadcast(apiEvent: APISSEvent): void {
-    this.streams.forEach((stream) => {
+    this.logService.info(`Broadcasting message of type '${apiEvent.type}'`);
+    for (const stream of [...this.streams]) {
       stream.send(apiEvent);
-    });
+    }
   }
 }
 
-export const defaultSSEManager: SSEManager = new SSEManager();
+export const defaultSSEManager: SSEManager = new SSEManager({
+  logService: makeLogService("SSEManager"),
+});

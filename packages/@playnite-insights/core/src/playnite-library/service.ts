@@ -22,11 +22,6 @@ export const makePlayniteLibraryService = ({
         monthIndex: monthIndex,
       } as GetPlayniteLibraryMetricsResponse["gamesOwnedLast6Months"][number];
     });
-    logService.debug(
-      `Found metrics for playnite game library: \ngamesOwnedLast6Months: ${JSON.stringify(
-        gamesOwnedLast6Months
-      )}`
-    );
 
     return {
       gamesOwnedLast6Months,

@@ -1,5 +1,5 @@
 import { services } from '$lib';
-import { handleApiError } from '$lib/server/api/handle-error';
+import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
 import {
 	createGameNoteCommandSchema,
@@ -12,11 +12,10 @@ import {
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = ({ request, url }) => {
-	const lastSync = url.searchParams.get('lastSync')?.trim();
-	const ifNoneMatch = request.headers.get('if-none-match');
-
-	try {
+export const GET: RequestHandler = ({ request, url }) =>
+	withInstanceAuth(request, url, async () => {
+		const lastSync = url.searchParams.get('lastSync')?.trim();
+		const ifNoneMatch = request.headers.get('if-none-match');
 		let data: GameNote[] = [];
 		if (lastSync && isNaN(Date.parse(lastSync))) {
 			return json(
@@ -41,17 +40,14 @@ export const GET: RequestHandler = ({ request, url }) => {
 			return emptyResponse(304);
 		}
 		return json(data, { headers: { 'Cache-Control': 'no-cache', ETag: etag } });
-	} catch (err) {
-		return handleApiError(err);
-	}
-};
+	});
 
 /**
  * 201: Created
  * 409: Conflic (note already exists)
  */
-export const POST: RequestHandler = async ({ request }) => {
-	try {
+export const POST: RequestHandler = async ({ request, url }) =>
+	withInstanceAuth(request, url, async () => {
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);
@@ -62,17 +58,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		const createdNote = services.noteRepository.add(command);
 		createGameNoteResponseSchema.parse(createdNote);
 		return json(createdNote, { status: 201 });
-	} catch (err) {
-		return handleApiError(err, `POST /api/note`);
-	}
-};
+	});
 
 /**
  * 200: Updated
  * 404: Not Found
  */
-export const PUT: RequestHandler = async ({ request }) => {
-	try {
+export const PUT: RequestHandler = async ({ request, url }) =>
+	withInstanceAuth(request, url, async () => {
 		const jsonBody = await request.json();
 		const command = updateGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);
@@ -82,7 +75,4 @@ export const PUT: RequestHandler = async ({ request }) => {
 		const updatedNote = services.noteRepository.update(command);
 		updateGameNoteResponseSchema.parse(updatedNote);
 		return json(updatedNote);
-	} catch (err) {
-		return handleApiError(err);
-	}
-};
+	});

@@ -118,7 +118,7 @@ export const makeAuthenticationService = ({
         return false;
       }
 
-      logService.debug(
+      logService.info(
         `${requestDescription}: Request authorized for ${extensionDescription}`
       );
       return true;
@@ -177,9 +177,7 @@ export const makeAuthenticationService = ({
         return result;
       }
 
-      logService.debug(
-        `${requestDescription}: Request authorized for instance`
-      );
+      logService.info(`${requestDescription}: Request authorized for instance`);
       return { isAuthorized: true };
     };
 
