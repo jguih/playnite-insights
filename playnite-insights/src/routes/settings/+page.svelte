@@ -32,7 +32,6 @@
 	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
 	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
 	let registrations = $derived(extensionRegistrationStore.list);
-	$inspect(registrations);
 
 	const handleOnChangeRegistration = async (
 		registrationId: ExtensionRegistration['Id'],
