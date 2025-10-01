@@ -149,9 +149,7 @@ export const makeGameNoteRepository = (
           updatedNote.LastUpdatedAt,
           updatedNote.Id
         );
-        logService.debug(
-          `Updated note (${note.Id}): old (${note.LastUpdatedAt}), new (${updatedNote.LastUpdatedAt})`
-        );
+        logService.debug(`Updated note (${note.Id})`);
         return updatedNote;
       },
       `update(${note.Id}, ${note.Title})`
