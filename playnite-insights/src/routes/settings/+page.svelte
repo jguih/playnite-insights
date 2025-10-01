@@ -227,9 +227,9 @@
 				})}
 			</p>
 			<div class="flex max-h-[56dvh] flex-col gap-4 overflow-y-auto">
-				{#if !extensionRegistrationStore.hasLoaded || !registrations}
+				{#if !extensionRegistrationStore.hasLoaded}
 					<Loading />
-				{:else if registrations.length > 0}
+				{:else if registrations && registrations.length > 0}
 					{#each registrations as registration ((registration.Id, registration.Status))}
 						{@render registrationCard(registration)}
 					{/each}
