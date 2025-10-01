@@ -126,6 +126,7 @@
   "exporter_registration_status_pending": "Pending",
   "exporter_registration_status_rejected": "Rejected",
   "exporter_registration_status_approved": "Approved",
+  "settings_playatlas_exporter_section_no_registrations_found": "No registrations found",
   "label_exporter_registration_approve": "Approve",
   "label_exporter_registration_reject": "Reject",
   "label_exporter_registration_rekove": "Revoke",

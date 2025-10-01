@@ -236,7 +236,9 @@
 					{/each}
 				{:else}
 					<div class="bg-background-2 p-2">
-						<p class="block w-full text-center">Nenhum registro encontrado</p>
+						<p class="block w-full text-center">
+							{m.settings_playatlas_exporter_section_no_registrations_found()}
+						</p>
 					</div>
 				{/if}
 			</div>
