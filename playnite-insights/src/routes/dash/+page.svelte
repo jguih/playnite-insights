@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -14,6 +14,7 @@
 	import { DashPageViewModel } from '$lib/client/viewmodel/dashPageViewModel.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 
+	const locator = getLocatorContext();
 	const vm = new DashPageViewModel({
 		gameStore: locator.gameStore,
 		libraryMetricsStore: locator.libraryMetricsStore,

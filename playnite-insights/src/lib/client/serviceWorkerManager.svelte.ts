@@ -1,12 +1,52 @@
 import { m } from '$lib/paraglide/messages';
-import { locator } from './app-state/serviceLocator.svelte';
+import type { CompanyStore } from './app-state/stores/companyStore.svelte';
+import type { GameSessionStore } from './app-state/stores/gameSessionStore.svelte';
+import type { GameStore } from './app-state/stores/gameStore.svelte';
+import type { GenreStore } from './app-state/stores/genreStore.svelte';
+import type { LibraryMetricsStore } from './app-state/stores/libraryMetricsStore.svelte';
+import type { PlatformStore } from './app-state/stores/platformStore.svelte';
+import type { ScreenshotStore } from './app-state/stores/screenshotStore.svelte';
 import { toast } from './app-state/toast.svelte';
+
+export type ServiceWorkerManagerDeps = {
+	gameStore: GameStore;
+	companyStore: CompanyStore;
+	platformStore: PlatformStore;
+	libraryMetricsStore: LibraryMetricsStore;
+	genreStore: GenreStore;
+	gameSessionStore: GameSessionStore;
+	screenshotStore: ScreenshotStore;
+};
 
 export class ServiceWorkerManager {
 	#newVersionAvailable: boolean;
+	// Stores
+	#gameStore: GameStore;
+	#companyStore: CompanyStore;
+	#platformStore: PlatformStore;
+	#libraryMetricsStore: LibraryMetricsStore;
+	#genreStore: GenreStore;
+	#gameSessionStore: GameSessionStore;
+	#screenshotStore: ScreenshotStore;
 
-	constructor() {
+	constructor({
+		gameStore,
+		companyStore,
+		platformStore,
+		libraryMetricsStore,
+		genreStore,
+		gameSessionStore,
+		screenshotStore,
+	}: ServiceWorkerManagerDeps) {
 		this.#newVersionAvailable = $state(false);
+
+		this.#gameStore = gameStore;
+		this.#companyStore = companyStore;
+		this.#platformStore = platformStore;
+		this.#libraryMetricsStore = libraryMetricsStore;
+		this.#genreStore = genreStore;
+		this.#gameSessionStore = gameSessionStore;
+		this.#screenshotStore = screenshotStore;
 	}
 
 	private handleMessage = (event: MessageEvent) => {
@@ -14,31 +54,31 @@ export class ServiceWorkerManager {
 		const type = event.data.type;
 		switch (type) {
 			case 'GAMES_UPDATE': {
-				locator.gameStore.loadGames();
+				this.#gameStore.loadGames();
 				break;
 			}
 			case 'COMPANY_UPDATE': {
-				locator.companyStore.loadCompanies();
+				this.#companyStore.loadCompanies();
 				break;
 			}
 			case 'RECENT_SESSION_UPDATE': {
-				locator.gameSessionStore.loadRecentSessions();
+				this.#gameSessionStore.loadRecentSessions();
 				break;
 			}
 			case 'GENRE_UPDATE': {
-				locator.genreStore.loadGenres();
+				this.#genreStore.loadGenres();
 				break;
 			}
 			case 'PLATFORM_UPDATE': {
-				locator.platformStore.loadPlatforms();
+				this.#platformStore.loadPlatforms();
 				break;
 			}
 			case 'LIBRARY_METRICS_UPDATE': {
-				locator.libraryMetricsStore.loadLibraryMetrics();
+				this.#libraryMetricsStore.loadLibraryMetrics();
 				break;
 			}
 			case 'ALL_SCREENSHOT_UPDATE': {
-				locator.screenshotStore.loadScreenshots();
+				this.#screenshotStore.loadScreenshots();
 				break;
 			}
 		}

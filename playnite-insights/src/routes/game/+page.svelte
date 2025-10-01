@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte.js';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte.js';
 	import SolidAnchor from '$lib/client/components/anchors/SolidAnchor.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
@@ -11,6 +11,7 @@
 	import { ArrowLeft } from '@lucide/svelte';
 
 	const { data } = $props();
+	const locator = getLocatorContext();
 	const vm = new GamePageViewModel({
 		getGameId: () => data.gameId,
 		gameStore: locator.gameStore,

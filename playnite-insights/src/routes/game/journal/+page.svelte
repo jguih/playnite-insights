@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte.js';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte.js';
 	import { toast } from '$lib/client/app-state/toast.svelte.js';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
@@ -33,6 +33,7 @@
 	import { onMount } from 'svelte';
 
 	const { data } = $props();
+	const locator = getLocatorContext();
 	const pageVm = new GamePageViewModel({
 		getGameId: () => data.gameId,
 		gameStore: locator.gameStore,

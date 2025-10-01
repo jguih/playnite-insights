@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { XIcon } from '@lucide/svelte';
 	import type {
@@ -56,9 +56,8 @@
 
 	const MAX_RENDER_OPTIONS = 30;
 
-	const companyStore = locator.companyStore;
-	const platformStore = locator.platformStore;
-	const genreStore = locator.genreStore;
+	const locator = getLocatorContext();
+	const { companyStore, platformStore, genreStore } = locator;
 	const companyList = $derived(companyStore.companyList);
 	const platformList = $derived(platformStore.platformList);
 	const genreList = $derived(genreStore.genreList);

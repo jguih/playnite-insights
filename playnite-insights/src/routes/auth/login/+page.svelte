@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { toast } from '$lib/client/app-state/toast.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import BaseInput from '$lib/client/components/forms/BaseInput.svelte';
@@ -15,6 +15,7 @@
 	} from '@playnite-insights/lib/client';
 	import type { FormEventHandler } from 'svelte/elements';
 
+	const locator = getLocatorContext();
 	let password: string | null = $state(null);
 	let isLoading: boolean = $state(false);
 

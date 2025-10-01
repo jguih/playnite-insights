@@ -2,7 +2,12 @@ import { goto } from '$app/navigation';
 import { m } from '$lib/paraglide/messages';
 import { apiSSEventDataSchema, type APISSEventType } from '@playnite-insights/lib/client';
 import z from 'zod';
-import { locator } from '../app-state/serviceLocator.svelte';
+import type { CompanyStore } from '../app-state/stores/companyStore.svelte';
+import type { GameSessionStore } from '../app-state/stores/gameSessionStore.svelte';
+import type { GameStore } from '../app-state/stores/gameStore.svelte';
+import type { GenreStore } from '../app-state/stores/genreStore.svelte';
+import type { LibraryMetricsStore } from '../app-state/stores/libraryMetricsStore.svelte';
+import type { PlatformStore } from '../app-state/stores/platformStore.svelte';
 import { toast } from '../app-state/toast.svelte';
 
 export type EventSourceManagerListenerCallback<T extends APISSEventType> = (args: {
@@ -16,6 +21,12 @@ export type EventSourceManagerListener<T extends APISSEventType = APISSEventType
 
 export type EventSourceManagerDeps = {
 	getSessionId: () => string | null | Promise<string | null>;
+	gameStore: GameStore;
+	companyStore: CompanyStore;
+	platformStore: PlatformStore;
+	libraryMetricsStore: LibraryMetricsStore;
+	genreStore: GenreStore;
+	gameSessionStore: GameSessionStore;
 };
 
 export class EventSourceManager {
@@ -28,15 +39,37 @@ export class EventSourceManager {
 	#clearHeartbeatListener: ReturnType<typeof this.addListener> | null = null;
 	#getSessionId: EventSourceManagerDeps['getSessionId'];
 	#authFailed: boolean = false;
+	// Stores
+	#gameStore: GameStore;
+	#companyStore: CompanyStore;
+	#platformStore: PlatformStore;
+	#libraryMetricsStore: LibraryMetricsStore;
+	#genreStore: GenreStore;
+	#gameSessionStore: GameSessionStore;
 
 	static EVENT_ENDPOINT = '/api/event';
 
-	constructor({ getSessionId }: EventSourceManagerDeps) {
+	constructor({
+		getSessionId,
+		gameStore,
+		companyStore,
+		platformStore,
+		libraryMetricsStore,
+		genreStore,
+		gameSessionStore,
+	}: EventSourceManagerDeps) {
 		this.#globalListenersUnsub = [];
 		this.#listeners = new Map();
 		this.#serverConnectionStatus = $state(false);
 		this.#serverConnectionStatusText = $state(m.server_offline_message());
 		this.#getSessionId = getSessionId;
+
+		this.#gameStore = gameStore;
+		this.#companyStore = companyStore;
+		this.#platformStore = platformStore;
+		this.#libraryMetricsStore = libraryMetricsStore;
+		this.#genreStore = genreStore;
+		this.#gameSessionStore = gameSessionStore;
 	}
 
 	#resetHeartbeat() {
@@ -169,20 +202,20 @@ export class EventSourceManager {
 				type: 'gameLibraryUpdated',
 				cb: async () =>
 					await Promise.all([
-						locator.gameStore.loadGames(),
-						locator.companyStore.loadCompanies(),
-						locator.genreStore.loadGenres(),
-						locator.platformStore.loadPlatforms(),
-						locator.libraryMetricsStore.loadLibraryMetrics(),
+						this.#gameStore.loadGames(),
+						this.#companyStore.loadCompanies(),
+						this.#genreStore.loadGenres(),
+						this.#platformStore.loadPlatforms(),
+						this.#libraryMetricsStore.loadLibraryMetrics(),
 					]),
 			}),
 			this.addListener({
 				type: 'sessionOpened',
-				cb: async () => await locator.gameSessionStore.loadRecentSessions(),
+				cb: async () => await this.#gameSessionStore.loadRecentSessions(),
 			}),
 			this.addListener({
 				type: 'sessionClosed',
-				cb: async () => await locator.gameSessionStore.loadRecentSessions(),
+				cb: async () => await this.#gameSessionStore.loadRecentSessions(),
 			}),
 		);
 	};

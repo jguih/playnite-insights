@@ -2,7 +2,10 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import {
+		ClientServiceLocator,
+		setLocatorContext,
+	} from '$lib/client/app-state/serviceLocator.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
 	import { onMount } from 'svelte';
@@ -13,6 +16,9 @@
 	let appName = $derived(data.appName);
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let loading = $state<Set<string>>(new Set('all'));
+	const locator = new ClientServiceLocator();
+
+	setLocatorContext(locator);
 
 	const addLoading = (value: string) => {
 		const newLoading = new Set(loading);

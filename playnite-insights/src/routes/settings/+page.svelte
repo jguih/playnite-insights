@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
@@ -26,13 +27,12 @@
 	import type { ChangeEventHandler } from 'svelte/elements';
 
 	let currentLocale = $state(getLocale());
-	const extensionRegistrationStore = locator.extensionRegistrationStore;
-	const eventSourceManager = locator.eventSourceManager;
+	const locator = getLocatorContext();
+	const { extensionRegistrationStore, eventSourceManager } = locator;
 	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
 	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
-	let registrations = $derived(
-		extensionRegistrationStore.list ? [...extensionRegistrationStore.list] : [],
-	);
+	let registrations = $derived(extensionRegistrationStore.list);
+	$inspect(registrations);
 
 	const handleOnChangeRegistration = async (
 		registrationId: ExtensionRegistration['Id'],
@@ -45,20 +45,22 @@
 				strategy: new EmptyStrategy(),
 				body: {},
 			});
-			const index = registrations.findIndex((r) => r.Id === registrationId) ?? -1;
+			const index = registrations?.findIndex((r) => r.Id === registrationId) ?? -1;
 			if (index > -1) {
+				let newRegistrations: ExtensionRegistration[] | null = [...registrations!];
 				switch (action) {
 					case 'approve':
-						registrations![index].Status = 'trusted';
+						newRegistrations[index].Status = 'trusted';
 						break;
 					case 'revoke':
 					case 'reject':
-						registrations![index].Status = 'rejected';
+						newRegistrations[index].Status = 'rejected';
 						break;
 					case 'remove':
-						registrations = registrations.filter((r) => r.Id !== registrationId) ?? null;
+						newRegistrations = registrations?.filter((r) => r.Id !== registrationId) ?? null;
 						break;
 				}
+				registrations = newRegistrations;
 			}
 		} catch (err) {
 			handleClientErrors(
@@ -108,6 +110,10 @@
 		return () => {
 			unsub();
 		};
+	});
+
+	beforeNavigate(() => {
+		extensionRegistrationStore.loadExtensionRegistrations();
 	});
 </script>
 
@@ -222,10 +228,10 @@
 				})}
 			</p>
 			<div class="flex max-h-[56dvh] flex-col gap-4 overflow-y-auto">
-				{#if !extensionRegistrationStore.hasLoaded}
+				{#if !extensionRegistrationStore.hasLoaded || !registrations}
 					<Loading />
 				{:else if registrations.length > 0}
-					{#each registrations as registration (registration.Id)}
+					{#each registrations as registration ((registration.Id, registration.Status))}
 						{@render registrationCard(registration)}
 					{/each}
 				{:else}

@@ -5,6 +5,7 @@ import {
 	SyncQueueFactory,
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
+import { getContext, setContext } from 'svelte';
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { KeyValueRepository } from '../db/keyValueRepository.svelte';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
@@ -120,13 +121,29 @@ export class ClientServiceLocator {
 	}
 	get eventSourceManager(): EventSourceManager {
 		if (!this.#eventSourceManager) {
-			this.#eventSourceManager = new EventSourceManager({ getSessionId: this.#getSessionId });
+			this.#eventSourceManager = new EventSourceManager({
+				getSessionId: this.#getSessionId,
+				companyStore: this.companyStore,
+				gameSessionStore: this.gameSessionStore,
+				gameStore: this.gameStore,
+				genreStore: this.genreStore,
+				libraryMetricsStore: this.libraryMetricsStore,
+				platformStore: this.platformStore,
+			});
 		}
 		return this.#eventSourceManager;
 	}
 	get serviceWorkerManager(): ServiceWorkerManager {
 		if (!this.#serviceWorkerManager) {
-			this.#serviceWorkerManager = new ServiceWorkerManager();
+			this.#serviceWorkerManager = new ServiceWorkerManager({
+				companyStore: this.companyStore,
+				gameSessionStore: this.gameSessionStore,
+				gameStore: this.gameStore,
+				genreStore: this.genreStore,
+				libraryMetricsStore: this.libraryMetricsStore,
+				platformStore: this.platformStore,
+				screenshotStore: this.screenshotStore,
+			});
 		}
 		return this.#serviceWorkerManager;
 	}
@@ -257,4 +274,12 @@ export class ClientServiceLocator {
 	}
 }
 
-export const locator = new ClientServiceLocator();
+const CONTEXT_KEY = 'locator';
+
+export const setLocatorContext = (locator: ClientServiceLocator) => {
+	setContext(CONTEXT_KEY, locator);
+};
+
+export const getLocatorContext = (): ClientServiceLocator => {
+	return getContext(CONTEXT_KEY) as ClientServiceLocator;
+};

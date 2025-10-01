@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { ArrowLeft } from '@lucide/svelte';
 	import LightButton from '../../buttons/LightButton.svelte';
@@ -15,7 +15,8 @@
 		onSelectImage: (path: string) => void | Promise<void>;
 	} = $props();
 
-	const screenshotStore = locator.screenshotStore;
+	const locator = getLocatorContext();
+	const { screenshotStore } = locator;
 </script>
 
 {#if props.isOpen}

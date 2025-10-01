@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { locator } from '$lib/client/app-state/serviceLocator.svelte';
+	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import type { GameSessionStatus } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
+	const locator = getLocatorContext();
 	const vm = new RecentActivityViewModel({
 		gameStore: locator.gameStore,
 		gameSessionStore: locator.gameSessionStore,
