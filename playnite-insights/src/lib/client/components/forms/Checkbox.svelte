@@ -14,7 +14,6 @@
 			'hover:accent-primary-light-hover-fg',
 			'focus:ring-primary-light-active-fg focus:ring-2',
 		],
-		'h-4 w-4',
 		props.class,
 	]}
 />

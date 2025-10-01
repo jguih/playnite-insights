@@ -187,5 +187,5 @@ body {
 }
 
 .shadow {
-  @apply shadow-lg
+  @apply shadow-xl/15
 }

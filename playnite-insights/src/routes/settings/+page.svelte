@@ -290,22 +290,21 @@
 				{m.settings_sync_section_label_sync()}
 			</SolidButton>
 		</ConfigSection>
-		<ConfigSection title="Interface">
+		<ConfigSection title={m.settings_interface_section_title()}>
 			<label
 				class="flex flex-row-reverse items-start justify-end gap-2"
 				for="settings-hide-hidden-games"
 			>
 				<div>
-					<p class="text-sm">Desconsiderar jogos ocultos</p>
-					<small class="text-xs opacity-80">
-						Jogos ocultos da biblioteca não serão mostrados e métricas do dashboard irão
-						desconsiderá-los
+					<p>{m.settings_interface_section_label_desconsider_hidden_games()}</p>
+					<small class="text-sm opacity-80">
+						{m.settings_interface_section_description_desconsider_hidden_games()}
 					</small>
 				</div>
 				<Checkbox
 					bind:checked={settings.desconsiderHiddenGames}
 					onchange={handleSettingsChange}
-					class={['mt-1']}
+					class={['mt-[0.35rem]']}
 					id="settings-hide-hidden-games"
 				/>
 			</label>
