@@ -1,16 +1,23 @@
 import { homePageSearchParamsKeys, type FullGame } from '@playnite-insights/lib/client';
 import { FullGameFactory, makeFetchClientMock, testUtils } from '@playnite-insights/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IApplicationSettingsStore } from './applicationSettingsStore.svelte';
 import { GameStore } from './gameStore.svelte';
 
 const factory = new FullGameFactory();
 const fetchClient = makeFetchClientMock();
-let gameStore = new GameStore({ httpClient: fetchClient });
+const applicationSettingsStore: IApplicationSettingsStore = {
+	addListener: vi.fn(),
+	loadSettings: vi.fn(),
+	saveSettings: vi.fn(),
+	settingsSignal: { desconsiderHiddenGames: false },
+};
+let gameStore = new GameStore({ httpClient: fetchClient, applicationSettingsStore });
 
 describe('HomePageViewModel', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-		gameStore = new GameStore({ httpClient: fetchClient });
+		gameStore = new GameStore({ httpClient: fetchClient, applicationSettingsStore });
 	});
 
 	it.each([

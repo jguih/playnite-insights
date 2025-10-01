@@ -35,6 +35,7 @@
 	let registrations = $derived(extensionRegistrationStore.listSignal);
 	const settings = $derived(applicationSettingsStore.settingsSignal);
 	let settingsChangeTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
+	let areRegistrationsDirty = $state(false);
 
 	const handleOnChangeRegistration = async (
 		registrationId: ExtensionRegistration['Id'],
@@ -63,6 +64,7 @@
 						break;
 				}
 				registrations = newRegistrations;
+				areRegistrationsDirty = true;
 			}
 		} catch (err) {
 			handleClientErrors(
@@ -76,7 +78,7 @@
 		if (settingsChangeTimeout) clearTimeout(settingsChangeTimeout);
 		settingsChangeTimeout = setTimeout(() => {
 			applicationSettingsStore.saveSettings({ ...settings });
-		}, 1_000);
+		}, 200);
 	};
 
 	const isValidLocale = (value: string): value is Locale => {
@@ -122,8 +124,7 @@
 	});
 
 	beforeNavigate(() => {
-		extensionRegistrationStore.loadExtensionRegistrations();
-		applicationSettingsStore.saveSettings({ ...settings });
+		if (areRegistrationsDirty) extensionRegistrationStore.loadExtensionRegistrations();
 	});
 </script>
 

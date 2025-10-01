@@ -10,11 +10,18 @@ import {
 	type HomePageSortingParams,
 } from '@playnite-insights/lib/client';
 import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
+import type {
+	IApplicationSettingsStore,
+	SettingsChangeListener,
+} from './applicationSettingsStore.svelte';
 
-export type GameStoreDeps = ApiDataStoreDeps;
+export type GameStoreDeps = ApiDataStoreDeps & {
+	applicationSettingsStore: IApplicationSettingsStore;
+};
 
 export type GameListSignal = {
-	list: GetAllGamesResponse | null;
+	raw: GetAllGamesResponse | null;
+	visibleOnly: GetAllGamesResponse | null;
 	isLoading: boolean;
 	hasLoaded: boolean;
 };
@@ -30,12 +37,42 @@ export type GameStoreCacheItem = {
 export class GameStore extends ApiDataStore {
 	#dataSignal: GameListSignal;
 	#cache: Map<string, GameStoreCacheItem>;
+	#applicationSettingsStore: IApplicationSettingsStore;
 
-	constructor({ httpClient }: GameStoreDeps) {
+	constructor({ httpClient, applicationSettingsStore }: GameStoreDeps) {
 		super({ httpClient });
-		this.#dataSignal = $state({ list: null, isLoading: false, hasLoaded: false });
+		this.#applicationSettingsStore = applicationSettingsStore;
+		this.#dataSignal = $state({
+			raw: null,
+			visibleOnly: null,
+			isLoading: false,
+			hasLoaded: false,
+		});
 		this.#cache = new Map();
+
+		this.#applicationSettingsStore.addListener(this.#handleOnSettingsChange);
 	}
+
+	#handleOnSettingsChange: SettingsChangeListener = async () => {
+		if (!this.#dataSignal.raw) return;
+		this.#loadVisibleOnly(this.#dataSignal.raw);
+		this.#invalidateMemoryCache();
+	};
+
+	#loadVisibleOnly = (games: GetAllGamesResponse) => {
+		const settings = this.#applicationSettingsStore.settingsSignal;
+		if (settings.desconsiderHiddenGames) {
+			const visibleGames = [...games].filter((g) => !g.Hidden);
+			this.#dataSignal.visibleOnly = visibleGames;
+			return;
+		} else {
+			this.#dataSignal.visibleOnly = this.#dataSignal.raw;
+		}
+	};
+
+	#invalidateMemoryCache = () => {
+		this.#cache = new Map();
+	};
 
 	#makeCacheKey = (searchParams: URLSearchParams): string => {
 		return JSON.stringify(Object.fromEntries(searchParams.entries()));
@@ -141,7 +178,8 @@ export class GameStore extends ApiDataStore {
 					endpoint: '/api/game',
 					strategy: new JsonStrategy(getAllGamesResponseSchema),
 				});
-				this.#dataSignal.list = result;
+				this.#dataSignal.raw = result;
+				this.#loadVisibleOnly(result);
 				return result;
 			});
 		} catch (err) {
@@ -150,12 +188,12 @@ export class GameStore extends ApiDataStore {
 		} finally {
 			this.#dataSignal.isLoading = false;
 			this.#dataSignal.hasLoaded = true;
-			this.#cache = new Map();
+			this.#invalidateMemoryCache();
 		}
 	};
 
-	get gameList() {
-		return this.#dataSignal.list;
+	get gameList(): FullGame[] | null {
+		return this.#dataSignal.visibleOnly;
 	}
 
 	get isLoading() {
@@ -173,7 +211,7 @@ export class GameStore extends ApiDataStore {
 			return this.#cache.get(key)!;
 		}
 
-		const games = this.#dataSignal.list ? [...this.#dataSignal.list] : null;
+		const games = this.#dataSignal.visibleOnly ? [...this.#dataSignal.visibleOnly] : null;
 		if (games === null) {
 			return {
 				games: [],

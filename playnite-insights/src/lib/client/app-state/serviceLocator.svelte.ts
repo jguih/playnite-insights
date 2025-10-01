@@ -206,7 +206,10 @@ export class ClientServiceLocator {
 	// Stores
 	get gameStore(): GameStore {
 		if (!this.#gameStore) {
-			this.#gameStore = new GameStore({ httpClient: this.httpClient });
+			this.#gameStore = new GameStore({
+				httpClient: this.httpClient,
+				applicationSettingsStore: this.applicationSettingsStore,
+			});
 		}
 		return this.#gameStore;
 	}
