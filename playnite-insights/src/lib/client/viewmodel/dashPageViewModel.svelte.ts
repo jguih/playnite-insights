@@ -1,12 +1,14 @@
 import { monthNames } from '$lib/utils/date';
 import type { FullGame } from '@playnite-insights/lib/client';
+import type { ApplicationSettingsStore } from '../app-state/stores/applicationSettingsStore.svelte';
 import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import type { LibraryMetricsStore } from '../app-state/stores/libraryMetricsStore.svelte';
 import { getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';
 
-export type DashPageViewModelProps = {
+export type DashPageViewModelDeps = {
 	gameStore: GameStore;
 	libraryMetricsStore: LibraryMetricsStore;
+	applicationSettingsStore: ApplicationSettingsStore;
 };
 
 export type DashPageLibraryMetrics = {
@@ -32,10 +34,12 @@ export class DashPageViewModel {
 	#libraryMetricsStore: LibraryMetricsStore;
 	#libraryMetrics: DashPageLibraryMetrics;
 	#chartsData: DashPageChartsData | null;
+	#applicationSettingsStore: ApplicationSettingsStore;
 
-	constructor({ gameStore, libraryMetricsStore }: DashPageViewModelProps) {
+	constructor({ gameStore, libraryMetricsStore, applicationSettingsStore }: DashPageViewModelDeps) {
 		this.#gameStore = gameStore;
 		this.#libraryMetricsStore = libraryMetricsStore;
+		this.#applicationSettingsStore = applicationSettingsStore;
 
 		this.#libraryMetrics = $derived.by(() => {
 			return this.getLibraryMetrics();
@@ -70,15 +74,23 @@ export class DashPageViewModel {
 
 	private getChartsData = (): DashPageChartsData => {
 		const libraryMetrics = this.#libraryMetricsStore.data;
+		const settings = this.#applicationSettingsStore.settingsSignal;
 		const data = libraryMetrics?.gamesOwnedLast6Months ?? null;
 		const gamesOwnedLast6Months: DashPageChartsData['gamesOwnedLast6Months'] = {
 			count: [],
 			months: [],
 		};
-		data?.forEach((d) => {
-			gamesOwnedLast6Months.count.push(d.count);
-			gamesOwnedLast6Months.months.push(monthNames[d.monthIndex].substring(0, 3) + '.');
-		});
+		if (settings.desconsiderHiddenGames) {
+			data?.visibleOnly.forEach((d) => {
+				gamesOwnedLast6Months.count.push(d.count);
+				gamesOwnedLast6Months.months.push(monthNames[d.monthIndex].substring(0, 3) + '.');
+			});
+		} else {
+			data?.all.forEach((d) => {
+				gamesOwnedLast6Months.count.push(d.count);
+				gamesOwnedLast6Months.months.push(monthNames[d.monthIndex].substring(0, 3) + '.');
+			});
+		}
 
 		return {
 			gamesOwnedLast6Months,

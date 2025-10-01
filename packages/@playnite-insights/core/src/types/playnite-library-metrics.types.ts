@@ -11,5 +11,8 @@ export type PlayniteLibraryMetricsRepository = {
    *
    * @returns An array with 0 to 6 numbers representing total games owned over the last 6 months.
    */
-  getGamesOwnedLastNMonths: (n?: number) => number[];
+  getGamesOwnedLastNMonths: (n?: number) => {
+    all: number[];
+    visibleOnly: number[];
+  };
 };

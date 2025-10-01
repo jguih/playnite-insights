@@ -77,28 +77,40 @@ export const makePlayniteLibraryMetricsRepository = (
       return repositoryCall(
         logService,
         () => {
-          const query = `
-          SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
+          const getQuery = (column: "TotalGames" | "VisibleTotalGames") => `
+          SELECT MAX(${column}) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
           FROM ${TABLE_NAME}
           WHERE Timestamp >= datetime('now', ?)
           GROUP BY yearMonth
           ORDER BY yearMonth DESC;
         `;
-          const stmt = getDb().prepare(query);
-          const result = stmt.all(`-${n} months`);
-          const data: number[] = new Array(6).fill(0);
+          const allGamesResult = getDb()
+            .prepare(getQuery("TotalGames"))
+            .all(`-${n} months`);
+          const visibleGamesResult = getDb()
+            .prepare(getQuery("VisibleTotalGames"))
+            .all(`-${n} months`);
+          const allGames: number[] = new Array(6).fill(0);
+          const visibleGames: number[] = new Array(6).fill(0);
           let i = 5;
-          for (const entry of result) {
+          for (const entry of allGamesResult) {
             const value = entry.totalGamesOwned as number;
-            data[i] = value;
+            allGames[i] = value;
+            i--;
+          }
+          i = 5;
+          for (const entry of visibleGamesResult) {
+            const value = entry.totalGamesOwned as number;
+            visibleGames[i] = value;
             i--;
           }
           logService.debug(
-            `Found total games owned over last 6 months: ${JSON.stringify(
-              data
-            )}`
+            `Found total games owned over last 6 months: ${JSON.stringify({
+              all: allGames,
+              visibleOnly: visibleGames,
+            })}`
           );
-          return data;
+          return { all: allGames, visibleOnly: visibleGames };
         },
         `getGamesOwnedLastNMonths(${n})`
       );

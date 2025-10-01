@@ -14,17 +14,28 @@ export const makePlayniteLibraryService = ({
 
     const gamesOwned =
       playniteLibraryMetricsRepository.getGamesOwnedLastNMonths(6);
-    const gamesOwnedLast6Months = gamesOwned.map((n, i) => {
-      const offset = gamesOwned.length - 1 - i;
+    const gamesOwnedLast6Months = gamesOwned.all.map((n, i) => {
+      const offset = gamesOwned.all.length - 1 - i;
       const monthIndex = (currentMonth - offset + 12) % 12;
       return {
         count: n,
         monthIndex: monthIndex,
-      } as GetPlayniteLibraryMetricsResponse["gamesOwnedLast6Months"][number];
+      } as GetPlayniteLibraryMetricsResponse["gamesOwnedLast6Months"]["all"][number];
+    });
+    const visibleGamesOwnedLast6Months = gamesOwned.visibleOnly.map((n, i) => {
+      const offset = gamesOwned.visibleOnly.length - 1 - i;
+      const monthIndex = (currentMonth - offset + 12) % 12;
+      return {
+        count: n,
+        monthIndex: monthIndex,
+      } as GetPlayniteLibraryMetricsResponse["gamesOwnedLast6Months"]["visibleOnly"][number];
     });
 
     return {
-      gamesOwnedLast6Months,
+      gamesOwnedLast6Months: {
+        all: gamesOwnedLast6Months,
+        visibleOnly: visibleGamesOwnedLast6Months,
+      },
     };
   };
   return { getLibraryMetrics };

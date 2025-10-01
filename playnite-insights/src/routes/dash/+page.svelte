@@ -18,6 +18,7 @@
 	const vm = new DashPageViewModel({
 		gameStore: locator.gameStore,
 		libraryMetricsStore: locator.libraryMetricsStore,
+		applicationSettingsStore: locator.applicationSettingsStore,
 	});
 </script>
 

@@ -9,7 +9,7 @@ import type {
   GenreRepository,
   PlatformRepository,
   PlayniteGameRepository,
-  PlayniteLibrarySyncRepository,
+  PlayniteLibraryMetricsRepository,
   SignatureService,
 } from "../src/types";
 import { CompletionStatusRepository } from "../src/types/completion-status.types";
@@ -77,11 +77,11 @@ export const makeMocks = () => {
     findAllBy: vi.fn(),
   } satisfies GameSessionRepository;
 
-  const playniteLibrarySyncRepository = {
+  const playniteLibraryMetricsRepository = {
     add: vi.fn(),
     getTotalPlaytimeOverLast6Months: vi.fn(),
     getGamesOwnedLastNMonths: vi.fn(),
-  } satisfies PlayniteLibrarySyncRepository;
+  } satisfies PlayniteLibraryMetricsRepository;
 
   const extensionRegistrationRepository = {
     add: vi.fn(),
@@ -139,6 +139,8 @@ export const makeMocks = () => {
 
   const cryptographyService = {
     hashPasswordAsync: vi.fn(),
+    createSessionId: vi.fn(),
+    verifyPassword: vi.fn(),
   } satisfies CryptographyService;
 
   return {
@@ -148,7 +150,7 @@ export const makeMocks = () => {
     libraryManifestService,
     signatureService,
     playniteGameRepository,
-    playniteLibrarySyncRepository,
+    playniteLibraryMetricsRepository,
     gameSessionRepository,
     extensionRegistrationRepository,
     completionStatusRepository,
