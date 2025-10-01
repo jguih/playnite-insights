@@ -8,6 +8,7 @@
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
 	import Divider from '$lib/client/components/Divider.svelte';
+	import Checkbox from '$lib/client/components/forms/Checkbox.svelte';
 	import Select from '$lib/client/components/forms/Select.svelte';
 	import Header from '$lib/client/components/header/Header.svelte';
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
@@ -28,10 +29,12 @@
 
 	let currentLocale = $state(getLocale());
 	const locator = getLocatorContext();
-	const { extensionRegistrationStore, eventSourceManager } = locator;
+	const { extensionRegistrationStore, eventSourceManager, applicationSettingsStore } = locator;
 	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
 	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
-	let registrations = $derived(extensionRegistrationStore.list);
+	let registrations = $derived(extensionRegistrationStore.listSignal);
+	const settings = $derived(applicationSettingsStore.settingsSignal);
+	let settingsChangeTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
 
 	const handleOnChangeRegistration = async (
 		registrationId: ExtensionRegistration['Id'],
@@ -67,6 +70,13 @@
 				`[handleOnRevokeRegistration] failed to ${action} registration /api/extension-registration/${registrationId}/${action}`,
 			);
 		}
+	};
+
+	const handleSettingsChange = () => {
+		if (settingsChangeTimeout) clearTimeout(settingsChangeTimeout);
+		settingsChangeTimeout = setTimeout(() => {
+			applicationSettingsStore.saveSettings({ ...settings });
+		}, 1_000);
 	};
 
 	const isValidLocale = (value: string): value is Locale => {
@@ -113,6 +123,7 @@
 
 	beforeNavigate(() => {
 		extensionRegistrationStore.loadExtensionRegistrations();
+		applicationSettingsStore.saveSettings({ ...settings });
 	});
 </script>
 
@@ -227,7 +238,7 @@
 				})}
 			</p>
 			<div class="flex max-h-[56dvh] flex-col gap-4 overflow-y-auto">
-				{#if !extensionRegistrationStore.hasLoaded}
+				{#if !extensionRegistrationStore.hasLoadedSignal}
 					<Loading />
 				{:else if registrations && registrations.length > 0}
 					{#each registrations as registration ((registration.Id, registration.Status))}
@@ -277,6 +288,26 @@
 			>
 				{m.settings_sync_section_label_sync()}
 			</SolidButton>
+		</ConfigSection>
+		<ConfigSection title="Interface">
+			<label
+				class="flex flex-row-reverse items-start justify-end gap-2"
+				for="settings-hide-hidden-games"
+			>
+				<div>
+					<p class="text-sm">Desconsiderar jogos ocultos</p>
+					<small class="text-xs opacity-80">
+						Jogos ocultos da biblioteca não serão mostrados e métricas do dashboard irão
+						desconsiderá-los
+					</small>
+				</div>
+				<Checkbox
+					bind:checked={settings.desconsiderHiddenGames}
+					onchange={handleSettingsChange}
+					class={['mt-1']}
+					id="settings-hide-hidden-games"
+				/>
+			</label>
 		</ConfigSection>
 	</Main>
 	<BottomNav>

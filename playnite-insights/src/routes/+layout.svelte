@@ -43,6 +43,13 @@
 		} finally {
 			removeLoading('instanceRegistered');
 		}
+		try {
+			addLoading('applicationSettings');
+			await locator.applicationSettingsStore.loadSettings();
+		} catch {
+		} finally {
+			removeLoading('applicationSettings');
+		}
 		loading = new Set();
 	};
 

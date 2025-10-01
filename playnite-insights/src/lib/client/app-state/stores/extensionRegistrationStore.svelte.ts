@@ -43,19 +43,15 @@ export class ExtensionRegistrationStore extends ApiDataStore {
 		}
 	};
 
-	get list() {
+	get listSignal() {
 		return this.#dataSignal.list;
 	}
 
-	get isLoading() {
+	get isLoadingSignal() {
 		return this.#dataSignal.isLoading;
 	}
 
-	get hasLoaded() {
+	get hasLoadedSignal() {
 		return this.#dataSignal.hasLoaded;
-	}
-
-	get signal() {
-		return this.#dataSignal;
 	}
 }

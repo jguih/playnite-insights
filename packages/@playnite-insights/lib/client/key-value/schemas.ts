@@ -1,5 +1,9 @@
 import z from "zod";
 
+export const applicationSettingsSchema = z.object({
+  desconsiderHiddenGames: z.boolean(),
+});
+
 export const keyValueSchema = z.discriminatedUnion("Key", [
   z.object({
     Key: z.literal("instance-registered"),
@@ -8,5 +12,9 @@ export const keyValueSchema = z.discriminatedUnion("Key", [
   z.object({
     Key: z.literal("session-id"),
     Value: z.string(),
+  }),
+  z.object({
+    Key: z.literal("application-settings"),
+    Value: applicationSettingsSchema,
   }),
 ]);
