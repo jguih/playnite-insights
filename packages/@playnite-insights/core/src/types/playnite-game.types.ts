@@ -14,7 +14,7 @@ export type PlayniteGameRepository = {
   getById: (id: string) => PlayniteGame | null;
   getManifestData: () => GameManifestData | null;
   getTotal: (filters?: GameFilters) => number;
-  getTotalPlaytimeSeconds: () => number;
+  getTotalPlaytimeSeconds: (filters?: GameFilters) => number;
   all: () => FullGame[];
   upsertMany: (games: PlayniteGame[]) => void;
   updateManyGenres: (

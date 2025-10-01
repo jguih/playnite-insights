@@ -1,11 +1,7 @@
-export type PlayniteLibrarySyncRepository = {
-  /**
-   * Creates a new entry for playnite_library_sync
-   * @param totalPlaytimeSeconds
-   * @param totalGames
-   * @returns
-   */
-  add: (totalPlaytimeSeconds: number, totalGames: number) => boolean;
+import type { PlayniteLibraryMetrics } from "@playnite-insights/lib/client";
+
+export type PlayniteLibraryMetricsRepository = {
+  add: (playniteLibraryMetrics: PlayniteLibraryMetrics) => boolean;
   /**
    *
    * @returns An array with 0 to 6 numbers representing the total playtime in seconds over the last 6 months.

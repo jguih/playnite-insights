@@ -17,8 +17,9 @@ export type GameSortBy = (typeof gameSortBy)[number];
 export type GameSortOrder = (typeof gameSortOrder)[number];
 
 export type GameFilters = {
-  query: string | null;
-  installed: string | null;
+  query?: string;
+  installed?: boolean;
+  hidden?: boolean;
 };
 
 export type GameSorting = {

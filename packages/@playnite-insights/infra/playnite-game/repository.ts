@@ -3,7 +3,9 @@ import {
   fullGameRawSchema,
   playniteGameSchema,
   type FullGame,
+  type GameFilters,
   type GameManifestData,
+  type GameSorting,
 } from "@playnite-insights/lib/client";
 import z from "zod";
 import {
@@ -11,7 +13,6 @@ import {
   repositoryCall,
   type BaseRepositoryDeps,
 } from "../repository/base";
-import { getWhereClauseAndParamsFromFilters } from "./filtering-and-sorting";
 
 type PlayniteGameRepositoryDeps = BaseRepositoryDeps;
 
@@ -24,6 +25,56 @@ export const makePlayniteGameRepository = (
 ): PlayniteGameRepository => {
   const { getDb, logService } = { ...defaultDeps, ...deps };
 
+  const _getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
+    const where: string[] = [];
+    const params: string[] = [];
+
+    if (!filters) {
+      return { where: "", params };
+    }
+
+    if (filters.query !== undefined) {
+      where.push(`LOWER(Name) LIKE ?`);
+      params.push(`%${filters.query.toLowerCase()}%`);
+    }
+
+    if (filters.installed !== undefined) {
+      where.push(`IsInstalled = ?`);
+      params.push(+filters.installed);
+    }
+
+    if (filters.hidden != undefined) {
+      where.push(`Hidden = ?`);
+      params.push(+filters.hidden);
+    }
+
+    return {
+      where: where.length > 0 ? `WHERE ${where.join(" AND ")}` : "",
+      params,
+    };
+  };
+
+  const _getOrderByClause = (sorting?: GameSorting): string => {
+    if (!sorting) return ` ORDER BY Id ASC`;
+    const order = sorting.order.toUpperCase();
+    switch (sorting.by) {
+      case "IsInstalled": {
+        return ` ORDER BY IsInstalled ${order}, Id ASC`;
+      }
+      case "Added": {
+        return ` ORDER BY Added ${order}, Id ASC`;
+      }
+      case "LastActivity": {
+        return ` ORDER BY LastActivity ${order}, Id ASC`;
+      }
+      case "Playtime": {
+        return ` ORDER BY Playtime ${order}, Id ASC`;
+      }
+      default:
+        return ` ORDER BY Id ASC`;
+    }
+  };
+
   const getTotal: PlayniteGameRepository["getTotal"] = (filters) => {
     return repositoryCall(
       logService,
@@ -34,12 +85,12 @@ export const makePlayniteGameRepository = (
             COUNT(*) AS Total
           FROM playnite_game pg
         `;
-        const { where, params } = getWhereClauseAndParamsFromFilters(filters);
+        const { where, params } = _getWhereClauseAndParamsFromFilters(filters);
         query += where;
         const total = (db.prepare(query).get(...params)?.Total as number) ?? 0;
         return total;
       },
-      `getTotal(${filters ? JSON.stringify(filters) : ""})`
+      `getTotal()`
     );
   };
 
@@ -407,14 +458,17 @@ export const makePlayniteGameRepository = (
   };
 
   const getTotalPlaytimeSeconds: PlayniteGameRepository["getTotalPlaytimeSeconds"] =
-    () => {
+    (filters) => {
       return repositoryCall(
         logService,
         () => {
           const db = getDb();
-          const query = `SELECT SUM(Playtime) as totalPlaytimeSeconds FROM playnite_game;`;
+          let query = `SELECT SUM(Playtime) as totalPlaytimeSeconds FROM playnite_game `;
+          const { where, params } =
+            _getWhereClauseAndParamsFromFilters(filters);
+          query += where;
           const stmt = db.prepare(query);
-          const result = stmt.get();
+          const result = stmt.get(...params);
           if (!result) return 0;
           const data = result.totalPlaytimeSeconds as number;
           logService.debug(`Calculated total playtime: ${data} seconds`);

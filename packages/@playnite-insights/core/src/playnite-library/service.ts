@@ -6,14 +6,14 @@ import type {
 
 export const makePlayniteLibraryService = ({
   logService,
-  playniteLibrarySyncRepository,
+  playniteLibraryMetricsRepository,
 }: PlayniteLibraryServiceDeps): PlayniteLibraryService => {
   const getLibraryMetrics: PlayniteLibraryService["getLibraryMetrics"] = () => {
     const now = new Date();
     const currentMonth = now.getMonth(); // 0–11
 
     const gamesOwned =
-      playniteLibrarySyncRepository.getGamesOwnedLastNMonths(6);
+      playniteLibraryMetricsRepository.getGamesOwnedLastNMonths(6);
     const gamesOwnedLast6Months = gamesOwned.map((n, i) => {
       const offset = gamesOwned.length - 1 - i;
       const monthIndex = (currentMonth - offset + 12) % 12;

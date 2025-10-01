@@ -8,7 +8,7 @@ import type {
   GenreRepository,
   PlatformRepository,
   PlayniteGameRepository,
-  PlayniteLibrarySyncRepository,
+  PlayniteLibraryMetricsRepository,
 } from "../types";
 import { type CompletionStatusRepository } from "../types/completion-status.types";
 import { type FileSystemService } from "../types/file-system.types";
@@ -19,7 +19,7 @@ import { type StreamUtilsService } from "../types/stream-utils.types";
 export type PlayniteLibraryImporterServiceDeps = {
   playniteGameRepository: PlayniteGameRepository;
   libraryManifestService: LibraryManifestService;
-  playniteLibrarySyncRepository: PlayniteLibrarySyncRepository;
+  playniteLibraryMetricsRepository: PlayniteLibraryMetricsRepository;
   gameSessionRepository: GameSessionRepository;
   fileSystemService: FileSystemService;
   streamUtilsService: StreamUtilsService;

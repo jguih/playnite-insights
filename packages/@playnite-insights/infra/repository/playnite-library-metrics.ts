@@ -1,35 +1,43 @@
-import type { PlayniteLibrarySyncRepository } from "@playnite-insights/core";
+import type { PlayniteLibraryMetricsRepository } from "@playnite-insights/core";
 import {
   type BaseRepositoryDeps,
   getDefaultRepositoryDeps,
   repositoryCall,
 } from "./base";
 
-export const makePlayniteLibrarySyncRepository = (
+export const makePlayniteLibraryMetricsRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
-): PlayniteLibrarySyncRepository => {
+): PlayniteLibraryMetricsRepository => {
   const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+  const TABLE_NAME = "playnite_library_metrics";
 
-  const add = (totalPlaytimeSeconds: number, totalGames: number) => {
+  const add: PlayniteLibraryMetricsRepository["add"] = (newMetrics) => {
     return repositoryCall(
       logService,
       () => {
         const db = getDb();
         const now = new Date().toISOString();
         const query = `
-        INSERT INTO playnite_library_sync
-          (Timestamp, TotalPlaytimeSeconds, TotalGames)
-        VALUES
-          (?, ?, ?);
+        INSERT INTO ${TABLE_NAME} (
+          Timestamp, 
+          TotalPlaytimeSeconds, 
+          TotalGames,
+          VisibleTotalPlaytimeSeconds,
+          VisibleTotalGames
+        ) VALUES
+          (?, ?, ?, ?, ?);
       `;
         const stmt = db.prepare(query);
-        stmt.run(now, totalPlaytimeSeconds, totalGames);
-        logService.debug(
-          `Created library sync entry (totalPlaytime: ${totalPlaytimeSeconds}s, totalGames: ${totalGames})`
+        stmt.run(
+          now,
+          newMetrics.TotalPlaytimeSeconds,
+          newMetrics.TotalGames,
+          newMetrics.VisibleTotalPlaytimeSeconds,
+          newMetrics.VisibleTotalGames
         );
         return true;
       },
-      `add(${totalPlaytimeSeconds}, ${totalGames})`
+      `add(${newMetrics.TotalPlaytimeSeconds}, ${newMetrics.TotalGames})`
     );
   };
 
@@ -40,7 +48,7 @@ export const makePlayniteLibrarySyncRepository = (
         const query = `
           SELECT totalPlaytimeSeconds FROM (
             SELECT MAX(TotalPlaytimeSeconds) as totalPlaytimeSeconds, strftime('%Y-%m', Timestamp) as yearMonth
-            FROM playnite_library_sync
+            FROM ${TABLE_NAME}
             WHERE Timestamp >= datetime('now', '-6 months')
             GROUP BY yearMonth
             ORDER BY yearMonth
@@ -64,14 +72,14 @@ export const makePlayniteLibrarySyncRepository = (
     );
   };
 
-  const getGamesOwnedLastNMonths: PlayniteLibrarySyncRepository["getGamesOwnedLastNMonths"] =
+  const getGamesOwnedLastNMonths: PlayniteLibraryMetricsRepository["getGamesOwnedLastNMonths"] =
     (n = 6) => {
       return repositoryCall(
         logService,
         () => {
           const query = `
           SELECT MAX(TotalGames) AS totalGamesOwned, strftime('%Y-%m', Timestamp) AS yearMonth
-          FROM playnite_library_sync
+          FROM ${TABLE_NAME}
           WHERE Timestamp >= datetime('now', ?)
           GROUP BY yearMonth
           ORDER BY yearMonth DESC;
@@ -103,5 +111,5 @@ export const makePlayniteLibrarySyncRepository = (
   };
 };
 
-export const defaultPlayniteLibrarySyncRepository: PlayniteLibrarySyncRepository =
-  makePlayniteLibrarySyncRepository();
+export const defaultPlayniteLibraryMetricsRepository: PlayniteLibraryMetricsRepository =
+  makePlayniteLibraryMetricsRepository();

@@ -6,4 +6,4 @@ export * from "./image";
 export * from "./instance-authentication";
 export * from "./instance-sessions";
 export * from "./platform";
-export * from "./playnite-library-sync";
+export * from "./playnite-library-metrics";

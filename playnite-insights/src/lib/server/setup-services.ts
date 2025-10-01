@@ -25,7 +25,7 @@ import {
 	makePlatformRepository,
 	makePlayniteGameRepository,
 	makePlayniteHostClient,
-	makePlayniteLibrarySyncRepository,
+	makePlayniteLibraryMetricsRepository,
 	makeSignatureService,
 	makeStreamUtilsService,
 	makeUploadService,
@@ -46,8 +46,8 @@ export const setupServices = () => {
 	const playniteGameRepository = makePlayniteGameRepository({
 		logService: makeLogService('PlayniteGameRepository'),
 	});
-	const playniteLibrarySyncRepository = makePlayniteLibrarySyncRepository({
-		logService: makeLogService('PlayniteLibrarySyncRepository'),
+	const playniteLibraryMetricsRepository = makePlayniteLibraryMetricsRepository({
+		logService: makeLogService('PlayniteLibraryMetricsRepository'),
 	});
 	const gameSessionRepository = makeGameSessionRepository({
 		logService: makeLogService('GameSessionRepository'),
@@ -72,7 +72,7 @@ export const setupServices = () => {
 		platformRepository,
 		companyRepository,
 		playniteGameRepository,
-		playniteLibrarySyncRepository,
+		playniteLibraryMetricsRepository,
 		genreRepository,
 		gameSessionRepository,
 		noteRepository,

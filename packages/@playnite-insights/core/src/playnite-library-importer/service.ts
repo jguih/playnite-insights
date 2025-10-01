@@ -5,6 +5,7 @@ import {
   type IncomingPlayniteGameDTO,
   type Platform,
   type PlayniteGame,
+  type PlayniteLibraryMetrics,
 } from "@playnite-insights/lib/client";
 import busboy from "busboy";
 import { createHash } from "crypto";
@@ -20,7 +21,7 @@ import {
 export const makePlayniteLibraryImporterService = ({
   playniteGameRepository,
   libraryManifestService,
-  playniteLibrarySyncRepository,
+  playniteLibraryMetricsRepository,
   gameSessionRepository,
   fileSystemService,
   streamUtilsService,
@@ -175,13 +176,24 @@ export const makePlayniteLibraryImporterService = ({
       }
 
       if (totalGamesToChange > 0) {
-        const totalPlaytimeHours =
-          playniteGameRepository.getTotalPlaytimeSeconds();
-        const totalGamesInLib = playniteGameRepository.getTotal();
-        playniteLibrarySyncRepository.add(
-          totalPlaytimeHours ?? 0,
-          totalGamesInLib ?? 0
-        );
+        const totalPlaytime = playniteGameRepository.getTotalPlaytimeSeconds();
+        const visibleTotalPlaytime =
+          playniteGameRepository.getTotalPlaytimeSeconds({
+            hidden: false,
+          });
+        const totalGames = playniteGameRepository.getTotal();
+        const visibleTotalGames = playniteGameRepository.getTotal({
+          hidden: false,
+        });
+        const newMetrics: PlayniteLibraryMetrics = {
+          Id: 0,
+          Timestamp: new Date().toISOString(),
+          TotalGames: totalGames,
+          TotalPlaytimeSeconds: totalPlaytime,
+          VisibleTotalGames: visibleTotalGames,
+          VisibleTotalPlaytimeSeconds: visibleTotalPlaytime,
+        };
+        playniteLibraryMetricsRepository.add(newMetrics);
         await libraryManifestService.write();
       }
 
@@ -189,10 +201,7 @@ export const makePlayniteLibraryImporterService = ({
       logService.success(`Completed library sync in ${duration.toFixed(1)}ms`);
     } catch (error) {
       const duration = performance.now() - start;
-      logService.error(
-        `Library sync failed after ${duration.toFixed(1)}ms`,
-        error as Error
-      );
+      logService.error(`Library sync failed after ${duration.toFixed(1)}ms`);
       throw error;
     }
   };
