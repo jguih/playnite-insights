@@ -5,7 +5,6 @@ import {
 	type GameSortBy,
 	type GameSortOrder,
 } from '@playnite-insights/lib/client';
-import { locator } from '../app-state/serviceLocator.svelte';
 import type { GameStore, GameStoreCacheItem } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 
@@ -45,9 +44,9 @@ export class HomePageViewModel {
 
 		this.#gamesCacheItem = $derived.by(() => {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const _ = locator.gameStore.gameList;
+			const _ = gameStore.gameList;
 			const searchParams = getPageSearchParams();
-			return locator.gameStore.getfilteredGames(searchParams);
+			return gameStore.getfilteredGames(searchParams);
 		});
 
 		this.#pageParams = $derived.by(() => {

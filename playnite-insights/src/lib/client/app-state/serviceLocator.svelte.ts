@@ -16,6 +16,7 @@ import { SyncQueue } from '../sync-queue/syncQueue';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { IndexedDbManager, type IndexedDbSignal } from './indexeddbManager.svelte';
 import { CompanyStore } from './stores/companyStore.svelte';
+import { ExtensionRegistrationStore } from './stores/extensionRegistrationStore.svelte';
 import { GameNoteStore } from './stores/gameNoteStore.svelte';
 import { GameSessionStore } from './stores/gameSessionStore.svelte';
 import { GameStore } from './stores/gameStore.svelte';
@@ -45,6 +46,7 @@ export class ClientServiceLocator {
 	#genreStore: GenreStore | null = null;
 	#platformStore: PlatformStore | null = null;
 	#screenshotStore: ScreenshotStore | null = null;
+	#extensionRegistrationStore: ExtensionRegistrationStore | null = null;
 	// Repositories
 	#gameNoteRepository: GameNoteRepository | null = null;
 	#syncQueueRepository: SyncQueueRepository | null = null;
@@ -244,6 +246,14 @@ export class ClientServiceLocator {
 			this.#screenshotStore = new ScreenshotStore({ httpClient: this.httpClient });
 		}
 		return this.#screenshotStore;
+	}
+	get extensionRegistrationStore(): ExtensionRegistrationStore {
+		if (!this.#extensionRegistrationStore) {
+			this.#extensionRegistrationStore = new ExtensionRegistrationStore({
+				httpClient: this.httpClient,
+			});
+		}
+		return this.#extensionRegistrationStore;
 	}
 }
 

@@ -14,6 +14,8 @@
 		onClose: () => void | Promise<void>;
 		onSelectImage: (path: string) => void | Promise<void>;
 	} = $props();
+
+	const screenshotStore = locator.screenshotStore;
 </script>
 
 {#if props.isOpen}
@@ -35,11 +37,11 @@
 			<div></div>
 		</AsideHeader>
 		<AsideBody>
-			{#if !locator.screenshotStore.hasLoaded || !locator.screenshotStore.screenshotList}
+			{#if !screenshotStore.hasLoaded || !screenshotStore.screenshotList}
 				<Loading />
 			{:else}
 				<ul class={['grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4']}>
-					{#each locator.screenshotStore.screenshotList as screenshot (screenshot.Id)}
+					{#each screenshotStore.screenshotList as screenshot (screenshot.Id)}
 						<li>
 							<LightButton
 								class={['p-0! w-full']}

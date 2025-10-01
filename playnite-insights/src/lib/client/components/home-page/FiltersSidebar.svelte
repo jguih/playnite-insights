@@ -56,9 +56,12 @@
 
 	const MAX_RENDER_OPTIONS = 30;
 
-	const companyList = $derived(locator.companyStore.companyList);
-	const platformList = $derived(locator.platformStore.platformList);
-	const genreList = $derived(locator.genreStore.genreList);
+	const companyStore = locator.companyStore;
+	const platformStore = locator.platformStore;
+	const genreStore = locator.genreStore;
+	const companyList = $derived(companyStore.companyList);
+	const platformList = $derived(platformStore.platformList);
+	const genreList = $derived(genreStore.genreList);
 
 	let developerSearchFilter: string | null = $state(null);
 	let developerListFiltered = $derived.by(() => {

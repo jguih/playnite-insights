@@ -19,41 +19,20 @@
 	import { AlertCircle, CheckCircle } from '@lucide/svelte';
 	import {
 		EmptyStrategy,
-		getAllExtensionRegistrationsSchema,
 		HttpClientNotSetError,
-		JsonStrategy,
 		type ExtensionRegistration,
 	} from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 	import type { ChangeEventHandler } from 'svelte/elements';
 
 	let currentLocale = $state(getLocale());
-	let serverConnectionStatusText = $derived(locator.eventSourceManager.serverConnectionStatusText);
-	let serverConnectionStatus = $derived(locator.eventSourceManager.serverConnectionStatus);
-	let extensionRegistrationsSignal = $state<{
-		isLoading: boolean;
-		registrations: ExtensionRegistration[] | null;
-	}>({ isLoading: false, registrations: null });
-
-	const loadExtensionRegistrations = async () => {
-		if (!locator.serverHeartbeat.isAlive) return;
-		try {
-			if (!locator.httpClient) throw new HttpClientNotSetError();
-			extensionRegistrationsSignal.isLoading = true;
-			const result = await locator.httpClient.httpGetAsync({
-				endpoint: '/api/extension-registration',
-				strategy: new JsonStrategy(getAllExtensionRegistrationsSchema),
-			});
-			extensionRegistrationsSignal.registrations = result.registrations;
-		} catch (err) {
-			handleClientErrors(
-				err,
-				`[loadExtensionRegistrations] failed to fetch /api/extension-registration`,
-			);
-		} finally {
-			extensionRegistrationsSignal.isLoading = false;
-		}
-	};
+	const extensionRegistrationStore = locator.extensionRegistrationStore;
+	const eventSourceManager = locator.eventSourceManager;
+	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
+	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
+	let registrations = $derived(
+		extensionRegistrationStore.list ? [...extensionRegistrationStore.list] : [],
+	);
 
 	const handleOnChangeRegistration = async (
 		registrationId: ExtensionRegistration['Id'],
@@ -66,21 +45,18 @@
 				strategy: new EmptyStrategy(),
 				body: {},
 			});
-			const index =
-				extensionRegistrationsSignal.registrations?.findIndex((r) => r.Id === registrationId) ?? -1;
+			const index = registrations.findIndex((r) => r.Id === registrationId) ?? -1;
 			if (index > -1) {
 				switch (action) {
 					case 'approve':
-						extensionRegistrationsSignal.registrations![index].Status = 'trusted';
+						registrations![index].Status = 'trusted';
 						break;
 					case 'revoke':
 					case 'reject':
-						extensionRegistrationsSignal.registrations![index].Status = 'rejected';
+						registrations![index].Status = 'rejected';
 						break;
 					case 'remove':
-						extensionRegistrationsSignal.registrations =
-							extensionRegistrationsSignal.registrations?.filter((r) => r.Id !== registrationId) ??
-							null;
+						registrations = registrations.filter((r) => r.Id !== registrationId) ?? null;
 						break;
 				}
 			}
@@ -115,19 +91,17 @@
 
 	const handleSSENewRegistration = (newRegistration: ExtensionRegistration) => {
 		let newRegistrations: ExtensionRegistration[] = [newRegistration];
-		const index =
-			extensionRegistrationsSignal.registrations?.findIndex((r) => r.Id === newRegistration.Id) ??
-			-1;
+		const index = registrations?.findIndex((r) => r.Id === newRegistration.Id) ?? -1;
 		if (index > -1) {
-			newRegistrations = [...extensionRegistrationsSignal.registrations!];
+			newRegistrations = [...registrations!];
 			newRegistrations[index] = newRegistration;
 		}
-		extensionRegistrationsSignal.registrations = newRegistrations;
+		registrations = newRegistrations;
 	};
 
 	onMount(() => {
-		loadExtensionRegistrations();
-		const unsub = locator.eventSourceManager.addListener({
+		extensionRegistrationStore.loadExtensionRegistrations();
+		const unsub = eventSourceManager.addListener({
 			type: 'createdExtensionRegistration',
 			cb: ({ data }) => handleSSENewRegistration(data),
 		});
@@ -248,10 +222,10 @@
 				})}
 			</p>
 			<div class="flex max-h-[56dvh] flex-col gap-4 overflow-y-auto">
-				{#if extensionRegistrationsSignal.isLoading}
+				{#if !extensionRegistrationStore.hasLoaded}
 					<Loading />
-				{:else if extensionRegistrationsSignal.registrations && extensionRegistrationsSignal.registrations.length > 0}
-					{#each extensionRegistrationsSignal.registrations as registration (registration.Id)}
+				{:else if registrations.length > 0}
+					{#each registrations as registration (registration.Id)}
 						{@render registrationCard(registration)}
 					{/each}
 				{:else}
