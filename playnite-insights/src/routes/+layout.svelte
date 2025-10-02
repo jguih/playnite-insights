@@ -8,6 +8,7 @@
 	} from '$lib/client/app-state/serviceLocator.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
+	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
@@ -50,6 +51,13 @@
 		} finally {
 			removeLoading('applicationSettings');
 		}
+		try {
+			addLoading('processQueue');
+			await locator.syncQueue.processQueueAsync();
+		} catch {
+		} finally {
+			removeLoading('processQueue');
+		}
 		loading = new Set();
 	};
 
@@ -58,16 +66,22 @@
 	}
 
 	const appProcessingHandler = () => {
-		return Promise.all([
-			locator.serverTimeStore.loadServerTime(),
-			locator.syncQueue.processQueueAsync(),
-		]);
+		try {
+			return Promise.all([
+				locator.serverTimeStore.loadServerTime(),
+				locator.syncQueue.processQueueAsync(),
+			]);
+		} catch {}
 	};
 
 	const handleFocus = () => {
 		if (!page.url.pathname.startsWith('/auth')) {
-			locator.gameSessionStore.loadRecentSessions();
-			locator.gameStore.loadGames();
+			try {
+				locator.gameSessionStore.loadRecentSessions();
+				locator.gameStore.loadGames();
+			} catch (error) {
+				handleClientErrors(error, `[handleFocus] failed`);
+			}
 		}
 	};
 
@@ -110,7 +124,7 @@
 {#if loading.size > 0}
 	<main class="flex h-full w-full items-center justify-center">
 		<div class="block">
-			<Loading />
+			<Loading size="lg" />
 		</div>
 	</main>
 {:else}
