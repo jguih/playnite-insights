@@ -28,6 +28,7 @@ import {
 	makePlayniteLibraryMetricsRepository,
 	makeSignatureService,
 	makeStreamUtilsService,
+	makeSynchronizationIdRepository,
 	makeUploadService,
 } from '@playnite-insights/infra';
 
@@ -68,6 +69,9 @@ export const setupServices = () => {
 	const instanceSessionsRepository = makeInstanceSessionsRepository({
 		logService: makeLogService('InstanceSessionsRepository'),
 	});
+	const synchronizationIdRepository = makeSynchronizationIdRepository({
+		logService: makeLogService('SynchronizationRepository'),
+	});
 	const repositories = {
 		platformRepository,
 		companyRepository,
@@ -81,6 +85,7 @@ export const setupServices = () => {
 		extensionRegistrationRepository,
 		instanceAuthenticationRepository,
 		instanceSessionsRepository,
+		synchronizationIdRepository,
 	};
 	const commonDeps = {
 		getDb,

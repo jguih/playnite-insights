@@ -45,7 +45,7 @@ export const makeSynchronizationIdRepository = (
             CreatedAt,
             LastUsedAt
           ) VALUES (
-            ?, ?, ?, ?,
+            ?, ?, ?, ?
           ) ON CONFLICT(Id) DO UPDATE SET
             SyncId = excluded.SyncId,
             CreatedAt = excluded.CreatedAt,

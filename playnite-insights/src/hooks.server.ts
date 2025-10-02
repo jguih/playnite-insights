@@ -3,6 +3,7 @@ import { setupServices } from '$lib/server/setup-services';
 import { config, defaultFileSystemService, initDatabase } from '@playnite-insights/infra';
 import { PLAYNITE_GAMES_JSON_FILE } from '@playnite-insights/infra/config/config';
 import type { Handle, ServerInit } from '@sveltejs/kit';
+import { randomUUID } from 'crypto';
 
 export const { services } = setupServices();
 
@@ -13,21 +14,46 @@ export const init: ServerInit = async () => {
 	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
 	services.log.info(`TZ: ${process.env.TZ}`);
 	services.log.info(`PLAYNITE_HOST_ADDRESS: ${config.PLAYNITE_HOST_ADDRESS || 'undefined'}`);
+
 	await initDatabase({
 		fileSystemService: defaultFileSystemService,
 		DB_FILE: services.config.DB_FILE,
 		MIGRATIONS_DIR: services.config.MIGRATIONS_DIR,
 		logService: services.log,
 	});
+
 	await services.libraryManifest.write();
-	await services.signature.generateKeyPairAsync();
+
+	try {
+		await services.signature.generateKeyPairAsync();
+	} catch (error) {
+		services.log.error(`Failed to create asymmetric key pair`, error);
+	}
 
 	try {
 		services.fileSystem.rm(PLAYNITE_GAMES_JSON_FILE, { force: true });
-	} catch {
+	} catch (error) {
 		services.log.error(
 			`Failed to delete deprecated games JSON file at ${PLAYNITE_GAMES_JSON_FILE}`,
+			error,
 		);
+	}
+
+	const now = new Date();
+	try {
+		const syncId = services.synchronizationIdRepository.get();
+		if (!syncId) {
+			const syncId = randomUUID();
+			services.synchronizationIdRepository.set({
+				Id: 1,
+				SyncId: randomUUID(),
+				CreatedAt: now.toISOString(),
+				LastUsedAt: now.toISOString(),
+			});
+			services.log.info(`Created synchronization id: ${syncId}`);
+		}
+	} catch (error) {
+		services.log.error(`Failed to create synchronization id`, error);
 	}
 };
 
