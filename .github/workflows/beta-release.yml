@@ -3,8 +3,6 @@ name: Create and publish prod Docker image
 on:
   push:
     branches: [beta]
-    tags:
-      - "v*-beta*"
 
 env:
   REGISTRY: ghcr.io
