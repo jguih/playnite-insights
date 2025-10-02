@@ -2,6 +2,79 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](///compare/v3.3.0...v4.0.0) (2025-10-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* env variable APP_NAME renamed to PLAYATLAS_INSTANCE_NAME
+* env variable WORK_DIR renamed to PLAYATLAS_DATA_DIR
+
+* chore: move locator to a svelte file
+
+* chore: filtered game list caching
+
+* chore: functional register page
+
+* chore: functional login page
+
+* chore: remove ORIGIN env variable from compose files
+
+* chore: code cleanup
+
+* chore: require auth for games endpoint
+
+fix: sw causing request loop when request failed
+
+* chore: add authentication for SSE route
+
+* chore: extract dictionary entries for register and login related errors
+
+* chore: protect all api endpoints
+
+* chore: typo
+
+* chore(ui): change note editor bottom nav style and height
+
+* chore: add screenshot store
+
+* chore: reduce log message size on note update
+
+* fix: reactivity problems in settings page
+
+* chore: declare locator inside a context to fix reactivity issues
+
+fix: extension resgistrations not updating correctly on mutation
+
+* chore: extract dictionary entry
+
+* chore: update translations
+
+* fix: registration list showing loading spinner when request failed
+
+* feat: application settings with local persistance
+
+* feat: desconsider hidden games
+
+* chore: ui changes and dictionary entries extraction
+
+* feat: metrics snapshot for non-hidden only games
+
+* feat: disconsider hidden games will affect dashboard graphics
+
+* chore: handle errors in root layout
+
+* chote: update backlog
+
+* chore: add PR github workflow
+
+* fix: workflow pnpm version
+
+* chote: update github workflows
+* this version contains multiple changes that are incompatible with previous versions
+
+* pre-release 4.x ([#27](undefined/undefined/undefined/issues/27)) dce152f
+
 ## [3.3.0](https://github.com/jguih/playnite-insights/compare/v3.2.1...v3.3.0) (2025-07-29)
 
 
