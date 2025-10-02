@@ -9,6 +9,8 @@ export const validAuthenticationHeaders = {
   "X-RegistrationId": "X-RegistrationId",
 } as const;
 
+export const syncIdHeader = "X-Sync-Id" as const;
+
 export const instanceAuthenticationSchema = z.object({
   Id: z.literal(1),
   PasswordHash: z.string(),

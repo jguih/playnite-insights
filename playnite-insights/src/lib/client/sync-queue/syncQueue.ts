@@ -1,9 +1,9 @@
 import {
+	apiErrorSchema,
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
 	EmptyStrategy,
 	FetchClientStrategyError,
-	gameNoteSchema,
 	HttpClientNotSetError,
 	JsonStrategy,
 	updateGameNoteCommandSchema,
@@ -83,7 +83,7 @@ export class SyncQueue {
 			const command = createGameNoteCommandSchema.parse(note);
 			try {
 				const createdNote = await client.httpPostAsync({
-					endpoint: '/api/note',
+					endpoint: '/api/sync/note',
 					strategy: new JsonStrategy(createGameNoteResponseSchema),
 					body: command,
 				});
@@ -91,8 +91,9 @@ export class SyncQueue {
 			} catch (error) {
 				if (error instanceof FetchClientStrategyError && error.statusCode === 409) {
 					// When note already exists (conflict)
-					const existingNote = gameNoteSchema.parse(error.data);
-					await this.updateGameNoteAndDeleteQueueItemAsync(existingNote, queueItem);
+					const apiError = apiErrorSchema.parse(error.data);
+					if (!(apiError.error.code === 'note_already_exists')) throw error;
+					await this.updateGameNoteAndDeleteQueueItemAsync(apiError.error.note, queueItem);
 				} else {
 					throw error;
 				}
@@ -106,7 +107,7 @@ export class SyncQueue {
 			const command = updateGameNoteCommandSchema.parse(note);
 			try {
 				const updatedNote = await client.httpPutAsync({
-					endpoint: '/api/note',
+					endpoint: '/api/sync/note',
 					strategy: new JsonStrategy(updateGameNoteResponseSchema),
 					body: command,
 				});
@@ -142,7 +143,7 @@ export class SyncQueue {
 			const note = { ...queueItem.Payload };
 			try {
 				await client.httpDeleteAsync({
-					endpoint: `/api/note/${note.Id}`,
+					endpoint: `/api/sync/note/${note.Id}`,
 					strategy: new EmptyStrategy(),
 				});
 				await this.deleteGameNoteAndQueueItemAsync(note, queueItem);

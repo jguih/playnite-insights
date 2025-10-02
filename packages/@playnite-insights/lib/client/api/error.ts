@@ -1,4 +1,5 @@
 import z, { type ZodIssue } from "zod";
+import { gameNoteSchema } from "../game-notes";
 
 export class ApiError extends Error {
   public readonly statusCode: number;
@@ -30,17 +31,36 @@ export class ValidationError extends ApiError {
   }
 }
 
-export const apiErrorSchema = z.object({
-  error: z.object({
+const errorSchema = z.discriminatedUnion("code", [
+  z.object({
+    code: z.literal("instance_not_registered"),
     message: z.string().optional(),
-    code: z.enum([
-      "instance_not_registered",
-      "invalid_request",
-      "not_authorized",
-    ]),
   }),
+  z.object({
+    code: z.literal("invalid_request"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("not_authorized"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("note_already_exists"),
+    note: gameNoteSchema,
+  }),
+  z.object({
+    code: z.literal("missing_or_invalid_sync_id"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("invalid_iso_date"),
+    message: z.string().optional(),
+  }),
+]);
+
+export const apiErrorSchema = z.object({
+  error: errorSchema,
 });
 
-export type ApiErrorCode = z.infer<
-  typeof apiErrorSchema.shape.error.shape.code
->;
+export type ApiErrorCode = z.infer<typeof errorSchema>["code"];
+export type ApiErrorResponse = z.infer<typeof apiErrorSchema>;

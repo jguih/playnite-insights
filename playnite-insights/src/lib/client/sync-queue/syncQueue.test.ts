@@ -2,6 +2,7 @@ import {
 	FetchClientStrategyError,
 	GameNoteFactory,
 	SyncQueueFactory,
+	type ApiErrorResponse,
 	type GameNote,
 	type IFetchClient,
 	type SyncQueueItem,
@@ -133,11 +134,14 @@ describe('SyncQueue', () => {
 		const note = await createAndUpdateNoteAsync();
 		const existingNote: GameNote = { ...note, GameId: crypto.randomUUID() };
 		const [createQueueItem] = await syncQueueRepository.getAllAsync();
+		const apiError: ApiErrorResponse = {
+			error: { code: 'note_already_exists', note: existingNote },
+		};
 		fakeFetchClient.httpPostAsync.mockImplementationOnce(() => {
 			throw new FetchClientStrategyError({
 				statusCode: 409,
 				message: 'Note already exists',
-				data: existingNote,
+				data: apiError,
 			});
 		});
 		// Act
@@ -185,7 +189,6 @@ describe('SyncQueue', () => {
 			throw new FetchClientStrategyError({
 				statusCode: 404,
 				message: 'Note not found',
-				data: null,
 			});
 		});
 		// Act

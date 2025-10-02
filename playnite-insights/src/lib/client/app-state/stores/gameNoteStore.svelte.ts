@@ -55,7 +55,7 @@ export class GameNoteStore extends ApiDataStore {
 			return await this.withHttpClient(async ({ client }) => {
 				const lastSync = this.#getLastServerSync();
 				const notes = await client.httpGetAsync({
-					endpoint: `/api/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
+					endpoint: `/api/sync/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
 					strategy: new JsonStrategy(getAllGameNotesResponseSchema),
 				});
 				this.#setLastServerSync();
@@ -70,7 +70,7 @@ export class GameNoteStore extends ApiDataStore {
 				this.#setLastServerSync();
 				return { notes: null, success: true };
 			}
-			handleClientErrors(err, `[loadNotesFromServerAsync] failed to fetch /api/note`);
+			handleClientErrors(err, `[loadNotesFromServerAsync] failed to fetch /api/sync/note`);
 			return { notes: null, success: false };
 		}
 	};

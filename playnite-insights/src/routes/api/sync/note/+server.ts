@@ -8,6 +8,7 @@ import {
 	getAllGameNotesResponseSchema,
 	updateGameNoteCommandSchema,
 	updateGameNoteResponseSchema,
+	type ApiErrorResponse,
 	type GameNote,
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
@@ -18,10 +19,13 @@ export const GET: RequestHandler = ({ request, url }) =>
 		const ifNoneMatch = request.headers.get('if-none-match');
 		let data: GameNote[] = [];
 		if (lastSync && isNaN(Date.parse(lastSync))) {
-			return json(
-				{ error: { message: 'lastSync param must be a valid ISO date string' } },
-				{ status: 400 },
-			);
+			const response: ApiErrorResponse = {
+				error: {
+					code: 'invalid_iso_date',
+					message: 'lastSync param must be a valid ISO date string',
+				},
+			};
+			return json(response, { status: 400 });
 		} else if (lastSync) {
 			const lastSyncDate = new Date(lastSync);
 			data = services.noteRepository.all({
@@ -52,8 +56,13 @@ export const POST: RequestHandler = async ({ request, url }) =>
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);
 		if (existingNote) {
-			createGameNoteResponseSchema.parse(existingNote);
-			return json(existingNote, { status: 409 });
+			const response: ApiErrorResponse = {
+				error: {
+					code: 'note_already_exists',
+					note: existingNote,
+				},
+			};
+			return json(response, { status: 409 });
 		}
 		const createdNote = services.noteRepository.add(command);
 		createGameNoteResponseSchema.parse(createdNote);

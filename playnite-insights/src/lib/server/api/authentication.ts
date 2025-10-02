@@ -4,13 +4,16 @@ import { json } from '@sveltejs/kit';
 import { handleApiError } from './handle-error';
 import { computeBase64HashAsync } from './hash';
 
+export const getRequestDescription = (request: Request, url: URL) =>
+	`${request.method} ${url.pathname}`;
+
 export const withExtensionAuth = async (
 	request: Request,
 	url: URL,
 	strategy: 'text' | 'none',
 	cb: (rawBody?: string) => Response | Promise<Response>,
 ) => {
-	const requestDescription = `${request.method} ${url.pathname}`;
+	const requestDescription = getRequestDescription(request, url);
 	try {
 		const isAuthorized = services.authentication.verifyExtensionAuthorization({
 			headers: {
@@ -58,7 +61,7 @@ export const withInstanceAuth = async (
 	cb: (isAuthorized: boolean) => Response | Promise<Response>,
 	passThroughAuth?: boolean,
 ) => {
-	const requestDescription = `${request.method} ${url.pathname}`;
+	const requestDescription = getRequestDescription(request, url);
 	try {
 		const verify = services.authentication.verifyInstanceAuthorization({
 			headers: { Authorization: request.headers.get('Authorization') },
