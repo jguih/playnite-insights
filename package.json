@@ -1,6 +1,6 @@
 {
   "name": "playnite-insights-project",
-  "version": "4.0.0",
+  "version": "1.0.0-beta.3",
   "private": true,
   "workspaces": [
     "playnite-insights",
@@ -18,6 +18,7 @@
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",
     "test:unit": "pnpm -r run test:unit",
+    "release-beta": "standard-version --prerelease beta",
     "release": "standard-version",
     "prepare": "husky"
   },
