@@ -2,7 +2,6 @@ name: Create and publish prod Docker image
 
 on:
   push:
-    branches: [master]
     tags:
       - "v*"
 
@@ -42,4 +41,4 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ !contains(github.ref_name, '-beta') && env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
