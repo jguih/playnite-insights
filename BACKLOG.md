@@ -38,6 +38,10 @@
 - Screenshot gallery improvements:
   - Delete images
   - Restore images from trash
+- Syncronization safety with Sync Id:
+  - Client and server keeps the same sync id. Client send it on every sync request.
+  - As long as client's sync id = server's sync id, the client is the source of truth and will overwrite server's data on every sync (last write wins).
+  - On a server reset, either trigger manually through the UI or by completly wiping out all server data, where a new sync id will be generated, causing a mismatch, the server becomes the source of truth and all local data will be overwritten.
 
 ## 📌 To Do
 
