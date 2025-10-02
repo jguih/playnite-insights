@@ -18,7 +18,7 @@
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",
     "test:unit": "pnpm -r run test:unit",
-    "release-beta": "standard-version --pre-release beta",
+    "release-beta": "standard-version -- --pre-release beta",
     "release": "standard-version",
     "prepare": "husky"
   },
