@@ -27,7 +27,7 @@ export const makePlayniteGameRepository = (
 
   const _getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
     const where: string[] = [];
-    const params: string[] = [];
+    const params: (string | number)[] = [];
 
     if (!filters) {
       return { where: "", params };

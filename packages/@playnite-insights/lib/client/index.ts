@@ -16,5 +16,5 @@ export * from "./platform";
 export * from "./playnite-game";
 export * from "./playnite-library-metrics";
 export * from "./sync-queue";
+export * from "./synchronization-id";
 export * from "./types";
-
