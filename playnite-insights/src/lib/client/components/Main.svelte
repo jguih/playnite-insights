@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { mainScrollPosition } from '$lib/stores/main-scroll-position.svelte';
+	import { mainScrollPosition } from '$lib/client/app-state/mainScrollPosition.svelte';
 	import { onMount } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
@@ -29,7 +29,7 @@
 	beforeNavigate(() => {
 		if (main && restoreScroll) {
 			mainScrollPosition[pathname] = {
-				scrollTop: main.scrollTop
+				scrollTop: main.scrollTop,
 			};
 		}
 	});
@@ -37,9 +37,11 @@
 
 <main
 	{...props}
-	class={`absolute ${bottomNav ? 'bottom-[3.4rem]' : 'bottom-0'} left-0 right-0 top-[3.4rem] overflow-y-auto overflow-x-hidden p-4 pb-12 ${
-		props?.class ?? ''
-	}`}
+	class={[
+		'absolute left-0 right-0 top-[var(--header-height)] overflow-y-auto overflow-x-hidden p-4',
+		bottomNav ? 'bottom-[var(--bottom-nav-height)]' : 'bottom-0',
+		props.class,
+	]}
 	bind:this={main}
 >
 	{#if props.children}

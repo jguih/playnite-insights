@@ -4,4 +4,5 @@ packages:
   - "packages/@playnite-insights/lib"
   - "packages/@playnite-insights/infra"
   - "packages/@playnite-insights/core"
+  - "packages/@playnite-insights/testing"
 injectWorkspacePackages: true

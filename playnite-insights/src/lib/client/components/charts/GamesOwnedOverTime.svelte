@@ -1,6 +1,12 @@
 <script lang="ts">
-	import { init, type BarSeriesOption, type ComposeOption } from 'echarts';
+	import type { BarSeriesOption, ComposeOption } from 'echarts';
+	import { BarChart } from 'echarts/charts';
+	import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+	import * as echarts from 'echarts/core';
+	import { CanvasRenderer } from 'echarts/renderers';
 	import { onMount } from 'svelte';
+
+	echarts.use([BarChart, TitleComponent, TooltipComponent, GridComponent, CanvasRenderer]);
 
 	type Props = {
 		xAxis: { data: string[] };
@@ -10,43 +16,57 @@
 	let { xAxis, series }: Props = $props();
 
 	const id = 'chart-games-owned-over-time';
-	var option: ComposeOption<BarSeriesOption> = $derived({
+	let chart: ReturnType<typeof echarts.init> | null = null;
+	const option: ComposeOption<BarSeriesOption> = $derived({
 		title: {
-			show: false
+			show: false,
 		},
 		tooltip: {},
 		grid: {
 			top: '8%',
 			left: '15%',
-			bottom: '12%'
+			bottom: '12%',
 		},
 		xAxis: {
 			data: xAxis.data,
 			axisLabel: {
-				color: 'white'
-			}
+				color: 'white',
+			},
 		},
 		yAxis: {
 			axisLabel: {
-				color: 'white'
-			}
+				color: 'white',
+			},
 		},
 		series: [
 			{
 				name: series.bar.label,
 				type: 'bar',
 				data: series.bar.data,
-				color: ['hsl(198, 100%, 67%)']
-			}
-		]
+				color: ['hsl(198, 100%, 67%)'],
+			},
+		],
 	});
 
 	onMount(() => {
-		if (document) {
-			var myChart = init(document.getElementById(id));
-			myChart.setOption(option);
-		}
+		chart = echarts.init(document.getElementById(id));
+		chart.setOption(option);
+
+		const resize = () => chart?.resize();
+		window.addEventListener('resize', resize);
+		return () => {
+			window.removeEventListener('resize', resize);
+			chart?.dispose();
+		};
+	});
+
+	$effect(() => {
+		const _option = option;
+		chart?.setOption(_option);
 	});
 </script>
 
-<div {id} class="h-[350px] w-full"></div>
+<div
+	{id}
+	class="h-[350px] w-full"
+></div>

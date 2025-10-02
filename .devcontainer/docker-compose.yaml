@@ -1,0 +1,25 @@
+name: playnite-insights-dev
+
+services:
+  app-dev:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      target: dev
+    environment:
+      TZ: America/Sao_Paulo
+      LOG_LEVEL: 0
+      PLAYNITE_HOST_ADDRESS: ${PLAYNITE_HOST_ADDRESS}
+      PLAYATLAS_INSTANCE_NAME: PlayAtlas Dev
+    volumes:
+      - playnite-insights-dev-data:/app/data
+      - ..:/workspace:cached
+    networks:
+      - services-ipv6
+
+volumes:
+  playnite-insights-dev-data:
+
+networks:
+  services-ipv6:
+    external: true

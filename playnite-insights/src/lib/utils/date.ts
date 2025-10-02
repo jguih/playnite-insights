@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 
-const monthNames = [
+export const monthNames = [
 	m.month_january(),
 	m.month_february(),
 	m.month_march(),
@@ -12,7 +12,7 @@ const monthNames = [
 	m.month_september(),
 	m.month_october(),
 	m.month_november(),
-	m.month_december()
+	m.month_december(),
 ];
 
 /**

@@ -14,8 +14,3 @@ export const isValidLogLevel = (
     value as (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS]
   );
 };
-
-const logLevel = Number(process.env.LOG_LEVEL);
-export const currentLogLevel = isValidLogLevel(logLevel)
-  ? logLevel
-  : LOG_LEVELS.info;

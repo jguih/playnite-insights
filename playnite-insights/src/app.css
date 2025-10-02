@@ -2,24 +2,190 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  --color-primary-50: hsl(198, 100%, 97%);
-  --color-primary-100: hsl(198, 100%, 94%);
-  --color-primary-200: hsl(198, 100%, 87%);
-  --color-primary-300: hsl(198, 100%, 77%);
-  --color-primary-400: hsl(198, 100%, 72%);
-  --color-primary-500: hsl(198, 100%, 67%);
-  --color-primary-600: hsl(198, 100%, 50%);
-  --color-primary-700: hsl(198, 100%, 42%);
-  --color-primary-800: hsl(198, 100%, 34%);
-  --color-primary-900: hsl(198, 100%, 26%);
-  --color-primary-950: hsl(198, 100%, 18%);
+	/* Colors Pallet */
+	--pl-color-primary-50: hsl(198, 100%, 97%);
+	--pl-color-primary-100: hsl(198, 100%, 94%);
+	--pl-color-primary-200: hsl(198, 100%, 87%);
+	--pl-color-primary-300: hsl(198, 100%, 77%);
+	--pl-color-primary-400: hsl(198, 100%, 72%);
+	--pl-color-primary-500: hsl(198, 100%, 67%);
+	--pl-color-primary-600: hsl(198, 100%, 50%);
+	--pl-color-primary-700: hsl(198, 100%, 42%);
+	--pl-color-primary-800: hsl(198, 100%, 34%);
+	--pl-color-primary-900: hsl(198, 100%, 26%);
+	--pl-color-primary-950: hsl(198, 100%, 18%);
 
-  --color-background: hsl(228, 48%, 10%);
-  --color-background-1: hsl(228, 48%, 15%);
-  --color-background-2: hsl(228, 48%, 18%);
-  --color-background-3: hsl(228, 48%, 22%);
+	--pl-color-background: hsl(228, 48%, 10%);
+	--pl-color-background-1: hsl(228, 48%, 15%);
+	--pl-color-background-2: hsl(228, 48%, 18%);
+	--pl-color-background-3: hsl(228, 48%, 22%);
+
+	--pl-color-foreground: white;
+
+	--bottom-nav-height: 4.4rem;
+	--header-height: 3.4rem;
+
+	/* BEGIN: Dark Theme */
+	--color-background: var(--pl-color-background);
+	--color-background-1: var(--pl-color-background-1);
+	--color-background-2: var(--pl-color-background-2);
+	--color-background-3: var(--pl-color-background-3);
+	--color-foreground: var(--color-neutral-50);
+	/* Primary variant */
+	--color-primary-bg: var(--pl-color-primary-700);
+	--color-primary-fg: var(--color-foreground);
+	--color-primary-hover-bg: var(--pl-color-primary-600);
+	--color-primary-hover-fg: var(--pl-color-primary-100);
+	--color-primary-active-bg: var(--pl-color-primary-800);
+	--color-primary-active-fg: var(--color-foreground);
+	--color-primary-disabled-bg: var(--color-neutral-800);
+	--color-primary-disabled-fg: var(--color-neutral-400);
+	/* Primary light variant */
+	--color-primary-light-bg: transparent;
+	--color-primary-light-fg: var(--color-foreground);
+	--color-primary-light-hover-bg: rgba(255, 255, 255, 0.02);
+	--color-primary-light-hover-fg: var(--pl-color-primary-600);
+	--color-primary-light-active-bg: rgba(255, 255, 255, 0.02);
+	--color-primary-light-active-fg: var(--pl-color-primary-700);
+	--color-primary-light-disabled-bg: rgba(255, 255, 255, 0.02);
+	--color-primary-light-disabled-fg: var(--color-neutral-400);
+  /* Neutral variant */
+	--color-neutral-bg: var(--color-neutral-700);
+	--color-neutral-fg: var(--color-foreground);
+	--color-neutral-hover-bg: var(--color-neutral-600);
+	--color-neutral-hover-fg: var(--color-neutral-100);
+	--color-neutral-active-bg: var(--color-neutral-800);
+	--color-neutral-active-fg: var(--color-foreground);
+	--color-neutral-disabled-bg: var(--color-neutral-800);
+	--color-neutral-disabled-fg: var(--color-neutral-400);
+	/* Neutral light variant */
+	--color-neutral-light-bg: transparent;
+	--color-neutral-light-fg: var(--color-neutral-200);
+	--color-neutral-light-hover-bg: rgba(255, 255, 255, 0.02);
+	--color-neutral-light-hover-fg: var(--color-neutral-300);
+	--color-neutral-light-active-bg: rgba(255, 255, 255, 0.02);
+	--color-neutral-light-active-fg: var(--color-neutral-400);
+	--color-neutral-light-disabled-bg: var(--color-neutral-800);
+	--color-neutral-light-disabled-fg: var(--color-neutral-400);
+	/* Success variant */
+	--color-success-bg: var(--color-green-700);
+	--color-success-fg: var(--color-foreground);
+	/* Success light variant */
+	--color-success-light-bg: transparent;
+	--color-success-light-fg: var(--color-green-500);
+  /* Warning variant */
+  --color-warning-bg: var(--color-yellow-700);
+	--color-warning-fg: var(--color-foreground);
+	/* Warning light variant */
+	--color-warning-light-bg: transparent;
+	--color-warning-light-fg: var(--color-yellow-600);
+  /* Error variant */
+  --color-error-bg: var(--color-red-700);
+	--color-error-fg: var(--color-foreground);
+  --color-error-hover-bg: var(--color-red-600);
+	--color-error-hover-fg: var(--color-red-100);
+	--color-error-active-bg: var(--color-red-800);
+	--color-error-active-fg: var(--color-foreground);
+	--color-error-disabled-bg: var(--color-neutral-800);
+	--color-error-disabled-fg: var(--color-neutral-400);
+  /* Error light variant */
+  --color-error-light-bg: transparent;
+	--color-error-light-fg: var(--color-red-600);
+  /* Info variant */
+  --color-info-bg: var(--pl-color-primary-800);
+	--color-info-fg: var(--color-foreground);
+	/* END: Dark Theme */
+}
+
+[data-theme='dark'] {
+	/* BEGIN: Dark Theme */
+	--color-background: var(--pl-color-background);
+	--color-background-1: var(--pl-color-background-1);
+	--color-background-2: var(--pl-color-background-2);
+	--color-background-3: var(--pl-color-background-3);
+	--color-foreground: var(--color-neutral-50);
+	/* Primary variant */
+	--color-primary-bg: var(--pl-color-primary-700);
+	--color-primary-fg: var(--color-foreground);
+	--color-primary-hover-bg: var(--pl-color-primary-600);
+	--color-primary-hover-fg: var(--pl-color-primary-100);
+	--color-primary-active-bg: var(--pl-color-primary-800);
+	--color-primary-active-fg: var(--color-foreground);
+	--color-primary-disabled-bg: var(--color-neutral-800);
+	--color-primary-disabled-fg: var(--color-neutral-400);
+	/* Primary light variant */
+	--color-primary-light-bg: transparent;
+	--color-primary-light-fg: var(--color-foreground);
+	--color-primary-light-hover-bg: rgba(255, 255, 255, 0.02);
+	--color-primary-light-hover-fg: var(--pl-color-primary-600);
+	--color-primary-light-active-bg: rgba(255, 255, 255, 0.02);
+	--color-primary-light-active-fg: var(--pl-color-primary-700);
+	--color-primary-light-disabled-bg: rgba(255, 255, 255, 0.02);
+	--color-primary-light-disabled-fg: var(--color-neutral-400);
+  /* Neutral variant */
+	--color-neutral-bg: var(--color-neutral-700);
+	--color-neutral-fg: var(--color-foreground);
+	--color-neutral-hover-bg: var(--color-neutral-600);
+	--color-neutral-hover-fg: var(--color-neutral-100);
+	--color-neutral-active-bg: var(--color-neutral-800);
+	--color-neutral-active-fg: var(--color-foreground);
+	--color-neutral-disabled-bg: var(--color-neutral-800);
+	--color-neutral-disabled-fg: var(--color-neutral-400);
+	/* Neutral light variant */
+	--color-neutral-light-bg: transparent;
+	--color-neutral-light-fg: var(--color-neutral-200);
+	--color-neutral-light-hover-bg: rgba(255, 255, 255, 0.02);
+	--color-neutral-light-hover-fg: var(--color-neutral-300);
+	--color-neutral-light-active-bg: rgba(255, 255, 255, 0.02);
+	--color-neutral-light-active-fg: var(--color-neutral-400);
+	--color-neutral-light-disabled-bg: var(--color-neutral-800);
+	--color-neutral-light-disabled-fg: var(--color-neutral-400);
+	/* Success variant */
+	--color-success-bg: var(--color-green-700);
+	--color-success-fg: var(--color-foreground);
+	/* Success light variant */
+	--color-success-light-bg: transparent;
+	--color-success-light-fg: var(--color-green-500);
+  /* Warning variant */
+  --color-warning-bg: var(--color-yellow-700);
+	--color-warning-fg: var(--color-foreground);
+	/* Warning light variant */
+	--color-warning-light-bg: transparent;
+	--color-warning-light-fg: var(--color-yellow-600);
+  /* Error variant */
+  --color-error-bg: var(--color-red-700);
+	--color-error-fg: var(--color-foreground);
+  --color-error-hover-bg: var(--color-red-600);
+	--color-error-hover-fg: var(--color-red-100);
+	--color-error-active-bg: var(--color-red-800);
+	--color-error-active-fg: var(--color-foreground);
+	--color-error-disabled-bg: var(--color-neutral-800);
+	--color-error-disabled-fg: var(--color-neutral-400);
+  /* Error light variant */
+  --color-error-light-bg: transparent;
+	--color-error-light-fg: var(--color-red-600);
+  /* Info variant */
+  --color-info-bg: var(--pl-color-primary-800);
+	--color-info-fg: var(--color-foreground);
+	/* END: Dark Theme */
 }
 
 body {
-  @apply text-white bg-background overflow-hidden;
+	@apply text-foreground bg-background overflow-hidden;
+}
+
+.size-sm {
+  @apply size-4
+}
+
+.size-md {
+  @apply size-5
+}
+
+.size-lg {
+  @apply size-6
+}
+
+.shadow {
+  @apply shadow-xl/15
 }

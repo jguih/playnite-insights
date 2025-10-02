@@ -1,4 +1,7 @@
 {
+  "extends": [
+    "./playnite-insights/tsconfig.json"
+  ],
   "compilerOptions": {
     "paths": {
       "@playnite-insights/lib": [
@@ -12,7 +15,10 @@
       ],
       "@playnite-insights/infra": [
         "./packages/@playnite-insights/infra"
+      ],
+      "@playnite-insights/testing": [
+        "./packages/@playnite-insights/testing"
       ]
-    },
+    }
   }
 }

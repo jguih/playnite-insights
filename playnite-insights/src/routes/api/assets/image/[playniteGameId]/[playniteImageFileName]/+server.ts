@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
 		playniteGameId,
 		playniteImageFileName,
 		ifNoneMatch,
-		ifModifiedSince
+		ifModifiedSince,
 	);
 	return result;
 };

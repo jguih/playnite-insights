@@ -1,13 +1,19 @@
 <script lang="ts">
-	import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { BaseCheckboxProps } from './types';
 
-	let { checked = $bindable<boolean>(), ...props }: { checked: boolean } & HTMLInputAttributes =
-		$props();
+	let { checked = $bindable<boolean>(), color = 'primary', ...props }: BaseCheckboxProps = $props();
 </script>
 
 <input
 	{...props}
 	bind:checked
 	type="checkbox"
-	class={`accent-primary-500 hover:accent-primary-600 focus:ring-primary-700 h-4 w-4 focus:ring-2 ${props?.class ?? ''}`}
+	class={[
+		color === 'primary' && [
+			'accent-primary-light-active-fg',
+			'hover:accent-primary-light-hover-fg',
+			'focus:ring-primary-light-active-fg focus:ring-2',
+		],
+		props.class,
+	]}
 />

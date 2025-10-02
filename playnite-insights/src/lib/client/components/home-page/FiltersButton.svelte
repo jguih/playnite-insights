@@ -1,17 +1,23 @@
 <script lang="ts">
 	import { ListFilter } from '@lucide/svelte';
+	import { scale } from 'svelte/transition';
 	import LightButton from '../buttons/LightButton.svelte';
 	import { filtersState } from './store.svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import { scale } from 'svelte/transition';
 
-	let { counter }: { counter?: number } = $props();
+	const { counter, disabled = false }: { counter?: number; disabled?: boolean } = $props();
 </script>
 
-<LightButton class="relative" onclick={() => (filtersState.show = !filtersState.show)}>
+<LightButton
+	class={['relative']}
+	color="primary"
+	onclick={() => (filtersState.show = !filtersState.show)}
+	{disabled}
+>
 	{#if counter}
 		<div
-			class="bg-primary-500 absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-xs text-black"
+			class={[
+				'bg-primary-bg text-primary-fg absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-xs',
+			]}
 			transition:scale={{ duration: 150 }}
 		>
 			{counter}

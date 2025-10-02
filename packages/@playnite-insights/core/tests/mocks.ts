@@ -1,13 +1,22 @@
-import { vi } from "vitest";
-import { LogService } from "../log.types";
-import { LOG_LEVELS } from "@playnite-insights/lib/client/log";
-import { FileSystemService } from "../file-system.types";
+import { LOG_LEVELS } from "@playnite-insights/lib/client";
 import { constants } from "fs/promises";
-import { StreamUtilsService } from "../stream-utils.types";
-import { PlayniteGameRepository } from "../playnite-game.types";
-import { LibraryManifestService } from "../library-manifest";
-import { PlayniteLibrarySyncRepository } from "../playnite-library-sync.types";
-import { GameSessionRepository } from "../game-session.types";
+import { vi } from "vitest";
+import type { LibraryManifestService } from "../src/library-manifest";
+import type {
+  CompanyRepository,
+  CryptographyService,
+  ExtensionRegistrationRepository,
+  GenreRepository,
+  PlatformRepository,
+  PlayniteGameRepository,
+  PlayniteLibraryMetricsRepository,
+  SignatureService,
+} from "../src/types";
+import { CompletionStatusRepository } from "../src/types/completion-status.types";
+import type { FileSystemService } from "../src/types/file-system.types";
+import type { GameSessionRepository } from "../src/types/game-session.types";
+import type { LogService } from "../src/types/log.types";
+import type { StreamUtilsService } from "../src/types/stream-utils.types";
 
 export const makeMocks = () => {
   const logService = {
@@ -30,6 +39,7 @@ export const makeMocks = () => {
     stat: vi.fn(),
     unlink: vi.fn(),
     writeFile: vi.fn(),
+    rename: vi.fn(),
   } satisfies FileSystemService;
 
   const streamUtilsService = {
@@ -44,25 +54,19 @@ export const makeMocks = () => {
   } satisfies LibraryManifestService;
 
   const playniteGameRepository = {
-    add: vi.fn(),
-    update: vi.fn(),
     remove: vi.fn(),
     exists: vi.fn(),
-    addDeveloperFor: vi.fn(),
-    deleteDevelopersFor: vi.fn(),
-    addPlatformFor: vi.fn(),
-    deletePlatformsFor: vi.fn(),
-    addGenreFor: vi.fn(),
-    deleteGenresFor: vi.fn(),
-    addPublisherFor: vi.fn(),
-    deletePublishersFor: vi.fn(),
     getById: vi.fn(),
     getManifestData: vi.fn(),
     getTotal: vi.fn(),
     getTotalPlaytimeSeconds: vi.fn(),
-    getTopMostPlayedGamesForDashPage: vi.fn(),
-    getGamesForDashPage: vi.fn(),
     all: vi.fn(),
+    upsertMany: vi.fn(),
+    updateManyGenres: vi.fn(),
+    updateManyDevelopers: vi.fn(),
+    updateManyPlatforms: vi.fn(),
+    updateManyPublishers: vi.fn(),
+    removeMany: vi.fn(),
   } satisfies PlayniteGameRepository;
 
   const gameSessionRepository = {
@@ -70,23 +74,89 @@ export const makeMocks = () => {
     add: vi.fn(),
     update: vi.fn(),
     all: vi.fn(),
-    unlinkSessionsForGame: vi.fn(),
     findAllBy: vi.fn(),
   } satisfies GameSessionRepository;
 
-  const playniteLibrarySyncRepository = {
+  const playniteLibraryMetricsRepository = {
     add: vi.fn(),
     getTotalPlaytimeOverLast6Months: vi.fn(),
-    getTotalGamesOwnedOverLast6Months: vi.fn(),
-  } satisfies PlayniteLibrarySyncRepository;
+    getGamesOwnedLastNMonths: vi.fn(),
+  } satisfies PlayniteLibraryMetricsRepository;
+
+  const extensionRegistrationRepository = {
+    add: vi.fn(),
+    update: vi.fn(),
+    getByExtensionId: vi.fn(),
+    getByRegistrationId: vi.fn(),
+    remove: vi.fn(),
+    all: vi.fn(),
+  } satisfies ExtensionRegistrationRepository;
+
+  const completionStatusRepository = {
+    add: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+    upsertMany: vi.fn(),
+  } satisfies CompletionStatusRepository;
+
+  const genreRepository = {
+    add: vi.fn(),
+    exists: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+    upsertMany: vi.fn(),
+  } satisfies GenreRepository;
+
+  const platformRepository = {
+    add: vi.fn(),
+    exists: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+    upsertMany: vi.fn(),
+  } satisfies PlatformRepository;
+
+  const companyRepository = {
+    add: vi.fn(),
+    exists: vi.fn(),
+    update: vi.fn(),
+    getById: vi.fn(),
+    hasChanges: vi.fn(),
+    all: vi.fn(),
+    upsertMany: vi.fn(),
+  } satisfies CompanyRepository;
+
+  const signatureService = {
+    generateKeyPairAsync: vi.fn(),
+    signAsync: vi.fn(),
+    verifyExtensionSignature: vi.fn(),
+  } satisfies SignatureService;
+
+  const cryptographyService = {
+    hashPasswordAsync: vi.fn(),
+    createSessionId: vi.fn(),
+    verifyPassword: vi.fn(),
+  } satisfies CryptographyService;
 
   return {
     logService,
     fileSystemService,
     streamUtilsService,
     libraryManifestService,
+    signatureService,
     playniteGameRepository,
-    playniteLibrarySyncRepository,
+    playniteLibraryMetricsRepository,
     gameSessionRepository,
+    extensionRegistrationRepository,
+    completionStatusRepository,
+    genreRepository,
+    platformRepository,
+    companyRepository,
+    cryptographyService,
   };
 };

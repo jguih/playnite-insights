@@ -13,6 +13,8 @@ export const playniteGameSchema = z.object({
   BackgroundImage: z.string().nullable(),
   CoverImage: z.string().nullable(),
   Icon: z.string().nullable(),
+  Hidden: z.number(),
+  CompletionStatusId: z.string().nullable(),
   ContentHash: z.string(),
 });
 
@@ -30,6 +32,7 @@ export const fullGameSchema = z.object({
   Publishers: z.array(z.string()),
   Genres: z.array(z.string()),
   Platforms: z.array(z.string()),
+  CompletionStatusId: z.string().nullable(),
 });
 
 export const gameManifestDataSchema = z.array(

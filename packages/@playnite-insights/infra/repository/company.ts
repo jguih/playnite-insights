@@ -1,107 +1,125 @@
-import type { CompanyRepository, LogService } from "@playnite-insights/core";
-import { companySchema, type Company } from "@playnite-insights/lib";
-import type { DatabaseSync } from "node:sqlite";
-import { getDb as _getDb } from "../database";
-import { defaultLogger } from "../services";
+import type { CompanyRepository } from "@playnite-insights/core";
+import { companySchema, type Company } from "@playnite-insights/lib/client";
 import z from "zod";
-
-type CompanyRepositoryDeps = {
-  getDb: () => DatabaseSync;
-  logService: LogService;
-};
-
-const defaultDeps: Required<CompanyRepositoryDeps> = {
-  getDb: _getDb,
-  logService: defaultLogger,
-};
+import {
+  getDefaultRepositoryDeps,
+  repositoryCall,
+  type BaseRepositoryDeps,
+} from "./base";
 
 export const makeCompanyRepository = (
-  deps: Partial<CompanyRepositoryDeps> = {}
+  deps: Partial<BaseRepositoryDeps> = {}
 ): CompanyRepository => {
-  const { getDb, logService } = { ...defaultDeps, ...deps };
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+  const TABLE_NAME = "company";
 
   const add = (company: Company): boolean => {
-    const db = getDb();
     const query = `
-    INSERT INTO company
-      (Id, Name)
-    VALUES
-      (?, ?);
-  `;
-    try {
-      const stmt = db.prepare(query);
-      stmt.run(company.Id, company.Name);
-      logService.debug(`Added company ${company.Name}`);
-      return true;
-    } catch (error) {
-      logService.error(`Failed to add company ${company.Name}`, error as Error);
-      return false;
-    }
+      INSERT INTO ${TABLE_NAME}
+        (Id, Name)
+      VALUES
+        (?, ?);
+      `;
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmt = db.prepare(query);
+        stmt.run(company.Id, company.Name);
+        logService.debug(`Created company (${company.Id}, ${company.Name})`);
+        return true;
+      },
+      `add()`
+    );
+  };
+
+  const upsertMany: CompanyRepository["upsertMany"] = (companies) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const query = `
+          INSERT INTO ${TABLE_NAME}
+            (Id, Name)
+          VALUES
+            (?, ?)
+          ON CONFLICT DO UPDATE SET
+            Name = excluded.Name;
+          `;
+        const stmt = db.prepare(query);
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const company of companies) stmt.run(company.Id, company.Name);
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `upsertMany(${companies.length} companies)`
+    );
   };
 
   const exists = (company: Company): boolean => {
-    const db = getDb();
     const query = `
-    SELECT EXISTS (
-      SELECT 1 FROM company 
-      WHERE Id = (?)
-    );
-  `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.get(company.Id);
-      if (result) {
-        return Object.values(result)[0] === 1;
-      }
-      return false;
-    } catch (error) {
-      logService.error(
-        `Failed to check if company ${company.Name} exists`,
-        error as Error
+      SELECT EXISTS (
+        SELECT 1 FROM company 
+        WHERE Id = (?)
       );
-      return false;
-    }
+    `;
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmt = db.prepare(query);
+        const result = stmt.get(company.Id);
+        if (result) {
+          return Object.values(result)[0] === 1;
+        }
+        return false;
+      },
+      `exists(${company.Id}, ${company.Name})`
+    );
   };
 
   const update = (company: Company): boolean => {
-    const db = getDb();
     const query = `
-    UPDATE company
-    SET
-      Name = ?
-    WHERE Id = ?;
-  `;
-    try {
-      const stmt = db.prepare(query);
-      stmt.run(company.Name, company.Id);
-      logService.debug(`Updated data for company ${company.Name}`);
-      return true;
-    } catch (error) {
-      logService.error(
-        `Failed to update company ${company.Name}`,
-        error as Error
-      );
-      return false;
-    }
+      UPDATE company
+      SET
+        Name = ?
+      WHERE Id = ?;
+    `;
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmt = db.prepare(query);
+        stmt.run(company.Name, company.Id);
+        logService.debug(`Updated company (${company.Id}, ${company.Name})`);
+        return true;
+      },
+      `update(${company.Id}, ${company.Name})`
+    );
   };
 
   const getById = (id: string): Company | undefined => {
-    const db = getDb();
     const query = `
       SELECT *
       FROM company
       WHERE Id = ?;
     `;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.get(id);
-      const company = z.optional(companySchema).parse(result);
-      logService.debug(`Found company: ${company?.Name}`);
-      return company;
-    } catch (error) {
-      logService.error(`Failed to get company with if ${id}`, error as Error);
-      return;
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmt = db.prepare(query);
+        const result = stmt.get(id);
+        const company = z.optional(companySchema).parse(result);
+        logService.debug(`Found company: ${company?.Name}`);
+        return company;
+      },
+      `getById(${id})`
+    );
   };
 
   const hasChanges = (oldCompany: Company, newCompany: Company): boolean => {
@@ -109,21 +127,24 @@ export const makeCompanyRepository = (
   };
 
   const all: CompanyRepository["all"] = () => {
-    const db = getDb();
     const query = `SELECT * FROM company ORDER BY Name ASC`;
-    try {
-      const stmt = db.prepare(query);
-      const result = stmt.all();
-      const companys = z.optional(z.array(companySchema)).parse(result);
-      logService.debug(`Found ${companys.length} companies`);
-      return companys;
-    } catch (error) {
-      logService.error(`Failed to get company list`, error as Error);
-    }
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmt = db.prepare(query);
+        const result = stmt.all();
+        const companies = z.optional(z.array(companySchema)).parse(result);
+        logService.debug(`Found ${companies?.length ?? 0} companies`);
+        return companies;
+      },
+      `all()`
+    );
   };
 
   return {
     add,
+    upsertMany,
     update,
     exists,
     getById,

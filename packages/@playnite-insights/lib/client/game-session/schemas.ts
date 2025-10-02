@@ -1,4 +1,5 @@
 import z from "zod";
+import { ISODateSchema } from "../schemas";
 
 export const sessionStatus = {
   inProgress: "in_progress",
@@ -21,12 +22,14 @@ export const gameSessionSchema = z.object({
 });
 
 export const openGameSessionSchema = z.object({
+  ClientUtcNow: ISODateSchema,
   SessionId: z.string(),
   GameId: z.string(),
   StartTime: z.string(),
 });
 
 export const closeGameSessionSchema = z.object({
+  ClientUtcNow: ISODateSchema,
   SessionId: z.string(),
   GameId: z.string(),
   StartTime: z.string(),

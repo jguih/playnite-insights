@@ -7,41 +7,101 @@ import { build, files, version } from '$service-worker';
 
 const sw = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self));
 
-const CACHE = `cache-${version}`;
-const GAMES_CACHE = `games-data-${version}`;
-const COMPANY_CACHE = `company-data-${version}`;
-const DASH_CACHE = `dashboard-data-${version}`;
-const GENRE_CACHE = `genre-data-${version}`;
-const PLATFORM_CACHE = `platform-data-${version}`;
-const RECENT_SESSION_CACHE = `recent-session-data-${version}`;
-const ALL_SESSION_CACHE = `all-session-cache-${version}`;
-const cacheKeysArr = [
-  CACHE, 
-  GAMES_CACHE, 
-  COMPANY_CACHE, 
-  DASH_CACHE, 
-  GENRE_CACHE, 
-  PLATFORM_CACHE, 
-  RECENT_SESSION_CACHE, 
-  ALL_SESSION_CACHE
+/**
+ * @param {string} name
+ */
+const cacheKey = (name) => `${name}-data-${version}`;
+
+const CacheKeys = {
+	APP: cacheKey('app'),
+	GAMES: cacheKey('games'),
+	COMPANY: cacheKey('company'),
+	GENRE: cacheKey('genre'),
+	PLATFORM: cacheKey('platform'),
+	RECENT_SESSION: cacheKey('recent-session'),
+	LIBRARY_METRICS: cacheKey('library-metrics'),
+	SCREENSHOT_METADATA: cacheKey('screenshot_metadata'),
+};
+
+const cacheKeysArr = Object.values(CacheKeys);
+
+/**
+ * @typedef {{
+ *  type: string
+ * }} UpdateMessage
+ */
+
+/**
+ * @typedef {[
+ *   string,                // prefix (e.g. "/api/game")
+ *   string,                // cache key
+ *   UpdateMessage,      // update message
+ *   (request: Request, cacheName: string, updateMessage?: UpdateMessage) => Promise<Response> // strategy fn
+ * ]} ApiRoute
+ */
+
+/**
+ *  @type {ApiRoute[]}
+ */
+const apiRoutes = [
+	['/api/game', CacheKeys.GAMES, { type: 'GAMES_UPDATE' }, staleWhileRevalidate],
+	['/api/company', CacheKeys.COMPANY, { type: 'COMPANY_UPDATE' }, staleWhileRevalidate],
+	['/api/genre', CacheKeys.GENRE, { type: 'GENRE_UPDATE' }, staleWhileRevalidate],
+	['/api/platform', CacheKeys.PLATFORM, { type: 'PLATFORM_UPDATE' }, staleWhileRevalidate],
+	[
+		'/api/session/recent',
+		CacheKeys.RECENT_SESSION,
+		{ type: 'RECENT_SESSION_UPDATE' },
+		networkFirst,
+	],
+	[
+		'/api/library/metrics',
+		CacheKeys.LIBRARY_METRICS,
+		{ type: 'LIBRARY_METRICS_UPDATE' },
+		staleWhileRevalidate,
+	],
+	[
+		'/api/assets/image/screenshot/all',
+		CacheKeys.SCREENSHOT_METADATA,
+		{ type: 'ALL_SCREENSHOT_UPDATE' },
+		staleWhileRevalidate,
+	],
 ];
+
+/**
+ * @type {string[]}
+ */
+const shellRoutes = ['/', '/game', '/game/journal', '/dash', '/settings'];
 
 const ASSETS = [
 	...build, // the app itself
-	...files  // everything in `static`
+	...files, // everything in `static`
 ];
 
-self.addEventListener('install', (event) => {
+sw.addEventListener('install', (event) => {
 	// Create a new cache and add all files to it
 	async function addFilesToCache() {
-		const cache = await caches.open(CACHE);
+		const cache = await caches.open(CacheKeys.APP);
 		await cache.addAll(ASSETS);
+		for (const shellRoute of shellRoutes) {
+			try {
+				const response = await fetch(shellRoute);
+				if (!(response instanceof Response)) {
+					throw new Error('Invalid response from fetch');
+				}
+				if (shouldCache(response)) {
+					await cache.put(shellRoute, response.clone());
+				}
+			} catch (error) {
+				console.error(`Failed to pre-cache shell route ${shellRoute}`, error);
+			}
+		}
 	}
 
 	event.waitUntil(addFilesToCache());
 });
 
-self.addEventListener('activate', (event) => {
+sw.addEventListener('activate', (event) => {
 	// Remove previous cached data from disk
 	async function deleteOldCaches() {
 		for (const key of await caches.keys()) {
@@ -49,137 +109,161 @@ self.addEventListener('activate', (event) => {
 		}
 	}
 
-	event.waitUntil(deleteOldCaches());
+	event.waitUntil(Promise.all([deleteOldCaches(), sw.clients.claim()]));
+});
+
+sw.addEventListener('message', (event) => {
+	if (!event.data) return;
+
+	switch (event.data.action) {
+		case 'skipWaiting': {
+			sw.skipWaiting();
+			break;
+		}
+	}
 });
 
 /**
- * 
- * @param {Request} request 
- * @param {string} cacheName
+ *
+ * @param {UpdateMessage} message
  */
-async function staleWhileRevalidate(request, cacheName) {
+function notifyClients(message) {
+	sw.clients.matchAll().then((clients) => {
+		clients.forEach((client) => {
+			client.postMessage(message);
+		});
+	});
+}
+
+/**
+ *
+ * @param {Response} response
+ */
+function shouldCache(response) {
+	return response.type !== 'opaque' && response.ok;
+}
+
+/**
+ *
+ * @param {Request} request
+ * @param {string} cacheName
+ * @param {UpdateMessage} updateMessage
+ */
+async function staleWhileRevalidate(request, cacheName, updateMessage = { type: 'UNKNOWN' }) {
 	const cache = await caches.open(cacheName);
 	const cachedResponse = await cache.match(request);
+	const cachedETag = cachedResponse?.headers.get('ETag');
 
-	// Start revalidation in the background
 	const fetchAndUpdate = fetch(request)
 		.then((networkResponse) => {
-			if (networkResponse.ok) {
+			if (shouldCache(networkResponse)) {
 				cache.put(request, networkResponse.clone());
+			}
+			const networkETag = networkResponse.headers.get('ETag');
+			if (networkResponse.ok && cachedETag && networkETag && cachedETag !== networkETag) {
+				notifyClients(updateMessage);
 			}
 			return networkResponse;
 		})
 		.catch(() => {
-			// Ignore fetch errors
+			return (
+				cachedResponse || new Response(null, { status: 503, statusText: 'Service Unavailable' })
+			);
 		});
 
-	// Respond with cache if available
-	if (cachedResponse) {
-		return cachedResponse;
-	}
-
-	// Else, wait for the network
-	return fetchAndUpdate;
+	return cachedResponse || fetchAndUpdate;
 }
 
 /**
- * @param {Request} request 
- * @param {string} cacheName 
- * @returns 
+ * @param {Request} request
+ * @param {string} cacheName
  */
+
 async function networkFirst(request, cacheName) {
 	const cache = await caches.open(cacheName);
 
 	try {
 		const networkResponse = await fetch(request);
-		if (networkResponse.ok) {
+		if (!(networkResponse instanceof Response)) {
+			throw new Error('Invalid response from fetch');
+		}
+		if (shouldCache(networkResponse)) {
 			cache.put(request, networkResponse.clone());
 		}
 		return networkResponse;
-	} catch (error) {
+	} catch {
 		// Network failed, try to return from cache
 		const cachedResponse = await cache.match(request);
 		if (cachedResponse) {
 			return cachedResponse;
 		}
 
-    console.warn(`SW failed to fetch and found no cache for ${request.url}`, err);
-		return new Response("Network error and no cache available", { status: 503 });
+		return new Response('Service Unavailable', { status: 503 });
 	}
 }
 
 /**
- * @param {Request} request 
+ *
+ * @param {string} pathname
  * @param {string} cacheName
+ * @param {Request} request
  */
-async function defaultFetchHandler(request, cacheName) {
-	const url = new URL(request.url);
+async function shellRouteStrategy(pathname, cacheName, request) {
 	const cache = await caches.open(cacheName);
-
-	if (ASSETS.includes(url.pathname)) {
-		const response = await cache.match(url.pathname);
-		if (response) return response;
-	}
-
 	try {
-		const response = await fetch(request);
-		if (response.ok) {
-			cache.put(request, response.clone());
+		const networkResponse = await fetch(request);
+		if (!(networkResponse instanceof Response)) {
+			throw new Error('Invalid response from fetch');
 		}
-		return response;
-	} catch (err) {
-		const fallback = await cache.match(request);
-		if (fallback) return fallback;
-    
-		console.warn(`SW failed to fetch and found no cache for ${event.request.url}`, err);
-		return new Response("Network error and no cache available", { status: 503 });
+		if (shouldCache(networkResponse)) {
+			cache.put(pathname, networkResponse.clone());
+		}
+		return networkResponse;
+	} catch {
+		const cachedResponse = await cache.match(pathname);
+		if (cachedResponse) {
+			return cachedResponse;
+		}
+		return new Response('Service Unavailable', { status: 503 });
 	}
 }
 
-
-self.addEventListener('fetch', (event) => {
+sw.addEventListener('fetch', async (event) => {
 	if (event.request.method !== 'GET') return;
+	if (event.request.headers.get('Accept')?.includes('text/event-stream')) return;
 
 	const url = new URL(event.request.url);
 
-	if (url.pathname.startsWith('/api/game')) {
-		event.respondWith(networkFirst(event.request, GAMES_CACHE));
+	// Always return cached assets
+	if (ASSETS.includes(url.pathname)) {
+		const serveCachedAssets = async () => {
+			const cache = await caches.open(CacheKeys.APP);
+			const response = await cache.match(url.pathname);
+			if (response) return response;
+			return fetch(event.request);
+		};
+		event.respondWith(serveCachedAssets());
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/dash')) {
-		event.respondWith(networkFirst(event.request, DASH_CACHE));
+	if (shellRoutes.includes(url.pathname)) {
+		event.respondWith(shellRouteStrategy(url.pathname, CacheKeys.APP, event.request));
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/company')) {
-		event.respondWith(networkFirst(event.request, COMPANY_CACHE));
+	// Network first for everything that is not from api
+	if (!url.pathname.startsWith('/api')) {
+		event.respondWith(networkFirst(event.request, CacheKeys.APP));
 		return;
 	}
 
-  if (url.pathname.startsWith('/api/genre')) {
-		event.respondWith(networkFirst(event.request, GENRE_CACHE));
-		return;
+	// Handle api caching
+	for (const [prefix, cacheKey, updateMessage, strategy] of apiRoutes) {
+		if (url.pathname.startsWith(prefix)) {
+			event.respondWith(strategy(event.request, cacheKey, updateMessage));
+			return;
+		}
 	}
 
-  if (url.pathname.startsWith('/api/platform')) {
-		event.respondWith(networkFirst(event.request, PLATFORM_CACHE));
-		return;
-	}
-
-  if (url.pathname.startsWith('/api/session')) {
-    const date = url.searchParams.get('date');
-    
-    if (date === 'today') {
-      event.respondWith(networkFirst(event.request, RECENT_SESSION_CACHE));
-      return;
-    }
-    
-    if (!date) {
-      event.respondWith(networkFirst(event.request, ALL_SESSION_CACHE));
-      return;
-    }
-  }
-
-	event.respondWith(defaultFetchHandler(event.request, CACHE));
+	return;
 });

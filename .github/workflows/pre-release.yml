@@ -1,0 +1,28 @@
+name: Pre release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ^10.13.0
+
+      - name: Build Svelte App image
+        run: |
+          docker build \
+            --target prod \
+            -t play-atlas:pr-check .

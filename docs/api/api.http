@@ -1,3 +1,19 @@
+### Get library manifest
+GET {{protocol}}://{{host}}/api/sync/manifest
+Content-Type: {{contentType}}
+
+### Run action on Playnite Host
+POST {{protocol}}://{{host}}/api/action
+Content-Type: {{contentType}}
+
+{
+  "action": "screenshot"
+}
+
+### Get all available screenshots
+GET {{protocol}}://{{host}}/api/assets/image/screenshot/all
+Content-Type: {{contentType}}
+
 ### Get all companies
 GET {{protocol}}://{{host}}/api/company
 Content-Type: {{contentType}}
@@ -14,8 +30,8 @@ Content-Type: {{contentType}}
 GET {{protocol}}://{{host}}/api/game
 Content-Type: {{contentType}}
 
-### Get dashboard page data
-GET {{protocol}}://{{host}}/api/dash
+### Get library metrics
+GET {{protocol}}://{{host}}/api/library/metrics
 Content-Type: {{contentType}}
 
 ### Get all game sessions
@@ -23,28 +39,30 @@ GET {{protocol}}://{{host}}/api/session
 Content-Type: {{contentType}}
 
 ### Get all game sessions for today
-GET {{protocol}}://{{host}}/api/session?date=today
+GET {{protocol}}://{{host}}/api/session/recent
 Content-Type: {{contentType}}
 
-### Create a session
-POST {{protocol}}://{{host}}/api/session/open
+### Get all game sessions for today
+GET {{protocol}}://{{host}}/api/extension-registration
 Content-Type: {{contentType}}
 
-{
-  "SessionId": "{{$uuid}}",
-  "GameId": "35ae3f82-98d6-42f9-933e-243c26b48147",
-  "StartTime": "2025-07-28T23:51:35.5476026Z"
-}
-
-### Close a session
-POST {{protocol}}://{{host}}/api/session/close
+### Register instance
+POST {{protocol}}://{{host}}/api/auth/register
 Content-Type: {{contentType}}
 
 {
-  "SessionId": "{{$uuid}}",
-  "GameId": "35ae3f82-98d6-42f9-933e-243c26b48147",
-  "StartTime": "2025-07-28T23:51:35.5476026Z",
-  "EndTime": "2025-07-28T23:59:35.5476026Z",
-  "Duration": 200,
-  "Status": "closed"
+  "password": "test123"
 }
+
+### Login instance
+POST {{protocol}}://{{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "password": "test123"
+}
+
+### Check health
+GET {{protocol}}://{{host}}/api/health
+Content-Type: {{contentType}}
+Authorization: Bearer b0db5ba50aae2170c5a887b64969f35b93c2027ad1c5e9c027d31bd50e2532f9
