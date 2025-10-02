@@ -16,4 +16,7 @@ export type LoginInstanceCommand = z.infer<
 
 export const loginInstanceResponseSchema = z.object({
   sessionId: z.string(),
+  syncId: z.string(),
 });
+
+export type LoginInstanceResponse = z.infer<typeof loginInstanceResponseSchema>;
