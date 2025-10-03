@@ -5,8 +5,10 @@ import {
 	type ApiErrorResponse,
 	type SynchronizationId,
 } from '@playnite-insights/lib/client';
+import { getRequestDescription } from './authentication';
 
-export const ensureSyncId = async (request: Request): Promise<SynchronizationId> => {
+export const ensureSyncId = async (request: Request, url: URL): Promise<SynchronizationId> => {
+	const requestDescription = getRequestDescription(request, url);
 	const syncId = request.headers.get(syncIdHeader);
 	const existingSyncId = services.synchronizationIdRepository.get();
 	if (!syncId || !existingSyncId || syncId !== existingSyncId.SyncId) {
@@ -15,5 +17,6 @@ export const ensureSyncId = async (request: Request): Promise<SynchronizationId>
 		};
 		throw new ApiError(response, 'Sync Id is invalid or missing', 409);
 	}
+	services.log.info(`${requestDescription}: Sync request accepted`);
 	return existingSyncId;
 };

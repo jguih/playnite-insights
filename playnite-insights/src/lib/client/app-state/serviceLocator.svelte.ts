@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import {
 	FetchClient,
 	GameNoteFactory,
+	syncIdHeader,
 	SyncQueueFactory,
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
@@ -57,7 +58,9 @@ export class ClientServiceLocator {
 	// Factories
 	#syncQueueFactory: SyncQueueFactory | null = null;
 	#gameNoteFactory: GameNoteFactory | null = null;
+
 	#sessionId: string | null = null;
+	#syncId: string | null = null;
 
 	constructor() {}
 
@@ -81,10 +84,19 @@ export class ClientServiceLocator {
 		return this.#sessionId;
 	};
 
+	#getSyncId = async (): Promise<string | null> => {
+		if (this.#syncId) return this.#syncId;
+		const syncId = await this.keyValueRepository.getAsync({ key: 'sync-id' });
+		if (syncId) this.#syncId = syncId;
+		return this.#syncId;
+	};
+
 	#getHttpClientGlobalHeaders = async (): Promise<Headers> => {
 		const headers = new Headers();
 		const sessionId = await this.#getSessionId();
+		const syncId = await this.#getSyncId();
 		if (sessionId) headers.set('Authorization', `Bearer ${sessionId}`);
+		if (syncId) headers.set(syncIdHeader, syncId);
 		return headers;
 	};
 

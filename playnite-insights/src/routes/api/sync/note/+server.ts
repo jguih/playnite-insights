@@ -3,19 +3,20 @@ import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
 import { ensureSyncId } from '$lib/server/api/synchronization';
 import {
-	createGameNoteCommandSchema,
-	createGameNoteResponseSchema,
-	emptyResponse,
-	getAllGameNotesResponseSchema,
-	updateGameNoteCommandSchema,
-	updateGameNoteResponseSchema,
-	type ApiErrorResponse,
-	type GameNote,
+  createGameNoteCommandSchema,
+  createGameNoteResponseSchema,
+  emptyResponse,
+  getAllGameNotesResponseSchema,
+  updateGameNoteCommandSchema,
+  updateGameNoteResponseSchema,
+  type ApiErrorResponse,
+  type GameNote,
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
+    await ensureSyncId(request, url);
 		const lastSync = url.searchParams.get('lastSync')?.trim();
 		const ifNoneMatch = request.headers.get('if-none-match');
 		let data: GameNote[] = [];
@@ -53,7 +54,7 @@ export const GET: RequestHandler = ({ request, url }) =>
  */
 export const POST: RequestHandler = async ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
-		await ensureSyncId(request);
+		await ensureSyncId(request, url);
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);
@@ -77,6 +78,7 @@ export const POST: RequestHandler = async ({ request, url }) =>
  */
 export const PUT: RequestHandler = async ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
+    await ensureSyncId(request, url);
 		const jsonBody = await request.json();
 		const command = updateGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);
