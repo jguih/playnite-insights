@@ -51,13 +51,6 @@
 		} finally {
 			removeLoading('applicationSettings');
 		}
-		try {
-			addLoading('processQueue');
-			await locator.syncQueue.processQueueAsync();
-		} catch {
-		} finally {
-			removeLoading('processQueue');
-		}
 		loading = new Set();
 	};
 
@@ -94,6 +87,7 @@
 		if (!page.url.pathname.startsWith('/auth')) {
 			locator.eventSourceManager.connect().then(() => {
 				locator.loadStoresData();
+				locator.syncQueue.processQueueAsync();
 			});
 		}
 

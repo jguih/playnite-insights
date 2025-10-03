@@ -129,6 +129,7 @@ export class ClientServiceLocator {
 				indexedDbSignal: this.dbSignal,
 				syncQueueRepository: this.syncQueueRepository,
 				httpClient: this.#httpClient,
+				serverHeartbeat: this.serverHeartbeat,
 			});
 		}
 		return this.#syncQueue;

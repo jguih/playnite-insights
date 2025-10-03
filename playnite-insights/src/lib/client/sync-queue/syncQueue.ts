@@ -17,11 +17,13 @@ import { IndexedDBNotInitializedError } from '../db/errors/indexeddbNotInitializ
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { runRequest, runTransaction } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
+import type { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte';
 
 export type SyncQueueDeps = {
 	syncQueueRepository: SyncQueueRepository;
 	httpClient: IFetchClient | null;
 	indexedDbSignal: IndexedDbSignal;
+	serverHeartbeat: ServerHeartbeat;
 };
 
 export class SyncQueue {
@@ -29,11 +31,13 @@ export class SyncQueue {
 	#httpClient: SyncQueueDeps['httpClient'];
 	#indexedDbSignal: SyncQueueDeps['indexedDbSignal'];
 	#permanentFailureCodes = [400, 401, 403, 404, 409, 422, 501];
+	#serverHeartbeat: ServerHeartbeat;
 
 	constructor(deps: SyncQueueDeps) {
 		this.#syncQueueRepository = deps.syncQueueRepository;
 		this.#httpClient = deps.httpClient;
 		this.#indexedDbSignal = deps.indexedDbSignal;
+		this.#serverHeartbeat = deps.serverHeartbeat;
 	}
 
 	/**
@@ -193,6 +197,7 @@ export class SyncQueue {
 
 	processQueueAsync = async () => {
 		try {
+			if (!this.#serverHeartbeat.isAlive) return;
 			const queueItems = await this.#syncQueueRepository.getAllAsync();
 			for (const queueItem of queueItems) {
 				if (queueItem.Retries && queueItem.Retries >= 100) continue;
