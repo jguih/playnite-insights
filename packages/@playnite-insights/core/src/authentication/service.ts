@@ -190,7 +190,12 @@ export const makeAuthenticationService = ({
   const registerInstanceAsync: AuthenticationService["registerInstanceAsync"] =
     async (password) => {
       const existing = instanceAuthenticationRepository.get();
-      if (existing) throw new ApiError("Instance password already set.", 400);
+      if (existing)
+        throw new ApiError(
+          { error: { code: "instance_already_registered" } },
+          "Instance already registered",
+          400
+        );
       const { hash, salt } = await cryptographyService.hashPasswordAsync(
         password
       );
@@ -208,12 +213,22 @@ export const makeAuthenticationService = ({
   const loginInstanceAsync: AuthenticationService["loginInstanceAsync"] =
     async (password) => {
       const existing = instanceAuthenticationRepository.get();
-      if (!existing) throw new ApiError("Instance not registered", 403);
+      if (!existing)
+        throw new ApiError(
+          { error: { code: "instance_not_registered" } },
+          "Instance not registered",
+          403
+        );
       const isValid = cryptographyService.verifyPassword(password, {
         hash: existing.PasswordHash,
         salt: existing.Salt,
       });
-      if (!isValid) throw new ApiError("Invalid credentials", 403);
+      if (!isValid)
+        throw new ApiError(
+          { error: { code: "not_authorized" } },
+          "Invalid credentials",
+          403
+        );
       const now = new Date();
       const sessionId = cryptographyService.createSessionId();
       const newSession: InstanceSession = {

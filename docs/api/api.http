@@ -65,4 +65,4 @@ Content-Type: {{contentType}}
 ### Check health
 GET {{protocol}}://{{host}}/api/health
 Content-Type: {{contentType}}
-Authorization: Bearer b0db5ba50aae2170c5a887b64969f35b93c2027ad1c5e9c027d31bd50e2532f9
+Authorization: Bearer 2d2749b736fda1e2c9387e4f16b4a47a80e25eb2d42c2da9150c71bb17ca4033

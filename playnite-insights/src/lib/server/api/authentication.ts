@@ -49,7 +49,7 @@ export const withExtensionAuth = async (
 				break;
 			}
 		}
-		return cb(rawBody);
+		return await cb(rawBody);
 	} catch (error) {
 		return handleApiError(error, requestDescription);
 	}
@@ -71,7 +71,8 @@ export const withInstanceAuth = async (
 		if (!passThroughAuth && !verify.isAuthorized) {
 			return json({ error: { code: verify.code } }, { status: 403 });
 		}
-		return cb(verify.isAuthorized);
+		const result = await cb(verify.isAuthorized);
+		return result;
 	} catch (error) {
 		return handleApiError(error, requestDescription);
 	}

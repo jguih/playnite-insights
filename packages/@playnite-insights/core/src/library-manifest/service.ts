@@ -69,9 +69,14 @@ export const makeLibraryManifestService = ({
     } catch (error) {
       logService.error("Failed to write manifest.json", error);
       if (error instanceof ApiError) throw error;
-      throw new ApiError("Failed to write manifest.json", 500, {
-        cause: error,
-      });
+      throw new ApiError(
+        { error: { code: "internal_error" } },
+        "Failed to write manifest.json",
+        500,
+        {
+          cause: error,
+        }
+      );
     }
   };
 

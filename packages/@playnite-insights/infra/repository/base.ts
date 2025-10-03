@@ -1,5 +1,5 @@
 import type { LogService } from "@playnite-insights/core";
-import { ApiError, ValidationError } from "@playnite-insights/lib/client";
+import { ApiError } from "@playnite-insights/lib/client";
 import type { DatabaseSync } from "node:sqlite";
 import { ZodError } from "zod";
 import { getDb as _getDb } from "../database/database";
@@ -44,8 +44,24 @@ export const repositoryCall = <T>(
     );
     if (error instanceof ApiError) throw error;
     if (error instanceof ZodError) {
-      throw new ValidationError({ details: error.errors });
+      throw new ApiError(
+        {
+          error: {
+            code: "validation_error",
+            issues: error.issues.map((issue) => ({
+              path: issue.path.join("."),
+              message: issue.message,
+            })),
+          },
+        },
+        "Validation Error"
+      );
     }
-    throw new ApiError("SQLite database error", 500, { cause: error });
+    throw new ApiError(
+      { error: { code: "internal_error" } },
+      "SQLite database error",
+      500,
+      { cause: error }
+    );
   }
 };

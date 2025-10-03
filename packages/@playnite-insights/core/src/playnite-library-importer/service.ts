@@ -289,13 +289,31 @@ export const makePlayniteLibraryImporterService = ({
             await Promise.all(ctx.filePromises);
 
             if (ctx.uploadCount === 0)
-              throw new ApiError("No images uploaded", 400);
-            if (!ctx.gameId) throw new ApiError("Missing gameId", 400);
+              throw new ApiError(
+                { error: { code: "bad_request" } },
+                "No images uploaded",
+                400
+              );
+            if (!ctx.gameId)
+              throw new ApiError(
+                { error: { code: "bad_request" } },
+                "Missing gameId",
+                400
+              );
             if (!ctx.mediaFilesHash)
-              throw new ApiError("Missing media file hash", 400);
+              throw new ApiError(
+                { error: { code: "bad_request" } },
+                "Missing media file hash",
+                400
+              );
 
             ctx.game = playniteGameRepository.getById(ctx.gameId) ?? null;
-            if (!ctx.game) throw new ApiError("Game not found", 404);
+            if (!ctx.game)
+              throw new ApiError(
+                { error: { code: "not_found" } },
+                "Game not found",
+                404
+              );
 
             const canonicalHash = createHash("sha256");
             canonicalHash.update(Buffer.from(ctx.gameId, "utf-8"));
@@ -315,6 +333,7 @@ export const makePlayniteLibraryImporterService = ({
                 `${requestDescription}: Request rejected bacause calculated content hash does not match received one`
               );
               throw new ApiError(
+                { error: { code: "not_authorized" } },
                 "Request rejected bacause calculated content hash does not match received one",
                 403
               );

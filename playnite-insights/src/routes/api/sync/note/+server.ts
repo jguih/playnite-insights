@@ -1,6 +1,7 @@
 import { services } from '$lib';
 import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
+import { ensureSyncId } from '$lib/server/api/synchronization';
 import {
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
@@ -52,6 +53,7 @@ export const GET: RequestHandler = ({ request, url }) =>
  */
 export const POST: RequestHandler = async ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
+		await ensureSyncId(request);
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.noteRepository.getById(command.Id);

@@ -13,7 +13,8 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		const command = registerInstanceCommandSchema.parse(jsonBody);
 		const sessionId = await services.authentication.loginInstanceAsync(command.password);
 		const syncId = services.synchronizationIdRepository.get();
-		if (!syncId) throw new ApiError(`Synchronization id not found`, 500);
+		if (!syncId)
+			throw new ApiError({ error: { code: 'not_found' } }, `Synchronization id not found`, 404);
 		services.log.info(`New instance login`);
 		const response: LoginInstanceResponse = {
 			sessionId,
