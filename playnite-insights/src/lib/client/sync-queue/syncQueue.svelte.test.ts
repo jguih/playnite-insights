@@ -14,7 +14,7 @@ import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 import { type IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
-import { SyncQueue } from './syncQueue';
+import { SyncQueue } from './syncQueue.svelte';
 
 const fakeFetchClient = {
 	httpGetAsync: vi.fn(),

@@ -29,7 +29,8 @@
 
 	let currentLocale = $state(getLocale());
 	const locator = getLocatorContext();
-	const { extensionRegistrationStore, eventSourceManager, applicationSettingsStore } = locator;
+	const { extensionRegistrationStore, eventSourceManager, applicationSettingsStore, syncQueue } =
+		locator;
 	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
 	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
 	let registrations = $derived(extensionRegistrationStore.listSignal);
@@ -276,19 +277,19 @@
 			</label>
 		</ConfigSection>
 		<ConfigSection title={m.settings_sync_section_title()}>
-			<p class="text-sm">
-				{m.settings_sync_section_summary_paragraph1()}
-			</p>
-			<p class="mb-4 mt-2 text-sm">
-				{m.settings_sync_section_summary_paragraph2()}
-			</p>
-			<SolidButton
-				class={['w-full']}
-				onclick={handleOnDataSync}
-				disabled={!locator.serverHeartbeat.isAlive}
-			>
-				{m.settings_sync_section_label_sync()}
-			</SolidButton>
+			<div class="mb-2">
+				{#if syncQueue.queueStatus === 'OK'}
+					<h2 class="text-success-light-fg">
+						{syncQueue.queueStatusText}
+						<CheckCircle class={['size-sm inline-block']} />
+					</h2>
+				{:else if syncQueue.queueStatus === 'NOT_OK'}
+					<h2 class="text-warning-light-fg">
+						{syncQueue.queueStatusText}
+						<AlertCircle class={['size-sm inline-block']} />
+					</h2>
+				{/if}
+			</div>
 		</ConfigSection>
 		<ConfigSection title={m.settings_interface_section_title()}>
 			<label

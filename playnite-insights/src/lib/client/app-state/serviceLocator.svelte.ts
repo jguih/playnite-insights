@@ -14,7 +14,7 @@ import { EventSourceManager } from '../event-source-manager/eventSourceManager.s
 import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte';
 import { InstanceManager } from '../instanceManager.svelte';
 import { ServiceWorkerManager } from '../serviceWorkerManager.svelte';
-import { SyncQueue } from '../sync-queue/syncQueue';
+import { SyncQueue } from '../sync-queue/syncQueue.svelte';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { IndexedDbManager, type IndexedDbSignal } from './indexeddbManager.svelte';
 import { ApplicationSettingsStore } from './stores/applicationSettingsStore.svelte';
@@ -129,7 +129,6 @@ export class ClientServiceLocator {
 				indexedDbSignal: this.dbSignal,
 				syncQueueRepository: this.syncQueueRepository,
 				httpClient: this.#httpClient,
-				serverHeartbeat: this.serverHeartbeat,
 			});
 		}
 		return this.#syncQueue;

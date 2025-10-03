@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import {
 	apiErrorSchema,
 	createGameNoteCommandSchema,
@@ -17,13 +18,11 @@ import { IndexedDBNotInitializedError } from '../db/errors/indexeddbNotInitializ
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { runRequest, runTransaction } from '../db/indexeddb';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
-import type { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte';
 
 export type SyncQueueDeps = {
 	syncQueueRepository: SyncQueueRepository;
 	httpClient: IFetchClient | null;
 	indexedDbSignal: IndexedDbSignal;
-	serverHeartbeat: ServerHeartbeat;
 };
 
 export class SyncQueue {
@@ -31,13 +30,15 @@ export class SyncQueue {
 	#httpClient: SyncQueueDeps['httpClient'];
 	#indexedDbSignal: SyncQueueDeps['indexedDbSignal'];
 	#permanentFailureCodes = [400, 401, 403, 404, 409, 422, 501];
-	#serverHeartbeat: ServerHeartbeat;
+	#queueStatusText: string;
+	#queueStatus: 'OK' | 'NOT_OK' | 'PENDING';
 
 	constructor(deps: SyncQueueDeps) {
 		this.#syncQueueRepository = deps.syncQueueRepository;
 		this.#httpClient = deps.httpClient;
 		this.#indexedDbSignal = deps.indexedDbSignal;
-		this.#serverHeartbeat = deps.serverHeartbeat;
+		this.#queueStatusText = $state('');
+		this.#queueStatus = $state('PENDING');
 	}
 
 	/**
@@ -197,19 +198,48 @@ export class SyncQueue {
 
 	processQueueAsync = async () => {
 		try {
-			if (!this.#serverHeartbeat.isAlive) return;
 			const queueItems = await this.#syncQueueRepository.getAllAsync();
+
+			if (queueItems.length === 0) {
+				this.#queueStatus = 'OK';
+				this.#queueStatusText = m.settings_sync_section_sync_queue_ok();
+				return;
+			}
+
+			let failed = 0;
 			for (const queueItem of queueItems) {
-				if (queueItem.Retries && queueItem.Retries >= 100) continue;
+				if (queueItem.Status === 'failed') failed++;
+				if (queueItem.Retries && queueItem.Retries >= 100) {
+					continue;
+				}
 				switch (queueItem.Entity) {
 					case 'gameNote':
 						await this.processGameNoteAsync(queueItem);
 				}
 			}
+
+			if (failed > 0) {
+				this.#queueStatus = 'NOT_OK';
+				this.#queueStatusText = m.settings_sync_section_failed_items_in_sync_queue({
+					count: failed,
+				});
+			} else {
+				this.#queueStatus = 'OK';
+				this.#queueStatusText = m.settings_sync_section_sync_queue_ok();
+			}
+
 			return true;
 		} catch (error) {
 			console.error(error);
 			return false;
 		}
 	};
+
+	get queueStatusText() {
+		return this.#queueStatusText;
+	}
+
+	get queueStatus() {
+		return this.#queueStatus;
+	}
 }
