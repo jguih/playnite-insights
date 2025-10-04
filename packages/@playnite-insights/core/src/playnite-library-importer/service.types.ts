@@ -10,11 +10,11 @@ import type {
   PlayniteGameRepository,
   PlayniteLibraryMetricsRepository,
 } from "../types";
-import { type CompletionStatusRepository } from "../types/completion-status.types";
-import { type FileSystemService } from "../types/file-system.types";
-import { type GameSessionRepository } from "../types/game-session.types";
-import { type LogService } from "../types/log.types";
-import { type StreamUtilsService } from "../types/stream-utils.types";
+import { type CompletionStatusRepository } from "../types/completion-status-repository";
+import { type FileSystemService } from "../types/file-system-service";
+import { type GameSessionRepository } from "../types/game-session-repository";
+import { type LogService } from "../types/log-service";
+import { type StreamUtilsService } from "../types/stream-utils-service";
 
 export type PlayniteLibraryImporterServiceDeps = {
   playniteGameRepository: PlayniteGameRepository;

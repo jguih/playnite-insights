@@ -7,16 +7,18 @@ import type {
   CryptographyService,
   ExtensionRegistrationRepository,
   GenreRepository,
+  InstanceAuthenticationRepository,
+  InstanceSessionsRepository,
   PlatformRepository,
   PlayniteGameRepository,
   PlayniteLibraryMetricsRepository,
   SignatureService,
 } from "../src/types";
-import { CompletionStatusRepository } from "../src/types/completion-status.types";
-import type { FileSystemService } from "../src/types/file-system.types";
-import type { GameSessionRepository } from "../src/types/game-session.types";
-import type { LogService } from "../src/types/log.types";
-import type { StreamUtilsService } from "../src/types/stream-utils.types";
+import { CompletionStatusRepository } from "../src/types/completion-status-repository";
+import type { FileSystemService } from "../src/types/file-system-service";
+import type { GameSessionRepository } from "../src/types/game-session-repository";
+import type { LogService } from "../src/types/log-service";
+import type { StreamUtilsService } from "../src/types/stream-utils-service";
 
 export const makeMocks = () => {
   const logService = {
@@ -131,6 +133,16 @@ export const makeMocks = () => {
     upsertMany: vi.fn(),
   } satisfies CompanyRepository;
 
+  const instanceAuthenticationRepository = {
+    get: vi.fn(),
+    set: vi.fn(),
+  } satisfies InstanceAuthenticationRepository;
+
+  const instanceSessionsRepository = {
+    add: vi.fn(),
+    getById: vi.fn(),
+  } satisfies InstanceSessionsRepository;
+
   const signatureService = {
     generateKeyPairAsync: vi.fn(),
     signAsync: vi.fn(),
@@ -157,6 +169,8 @@ export const makeMocks = () => {
     genreRepository,
     platformRepository,
     companyRepository,
+    instanceAuthenticationRepository,
+    instanceSessionsRepository,
     cryptographyService,
   };
 };

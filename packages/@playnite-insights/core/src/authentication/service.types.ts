@@ -2,12 +2,12 @@ import type {
   ApiErrorCode,
   ValidAuthenticationHeader,
 } from "@playnite-insights/lib/client";
-import type { CryptographyService } from "../types/cryptography.types";
-import type { ExtensionRegistrationRepository } from "../types/extension-registration.types";
-import type { InstanceAuthenticationRepository } from "../types/instance-authentication.types";
-import type { InstanceSessionsRepository } from "../types/instance-sessions.types";
-import type { LogService } from "../types/log.types";
-import type { SignatureService } from "../types/signature.types";
+import type { CryptographyService } from "../types/cryptography-service";
+import type { ExtensionRegistrationRepository } from "../types/extension-registration-repository";
+import type { InstanceAuthenticationRepository } from "../types/instance-authentication-repository";
+import type { InstanceSessionsRepository } from "../types/instance-sessions-repository";
+import type { LogService } from "../types/log-service";
+import type { SignatureService } from "../types/signature-service";
 
 export type AuthenticationServiceDeps = {
   extensionRegistrationRepository: ExtensionRegistrationRepository;
