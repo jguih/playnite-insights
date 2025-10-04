@@ -11,3 +11,4 @@ export * from "./platform";
 export * from "./playnite-library";
 export * from "./playnite-library-importer";
 export * from "./server-time";
+export * from "./synchronization";

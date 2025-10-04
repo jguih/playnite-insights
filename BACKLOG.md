@@ -42,6 +42,7 @@
 
 ## 📌 To Do
 
+- Fix pagination bug
 - Screenshot gallery improvements:
   - Delete images
   - Restore images from trash
