@@ -57,12 +57,43 @@ export const makeGameNoteRepository = (
     return { where: ` WHERE ${where.join(" AND ")}`, params };
   };
 
+  const queries = {
+    getById: `SELECT * FROM game_note WHERE Id = (?)`,
+    update: `
+        UPDATE game_note 
+        SET
+          Title = ?,
+          Content = ?,
+          ImagePath = ?,
+          GameId = ?,
+          SessionId = ?,
+          DeletedAt = ?,
+          CreatedAt = ?,
+          LastUpdatedAt = ?
+        WHERE Id = ?;
+        `,
+    add: `
+      INSERT INTO game_note (
+        Id, 
+        Title,
+        Content,
+        ImagePath,
+        GameId,
+        SessionId,
+        DeletedAt,
+        CreatedAt,
+        LastUpdatedAt
+      ) VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      `,
+  };
+
   const getById = (id: string): GameNote | null => {
     return repositoryCall(
       logService,
       () => {
         const db = getDb();
-        const query = `SELECT * FROM game_note WHERE Id = (?)`;
+        const query = queries.getById;
         const stmt = db.prepare(query);
         const result = stmt.get(id);
         const note = z.optional(gameNoteSchema).parse(result);
@@ -77,20 +108,7 @@ export const makeGameNoteRepository = (
       logService,
       () => {
         const db = getDb();
-        const query = `
-      INSERT INTO game_note (
-        Id, 
-        Title,
-        Content,
-        ImagePath,
-        GameId,
-        SessionId,
-        DeletedAt,
-        CreatedAt,
-        LastUpdatedAt
-      ) VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?);
-      `;
+        const query = queries.add;
         const newNote = { ...note };
         const now = new Date().toISOString();
         newNote.CreatedAt = now;
@@ -120,19 +138,7 @@ export const makeGameNoteRepository = (
       logService,
       () => {
         const db = getDb();
-        const query = `
-        UPDATE game_note 
-        SET
-          Title = ?,
-          Content = ?,
-          ImagePath = ?,
-          GameId = ?,
-          SessionId = ?,
-          DeletedAt = ?,
-          CreatedAt = ?,
-          LastUpdatedAt = ?
-        WHERE Id = ?;
-        `;
+        const query = queries.update;
         const updatedNote = { ...note };
         const now = new Date().toISOString();
         updatedNote.LastUpdatedAt = now;
@@ -193,9 +199,54 @@ export const makeGameNoteRepository = (
         logService.debug(`Found ${notes.length} notes`);
         return notes;
       },
-      `all(${JSON.stringify(args)})`
+      `all()`
     );
   };
 
-  return { add, getById, update, remove, all };
+  const reconsileFromSource: GameNoteRepository["reconsileFromSource"] = (
+    notes
+  ) => {
+    return repositoryCall(
+      logService,
+      () => {
+        const db = getDb();
+        const stmts = {
+          getById: db.prepare(queries.getById),
+          add: db.prepare(queries.add),
+          update: db.prepare(queries.update),
+        };
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const note of notes) {
+            const existing = stmts.getById.get(note.Id);
+            if (!existing) {
+              stmts.add.run(note);
+              continue;
+            }
+            const existingNote = gameNoteSchema.parse(existing);
+            if (note.LastUpdatedAt > existingNote.LastUpdatedAt) {
+              stmts.update.run(
+                note.Title,
+                note.Content,
+                note.ImagePath,
+                note.GameId,
+                note.SessionId,
+                note.DeletedAt,
+                note.CreatedAt,
+                note.LastUpdatedAt,
+                note.Id
+              );
+            }
+          }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `reconsileFromSource(${notes.length} notes)`
+    );
+  };
+
+  return { add, getById, update, remove, all, reconsileFromSource };
 };

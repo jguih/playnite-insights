@@ -1,13 +1,11 @@
-import { DatabaseSync } from "node:sqlite";
-import { existsSync } from "fs";
-import { seedDb } from "./seed.js";
-import { exit } from "process";
-import { join } from "path";
 import type { FileSystemService, LogService } from "@playnite-insights/core";
+import { DatabaseSync } from "node:sqlite";
+import { join } from "path";
+import { exit } from "process";
 
 type InitDatabaseDeps = {
   fileSystemService: FileSystemService;
-  DB_FILE: string;
+  db: DatabaseSync;
   MIGRATIONS_DIR: string;
   logService: LogService;
 };
@@ -18,23 +16,11 @@ const shouldSeedDb = () =>
     process.env.NODE_ENV === "testing");
 
 export const initDatabase = async ({
-  DB_FILE,
+  db,
   MIGRATIONS_DIR,
   logService,
   fileSystemService,
 }: InitDatabaseDeps) => {
-  try {
-    if (shouldSeedDb() && existsSync(DB_FILE)) {
-      await fileSystemService.unlink(DB_FILE);
-      logService.debug(
-        "Detected test data environment, database file was removed"
-      );
-    }
-  } catch (error) {
-    logService.error(`Failed to remove database file`, error as Error);
-    exit(1);
-  }
-  const db = new DatabaseSync(DB_FILE, { enableForeignKeyConstraints: true });
   try {
     db.exec(`
       CREATE TABLE IF NOT EXISTS __migrations (
@@ -86,8 +72,4 @@ export const initDatabase = async ({
     logService.error("Failed to initialize database", error as Error);
     exit(1);
   }
-  if (shouldSeedDb()) {
-    seedDb(db, logService);
-  }
-  db.close();
 };

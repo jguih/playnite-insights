@@ -1,11 +1,12 @@
 import { homePageSearchParamsKeys, type FullGame } from '@playnite-insights/lib/client';
-import { FullGameFactory, makeFetchClientMock, testUtils } from '@playnite-insights/testing';
+import { FullGameFactory, makeMocks, testUtils } from '@playnite-insights/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IApplicationSettingsStore } from './applicationSettingsStore.svelte';
 import { GameStore } from './gameStore.svelte';
 
+const mocks = makeMocks();
 const factory = new FullGameFactory();
-const fetchClient = makeFetchClientMock();
+const fetchClient = mocks.fetchClient;
 const applicationSettingsStore: IApplicationSettingsStore = {
 	addListener: vi.fn(),
 	loadSettings: vi.fn(),

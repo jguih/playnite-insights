@@ -1,7 +1,7 @@
 import { PlayniteLibraryManifest } from "@playnite-insights/lib/client";
+import { makeMocks } from "@playnite-insights/testing";
 import { join } from "path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeMocks } from "../../tests/mocks";
 import { makeLibraryManifestService } from "./service";
 import type { LibraryManifestService } from "./service.types";
 

@@ -4,8 +4,8 @@ import type {
   GameSession,
   OpenSessionCommand,
 } from "@playnite-insights/lib/client";
+import { makeMocks } from "@playnite-insights/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeMocks } from "../../tests/mocks";
 import { makeGameSessionService } from "./service";
 import type {
   GameSessionService,

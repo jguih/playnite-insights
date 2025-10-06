@@ -2,8 +2,8 @@ import {
   ExtensionRegistration,
   ValidAuthenticationHeader,
 } from "@playnite-insights/lib/client";
+import { makeMocks } from "@playnite-insights/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeMocks } from "../../tests/mocks";
 import { makeAuthenticationService } from "./service";
 import type {
   AuthenticationService,

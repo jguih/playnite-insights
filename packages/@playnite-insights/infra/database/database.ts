@@ -1,11 +1,19 @@
 import { DatabaseSync } from "node:sqlite";
 import { config } from "../config";
 
+export type GetDbDeps = {
+  /**
+   * If `true` will use a in memory SQLite database
+   */
+  inMemory?: boolean;
+};
+
 let db: DatabaseSync | null = null;
 
-export const getDb = (): DatabaseSync => {
+export const getDb = ({ inMemory }: GetDbDeps = {}): DatabaseSync => {
+  const dbPath = inMemory ? ":memory:" : config.DB_FILE;
   if (db === null) {
-    db = new DatabaseSync(config.DB_FILE, {
+    db = new DatabaseSync(dbPath, {
       enableForeignKeyConstraints: true,
     });
   }

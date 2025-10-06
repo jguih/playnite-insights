@@ -4,14 +4,20 @@
   "version": "1.0.0",
   "main": "./index.ts",
   "types": "./index.ts",
+  "scripts": {
+    "test:unit": "vitest run",
+    "test:watch": "vitest --watch"
+  },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^24.0.14"
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
+    "vitest": "^3.2.4",
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/lib": "workspace:*",
+    "@playnite-insights/testing": "workspace:*",
     "@types/busboy": "^1.5.4",
     "busboy": "^1.6.0",
     "sharp": "^0.34.3",

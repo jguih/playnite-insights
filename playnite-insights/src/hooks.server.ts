@@ -1,6 +1,6 @@
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { setupServices } from '$lib/server/setup-services';
-import { config, defaultFileSystemService, initDatabase } from '@playnite-insights/infra';
+import { config, defaultFileSystemService, getDb, initDatabase } from '@playnite-insights/infra';
 import { PLAYNITE_GAMES_JSON_FILE } from '@playnite-insights/infra/config/config';
 import type { Handle, ServerInit } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
@@ -16,8 +16,8 @@ export const init: ServerInit = async () => {
 	services.log.info(`PLAYNITE_HOST_ADDRESS: ${config.PLAYNITE_HOST_ADDRESS || 'undefined'}`);
 
 	await initDatabase({
+		db: getDb(),
 		fileSystemService: defaultFileSystemService,
-		DB_FILE: services.config.DB_FILE,
 		MIGRATIONS_DIR: services.config.MIGRATIONS_DIR,
 		logService: services.log,
 	});
