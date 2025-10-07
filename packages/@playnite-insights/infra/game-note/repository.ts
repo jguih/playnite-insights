@@ -109,25 +109,24 @@ export const makeGameNoteRepository = (
       () => {
         const db = getDb();
         const query = queries.add;
-        const newNote = { ...note };
         const now = new Date().toISOString();
-        newNote.CreatedAt = now;
-        newNote.LastUpdatedAt = now;
-        newNote.DeletedAt = null;
+        note.CreatedAt = now;
+        note.LastUpdatedAt = now;
+        note.DeletedAt = null;
         const stmt = db.prepare(query);
         stmt.run(
-          newNote.Id,
-          newNote.Title,
-          newNote.Content,
-          newNote.ImagePath,
-          newNote.GameId,
-          newNote.SessionId,
-          newNote.DeletedAt,
-          newNote.CreatedAt,
-          newNote.LastUpdatedAt
+          note.Id,
+          note.Title,
+          note.Content,
+          note.ImagePath,
+          note.GameId,
+          note.SessionId,
+          note.DeletedAt,
+          note.CreatedAt,
+          note.LastUpdatedAt
         );
-        logService.debug(`Created note (${newNote.Id}, ${newNote.Title})`);
-        return newNote;
+        logService.debug(`Created note (${note.Id}, ${note.Title})`);
+        return note;
       },
       `add(${note.Id}, ${note.Title})`
     );

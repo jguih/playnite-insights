@@ -1,4 +1,8 @@
-import { makeMocks, testUtils } from "@playnite-insights/testing";
+import {
+  GameNoteFactory,
+  makeMocks,
+  testUtils,
+} from "@playnite-insights/testing";
 import type { DatabaseSync } from "node:sqlite";
 import {
   afterAll,
@@ -12,8 +16,10 @@ import {
 import { getDb } from "../database/database";
 import { initDatabase } from "../database/init";
 import { defaultFileSystemService } from "../services/file-system";
+import { makeGameNoteRepository } from "./repository";
 
 const mocks = makeMocks();
+const gameNoteFactory = new GameNoteFactory();
 let db: DatabaseSync;
 
 describe("Game Note Repository", () => {
@@ -33,7 +39,13 @@ describe("Game Note Repository", () => {
   });
 
   it("works", () => {
-    expect(true).toBeTruthy();
+    const repo = makeGameNoteRepository({ logService: mocks.logService });
+    const note = gameNoteFactory.getNote({ DeletedAt: null });
+    repo.add(note);
+    const existing = repo.getById(note.Id);
+    expect(existing).toBeTruthy();
+    expect(existing?.Title).toBe(note.Title);
+    expect(existing?.DeletedAt).toBe(note.DeletedAt);
   });
 
   afterAll(() => {

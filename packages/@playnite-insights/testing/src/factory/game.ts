@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import type { FullGame } from "@playnite-insights/lib/client";
 
-export class FullGameFactory {
+export class GameFactory {
   private buildGame = ({ ...props }: Partial<FullGame> = {}): FullGame => {
     return {
       Id: props?.Id ?? faker.string.uuid(),
