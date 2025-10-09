@@ -1,4 +1,4 @@
-name: playatlas-app
+name: playnite-insights-app
 
 services:
   app-vitest:
@@ -6,8 +6,6 @@ services:
       context: .
       target: vitest
     container_name: app-vitest
-    environment:
-      LOG_LEVEL: 0 # debug
 
   # This instance is used for automated e2e testing with Playwright
   app-stage:
@@ -17,7 +15,6 @@ services:
     container_name: app-stage
     environment:
       TEST_DATA: true
-      TZ: "America/Sao_Paulo"
 
   app-playwright:
     build:
@@ -51,9 +48,6 @@ services:
       target: prod
     container_name: app-prod
     restart: always
-    environment:
-      TZ: "America/Sao_Paulo"
-      LOG_LEVEL: 0
     volumes:
       - playnite-insights-prod-data:/app/data
 

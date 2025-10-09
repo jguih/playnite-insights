@@ -1,5 +1,3 @@
-name: playatlas-dev
-
 services:
   app-dev:
     environment:
