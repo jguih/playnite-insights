@@ -2,3 +2,7 @@ site_name: PlayAtlas Docs
 use_directory_urls: true
 theme:
   name: material
+nav:
+  - Home: index.md
+  - Features:
+      - Syncing Across Devices: features/cross-device-sync.md
