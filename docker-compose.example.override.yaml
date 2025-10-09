@@ -6,7 +6,7 @@ services:
 
   app-stage:
     environment:
-      # Required: Your local timezone indentifier. If you don't know your timezone identifier, visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+      # Required: Your local timezone identifier. If you don't know your timezone identifier, visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
       TZ: "America/Sao_Paulo"
 
   app-test-results:
@@ -21,7 +21,7 @@ services:
     environment:
       # Required: Your Playnite host address and port (configured in PlayAtlas Exporter)
       PLAYNITE_HOST_ADDRESS: "http://192.168.0.10:3001/"
-      # Required: Your local timezone indentifier. If you don't know your timezone identifier, visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+      # Required: Your local timezone identifier. If you don't know your timezone identifier, visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
       TZ: "America/Sao_Paulo"
       # Optional: Application Log Level, recommended is 0 (Debug)
       LOG_LEVEL: 0
