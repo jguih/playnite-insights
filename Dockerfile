@@ -26,15 +26,16 @@ WORKDIR /app
 ENV PLAYATLAS_DATA_DIR=/app/data
 ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
-ENV PLAYATLAS_INSTANCE_NAME='PlayAtlas (Dev)'
 
 RUN apt update && apt install sqlite3 -y 
-
 RUN mkdir -p /app/data/files /app/data/tmp
-COPY ./playnite-insights/static/placeholder /app/data/files/placeholder
-COPY ./packages/@playnite-insights/infra/migrations /app/infra/migrations
+RUN chown -R node:node /app/data
+COPY --chown=node:node ./playnite-insights/static/placeholder /app/data/files/placeholder
+COPY --chown=node:node ./packages/@playnite-insights/infra/migrations /app/infra/migrations
 
 EXPOSE 3000
+
+USER node
 
 CMD [ "sleep", "infinity" ]
 
@@ -49,7 +50,6 @@ WORKDIR /app
 ENV PLAYATLAS_DATA_DIR=/app/data
 ENV NODE_ENV='production'
 ENV BODY_SIZE_LIMIT=128M
-ENV PLAYATLAS_INSTANCE_NAME='PlayAtlas'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p /app/data/files /app/data/tmp
@@ -105,3 +105,26 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 FROM playwright-deps AS playwright
 WORKDIR /usr/src/app
 ENTRYPOINT ["pnpm", "--filter", "playwright", "exec", "playwright", "test"]
+
+FROM python:3.14 AS mkdocs-build
+
+WORKDIR /app
+
+RUN pip install mkdocs-material
+
+COPY ./docs /app
+RUN mkdocs build -d ./dist
+
+FROM busybox:1.36 AS mkdocs-runtime
+
+WORKDIR /app
+
+RUN adduser -D mkdocs
+
+COPY --chown=mkdocs:mkdocs --from=mkdocs-build /app/dist /app
+
+EXPOSE 3001
+
+USER mkdocs
+
+ENTRYPOINT ["busybox", "httpd", "-f", "-v", "-p", "3001"]

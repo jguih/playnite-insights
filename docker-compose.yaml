@@ -1,4 +1,4 @@
-name: playnite-insights-app
+name: playatlas-app
 
 services:
   app-vitest:
@@ -27,7 +27,7 @@ services:
     environment:
       BASE_URL: "http://app-stage:3000"
     volumes:
-      - playnite-insights-playwright-results:/usr/src/app/playwright/playwright-report
+      - playatlas-playwright-results:/usr/src/app/playwright/playwright-report
     depends_on:
       - app-test-results
 
@@ -35,11 +35,15 @@ services:
     image: nginx:alpine
     container_name: test-results
     volumes:
-      - playnite-insights-playwright-results:/usr/share/nginx/html/playwright:ro
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - playatlas-playwright-results:/usr/share/nginx/html/playwright:ro
+      - ./playwright/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
-    networks:
-      - services-ipv6
+
+  app-docs:
+    build:
+      context: .
+      target: mkdocs-runtime
+    container_name: app-docs
 
   app-prod:
     build:
@@ -48,20 +52,12 @@ services:
     container_name: app-prod
     restart: always
     environment:
-      PLAYNITE_HOST_ADDRESS: ${PLAYNITE_HOST_ADDRESS_PROD}
-      PLAYATLAS_INSTANCE_NAME: "PlayAtlas"
       TZ: "America/Sao_Paulo"
       LOG_LEVEL: 0
     volumes:
       - playnite-insights-prod-data:/app/data
-    networks:
-      - services-ipv6
-
-networks:
-  services-ipv6:
-    external: true
 
 volumes:
   playnite-insights-dev-data:
   playnite-insights-prod-data:
-  playnite-insights-playwright-results:
+  playatlas-playwright-results:

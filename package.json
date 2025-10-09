@@ -12,9 +12,10 @@
   ],
   "scripts": {
     "dev": "pnpm --filter playnite-insights run dev",
+    "prod": "docker compose up -d --build --force-recreate app-prod",
+    "mkdocs": "docker compose up -d --build --force-recreate app-docs",
     "build": "pnpm --filter playnite-insights run build",
     "preview": "pnpm --filter playnite-insights run preview",
-    "prod": "docker compose up -d --build --force-recreate app-prod",
     "stage:up": "docker compose up -d --build app-stage",
     "test:e2e": "docker compose run --rm --build app-playwright",
     "test:unit": "pnpm -r run test:unit",

@@ -14,7 +14,6 @@
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
-	let appName = $derived(data.appName);
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let loading = $state<Set<string>>(new Set('all'));
 	const locator = new ClientServiceLocator();
@@ -101,18 +100,6 @@
 		};
 	});
 </script>
-
-<svelte:head>
-	<title>{appName}</title>
-	<meta
-		name="application-name"
-		content={appName}
-	/>
-	<meta
-		name="apple-mobile-web-app-title"
-		content={appName}
-	/>
-</svelte:head>
 
 <Toast />
 {#if loading.size > 0}

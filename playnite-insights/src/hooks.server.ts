@@ -10,7 +10,6 @@ export const { services } = setupServices();
 export const init: ServerInit = async () => {
 	services.log.debug(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 	services.log.debug(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
-	services.log.info(`APP_NAME: ${process.env.PLAYATLAS_INSTANCE_NAME}`);
 	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
 	services.log.info(`TZ: ${process.env.TZ}`);
 	services.log.info(`PLAYNITE_HOST_ADDRESS: ${config.PLAYNITE_HOST_ADDRESS || 'undefined'}`);

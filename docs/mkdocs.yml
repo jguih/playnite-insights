@@ -1,0 +1,4 @@
+site_name: PlayAtlas Docs
+use_directory_urls: true
+theme:
+  name: material

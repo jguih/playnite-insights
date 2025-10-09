@@ -1,0 +1,29 @@
+name: playatlas-app
+
+services:
+  app-test-results:
+    # ports:
+    #   - "127.0.0.1:3002:80"
+
+  app-docs:
+    # ports:
+    #   - "127.0.0.1:3001:3001"
+
+  app-prod:
+    environment:
+      # Required: Your Playnite host address and port (configured in PlayAtlas Exporter)
+      PLAYNITE_HOST_ADDRESS: "http://192.168.0.10:3001/"
+      # Required: Your local timezone indentifier. If you don't know your timezone identifier, visit https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+      TZ: "America/Sao_Paulo"
+      # Optional: Application Log Level, recommended is 0 (Debug)
+      LOG_LEVEL: 0
+    # It's recommended to not expose ports directly, even on localhost, as PlayAtlas does not support HTTPS. Some feature requires a secure connection and even during development it's recommended to only access services over HTTPS. The recommended approach is to have all local services behind a reverse proxy that terminates TLS, please check the documentation for more information on this. Uncomment the next lines only if you want to expose the application on localhost.
+    # ports:
+    #   - "127.0.0.1:3000:3000"
+    # If you're using an external network for your reverse proxy, you can include it here by uncommenting the lines below.
+    # networks:
+    #   - my-network
+#
+# networks:
+#   my-network:
+#     external: true
