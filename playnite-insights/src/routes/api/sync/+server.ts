@@ -10,12 +10,12 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 /**
  * POST /api/sync
  *
- * Reconsiles sync state between client and server.
+ * Reconciles sync state between client and server.
  * - Used when client has a different sync id than the server.
  * - Server will return it's sync id along with all sync state.
  *
  * @returns {Promise<Response>}
- * - 200 Ok → Reconsiliation successfull
+ * - 200 Ok → Reconciliation successful
  * - 500 Internal Error
  */
 export const POST: RequestHandler = async ({ request, url }): Promise<Response> =>

@@ -3,10 +3,10 @@ import type { GameNoteRepository } from "../types/game-note-repository";
 
 export type SynchronizationService = {
   /**
-   * Reconsiles client sync state with server's.
-   * @param command The client reconsile command
+   * Reconciles client sync state with server's.
+   * @param command The client reconcile command
    */
-  reconsile: (command: ClientSyncReconciliationCommand) => void;
+  reconcile: (command: ClientSyncReconciliationCommand) => void;
 };
 
 export type SynchronizationServiceDeps = {

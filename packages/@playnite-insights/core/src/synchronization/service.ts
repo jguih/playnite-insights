@@ -6,9 +6,9 @@ import type {
 export const makeSynchronizationService = ({
   gameNoteRepository,
 }: SynchronizationServiceDeps): SynchronizationService => {
-  const reconsile: SynchronizationService["reconsile"] = (command) => {
-    gameNoteRepository.reconsileFromSource(command.notes);
+  const reconcile: SynchronizationService["reconcile"] = (command) => {
+    gameNoteRepository.reconcileFromSource(command.notes);
   };
 
-  return { reconsile };
+  return { reconcile };
 };

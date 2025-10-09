@@ -15,6 +15,7 @@ export const makeGameNoteRepository = (
   deps: Partial<BaseRepositoryDeps> = {}
 ): GameNoteRepository => {
   const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+  const TABLE_NAME = "game_note";
 
   const getWhereClauseAndParamsFromFilters = (filters?: GameNoteFilters) => {
     const where: string[] = [];
@@ -58,9 +59,9 @@ export const makeGameNoteRepository = (
   };
 
   const queries = {
-    getById: `SELECT * FROM game_note WHERE Id = (?)`,
+    getById: `SELECT * FROM ${TABLE_NAME} WHERE Id = (?)`,
     update: `
-        UPDATE game_note 
+        UPDATE ${TABLE_NAME} 
         SET
           Title = ?,
           Content = ?,
@@ -73,7 +74,7 @@ export const makeGameNoteRepository = (
         WHERE Id = ?;
         `,
     add: `
-      INSERT INTO game_note (
+      INSERT INTO ${TABLE_NAME} (
         Id, 
         Title,
         Content,
@@ -86,6 +87,36 @@ export const makeGameNoteRepository = (
       ) VALUES
         (?, ?, ?, ?, ?, ?, ?, ?, ?);
       `,
+    all: `SELECT * FROM game_note`,
+  };
+
+  const params = {
+    add: {
+      fromNote: (note: GameNote) => [
+        note.Id,
+        note.Title,
+        note.Content,
+        note.ImagePath,
+        note.GameId,
+        note.SessionId,
+        note.DeletedAt,
+        note.CreatedAt,
+        note.LastUpdatedAt,
+      ],
+    },
+    update: {
+      fromNote: (note: GameNote) => [
+        note.Title,
+        note.Content,
+        note.ImagePath,
+        note.GameId,
+        note.SessionId,
+        note.DeletedAt,
+        note.CreatedAt,
+        note.LastUpdatedAt,
+        note.Id,
+      ],
+    },
   };
 
   const getById = (id: string): GameNote | null => {
@@ -114,21 +145,38 @@ export const makeGameNoteRepository = (
         note.LastUpdatedAt = now;
         note.DeletedAt = null;
         const stmt = db.prepare(query);
-        stmt.run(
-          note.Id,
-          note.Title,
-          note.Content,
-          note.ImagePath,
-          note.GameId,
-          note.SessionId,
-          note.DeletedAt,
-          note.CreatedAt,
-          note.LastUpdatedAt
-        );
+        stmt.run(...params.add.fromNote(note));
         logService.debug(`Created note (${note.Id}, ${note.Title})`);
         return note;
       },
       `add(${note.Id}, ${note.Title})`
+    );
+  };
+
+  const addMany: GameNoteRepository["addMany"] = (notes) => {
+    return repositoryCall(
+      logService,
+      () => {
+        if (notes.length === 0) return;
+        const db = getDb();
+        const query = queries.add;
+        const now = new Date().toISOString();
+        const stmt = db.prepare(query);
+        db.exec("BEGIN TRANSACTION");
+        try {
+          for (const note of notes) {
+            note.CreatedAt = now;
+            note.LastUpdatedAt = now;
+            note.DeletedAt = null;
+            stmt.run(...params.add.fromNote(note));
+          }
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      },
+      `addMany(${notes.length} notes)`
     );
   };
 
@@ -143,17 +191,7 @@ export const makeGameNoteRepository = (
         updatedNote.LastUpdatedAt = now;
         updatedNote.DeletedAt = null;
         const stmt = db.prepare(query);
-        stmt.run(
-          updatedNote.Title,
-          updatedNote.Content,
-          updatedNote.ImagePath,
-          updatedNote.GameId,
-          updatedNote.SessionId,
-          updatedNote.DeletedAt,
-          updatedNote.CreatedAt,
-          updatedNote.LastUpdatedAt,
-          updatedNote.Id
-        );
+        stmt.run(...params.update.fromNote(updatedNote));
         logService.debug(`Updated note (${note.Id})`);
         return updatedNote;
       },
@@ -187,7 +225,7 @@ export const makeGameNoteRepository = (
       logService,
       () => {
         const db = getDb();
-        let query = `SELECT * FROM game_note`;
+        let query = queries.all;
         const { where, params } = getWhereClauseAndParamsFromFilters(
           args.filters
         );
@@ -202,50 +240,64 @@ export const makeGameNoteRepository = (
     );
   };
 
-  const reconsileFromSource: GameNoteRepository["reconsileFromSource"] = (
+  const reconcileFromSource: GameNoteRepository["reconcileFromSource"] = (
     notes
   ) => {
     return repositoryCall(
       logService,
       () => {
+        if (notes.length === 0) return;
         const db = getDb();
         const stmts = {
           getById: db.prepare(queries.getById),
           add: db.prepare(queries.add),
           update: db.prepare(queries.update),
+          all: db.prepare(queries.all),
         };
+        let added = 0;
+        let skipped = 0;
+        let updated = 0;
         db.exec("BEGIN TRANSACTION");
         try {
+          const existingNotes = z.array(gameNoteSchema).parse(stmts.all.all());
+          logService.info(
+            `Notes reconciliation started: ${notes.length} incoming notes, ${existingNotes.length} notes in database`
+          );
           for (const note of notes) {
             const existing = stmts.getById.get(note.Id);
             if (!existing) {
-              stmts.add.run(note);
+              stmts.add.run(...params.add.fromNote(note));
+              added++;
               continue;
             }
             const existingNote = gameNoteSchema.parse(existing);
             if (note.LastUpdatedAt > existingNote.LastUpdatedAt) {
-              stmts.update.run(
-                note.Title,
-                note.Content,
-                note.ImagePath,
-                note.GameId,
-                note.SessionId,
-                note.DeletedAt,
-                note.CreatedAt,
-                note.LastUpdatedAt,
-                note.Id
-              );
+              stmts.update.run(...params.update.fromNote(note));
+              updated++;
+            } else {
+              skipped++;
             }
           }
           db.exec("COMMIT");
+          logService.success(
+            `Notes reconciliation complete: ${added} added, ${updated} updated and ${skipped} skipped`
+          );
         } catch (error) {
           db.exec("ROLLBACK");
           throw error;
         }
       },
-      `reconsileFromSource(${notes.length} notes)`
+      `reconcileFromSource(${notes.length} notes)`
     );
   };
 
-  return { add, getById, update, remove, all, reconsileFromSource };
+  return {
+    add,
+    addMany,
+    getById,
+    update,
+    remove,
+    all,
+    reconcileFromSource,
+  };
 };
