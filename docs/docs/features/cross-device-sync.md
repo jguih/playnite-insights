@@ -12,7 +12,7 @@ Data synchronization is always active and setup automatically by both client and
 
 A **synchronization id** is a unique value shared between your PlayAtlas server and all of its clients. It's used by both client and server to determine if they're in sync with each other.
 
-A SyncId is issued the first time the PlayAtlas server is started and shared with all clients. It is immutable by design and can only be changed manually through a server reset or reconciliation request.
+A SyncId is issued the first time the PlayAtlas server is started and shared with all clients. It is immutable by design and can only be changed manually through a server reset.
 
 When the client attempts to create or update an entity that requires synchronization, it must send a valid SyncId. The **server** then:
 
