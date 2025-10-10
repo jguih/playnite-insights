@@ -11,6 +11,6 @@ export const DELETE: RequestHandler = async ({ params, request, url }) =>
 		if (!noteId) {
 			return badRequest();
 		}
-		services.noteRepository.remove(noteId);
+		services.gameNoteRepository.remove(noteId);
 		return emptyResponse(204);
 	});

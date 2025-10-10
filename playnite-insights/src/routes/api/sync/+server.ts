@@ -30,8 +30,9 @@ export const POST: RequestHandler = async ({ request, url }): Promise<Response> 
 
 		const jsonBody = await request.json();
 		const command = clientSyncReconciliationCommandSchema.parse(jsonBody);
+		services.synchronization.reconcile(command);
 
-		const notes = services.noteRepository.all();
+		const notes = services.gameNoteRepository.all();
 		const response: ServerSyncReconciliationResponse = {
 			syncId: syncId.SyncId,
 			notes,

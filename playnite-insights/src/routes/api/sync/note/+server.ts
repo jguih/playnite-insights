@@ -3,20 +3,20 @@ import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
 import { ensureSyncId } from '$lib/server/api/synchronization';
 import {
-  createGameNoteCommandSchema,
-  createGameNoteResponseSchema,
-  emptyResponse,
-  getAllGameNotesResponseSchema,
-  updateGameNoteCommandSchema,
-  updateGameNoteResponseSchema,
-  type ApiErrorResponse,
-  type GameNote,
+	createGameNoteCommandSchema,
+	createGameNoteResponseSchema,
+	emptyResponse,
+	getAllGameNotesResponseSchema,
+	updateGameNoteCommandSchema,
+	updateGameNoteResponseSchema,
+	type ApiErrorResponse,
+	type GameNote,
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
-    await ensureSyncId(request, url);
+		await ensureSyncId(request, url);
 		const lastSync = url.searchParams.get('lastSync')?.trim();
 		const ifNoneMatch = request.headers.get('if-none-match');
 		let data: GameNote[] = [];
@@ -30,11 +30,11 @@ export const GET: RequestHandler = ({ request, url }) =>
 			return json(response, { status: 400 });
 		} else if (lastSync) {
 			const lastSyncDate = new Date(lastSync);
-			data = services.noteRepository.all({
+			data = services.gameNoteRepository.all({
 				filters: { lastUpdatedAt: [{ op: 'gte', value: lastSyncDate.toISOString() }] },
 			});
 		} else {
-			data = services.noteRepository.all();
+			data = services.gameNoteRepository.all();
 		}
 		if (!data || data.length === 0) {
 			return emptyResponse();
@@ -50,14 +50,14 @@ export const GET: RequestHandler = ({ request, url }) =>
 
 /**
  * 201: Created
- * 409: Conflic (note already exists)
+ * 409: Conflict (note already exists)
  */
 export const POST: RequestHandler = async ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
 		await ensureSyncId(request, url);
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
-		const existingNote = services.noteRepository.getById(command.Id);
+		const existingNote = services.gameNoteRepository.getById(command.Id);
 		if (existingNote) {
 			const response: ApiErrorResponse = {
 				error: {
@@ -67,7 +67,7 @@ export const POST: RequestHandler = async ({ request, url }) =>
 			};
 			return json(response, { status: 409 });
 		}
-		const createdNote = services.noteRepository.add(command);
+		const createdNote = services.gameNoteRepository.add(command);
 		createGameNoteResponseSchema.parse(createdNote);
 		return json(createdNote, { status: 201 });
 	});
@@ -78,14 +78,14 @@ export const POST: RequestHandler = async ({ request, url }) =>
  */
 export const PUT: RequestHandler = async ({ request, url }) =>
 	withInstanceAuth(request, url, async () => {
-    await ensureSyncId(request, url);
+		await ensureSyncId(request, url);
 		const jsonBody = await request.json();
 		const command = updateGameNoteCommandSchema.parse(jsonBody);
-		const existingNote = services.noteRepository.getById(command.Id);
+		const existingNote = services.gameNoteRepository.getById(command.Id);
 		if (!existingNote) {
 			return json(null, { status: 404 });
 		}
-		const updatedNote = services.noteRepository.update(command);
+		const updatedNote = services.gameNoteRepository.update(command);
 		updateGameNoteResponseSchema.parse(updatedNote);
 		return json(updatedNote);
 	});

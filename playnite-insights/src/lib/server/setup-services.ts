@@ -6,6 +6,7 @@ import {
 	makeMediaFilesService,
 	makePlayniteLibraryImporterService,
 	makePlayniteLibraryService,
+	makeSynchronizationService,
 } from '@playnite-insights/core';
 import {
 	config,
@@ -53,7 +54,7 @@ export const setupServices = () => {
 	const gameSessionRepository = makeGameSessionRepository({
 		logService: makeLogService('GameSessionRepository'),
 	});
-	const noteRepository = makeGameNoteRepository({
+	const gameNoteRepository = makeGameNoteRepository({
 		logService: makeLogService('GameNoteRepository'),
 	});
 	const imageRepository = makeImageRepository({ logService: makeLogService('ImageRepository') });
@@ -79,7 +80,7 @@ export const setupServices = () => {
 		playniteLibraryMetricsRepository,
 		genreRepository,
 		gameSessionRepository,
-		noteRepository,
+		gameNoteRepository,
 		imageRepository,
 		completionStatusRepository,
 		extensionRegistrationRepository,
@@ -138,6 +139,7 @@ export const setupServices = () => {
 		logService: makeLogService('AuthenticationService'),
 		cryptographyService,
 	});
+	const synchronizationService = makeSynchronizationService({ ...commonDeps });
 	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 
 	const services = {
@@ -153,6 +155,7 @@ export const setupServices = () => {
 		authentication: authenticationService,
 		playniteHostHttpClient,
 		fileSystem: fileSystemService,
+		synchronization: synchronizationService,
 		config,
 	};
 
