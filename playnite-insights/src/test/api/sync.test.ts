@@ -1,20 +1,30 @@
 import { defaultFileSystemService, getDb, initDatabase } from '@playnite-insights/infra';
-import { type ClientSyncReconciliationCommand } from '@playnite-insights/lib/client';
-import { makeMocks, testUtils } from '@playnite-insights/testing';
+import {
+	serverSyncReconciliationResponseSchema,
+	type ClientSyncReconciliationCommand,
+} from '@playnite-insights/lib/client';
+import { GameNoteFactory, makeMocks, testUtils } from '@playnite-insights/testing';
 import type { DatabaseSync } from 'node:sqlite';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeServerServices, type ServerServices } from '../../lib/server/setup-services';
 import * as syncHandler from '../../routes/api/sync/+server';
 
 const mocks = makeMocks();
+const gameNoteFactory = new GameNoteFactory();
 let db: DatabaseSync;
 let services: ServerServices;
-const baseUrl = 'https://test.com';
+let sessionId: string;
+let syncId: string;
 
 describe('/api/sync', () => {
 	beforeEach(async () => {
+		if (!db) throw new Error('DB not initialized');
+		if (!services) throw new Error('Services not initialized');
+		const now = new Date();
 		vi.resetAllMocks();
 		testUtils.clearAllTables(db);
+		sessionId = await testUtils.registerInstanceAndCreateSessionAsync(services);
+		syncId = testUtils.setSyncId(services, now);
 	});
 
 	beforeAll(async () => {
@@ -28,22 +38,31 @@ describe('/api/sync', () => {
 		services = makeServerServices({ getDb: () => db, makeLogService: () => mocks.logService });
 	});
 
-	it('works', async () => {
+	it('on reconciliation, server returns all notes and its syncId', async () => {
 		// Arrange
+		const serverNotes = gameNoteFactory.getNotes(200);
+		services.gameNoteRepository.addMany(serverNotes);
 		const command: ClientSyncReconciliationCommand = {
 			notes: [],
 		};
 		const event = testUtils.createMockEvent({
-			request: new Request(`${baseUrl}/api/sync`, {
+			request: testUtils.makeJsonRequest({
+				endpoint: '/api/sync',
 				method: 'POST',
-				body: JSON.stringify(command),
+				body: command,
+				sessionId,
+				syncId,
 			}),
 			locals: { services },
 		});
 		// Act
 		const response = await syncHandler.POST(event);
+		const responseBodyJson = await response.json();
+		const responseBody = serverSyncReconciliationResponseSchema.parse(responseBodyJson);
 		// Assert
-		expect(response.ok).toBe(false);
+		expect(response.ok).toBe(true);
+		expect(responseBody.syncId).toBe(syncId);
+		expect(responseBody.notes).toHaveLength(serverNotes.length);
 	});
 
 	afterAll(() => {

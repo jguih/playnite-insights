@@ -50,5 +50,10 @@ export type AuthService = {
   ) => { isAuthorized: false; code: ApiErrorCode } | { isAuthorized: true };
   isInstanceRegistered: () => boolean;
   registerInstanceAsync: (password: string) => Promise<void>;
+  /**
+   * Creates a new session for this instance and returns a Session ID.
+   * @param password The instance password
+   * @returns A Session ID
+   */
   loginInstanceAsync: (password: string) => Promise<string>;
 };
