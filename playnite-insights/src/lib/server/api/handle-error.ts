@@ -1,6 +1,6 @@
-import { services } from '$lib';
 import { ApiError, type ApiErrorResponse } from '@playnite-insights/lib/client';
 import { json } from '@sveltejs/kit';
+import type { ServerServices } from '../setup-services';
 
 const handleErrorCode = (code: string) => {
 	switch (code) {
@@ -19,8 +19,12 @@ const handleErrorCode = (code: string) => {
 	}
 };
 
-export const handleApiError = (err: unknown, context?: string): Response => {
-	services.log.error(`Error while handling API request at ${context ?? ''}`, err);
+export const handleApiError = (
+	err: unknown,
+	logService: ServerServices['logService'],
+	context?: string,
+): Response => {
+	logService.error(`Error while handling API request at ${context ?? ''}`, err);
 	if (err instanceof ApiError) {
 		return json(err.response, { status: err.statusCode });
 	}

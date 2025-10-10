@@ -1,4 +1,3 @@
-import { services } from '$lib';
 import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
 import { ensureSyncId } from '$lib/server/api/synchronization';
@@ -14,9 +13,9 @@ import {
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = ({ request, url }) =>
-	withInstanceAuth(request, url, async () => {
-		await ensureSyncId(request, url);
+export const GET: RequestHandler = ({ request, url, locals: { services } }) =>
+	withInstanceAuth(request, url, services, async () => {
+		await ensureSyncId({ request, url, ...services });
 		const lastSync = url.searchParams.get('lastSync')?.trim();
 		const ifNoneMatch = request.headers.get('if-none-match');
 		let data: GameNote[] = [];
@@ -52,9 +51,9 @@ export const GET: RequestHandler = ({ request, url }) =>
  * 201: Created
  * 409: Conflict (note already exists)
  */
-export const POST: RequestHandler = async ({ request, url }) =>
-	withInstanceAuth(request, url, async () => {
-		await ensureSyncId(request, url);
+export const POST: RequestHandler = async ({ request, url, locals: { services } }) =>
+	withInstanceAuth(request, url, services, async () => {
+		await ensureSyncId({ request, url, ...services });
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.gameNoteRepository.getById(command.Id);
@@ -76,9 +75,9 @@ export const POST: RequestHandler = async ({ request, url }) =>
  * 200: Updated
  * 404: Not Found
  */
-export const PUT: RequestHandler = async ({ request, url }) =>
-	withInstanceAuth(request, url, async () => {
-		await ensureSyncId(request, url);
+export const PUT: RequestHandler = async ({ request, url, locals: { services } }) =>
+	withInstanceAuth(request, url, services, async () => {
+		await ensureSyncId({ request, url, ...services });
 		const jsonBody = await request.json();
 		const command = updateGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.gameNoteRepository.getById(command.Id);

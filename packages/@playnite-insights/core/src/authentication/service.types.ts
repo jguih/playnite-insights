@@ -9,7 +9,7 @@ import type { InstanceSessionsRepository } from "../types/instance-sessions-repo
 import type { LogService } from "../types/log-service";
 import type { SignatureService } from "../types/signature-service";
 
-export type AuthenticationServiceDeps = {
+export type AuthServiceDeps = {
   extensionRegistrationRepository: ExtensionRegistrationRepository;
   signatureService: SignatureService;
   logService: LogService;
@@ -18,7 +18,7 @@ export type AuthenticationServiceDeps = {
   instanceSessionsRepository: InstanceSessionsRepository;
 };
 
-export type VerifyInstanceAuthorizationArgs = {
+export type VerifyInstanceAuthArgs = {
   headers: { Authorization: string | null };
   request: {
     method: string;
@@ -29,8 +29,8 @@ export type VerifyInstanceAuthorizationArgs = {
   };
 };
 
-export type AuthenticationService = {
-  verifyExtensionAuthorization: (args: {
+export type AuthService = {
+  verifyExtensionAuth: (args: {
     headers: Record<ValidAuthenticationHeader, string | null>;
     request: {
       method: string;
@@ -45,8 +45,8 @@ export type AuthenticationService = {
   }) =>
     | { isAuthorized: false; code: ApiErrorCode; message: string }
     | { isAuthorized: true };
-  verifyInstanceAuthorization: (
-    args: VerifyInstanceAuthorizationArgs
+  verifyInstanceAuth: (
+    args: VerifyInstanceAuthArgs
   ) => { isAuthorized: false; code: ApiErrorCode } | { isAuthorized: true };
   isInstanceRegistered: () => boolean;
   registerInstanceAsync: (password: string) => Promise<void>;

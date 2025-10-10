@@ -1,4 +1,3 @@
-import { services } from '$lib';
 import { withInstanceAuth } from '$lib/server/api/authentication';
 import {
 	clientSyncReconciliationCommandSchema,
@@ -18,8 +17,12 @@ import { json, type RequestHandler } from '@sveltejs/kit';
  * - 200 Ok → Reconciliation successful
  * - 500 Internal Error
  */
-export const POST: RequestHandler = async ({ request, url }): Promise<Response> =>
-	withInstanceAuth(request, url, async () => {
+export const POST: RequestHandler = async ({
+	request,
+	url,
+	locals: { services },
+}): Promise<Response> =>
+	withInstanceAuth(request, url, services, async () => {
 		const syncId = services.synchronizationIdRepository.get();
 		if (!syncId) {
 			const response: ApiErrorResponse = {
@@ -30,7 +33,7 @@ export const POST: RequestHandler = async ({ request, url }): Promise<Response> 
 
 		const jsonBody = await request.json();
 		const command = clientSyncReconciliationCommandSchema.parse(jsonBody);
-		services.synchronization.reconcile(command);
+		services.synchronizationService.reconcile(command);
 
 		const notes = services.gameNoteRepository.all();
 		const response: ServerSyncReconciliationResponse = {

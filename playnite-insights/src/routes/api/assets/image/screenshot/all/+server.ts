@@ -1,14 +1,13 @@
-import { services } from '$lib';
 import { handleApiError } from '$lib/server/api/handle-error';
 import { createHashForObject } from '$lib/server/api/hash';
 import { emptyResponse, type GetAllScreenshotsResponse } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ request }) => {
+export const GET: RequestHandler = async ({ request, locals: { services } }) => {
 	const ifNoneMatch = request.headers.get('if-none-match');
 
 	try {
-		const result = await services.mediaFiles.getAvailableScreenshots();
+		const result = await services.mediaFilesService.getAvailableScreenshots();
 		const parsedResult = result.map((image) => {
 			return {
 				...image,
@@ -25,6 +24,6 @@ export const GET: RequestHandler = async ({ request }) => {
 		}
 		return json(response, { headers: { 'Cache-Control': 'no-cache', ETag: etag } });
 	} catch (error) {
-		return handleApiError(error, `GET /api/assets/image/screenshot/all`);
+		return handleApiError(error, services.logService, `GET /api/assets/image/screenshot/all`);
 	}
 };

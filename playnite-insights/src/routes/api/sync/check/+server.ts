@@ -15,8 +15,8 @@ import type { RequestHandler } from '@sveltejs/kit';
  * - 409 Conflict → Invalid Sync id
  * - 500 Internal Error
  */
-export const GET: RequestHandler = ({ request, url }): Promise<Response> =>
-	withInstanceAuth(request, url, async () => {
-		await ensureSyncId(request, url);
+export const GET: RequestHandler = ({ request, url, locals: { services } }): Promise<Response> =>
+	withInstanceAuth(request, url, services, async () => {
+		await ensureSyncId({ request, url, ...services });
 		return emptyResponse();
 	});

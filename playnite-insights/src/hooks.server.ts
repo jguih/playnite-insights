@@ -1,58 +1,55 @@
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { setupServices } from '$lib/server/setup-services';
-import { config, defaultFileSystemService, getDb, initDatabase } from '@playnite-insights/infra';
-import { PLAYNITE_GAMES_JSON_FILE } from '@playnite-insights/infra/config/config';
-import type { Handle, ServerInit } from '@sveltejs/kit';
+import { makeServerServices, type ServerServices } from '$lib/server/setup-services';
+import { defaultFileSystemService, getDb, initDatabase } from '@playnite-insights/infra';
+import { type Handle, type ServerInit } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
 
-export const { services } = setupServices();
+let _services: ServerServices;
 
 export const init: ServerInit = async () => {
-	services.log.debug(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
-	services.log.debug(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
-	services.log.info(`LOG_LEVEL: ${services.log.CURRENT_LOG_LEVEL}`);
-	services.log.info(`TZ: ${process.env.TZ}`);
-	services.log.info(`PLAYNITE_HOST_ADDRESS: ${config.PLAYNITE_HOST_ADDRESS || 'undefined'}`);
+	if (_services) return;
+
+	const db = getDb();
+	_services = makeServerServices({ getDb });
+
+	_services.logService.debug(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
+	_services.logService.debug(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
+	_services.logService.info(`LOG_LEVEL: ${_services.logService.CURRENT_LOG_LEVEL}`);
+	_services.logService.info(`TZ: ${process.env.TZ}`);
+	_services.logService.info(
+		`PLAYNITE_HOST_ADDRESS: ${_services.config.PLAYNITE_HOST_ADDRESS || 'undefined'}`,
+	);
 
 	await initDatabase({
-		db: getDb(),
+		db,
 		fileSystemService: defaultFileSystemService,
-		MIGRATIONS_DIR: services.config.MIGRATIONS_DIR,
-		logService: services.log,
+		MIGRATIONS_DIR: _services.config.MIGRATIONS_DIR,
+		logService: _services.logService,
 	});
 
-	await services.libraryManifest.write();
+	await _services.libraryManifestService.write();
 
 	try {
-		await services.signature.generateKeyPairAsync();
+		await _services.signatureService.generateKeyPairAsync();
 	} catch (error) {
-		services.log.error(`Failed to create asymmetric key pair`, error);
-	}
-
-	try {
-		services.fileSystem.rm(PLAYNITE_GAMES_JSON_FILE, { force: true });
-	} catch (error) {
-		services.log.error(
-			`Failed to delete deprecated games JSON file at ${PLAYNITE_GAMES_JSON_FILE}`,
-			error,
-		);
+		_services.logService.error(`Failed to create asymmetric key pair`, error);
 	}
 
 	const now = new Date();
 	try {
-		const syncId = services.synchronizationIdRepository.get();
+		const syncId = _services.synchronizationIdRepository.get();
 		if (!syncId) {
 			const syncId = randomUUID();
-			services.synchronizationIdRepository.set({
+			_services.synchronizationIdRepository.set({
 				Id: 1,
 				SyncId: randomUUID(),
 				CreatedAt: now.toISOString(),
 				LastUsedAt: now.toISOString(),
 			});
-			services.log.info(`Created synchronization id: ${syncId}`);
+			_services.logService.info(`Created synchronization id: ${syncId}`);
 		}
 	} catch (error) {
-		services.log.error(`Failed to create synchronization id`, error);
+		_services.logService.error(`Failed to create synchronization id`, error);
 	}
 };
 
@@ -66,6 +63,8 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 	});
 
 export const handle: Handle = async ({ event, resolve }) => {
+	event.locals.services = _services;
+
 	// Apply CORS header for API routes
 	if (event.url.pathname.startsWith('/api')) {
 		// Required for CORS to work

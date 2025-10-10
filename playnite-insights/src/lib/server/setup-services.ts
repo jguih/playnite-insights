@@ -1,5 +1,5 @@
 import {
-	makeAuthenticationService,
+	makeAuthService,
 	makeExtensionRegistrationService,
 	makeGameSessionService,
 	makeLibraryManifestService,
@@ -10,7 +10,8 @@ import {
 } from '@playnite-insights/core';
 import {
 	config,
-	getDb,
+	getDb as infraGetDb,
+	makeLogService as infraMakeLogService,
 	makeCompanyRepository,
 	makeCompletionStatusRepository,
 	makeCryptographyService,
@@ -22,7 +23,6 @@ import {
 	makeImageRepository,
 	makeInstanceAuthenticationRepository,
 	makeInstanceSessionsRepository,
-	makeLogService,
 	makePlatformRepository,
 	makePlayniteGameRepository,
 	makePlayniteHostClient,
@@ -33,45 +33,72 @@ import {
 	makeUploadService,
 } from '@playnite-insights/infra';
 
-export const setupServices = () => {
+export type ServerServicesDeps = {
+	getDb?: typeof infraGetDb;
+	makeLogService?: typeof infraMakeLogService;
+};
+
+export const makeServerServices = (deps: ServerServicesDeps = {}) => {
+	const { getDb, makeLogService } = {
+		getDb: infraGetDb,
+		makeLogService: infraMakeLogService,
+		...deps,
+	};
 	const fileSystemService = makeFileSystemService();
 	const streamUtilsService = makeStreamUtilsService();
 	const logService = makeLogService('SvelteBackend');
 	// Repositories
 	const platformRepository = makePlatformRepository({
 		logService: makeLogService('PlatformRepository'),
+		getDb,
 	});
 	const companyRepository = makeCompanyRepository({
 		logService: makeLogService('CompanyRepository'),
+		getDb,
 	});
-	const genreRepository = makeGenreRepository({ logService: makeLogService('GenreRepository') });
+	const genreRepository = makeGenreRepository({
+		logService: makeLogService('GenreRepository'),
+		getDb,
+	});
 	const playniteGameRepository = makePlayniteGameRepository({
 		logService: makeLogService('PlayniteGameRepository'),
+		getDb,
 	});
 	const playniteLibraryMetricsRepository = makePlayniteLibraryMetricsRepository({
 		logService: makeLogService('PlayniteLibraryMetricsRepository'),
+		getDb,
 	});
 	const gameSessionRepository = makeGameSessionRepository({
 		logService: makeLogService('GameSessionRepository'),
+		getDb,
 	});
 	const gameNoteRepository = makeGameNoteRepository({
 		logService: makeLogService('GameNoteRepository'),
+		getDb,
 	});
-	const imageRepository = makeImageRepository({ logService: makeLogService('ImageRepository') });
+	const imageRepository = makeImageRepository({
+		logService: makeLogService('ImageRepository'),
+		getDb,
+	});
 	const completionStatusRepository = makeCompletionStatusRepository({
 		logService: makeLogService('CompletionStatusRepository'),
+		getDb,
 	});
 	const extensionRegistrationRepository = makeExtensionRegistrationRepository({
 		logService: makeLogService('ExtensionRegistrationRepository'),
+		getDb,
 	});
 	const instanceAuthenticationRepository = makeInstanceAuthenticationRepository({
 		logService: makeLogService('InstanceAuthenticationRepository'),
+		getDb,
 	});
 	const instanceSessionsRepository = makeInstanceSessionsRepository({
 		logService: makeLogService('InstanceSessionsRepository'),
+		getDb,
 	});
 	const synchronizationIdRepository = makeSynchronizationIdRepository({
 		logService: makeLogService('SynchronizationRepository'),
+		getDb,
 	});
 	const repositories = {
 		platformRepository,
@@ -133,31 +160,32 @@ export const setupServices = () => {
 		...commonDeps,
 		logService: makeLogService('ExtensionRegistrationService'),
 	});
-	const authenticationService = makeAuthenticationService({
+	const authService = makeAuthService({
 		...commonDeps,
 		signatureService,
-		logService: makeLogService('AuthenticationService'),
+		logService: makeLogService('AuthService'),
 		cryptographyService,
 	});
 	const synchronizationService = makeSynchronizationService({ ...commonDeps });
 	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
 
 	const services = {
-		...repositories,
-		log: logService,
-		libraryManifest: libraryManifestService,
-		playniteLibraryImporter: playniteLibraryImporterService,
-		mediaFiles: mediaFilesService,
-		gameSession: gameSessionService,
-		playniteLibrary: playniteLibraryService,
-		signature: signatureService,
-		extensionRegistration: extensionRegistrationService,
-		authentication: authenticationService,
+		logService,
+		libraryManifestService,
+		playniteLibraryImporterService,
+		mediaFilesService,
+		gameSessionService,
+		playniteLibraryService,
+		signatureService,
+		extensionRegistrationService,
+		authService,
+		fileSystemService,
+		synchronizationService,
 		playniteHostHttpClient,
-		fileSystem: fileSystemService,
-		synchronization: synchronizationService,
 		config,
 	};
 
-	return { services };
+	return { ...repositories, ...services };
 };
+
+export type ServerServices = ReturnType<typeof makeServerServices>;
