@@ -4,6 +4,7 @@ import type {
   CryptographyService,
   ExtensionRegistrationRepository,
   FileSystemService,
+  GameNoteRepository,
   GameSessionRepository,
   GenreRepository,
   InstanceAuthenticationRepository,
@@ -183,6 +184,16 @@ export const makeMocks = () => {
     getById: vi.fn(),
   } satisfies InstanceSessionsRepository;
 
+  const gameNoteRepository = {
+    add: vi.fn(),
+    addMany: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    all: vi.fn(),
+    getById: vi.fn(),
+    reconcileFromSource: vi.fn(),
+  } satisfies GameNoteRepository;
+
   return {
     logService,
     fileSystemService,
@@ -199,6 +210,7 @@ export const makeMocks = () => {
     companyRepository,
     instanceAuthenticationRepository,
     instanceSessionsRepository,
+    gameNoteRepository,
     cryptographyService,
     fetchClient,
     config,

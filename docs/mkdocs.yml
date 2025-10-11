@@ -4,10 +4,10 @@ theme:
   name: material
 nav:
   - Home: index.md
-  - Features:
-      - Syncing Across Devices: features/cross-device-sync.md
   - Overview:
       - Quick Start: overview/quick-start.md
+  - Features:
+      - Syncing Across Devices: features/cross-device-sync.md
   - Administration:
       - Reverse Proxy: administration/reverse-proxy.md
       - Authentication: administration/authentication.md
