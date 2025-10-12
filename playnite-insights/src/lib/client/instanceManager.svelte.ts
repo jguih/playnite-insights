@@ -22,15 +22,22 @@ export class InstanceManager {
 		this.#httpClient = httpClient;
 	}
 
+	#withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
+		const client = this.#httpClient;
+		if (!client) throw new HttpClientNotSetError();
+		return cb({ client });
+	};
+
 	#perfomHealthcheck = async (): Promise<boolean> => {
-		if (!this.#httpClient) throw new HttpClientNotSetError();
 		try {
-			await this.#httpClient.httpGetAsync({
-				endpoint: '/api/health',
-				strategy: new EmptyStrategy(),
+			return await this.#withHttpClient(async ({ client }) => {
+				await client.httpGetAsync({
+					endpoint: '/api/health',
+					strategy: new EmptyStrategy(),
+				});
+				this.#isRegistered = true;
+				return this.#isRegistered;
 			});
-			this.#isRegistered = true;
-			return this.#isRegistered;
 		} catch (error) {
 			if (error instanceof FetchClientStrategyError && error.statusCode === 403) {
 				if (error.data) {

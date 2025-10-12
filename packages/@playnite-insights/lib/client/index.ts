@@ -2,6 +2,7 @@ export * from "./api";
 export * from "./authentication";
 export * from "./company";
 export * from "./completion-status";
+export * from "./error";
 export * from "./extension-registration";
 export * from "./fetch-client";
 export * from "./game-notes";

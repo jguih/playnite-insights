@@ -7,6 +7,7 @@ import {
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
 import { getContext, setContext } from 'svelte';
+import { AuthService } from '../auth-service/authService.svelte';
 import { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import { KeyValueRepository } from '../db/keyValueRepository.svelte';
 import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
@@ -15,6 +16,7 @@ import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte'
 import { InstanceManager } from '../instanceManager.svelte';
 import { ServiceWorkerManager } from '../serviceWorkerManager.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue.svelte';
+import { SynchronizationService } from '../synchronization-service/synchronizationService.svelte';
 import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import { IndexedDbManager, type IndexedDbSignal } from './indexeddbManager.svelte';
 import { ApplicationSettingsStore } from './stores/applicationSettingsStore.svelte';
@@ -39,6 +41,8 @@ export class ClientServiceLocator {
 	#serverHeartbeat: ServerHeartbeat | null = null;
 	#httpClient: IFetchClient | null = null;
 	#instanceManager: InstanceManager | null = null;
+	#syncService: SynchronizationService | null = null;
+	#authService: AuthService | null = null;
 	// Stores
 	#gameStore: GameStore | null = null;
 	#serverTimeStore: ServerTimeStore | null = null;
@@ -59,9 +63,6 @@ export class ClientServiceLocator {
 	#syncQueueFactory: SyncQueueFactory | null = null;
 	#gameNoteFactory: GameNoteFactory | null = null;
 
-	#sessionId: string | null = null;
-	#syncId: string | null = null;
-
 	constructor() {}
 
 	loadStoresData = async () => {
@@ -77,24 +78,10 @@ export class ClientServiceLocator {
 		]);
 	};
 
-	#getSessionId = async (): Promise<string | null> => {
-		if (this.#sessionId) return this.#sessionId;
-		const sessionId = await this.keyValueRepository.getAsync({ key: 'session-id' });
-		if (sessionId) this.#sessionId = sessionId;
-		return this.#sessionId;
-	};
-
-	#getSyncId = async (): Promise<string | null> => {
-		if (this.#syncId) return this.#syncId;
-		const syncId = await this.keyValueRepository.getAsync({ key: 'sync-id' });
-		if (syncId) this.#syncId = syncId;
-		return this.#syncId;
-	};
-
 	#getHttpClientGlobalHeaders = async (): Promise<Headers> => {
 		const headers = new Headers();
-		const sessionId = await this.#getSessionId();
-		const syncId = await this.#getSyncId();
+		const sessionId = await this.authService.getSessionId();
+		const syncId = await this.syncService.getSyncId();
 		if (sessionId) headers.set('Authorization', `Bearer ${sessionId}`);
 		if (syncId) headers.set(syncIdHeader, syncId);
 		return headers;
@@ -136,7 +123,7 @@ export class ClientServiceLocator {
 	get eventSourceManager(): EventSourceManager {
 		if (!this.#eventSourceManager) {
 			this.#eventSourceManager = new EventSourceManager({
-				getSessionId: this.#getSessionId,
+				getSessionId: this.authService.getSessionId,
 				companyStore: this.companyStore,
 				gameSessionStore: this.gameSessionStore,
 				gameStore: this.gameStore,
@@ -175,6 +162,24 @@ export class ClientServiceLocator {
 			});
 		}
 		return this.#instanceManager;
+	}
+	get syncService(): SynchronizationService {
+		if (!this.#syncService) {
+			this.#syncService = new SynchronizationService({
+				httpClient: this.httpClient,
+				keyValueRepository: this.keyValueRepository,
+				gameNoteStore: this.gameNoteStore,
+			});
+		}
+		return this.#syncService;
+	}
+	get authService(): AuthService {
+		if (!this.#authService) {
+			this.#authService = new AuthService({
+				keyValueRepository: this.keyValueRepository,
+			});
+		}
+		return this.#authService;
 	}
 
 	// Repositories
