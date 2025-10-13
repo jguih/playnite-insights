@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
-	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -89,18 +88,6 @@
 	const handleOnChangeLocale: ChangeEventHandler<HTMLSelectElement> = (e) => {
 		const value = e.currentTarget.value;
 		if (isValidLocale(value)) setLocale(value);
-	};
-
-	const handleOnDataSync = async () => {
-		const syncResult = await locator.syncQueue.processQueueAsync();
-		const loadResult = syncResult
-			? await locator.gameNoteStore.loadNotesFromServerAsync(true)
-			: false;
-		if (!syncResult || !loadResult) {
-			toast.error({ category: 'app', message: m.toast_data_sync_failed() });
-			return;
-		}
-		toast.success({ category: 'app', message: m.toast_data_sync_succeeded() });
 	};
 
 	const handleSSENewRegistration = (newRegistration: ExtensionRegistration) => {
@@ -277,18 +264,25 @@
 			</label>
 		</ConfigSection>
 		<ConfigSection title={m.settings_sync_section_title()}>
-			<div class="mb-2">
-				{#if syncQueue.queueStatus === 'OK'}
-					<h2 class="text-success-light-fg">
-						{syncQueue.queueStatusText}
-						<CheckCircle class={['size-sm inline-block']} />
-					</h2>
-				{:else if syncQueue.queueStatus === 'NOT_OK'}
-					<h2 class="text-warning-light-fg">
-						{syncQueue.queueStatusText}
-						<AlertCircle class={['size-sm inline-block']} />
-					</h2>
-				{/if}
+			<div class="mb-4 mt-4 flex flex-col">
+				<div class="flex flex-row justify-between gap-4">
+					<p class="text-nowrap">Status</p>
+					{#if syncQueue.queueStatus === 'OK'}
+						<p class="text-success-light-fg break-all">
+							{syncQueue.queueStatusText}
+						</p>
+					{:else if syncQueue.queueStatus === 'NOT_OK'}
+						<p class="text-warning-light-fg break-all">
+							{syncQueue.queueStatusText}
+						</p>
+					{/if}
+				</div>
+				<Divider />
+				<div class="flex flex-row justify-between gap-4">
+					<p class="text-nowrap">SyncId</p>
+					<p class="break-all text-sm opacity-80">{locator.syncService.syncIdSignal}</p>
+				</div>
+				<Divider />
 			</div>
 		</ConfigSection>
 		<ConfigSection title={m.settings_interface_section_title()}>

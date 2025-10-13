@@ -6,14 +6,16 @@
 		ClientServiceLocator,
 		setLocatorContext,
 	} from '$lib/client/app-state/serviceLocator.svelte';
+	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
+	import { AppClientError } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 
-	let { children, data }: LayoutProps = $props();
+	let { children }: LayoutProps = $props();
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let loading = $state<Set<string>>(new Set('all'));
 	const locator = new ClientServiceLocator();
@@ -53,7 +55,11 @@
 		try {
 			addLoading('ensureSyncId');
 			await locator.syncService.ensureValidLocalSyncId();
-		} catch {
+		} catch (error) {
+			if (error instanceof AppClientError) {
+				if (error.code === 'invalid_syncid')
+					toast.warning({ category: 'app', message: error.message });
+			}
 		} finally {
 			removeLoading('ensureSyncId');
 		}

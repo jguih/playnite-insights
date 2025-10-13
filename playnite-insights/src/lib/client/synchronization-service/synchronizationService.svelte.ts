@@ -24,7 +24,7 @@ export class SynchronizationService {
 	#httpClient: SynchronizationServiceDeps['httpClient'];
 	#gameNoteRepository: SynchronizationServiceDeps['gameNoteRepository'];
 	#logService: SynchronizationServiceDeps['logService'];
-	#syncId: string | null = null;
+	#syncIdSignal: string | null;
 
 	constructor({
 		keyValueRepository,
@@ -36,6 +36,7 @@ export class SynchronizationService {
 		this.#httpClient = httpClient;
 		this.#gameNoteRepository = gameNoteRepository;
 		this.#logService = logService;
+		this.#syncIdSignal = $state(null);
 	}
 
 	#withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
@@ -78,11 +79,15 @@ export class SynchronizationService {
 	};
 
 	getSyncId = async (): Promise<string | null> => {
-		if (this.#syncId) return this.#syncId;
+		if (this.#syncIdSignal) return this.#syncIdSignal;
 		const syncId = await this.#keyValueRepository.getAsync({ key: 'sync-id' });
-		if (syncId) this.#syncId = syncId;
-		return this.#syncId;
+		if (syncId) this.#syncIdSignal = syncId;
+		return this.#syncIdSignal;
 	};
+
+	get syncIdSignal() {
+		return this.#syncIdSignal;
+	}
 
 	ensureValidLocalSyncId = async (): Promise<void> => {
 		try {
