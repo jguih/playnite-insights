@@ -14,6 +14,7 @@ import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 import { EventSourceManager } from '../event-source-manager/eventSourceManager.svelte';
 import { ServerHeartbeat } from '../event-source-manager/serverHeartbeat.svelte';
 import { InstanceManager } from '../instanceManager.svelte';
+import { LogService, type ILogService } from '../logService.svelte';
 import { ServiceWorkerManager } from '../serviceWorkerManager.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue.svelte';
 import { SynchronizationService } from '../synchronization-service/synchronizationService.svelte';
@@ -47,6 +48,7 @@ export class ClientServiceLocator {
 	protected _instanceManager: InstanceManager | null = null;
 	protected _syncService: SynchronizationService | null = null;
 	protected _authService: AuthService | null = null;
+	protected _logService: ILogService | null = null;
 
 	get indexeddbManager(): IIndexedDbManager {
 		if (!this._indexeddbManager) {
@@ -164,6 +166,7 @@ export class ClientServiceLocator {
 				httpClient: this.httpClient,
 				keyValueRepository: this.keyValueRepository,
 				gameNoteRepository: this.gameNoteRepository,
+				logService: this.logService,
 			});
 		}
 		return this._syncService;
@@ -176,6 +179,16 @@ export class ClientServiceLocator {
 			});
 		}
 		return this._authService;
+	}
+
+	get logService(): ILogService {
+		if (!this._logService) {
+			this._logService = new LogService();
+		}
+		return this._logService;
+	}
+	set logService(service: ILogService) {
+		this._logService = service;
 	}
 
 	// Stores

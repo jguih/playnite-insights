@@ -62,4 +62,31 @@ describe('Synchronization Service', () => {
 			expect.objectContaining({ endpoint: '/api/sync' }),
 		);
 	});
+
+	it('does not trigger reconciliation when server returns 200 during SyncId check', async () => {
+		// Arrange
+		const { syncService } = locator;
+		fetchClient.httpGetAsync.mockImplementationOnce(() => {
+			throw new FetchClientStrategyError({ statusCode: 409, message: 'Request failed with 409' });
+		});
+		fetchClient.httpPostAsync.mockResolvedValueOnce({
+			syncId: faker.string.uuid(),
+			notes: [],
+		} as ServerSyncReconciliationResponse);
+		// Act
+		try {
+			await syncService.ensureValidLocalSyncId();
+		} catch (error) {
+			if (error instanceof AppClientError) {
+				expect(error.code).toBe('invalid_syncid');
+			}
+		}
+		// Assert
+		expect(fetchClient.httpGetAsync).toHaveBeenCalledWith(
+			expect.objectContaining({ endpoint: '/api/sync/check' }),
+		);
+		expect(fetchClient.httpPostAsync).toHaveBeenCalledWith(
+			expect.objectContaining({ endpoint: '/api/sync' }),
+		);
+	});
 });

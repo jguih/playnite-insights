@@ -50,6 +50,13 @@
 		} finally {
 			removeLoading('applicationSettings');
 		}
+		try {
+			addLoading('ensureSyncId');
+			await locator.syncService.ensureValidLocalSyncId();
+		} catch {
+		} finally {
+			removeLoading('ensureSyncId');
+		}
 		loading = new Set();
 	};
 

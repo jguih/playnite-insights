@@ -10,23 +10,32 @@ import {
 } from '@playnite-insights/lib/client';
 import type { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import type { KeyValueRepository } from '../db/keyValueRepository.svelte';
+import type { ILogService } from '../logService.svelte';
 
 export type SynchronizationServiceDeps = {
 	keyValueRepository: KeyValueRepository;
 	gameNoteRepository: GameNoteRepository;
 	httpClient: IFetchClient | null;
+	logService: ILogService;
 };
 
 export class SynchronizationService {
 	#keyValueRepository: SynchronizationServiceDeps['keyValueRepository'];
 	#httpClient: SynchronizationServiceDeps['httpClient'];
 	#gameNoteRepository: SynchronizationServiceDeps['gameNoteRepository'];
+	#logService: SynchronizationServiceDeps['logService'];
 	#syncId: string | null = null;
 
-	constructor({ keyValueRepository, httpClient, gameNoteRepository }: SynchronizationServiceDeps) {
+	constructor({
+		keyValueRepository,
+		httpClient,
+		gameNoteRepository,
+		logService,
+	}: SynchronizationServiceDeps) {
 		this.#keyValueRepository = keyValueRepository;
 		this.#httpClient = httpClient;
 		this.#gameNoteRepository = gameNoteRepository;
+		this.#logService = logService;
 	}
 
 	#withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
@@ -37,6 +46,7 @@ export class SynchronizationService {
 
 	#reconcileWithServer = async () => {
 		try {
+			this.#logService.info(`Reconciliation started`);
 			await this.#withHttpClient(async ({ client }) => {
 				const notes = await this.#gameNoteRepository.getAllAsync();
 				const command: ClientSyncReconciliationCommand = {
@@ -51,8 +61,12 @@ export class SynchronizationService {
 					keyvalue: { Key: 'sync-id', Value: response.syncId },
 				});
 				await this.#gameNoteRepository.upsertOrDeleteManyAsync(response.notes);
+				this.#logService.success(
+					`Reconciliation completed (Processed ${response.notes.length} notes. Stored new SyncId: ${response.syncId})`,
+				);
 			});
 		} catch (error) {
+			this.#logService.error(`Reconciliation failed`, error);
 			throw new AppClientError(
 				{
 					code: 'reconciliation_failed',
@@ -79,21 +93,31 @@ export class SynchronizationService {
 				});
 			});
 		} catch (error) {
-			if (error instanceof FetchClientStrategyError && error.statusCode === 409) {
-				// Invalid SyncId
-				await this.#reconcileWithServer();
-				throw new AppClientError(
-					{
-						code: 'invalid_syncid',
-						message: 'Local SyncId was invalid and reconciliation was triggered.',
-					},
-					error,
-				);
-			}
-			throw new AppClientError(
+			const syncCheckFailedError = new AppClientError(
 				{ code: 'sync_check_failed', message: 'Failed to verify SyncId with server.' },
 				error,
 			);
+			if (error instanceof FetchClientStrategyError) {
+				if (error.statusCode === 409) {
+					this.#logService.error(`Client has invalid SyncId`, error);
+					await this.#reconcileWithServer();
+					throw new AppClientError(
+						{
+							code: 'invalid_syncid',
+							message: 'Local SyncId was invalid and reconciliation was triggered.',
+						},
+						error,
+					);
+				} else if (error.statusCode >= 500) {
+					this.#logService.error(`Failed to verify SyncId with server`, error);
+					throw syncCheckFailedError;
+				}
+				this.#logService.debug(`Failed to verify SyncId with server: ${error.message}`);
+				throw syncCheckFailedError;
+			} else {
+				this.#logService.error(`Unexpected error during SyncId check`, error);
+				throw syncCheckFailedError;
+			}
 		}
 	};
 }

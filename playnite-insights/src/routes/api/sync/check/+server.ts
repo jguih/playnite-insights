@@ -18,5 +18,5 @@ import type { RequestHandler } from '@sveltejs/kit';
 export const GET: RequestHandler = ({ request, url, locals: { services } }): Promise<Response> =>
 	withInstanceAuth(request, url, services, async () => {
 		await ensureSyncId({ request, url, ...services });
-		return emptyResponse();
+		return emptyResponse(200);
 	});
