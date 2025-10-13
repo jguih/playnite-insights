@@ -180,6 +180,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 
 	upsertOrDeleteManyAsync: IGameNotesRepository['upsertOrDeleteManyAsync'] = async (notes, ops) => {
 		const shouldOverride = ops?.override === true;
+		if (notes.length === 0) return;
 		return await this.withDb(async (db) => {
 			await runTransaction(db, [GameNoteRepository.STORE_NAME], 'readwrite', async ({ tx }) => {
 				const store = tx.objectStore(GameNoteRepository.STORE_NAME);
