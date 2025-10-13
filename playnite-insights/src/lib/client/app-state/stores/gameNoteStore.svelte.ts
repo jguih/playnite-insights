@@ -1,6 +1,6 @@
 import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
 import type { ServerHeartbeat } from '$lib/client/event-source-manager/serverHeartbeat.svelte';
-import type { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
+import type { IDateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
 	FetchClientStrategyError,
@@ -12,7 +12,7 @@ import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 export type GameNoteStoreDeps = ApiDataStoreDeps & {
 	serverHeartbeat: ServerHeartbeat;
 	gameNoteRepository: GameNoteRepository;
-	dateTimeHandler: DateTimeHandler;
+	dateTimeHandler: IDateTimeHandler;
 };
 
 export class GameNoteStore extends ApiDataStore {

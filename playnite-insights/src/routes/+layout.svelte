@@ -82,6 +82,7 @@
 		locator.eventSourceManager.setupGlobalListeners();
 		locator.serviceWorkerManager.setupGlobalListeners();
 		locator.serviceWorkerManager.watchServiceWorkerUpdates();
+		locator.gameNoteStore.loadNotesFromServerAsync();
 
 		if (!page.url.pathname.startsWith('/auth')) {
 			locator.eventSourceManager.connect().then(() => {

@@ -17,8 +17,12 @@ import { InstanceManager } from '../instanceManager.svelte';
 import { ServiceWorkerManager } from '../serviceWorkerManager.svelte';
 import { SyncQueue } from '../sync-queue/syncQueue.svelte';
 import { SynchronizationService } from '../synchronization-service/synchronizationService.svelte';
-import { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
-import { IndexedDbManager, type IndexedDbSignal } from './indexeddbManager.svelte';
+import { DateTimeHandler, type IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
+import {
+	IndexedDbManager,
+	type IIndexedDbManager,
+	type IndexedDbSignal,
+} from './indexeddbManager.svelte';
 import { ApplicationSettingsStore } from './stores/applicationSettingsStore.svelte';
 import { CompanyStore } from './stores/companyStore.svelte';
 import { ExtensionRegistrationStore } from './stores/extensionRegistrationStore.svelte';
@@ -33,35 +37,166 @@ import { ServerTimeStore } from './stores/serverTimeStore.svelte';
 
 export class ClientServiceLocator {
 	// Services
-	#indexeddbManager: IndexedDbManager | null = null;
-	#dateTimeHandler: DateTimeHandler | null = null;
-	#syncQueue: SyncQueue | null = null;
-	#eventSourceManager: EventSourceManager | null = null;
-	#serviceWorkerManager: ServiceWorkerManager | null = null;
-	#serverHeartbeat: ServerHeartbeat | null = null;
-	#httpClient: IFetchClient | null = null;
-	#instanceManager: InstanceManager | null = null;
-	#syncService: SynchronizationService | null = null;
-	#authService: AuthService | null = null;
+	protected _indexeddbManager: IIndexedDbManager | null = null;
+	protected _dateTimeHandler: IDateTimeHandler | null = null;
+	protected _syncQueue: SyncQueue | null = null;
+	protected _eventSourceManager: EventSourceManager | null = null;
+	protected _serviceWorkerManager: ServiceWorkerManager | null = null;
+	protected _serverHeartbeat: ServerHeartbeat | null = null;
+	protected _httpClient: IFetchClient | null = null;
+	protected _instanceManager: InstanceManager | null = null;
+	protected _syncService: SynchronizationService | null = null;
+	protected _authService: AuthService | null = null;
+
+	get indexeddbManager(): IIndexedDbManager {
+		if (!this._indexeddbManager) {
+			this._indexeddbManager = new IndexedDbManager();
+		}
+		return this._indexeddbManager;
+	}
+	set indexeddbManager(manager: IIndexedDbManager) {
+		this._indexeddbManager = manager;
+	}
+
+	get dateTimeHandler(): IDateTimeHandler {
+		if (!this._dateTimeHandler) {
+			this._dateTimeHandler = new DateTimeHandler({ serverTimeStore: this.serverTimeStore });
+		}
+		return this._dateTimeHandler;
+	}
+	set dateTimeHandler(handler: IDateTimeHandler) {
+		this._dateTimeHandler = handler;
+	}
+
+	get dbSignal(): IndexedDbSignal {
+		return this.indexeddbManager.dbSignal;
+	}
+
+	get syncQueue(): SyncQueue {
+		if (!this._syncQueue) {
+			this._syncQueue = new SyncQueue({
+				indexedDbSignal: this.dbSignal,
+				syncQueueRepository: this.syncQueueRepository,
+				httpClient: this._httpClient,
+			});
+		}
+		return this._syncQueue;
+	}
+	set syncQueue(syncQueue: SyncQueue) {
+		this._syncQueue = syncQueue;
+	}
+
+	get eventSourceManager(): EventSourceManager {
+		if (!this._eventSourceManager) {
+			this._eventSourceManager = new EventSourceManager({
+				getSessionId: this.authService.getSessionId,
+				companyStore: this.companyStore,
+				gameSessionStore: this.gameSessionStore,
+				gameStore: this.gameStore,
+				genreStore: this.genreStore,
+				libraryMetricsStore: this.libraryMetricsStore,
+				platformStore: this.platformStore,
+			});
+		}
+		return this._eventSourceManager;
+	}
+	set eventSourceManager(manager: EventSourceManager) {
+		this._eventSourceManager = manager;
+	}
+
+	get serviceWorkerManager(): ServiceWorkerManager {
+		if (!this._serviceWorkerManager) {
+			this._serviceWorkerManager = new ServiceWorkerManager({
+				companyStore: this.companyStore,
+				gameSessionStore: this.gameSessionStore,
+				gameStore: this.gameStore,
+				genreStore: this.genreStore,
+				libraryMetricsStore: this.libraryMetricsStore,
+				platformStore: this.platformStore,
+				screenshotStore: this.screenshotStore,
+			});
+		}
+		return this._serviceWorkerManager;
+	}
+	set serviceWorkerManager(manager: ServiceWorkerManager) {
+		this._serviceWorkerManager = manager;
+	}
+
+	get serverHeartbeat(): ServerHeartbeat {
+		if (!this._serverHeartbeat) {
+			this._serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.eventSourceManager });
+		}
+		return this._serverHeartbeat;
+	}
+	set serverHeartbeat(serverHeartbeat: ServerHeartbeat) {
+		this._serverHeartbeat = serverHeartbeat;
+	}
+
+	get httpClient(): IFetchClient | null {
+		if (!this._httpClient && browser) {
+			this._httpClient = new FetchClient({
+				url: window.location.origin,
+				globalHeaders: this.#getHttpClientGlobalHeaders,
+			});
+		}
+		return this._httpClient;
+	}
+	set httpClient(client: IFetchClient) {
+		this._httpClient = client;
+	}
+
+	get instanceManager(): InstanceManager {
+		if (!this._instanceManager) {
+			this._instanceManager = new InstanceManager({
+				httpClient: this.httpClient,
+				keyValueRepository: this.keyValueRepository,
+			});
+		}
+		return this._instanceManager;
+	}
+	set instanceManager(manager: InstanceManager) {
+		this._instanceManager = manager;
+	}
+
+	get syncService(): SynchronizationService {
+		if (!this._syncService) {
+			this._syncService = new SynchronizationService({
+				httpClient: this.httpClient,
+				keyValueRepository: this.keyValueRepository,
+				gameNoteRepository: this.gameNoteRepository,
+			});
+		}
+		return this._syncService;
+	}
+
+	get authService(): AuthService {
+		if (!this._authService) {
+			this._authService = new AuthService({
+				keyValueRepository: this.keyValueRepository,
+			});
+		}
+		return this._authService;
+	}
+
 	// Stores
-	#gameStore: GameStore | null = null;
-	#serverTimeStore: ServerTimeStore | null = null;
-	#companyStore: CompanyStore | null = null;
-	#gameSessionStore: GameSessionStore | null = null;
-	#gameNoteStore: GameNoteStore | null = null;
-	#libraryMetricsStore: LibraryMetricsStore | null = null;
-	#genreStore: GenreStore | null = null;
-	#platformStore: PlatformStore | null = null;
-	#screenshotStore: ScreenshotStore | null = null;
-	#extensionRegistrationStore: ExtensionRegistrationStore | null = null;
-	#applicationSettingsStore: ApplicationSettingsStore | null = null;
+	protected _gameStore: GameStore | null = null;
+	protected _serverTimeStore: ServerTimeStore | null = null;
+	protected _companyStore: CompanyStore | null = null;
+	protected _gameSessionStore: GameSessionStore | null = null;
+	protected _gameNoteStore: GameNoteStore | null = null;
+	protected _libraryMetricsStore: LibraryMetricsStore | null = null;
+	protected _genreStore: GenreStore | null = null;
+	protected _platformStore: PlatformStore | null = null;
+	protected _screenshotStore: ScreenshotStore | null = null;
+	protected _extensionRegistrationStore: ExtensionRegistrationStore | null = null;
+	protected _applicationSettingsStore: ApplicationSettingsStore | null = null;
 	// Repositories
-	#gameNoteRepository: GameNoteRepository | null = null;
-	#syncQueueRepository: SyncQueueRepository | null = null;
-	#keyValueRepository: KeyValueRepository | null = null;
+	protected _gameNoteRepository: GameNoteRepository | null = null;
+	protected _syncQueueRepository: SyncQueueRepository | null = null;
+	protected _keyValueRepository: KeyValueRepository | null = null;
 	// Factories
-	#syncQueueFactory: SyncQueueFactory | null = null;
-	#gameNoteFactory: GameNoteFactory | null = null;
+	protected _syncQueueFactory: SyncQueueFactory | null = null;
+	protected _gameNoteFactory: GameNoteFactory | null = null;
 
 	constructor() {}
 
@@ -87,220 +222,125 @@ export class ClientServiceLocator {
 		return headers;
 	};
 
-	get httpClient(): IFetchClient | null {
-		if (!this.#httpClient && browser) {
-			this.#httpClient = new FetchClient({
-				url: window.location.origin,
-				globalHeaders: this.#getHttpClientGlobalHeaders,
-			});
-		}
-		return this.#httpClient;
-	}
-	get dbSignal(): IndexedDbSignal {
-		if (!this.#indexeddbManager) {
-			this.#indexeddbManager = new IndexedDbManager({
-				onOpen: () => this.gameNoteStore.loadNotesFromServerAsync(),
-			});
-		}
-		return this.#indexeddbManager.dbSignal;
-	}
-	get dateTimeHandler(): DateTimeHandler {
-		if (!this.#dateTimeHandler) {
-			this.#dateTimeHandler = new DateTimeHandler({ serverTimeStore: this.serverTimeStore });
-		}
-		return this.#dateTimeHandler;
-	}
-	get syncQueue(): SyncQueue {
-		if (!this.#syncQueue) {
-			this.#syncQueue = new SyncQueue({
-				indexedDbSignal: this.dbSignal,
-				syncQueueRepository: this.syncQueueRepository,
-				httpClient: this.#httpClient,
-			});
-		}
-		return this.#syncQueue;
-	}
-	get eventSourceManager(): EventSourceManager {
-		if (!this.#eventSourceManager) {
-			this.#eventSourceManager = new EventSourceManager({
-				getSessionId: this.authService.getSessionId,
-				companyStore: this.companyStore,
-				gameSessionStore: this.gameSessionStore,
-				gameStore: this.gameStore,
-				genreStore: this.genreStore,
-				libraryMetricsStore: this.libraryMetricsStore,
-				platformStore: this.platformStore,
-			});
-		}
-		return this.#eventSourceManager;
-	}
-	get serviceWorkerManager(): ServiceWorkerManager {
-		if (!this.#serviceWorkerManager) {
-			this.#serviceWorkerManager = new ServiceWorkerManager({
-				companyStore: this.companyStore,
-				gameSessionStore: this.gameSessionStore,
-				gameStore: this.gameStore,
-				genreStore: this.genreStore,
-				libraryMetricsStore: this.libraryMetricsStore,
-				platformStore: this.platformStore,
-				screenshotStore: this.screenshotStore,
-			});
-		}
-		return this.#serviceWorkerManager;
-	}
-	get serverHeartbeat(): ServerHeartbeat {
-		if (!this.#serverHeartbeat) {
-			this.#serverHeartbeat = new ServerHeartbeat({ eventSourceManager: this.eventSourceManager });
-		}
-		return this.#serverHeartbeat;
-	}
-	get instanceManager(): InstanceManager {
-		if (!this.#instanceManager) {
-			this.#instanceManager = new InstanceManager({
-				httpClient: this.httpClient,
-				keyValueRepository: this.keyValueRepository,
-			});
-		}
-		return this.#instanceManager;
-	}
-	get syncService(): SynchronizationService {
-		if (!this.#syncService) {
-			this.#syncService = new SynchronizationService({
-				httpClient: this.httpClient,
-				keyValueRepository: this.keyValueRepository,
-				gameNoteStore: this.gameNoteStore,
-			});
-		}
-		return this.#syncService;
-	}
-	get authService(): AuthService {
-		if (!this.#authService) {
-			this.#authService = new AuthService({
-				keyValueRepository: this.keyValueRepository,
-			});
-		}
-		return this.#authService;
-	}
-
 	// Repositories
 	get gameNoteRepository(): GameNoteRepository {
-		if (!this.#gameNoteRepository) {
-			this.#gameNoteRepository = new GameNoteRepository({
+		if (!this._gameNoteRepository) {
+			this._gameNoteRepository = new GameNoteRepository({
 				dateTimeHandler: this.dateTimeHandler,
 				indexedDbSignal: this.dbSignal,
 				syncQueueFactory: this.syncQueueFactory,
 			});
 		}
-		return this.#gameNoteRepository;
+		return this._gameNoteRepository;
 	}
 	get syncQueueRepository(): SyncQueueRepository {
-		if (!this.#syncQueueRepository) {
-			this.#syncQueueRepository = new SyncQueueRepository({ indexedDbSignal: this.dbSignal });
+		if (!this._syncQueueRepository) {
+			this._syncQueueRepository = new SyncQueueRepository({ indexedDbSignal: this.dbSignal });
 		}
-		return this.#syncQueueRepository;
+		return this._syncQueueRepository;
 	}
 	get keyValueRepository(): KeyValueRepository {
-		if (!this.#keyValueRepository) {
-			this.#keyValueRepository = new KeyValueRepository({ indexedDbSignal: this.dbSignal });
+		if (!this._keyValueRepository) {
+			this._keyValueRepository = new KeyValueRepository({ indexedDbSignal: this.dbSignal });
 		}
-		return this.#keyValueRepository;
+		return this._keyValueRepository;
 	}
 
 	// Factories
 	get syncQueueFactory(): SyncQueueFactory {
-		if (!this.#syncQueueFactory) {
-			this.#syncQueueFactory = new SyncQueueFactory();
+		if (!this._syncQueueFactory) {
+			this._syncQueueFactory = new SyncQueueFactory();
 		}
-		return this.#syncQueueFactory;
+		return this._syncQueueFactory;
 	}
 	get gameNoteFactory(): GameNoteFactory {
-		if (!this.#gameNoteFactory) {
-			this.#gameNoteFactory = new GameNoteFactory();
+		if (!this._gameNoteFactory) {
+			this._gameNoteFactory = new GameNoteFactory();
 		}
-		return this.#gameNoteFactory;
+		return this._gameNoteFactory;
 	}
 
 	// Stores
 	get gameStore(): GameStore {
-		if (!this.#gameStore) {
-			this.#gameStore = new GameStore({
+		if (!this._gameStore) {
+			this._gameStore = new GameStore({
 				httpClient: this.httpClient,
 				applicationSettingsStore: this.applicationSettingsStore,
 			});
 		}
-		return this.#gameStore;
+		return this._gameStore;
 	}
 	get companyStore(): CompanyStore {
-		if (!this.#companyStore) {
-			this.#companyStore = new CompanyStore({ httpClient: this.httpClient });
+		if (!this._companyStore) {
+			this._companyStore = new CompanyStore({ httpClient: this.httpClient });
 		}
-		return this.#companyStore;
+		return this._companyStore;
 	}
 	get gameSessionStore(): GameSessionStore {
-		if (!this.#gameSessionStore) {
-			this.#gameSessionStore = new GameSessionStore({ httpClient: this.httpClient });
+		if (!this._gameSessionStore) {
+			this._gameSessionStore = new GameSessionStore({ httpClient: this.httpClient });
 		}
-		return this.#gameSessionStore;
+		return this._gameSessionStore;
 	}
 	get gameNoteStore(): GameNoteStore {
-		if (!this.#gameNoteStore) {
-			this.#gameNoteStore = new GameNoteStore({
+		if (!this._gameNoteStore) {
+			this._gameNoteStore = new GameNoteStore({
 				httpClient: this.httpClient,
 				serverHeartbeat: this.serverHeartbeat,
 				dateTimeHandler: this.dateTimeHandler,
 				gameNoteRepository: this.gameNoteRepository,
 			});
 		}
-		return this.#gameNoteStore;
+		return this._gameNoteStore;
 	}
 	get libraryMetricsStore(): LibraryMetricsStore {
-		if (!this.#libraryMetricsStore) {
-			this.#libraryMetricsStore = new LibraryMetricsStore({ httpClient: this.httpClient });
+		if (!this._libraryMetricsStore) {
+			this._libraryMetricsStore = new LibraryMetricsStore({ httpClient: this.httpClient });
 		}
-		return this.#libraryMetricsStore;
+		return this._libraryMetricsStore;
 	}
 	get genreStore(): GenreStore {
-		if (!this.#genreStore) {
-			this.#genreStore = new GenreStore({ httpClient: this.httpClient });
+		if (!this._genreStore) {
+			this._genreStore = new GenreStore({ httpClient: this.httpClient });
 		}
-		return this.#genreStore;
+		return this._genreStore;
 	}
 	get platformStore(): PlatformStore {
-		if (!this.#platformStore) {
-			this.#platformStore = new PlatformStore({ httpClient: this.httpClient });
+		if (!this._platformStore) {
+			this._platformStore = new PlatformStore({ httpClient: this.httpClient });
 		}
-		return this.#platformStore;
+		return this._platformStore;
 	}
 	get serverTimeStore(): ServerTimeStore {
-		if (!this.#serverTimeStore) {
-			this.#serverTimeStore = new ServerTimeStore({
+		if (!this._serverTimeStore) {
+			this._serverTimeStore = new ServerTimeStore({
 				httpClient: this.httpClient,
 				serverHeartbeat: this.serverHeartbeat,
 			});
 		}
-		return this.#serverTimeStore;
+		return this._serverTimeStore;
 	}
 	get screenshotStore(): ScreenshotStore {
-		if (!this.#screenshotStore) {
-			this.#screenshotStore = new ScreenshotStore({ httpClient: this.httpClient });
+		if (!this._screenshotStore) {
+			this._screenshotStore = new ScreenshotStore({ httpClient: this.httpClient });
 		}
-		return this.#screenshotStore;
+		return this._screenshotStore;
 	}
 	get extensionRegistrationStore(): ExtensionRegistrationStore {
-		if (!this.#extensionRegistrationStore) {
-			this.#extensionRegistrationStore = new ExtensionRegistrationStore({
+		if (!this._extensionRegistrationStore) {
+			this._extensionRegistrationStore = new ExtensionRegistrationStore({
 				httpClient: this.httpClient,
 			});
 		}
-		return this.#extensionRegistrationStore;
+		return this._extensionRegistrationStore;
 	}
 	get applicationSettingsStore(): ApplicationSettingsStore {
-		if (!this.#applicationSettingsStore) {
-			this.#applicationSettingsStore = new ApplicationSettingsStore({
+		if (!this._applicationSettingsStore) {
+			this._applicationSettingsStore = new ApplicationSettingsStore({
 				keyValueRepository: this.keyValueRepository,
 			});
 		}
-		return this.#applicationSettingsStore;
+		return this._applicationSettingsStore;
 	}
 }
 

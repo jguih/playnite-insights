@@ -10,14 +10,14 @@ import { runRequest, runTransaction } from './indexeddb';
 import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
-export type GameNotesRepositoryDeps = {
+export type GameNoteRepositoryDeps = {
 	syncQueueFactory: SyncQueueFactory;
 	dateTimeHandler: IDateTimeHandler;
 } & IndexedDBRepositoryDeps;
 
 export class GameNoteRepository extends IndexedDBRepository implements IGameNotesRepository {
-	#syncQueueFactory: GameNotesRepositoryDeps['syncQueueFactory'];
-	#dateTimeHandler: GameNotesRepositoryDeps['dateTimeHandler'];
+	#syncQueueFactory: GameNoteRepositoryDeps['syncQueueFactory'];
+	#dateTimeHandler: GameNoteRepositoryDeps['dateTimeHandler'];
 
 	static STORE_NAME = 'gameNotes' as const;
 
@@ -31,7 +31,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		byGameId: this.INDEX.byGameId,
 	} as const;
 
-	constructor({ indexedDbSignal, syncQueueFactory, dateTimeHandler }: GameNotesRepositoryDeps) {
+	constructor({ indexedDbSignal, syncQueueFactory, dateTimeHandler }: GameNoteRepositoryDeps) {
 		super({ indexedDbSignal });
 		this.#syncQueueFactory = syncQueueFactory;
 		this.#dateTimeHandler = dateTimeHandler;
