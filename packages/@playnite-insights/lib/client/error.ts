@@ -13,6 +13,26 @@ export const appClientErrorDepsSchema = z.discriminatedUnion("code", [
     code: z.literal("reconciliation_failed"),
     message: z.string().optional(),
   }),
+  z.object({
+    code: z.literal("indexeddb_not_initialized"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("dom_exception"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("instance_registration_check_failed"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("server_error"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("load_application_settings_failed"),
+    message: z.string().optional(),
+  }),
 ]);
 
 export type AppClientErrorDeps = z.infer<typeof appClientErrorDepsSchema>;

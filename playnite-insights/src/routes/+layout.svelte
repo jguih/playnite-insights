@@ -37,11 +37,18 @@
 	const initInstance = async () => {
 		try {
 			addLoading('instanceRegistered');
-			var registered = await locator.instanceManager.isRegistered();
+			const registered = await locator.instanceManager.isRegistered();
 			if (!registered) {
 				await goto('/auth/register', { replaceState: true });
 			}
-		} catch {
+		} catch (error) {
+			if (error instanceof AppClientError) {
+				if (error.code === 'server_error')
+					toast.error({
+						category: 'app',
+						message: 'Failed to check instance registration, please check application logs.',
+					});
+			}
 		} finally {
 			removeLoading('instanceRegistered');
 		}
@@ -49,16 +56,29 @@
 			addLoading('applicationSettings');
 			await locator.applicationSettingsStore.loadSettings();
 		} catch {
+			// Logs only
 		} finally {
 			removeLoading('applicationSettings');
 		}
 		try {
 			addLoading('ensureSyncId');
-			await locator.syncService.ensureValidLocalSyncId();
+			await locator.syncService.ensureValidLocalSyncId({
+				onFinishReconcile: () => {
+					toast.info({ category: 'app', message: `Reconciled data with server.` });
+				},
+			});
 		} catch (error) {
 			if (error instanceof AppClientError) {
 				if (error.code === 'invalid_syncid')
-					toast.warning({ category: 'app', message: error.message });
+					toast.warning({
+						category: 'app',
+						message: `Invalid SyncId detected, reconciling local dataset with server...`,
+					});
+				if (error.code === 'reconciliation_failed')
+					toast.error({
+						category: 'app',
+						message: `Failed to reconcile data with server, please check application logs.`,
+					});
 			}
 		} finally {
 			removeLoading('ensureSyncId');

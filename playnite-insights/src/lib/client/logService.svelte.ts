@@ -8,8 +8,7 @@ export interface ILogService {
 
 export class LogService implements ILogService {
 	error = (message: string, error?: unknown) => {
-		console.error(`${message}`);
-		if (error) console.error(error);
+		console.error(`${message}`, error);
 	};
 	warning = (message: string) => {
 		console.warn(message);

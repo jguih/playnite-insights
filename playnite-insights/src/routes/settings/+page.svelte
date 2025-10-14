@@ -28,8 +28,13 @@
 
 	let currentLocale = $state(getLocale());
 	const locator = getLocatorContext();
-	const { extensionRegistrationStore, eventSourceManager, applicationSettingsStore, syncQueue } =
-		locator;
+	const {
+		extensionRegistrationStore,
+		eventSourceManager,
+		applicationSettingsStore,
+		syncQueue,
+		syncService,
+	} = locator;
 	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
 	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
 	let registrations = $derived(extensionRegistrationStore.listSignal);
@@ -280,7 +285,7 @@
 				<Divider />
 				<div class="flex flex-row justify-between gap-4">
 					<p class="text-nowrap">SyncId</p>
-					<p class="break-all text-sm opacity-80">{locator.syncService.syncIdSignal}</p>
+					<p class="break-all text-sm opacity-80">{syncService.syncIdSignal}</p>
 				</div>
 				<Divider />
 			</div>

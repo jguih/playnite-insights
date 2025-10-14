@@ -48,7 +48,7 @@ describe('Synchronization Service', () => {
 		} as ServerSyncReconciliationResponse);
 		// Act
 		try {
-			await syncService.ensureValidLocalSyncId();
+			await syncService.ensureValidLocalSyncId({ waitForReconcile: true });
 		} catch (error) {
 			if (error instanceof AppClientError) {
 				expect(error.code).toBe('invalid_syncid');

@@ -152,6 +152,7 @@ export class ClientServiceLocator {
 			this._instanceManager = new InstanceManager({
 				httpClient: this.httpClient,
 				keyValueRepository: this.keyValueRepository,
+				logService: this.logService,
 			});
 		}
 		return this._instanceManager;
@@ -351,6 +352,7 @@ export class ClientServiceLocator {
 		if (!this._applicationSettingsStore) {
 			this._applicationSettingsStore = new ApplicationSettingsStore({
 				keyValueRepository: this.keyValueRepository,
+				logService: this.logService,
 			});
 		}
 		return this._applicationSettingsStore;

@@ -8,6 +8,7 @@ import {
 	type ClientSyncReconciliationCommand,
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
+import { IndexedDBNotInitializedError } from '../db/errors/indexeddbNotInitialized';
 import type { GameNoteRepository } from '../db/gameNotesRepository.svelte';
 import type { KeyValueRepository } from '../db/keyValueRepository.svelte';
 import type { ILogService } from '../logService.svelte';
@@ -18,6 +19,14 @@ export type SynchronizationServiceDeps = {
 	httpClient: IFetchClient | null;
 	logService: ILogService;
 };
+
+export interface ISynchronizationService {
+	ensureValidLocalSyncId: (deps: {
+		onFinishReconcile?: () => void;
+		/** If `true` the reconcile function will not run in background and any errors will wait before being thrown */
+		waitForReconcile?: boolean;
+	}) => Promise<void>;
+}
 
 export class SynchronizationService {
 	#keyValueRepository: SynchronizationServiceDeps['keyValueRepository'];
@@ -61,17 +70,65 @@ export class SynchronizationService {
 				await this.#keyValueRepository.putAsync({
 					keyvalue: { Key: 'sync-id', Value: response.syncId },
 				});
+				this.#syncIdSignal = response.syncId;
 				await this.#gameNoteRepository.upsertOrDeleteManyAsync(response.notes);
 				this.#logService.success(
 					`Reconciliation completed (Processed ${response.notes.length} notes. Stored new SyncId: ${response.syncId})`,
 				);
 			});
 		} catch (error) {
-			this.#logService.error(`Reconciliation failed`, error);
+			if (error instanceof IndexedDBNotInitializedError) {
+				this.#logService.error(
+					`IndexedDb not initialized while reconciling server dataset: ${error.message}`,
+				);
+				throw new AppClientError(
+					{
+						code: 'indexeddb_not_initialized',
+						message: 'IndexedDb not initialized while reconciling server dataset',
+					},
+					error,
+				);
+			} else if (error instanceof DOMException) {
+				this.#logService.error(
+					`DOMException while reconciling server dataset (${error.name}): ${error.message}`,
+					error,
+				);
+				throw new AppClientError(
+					{
+						code: 'dom_exception',
+						message: `DOMException while reconciling server dataset`,
+					},
+					error,
+				);
+			} else if (error instanceof FetchClientStrategyError) {
+				if (error.statusCode >= 500) {
+					this.#logService.error(
+						`HTTP request error while reconciling server dataset: ${error.message}`,
+						error,
+					);
+					throw new AppClientError(
+						{
+							code: 'server_error',
+							message: `HTTP request error while reconciling server dataset`,
+						},
+						error,
+					);
+				} else {
+					this.#logService.debug(`HTTP request error while reconciling server dataset`);
+					throw new AppClientError(
+						{
+							code: 'reconciliation_failed',
+							message: `HTTP request error while reconciling server dataset`,
+						},
+						error,
+					);
+				}
+			}
+			this.#logService.error(`Unknown error while reconciling with server`, error);
 			throw new AppClientError(
 				{
 					code: 'reconciliation_failed',
-					message: 'Failed to reconcile local dataset with server.',
+					message: 'Unknown error while reconciling with server',
 				},
 				error,
 			);
@@ -89,7 +146,9 @@ export class SynchronizationService {
 		return this.#syncIdSignal;
 	}
 
-	ensureValidLocalSyncId = async (): Promise<void> => {
+	ensureValidLocalSyncId = async (
+		deps: { onFinishReconcile?: () => void; waitForReconcile?: boolean } = {},
+	): Promise<void> => {
 		try {
 			await this.#withHttpClient(async ({ client }) => {
 				await client.httpGetAsync({
@@ -98,14 +157,11 @@ export class SynchronizationService {
 				});
 			});
 		} catch (error) {
-			const syncCheckFailedError = new AppClientError(
-				{ code: 'sync_check_failed', message: 'Failed to verify SyncId with server.' },
-				error,
-			);
 			if (error instanceof FetchClientStrategyError) {
 				if (error.statusCode === 409) {
-					this.#logService.error(`Client has invalid SyncId`, error);
-					await this.#reconcileWithServer();
+					this.#logService.error(`Invalid SyncId detected`, error);
+					if (deps.waitForReconcile) await this.#reconcileWithServer().then(deps.onFinishReconcile);
+					else this.#reconcileWithServer().then(deps.onFinishReconcile);
 					throw new AppClientError(
 						{
 							code: 'invalid_syncid',
@@ -113,16 +169,37 @@ export class SynchronizationService {
 						},
 						error,
 					);
-				} else if (error.statusCode >= 500) {
-					this.#logService.error(`Failed to verify SyncId with server`, error);
-					throw syncCheckFailedError;
 				}
-				this.#logService.debug(`Failed to verify SyncId with server: ${error.message}`);
-				throw syncCheckFailedError;
-			} else {
-				this.#logService.error(`Unexpected error during SyncId check`, error);
-				throw syncCheckFailedError;
+				if (error.statusCode >= 500) {
+					this.#logService.error(
+						`HTTP request error while validating local SyncId: ${error.message}`,
+						error,
+					);
+					throw new AppClientError(
+						{
+							code: 'server_error',
+							message: 'HTTP request error while validating local SyncId',
+						},
+						error,
+					);
+				} else {
+					this.#logService.debug(
+						`HTTP request error while validating local SyncId: ${error.message}`,
+					);
+					throw new AppClientError(
+						{
+							code: 'sync_check_failed',
+							message: 'HTTP request error while validating local SyncId',
+						},
+						error,
+					);
+				}
 			}
+			this.#logService.error(`Unknown error while validating local SyncId`, error);
+			throw new AppClientError(
+				{ code: 'sync_check_failed', message: 'Unknown error while validating local SyncId' },
+				error,
+			);
 		}
 	};
 }
