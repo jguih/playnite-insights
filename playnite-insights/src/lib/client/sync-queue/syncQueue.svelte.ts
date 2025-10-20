@@ -5,7 +5,6 @@ import {
 	createGameNoteResponseSchema,
 	EmptyStrategy,
 	FetchClientStrategyError,
-	HttpClientNotSetError,
 	JsonStrategy,
 	updateGameNoteCommandSchema,
 	updateGameNoteResponseSchema,
@@ -21,7 +20,7 @@ import { SyncQueueRepository } from '../db/syncQueueRepository.svelte';
 
 export type SyncQueueDeps = {
 	syncQueueRepository: SyncQueueRepository;
-	httpClient: IFetchClient | null;
+	httpClient: IFetchClient;
 	indexedDbSignal: IndexedDbSignal;
 };
 
@@ -53,14 +52,6 @@ export class SyncQueue {
 		return callback(db);
 	}
 
-	protected withHttpClient = async <T>(
-		cb: (props: { client: IFetchClient }) => Promise<T>,
-	): Promise<T> => {
-		const client = this.#httpClient;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	private updateGameNoteAndDeleteQueueItemAsync = async (
 		note: GameNote,
 		queueItem: SyncQueueItem,
@@ -83,83 +74,77 @@ export class SyncQueue {
 	};
 
 	protected createGameNoteAsync = async (queueItem: SyncQueueItem) => {
-		return await this.withHttpClient(async ({ client }) => {
-			const note = { ...queueItem.Payload };
-			const command = createGameNoteCommandSchema.parse(note);
-			try {
-				const createdNote = await client.httpPostAsync({
-					endpoint: '/api/sync/note',
-					strategy: new JsonStrategy(createGameNoteResponseSchema),
-					body: command,
-				});
-				await this.updateGameNoteAndDeleteQueueItemAsync(createdNote, queueItem);
-			} catch (error) {
-				if (error instanceof FetchClientStrategyError && error.statusCode === 409) {
-					// When note already exists (conflict)
-					const apiError = apiErrorSchema.parse(error.data);
-					if (!(apiError.error.code === 'note_already_exists')) throw error;
-					await this.updateGameNoteAndDeleteQueueItemAsync(apiError.error.note, queueItem);
-				} else {
-					throw error;
-				}
+		const note = { ...queueItem.Payload };
+		const command = createGameNoteCommandSchema.parse(note);
+		try {
+			const createdNote = await this.#httpClient.httpPostAsync({
+				endpoint: '/api/sync/note',
+				strategy: new JsonStrategy(createGameNoteResponseSchema),
+				body: command,
+			});
+			await this.updateGameNoteAndDeleteQueueItemAsync(createdNote, queueItem);
+		} catch (error) {
+			if (error instanceof FetchClientStrategyError && error.statusCode === 409) {
+				// When note already exists (conflict)
+				const apiError = apiErrorSchema.parse(error.data);
+				if (!(apiError.error.code === 'note_already_exists')) throw error;
+				await this.updateGameNoteAndDeleteQueueItemAsync(apiError.error.note, queueItem);
+			} else {
+				throw error;
 			}
-		});
+		}
 	};
 
 	protected updateGameNoteAsync = async (queueItem: SyncQueueItem) => {
-		return await this.withHttpClient(async ({ client }) => {
-			const note = { ...queueItem.Payload };
-			const command = updateGameNoteCommandSchema.parse(note);
-			try {
-				const updatedNote = await client.httpPutAsync({
-					endpoint: '/api/sync/note',
-					strategy: new JsonStrategy(updateGameNoteResponseSchema),
-					body: command,
-				});
-				await this.updateGameNoteAndDeleteQueueItemAsync(updatedNote, queueItem);
-			} catch (error) {
-				if (error instanceof FetchClientStrategyError && error.statusCode === 404) {
-					await this.withDb(async (db) => {
-						await runTransaction(db, ['syncQueue', 'gameNotes'], 'readwrite', async ({ tx }) => {
-							const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
-							const index = syncQueueStore.index(SyncQueueRepository.INDEX.Entity_PayloadId_Type);
-							// Delete all create queue items for this payload
-							const createQueueItems = await runRequest(
-								index.getAllKeys(['gameNote', note.Id, 'create']),
-							);
-							for (const createQueueItem of createQueueItems)
-								await runRequest(syncQueueStore.delete(createQueueItem));
-							// Update 'type' of current queue item to 'create'
-							const newItem = { ...queueItem };
-							newItem.Type = 'create';
-							newItem.Status = 'pending';
-							await runRequest(syncQueueStore.put(newItem));
-						});
+		const note = { ...queueItem.Payload };
+		const command = updateGameNoteCommandSchema.parse(note);
+		try {
+			const updatedNote = await this.#httpClient.httpPutAsync({
+				endpoint: '/api/sync/note',
+				strategy: new JsonStrategy(updateGameNoteResponseSchema),
+				body: command,
+			});
+			await this.updateGameNoteAndDeleteQueueItemAsync(updatedNote, queueItem);
+		} catch (error) {
+			if (error instanceof FetchClientStrategyError && error.statusCode === 404) {
+				await this.withDb(async (db) => {
+					await runTransaction(db, ['syncQueue', 'gameNotes'], 'readwrite', async ({ tx }) => {
+						const syncQueueStore = tx.objectStore(SyncQueueRepository.STORE_NAME);
+						const index = syncQueueStore.index(SyncQueueRepository.INDEX.Entity_PayloadId_Type);
+						// Delete all create queue items for this payload
+						const createQueueItems = await runRequest(
+							index.getAllKeys(['gameNote', note.Id, 'create']),
+						);
+						for (const createQueueItem of createQueueItems)
+							await runRequest(syncQueueStore.delete(createQueueItem));
+						// Update 'type' of current queue item to 'create'
+						const newItem = { ...queueItem };
+						newItem.Type = 'create';
+						newItem.Status = 'pending';
+						await runRequest(syncQueueStore.put(newItem));
 					});
-				} else {
-					throw error;
-				}
+				});
+			} else {
+				throw error;
 			}
-		});
+		}
 	};
 
 	protected deleteGameNoteAsync = async (queueItem: SyncQueueItem) => {
-		return await this.withHttpClient(async ({ client }) => {
-			const note = { ...queueItem.Payload };
-			try {
-				await client.httpDeleteAsync({
-					endpoint: `/api/sync/note/${note.Id}`,
-					strategy: new EmptyStrategy(),
-				});
+		const note = { ...queueItem.Payload };
+		try {
+			await this.#httpClient.httpDeleteAsync({
+				endpoint: `/api/sync/note/${note.Id}`,
+				strategy: new EmptyStrategy(),
+			});
+			await this.deleteGameNoteAndQueueItemAsync(note, queueItem);
+		} catch (error) {
+			if (error instanceof FetchClientStrategyError && error.statusCode === 404) {
 				await this.deleteGameNoteAndQueueItemAsync(note, queueItem);
-			} catch (error) {
-				if (error instanceof FetchClientStrategyError && error.statusCode === 404) {
-					await this.deleteGameNoteAndQueueItemAsync(note, queueItem);
-				} else {
-					throw error;
-				}
+			} else {
+				throw error;
 			}
-		});
+		}
 	};
 
 	protected processGameNoteAsync = async (queueItem: SyncQueueItem) => {

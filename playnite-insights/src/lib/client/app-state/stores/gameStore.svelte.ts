@@ -172,16 +172,14 @@ export class GameStore extends ApiDataStore {
 
 	loadGames = async () => {
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#dataSignal.isLoading = true;
-				const result = await client.httpGetAsync({
-					endpoint: '/api/game',
-					strategy: new JsonStrategy(getAllGamesResponseSchema),
-				});
-				this.#dataSignal.raw = result;
-				this.#loadVisibleOnly(result);
-				return result;
+			this.#dataSignal.isLoading = true;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/game',
+				strategy: new JsonStrategy(getAllGamesResponseSchema),
 			});
+			this.#dataSignal.raw = result;
+			this.#loadVisibleOnly(result);
+			return result;
 		} catch (err) {
 			handleClientErrors(err, `[loadGames] failed to fetch /api/game`);
 			return null;

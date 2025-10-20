@@ -1,4 +1,3 @@
-import { browser } from '$app/environment';
 import {
 	FetchClient,
 	GameNoteFactory,
@@ -79,7 +78,7 @@ export class ClientServiceLocator {
 			this._syncQueue = new SyncQueue({
 				indexedDbSignal: this.dbSignal,
 				syncQueueRepository: this.syncQueueRepository,
-				httpClient: this._httpClient,
+				httpClient: this.httpClient,
 			});
 		}
 		return this._syncQueue;
@@ -134,8 +133,8 @@ export class ClientServiceLocator {
 		this._serverHeartbeat = serverHeartbeat;
 	}
 
-	get httpClient(): IFetchClient | null {
-		if (!this._httpClient && browser) {
+	get httpClient(): IFetchClient {
+		if (!this._httpClient) {
 			this._httpClient = new FetchClient({
 				url: window.location.origin,
 				globalHeaders: this.#getHttpClientGlobalHeaders,

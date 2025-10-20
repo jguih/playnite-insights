@@ -23,15 +23,13 @@ export class PlatformStore extends ApiDataStore {
 
 	loadPlatforms = async () => {
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#dataSignal.isLoading = true;
-				const result = await client.httpGetAsync({
-					endpoint: '/api/platform',
-					strategy: new JsonStrategy(getAllPlatformsResponseSchema),
-				});
-				this.#dataSignal.list = result;
-				return result;
+			this.#dataSignal.isLoading = true;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/platform',
+				strategy: new JsonStrategy(getAllPlatformsResponseSchema),
 			});
+			this.#dataSignal.list = result;
+			return result;
 		} catch (err) {
 			handleClientErrors(err, `[loadPlatforms] failed to fetch /api/platform`);
 			return null;

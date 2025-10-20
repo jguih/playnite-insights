@@ -3,7 +3,6 @@ import {
 	AppClientError,
 	EmptyStrategy,
 	FetchClientStrategyError,
-	HttpClientNotSetError,
 	type IFetchClient,
 } from '@playnite-insights/lib/client';
 import { IndexedDBNotInitializedError } from './db/errors/indexeddbNotInitialized';
@@ -12,7 +11,7 @@ import type { ILogService } from './logService.svelte';
 
 export type InstanceManagerDeps = {
 	keyValueRepository: KeyValueRepository;
-	httpClient: IFetchClient | null;
+	httpClient: IFetchClient;
 	logService: ILogService;
 };
 
@@ -28,22 +27,14 @@ export class InstanceManager {
 		this.#logService = logService;
 	}
 
-	#withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClient;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	#performHealthcheck = async (): Promise<boolean> => {
 		try {
-			return await this.#withHttpClient(async ({ client }) => {
-				await client.httpGetAsync({
-					endpoint: '/api/health',
-					strategy: new EmptyStrategy(),
-				});
-				this.#isRegistered = true;
-				return this.#isRegistered;
+			await this.#httpClient.httpGetAsync({
+				endpoint: '/api/health',
+				strategy: new EmptyStrategy(),
 			});
+			this.#isRegistered = true;
+			return this.#isRegistered;
 		} catch (error) {
 			if (error instanceof FetchClientStrategyError && error.statusCode === 403) {
 				if (error.data) {

@@ -26,14 +26,12 @@ export class ScreenshotStore extends ApiDataStore {
 
 	loadScreenshots = async () => {
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#dataSignal.isLoading = true;
-				const response = await client.httpGetAsync({
-					endpoint: '/api/assets/image/screenshot/all',
-					strategy: new JsonStrategy(getAllScreenshotsResponseSchema),
-				});
-				return (this.#dataSignal.list = response.screenshots);
+			this.#dataSignal.isLoading = true;
+			const response = await this.httpClient.httpGetAsync({
+				endpoint: '/api/assets/image/screenshot/all',
+				strategy: new JsonStrategy(getAllScreenshotsResponseSchema),
 			});
+			return (this.#dataSignal.list = response.screenshots);
 		} catch (error) {
 			handleClientErrors(
 				error,

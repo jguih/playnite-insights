@@ -15,21 +15,21 @@ export const makeLogService = (
 ): LogService => {
   const getDateTimeString = (): string => {
     const now = new Date();
-    return now.toISOString().trim();
+    return now.toLocaleString();
   };
 
   const logError = (message: string, error?: unknown): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.error) {
       return;
     }
-    console.error(`[${getDateTimeString()}][ERROR][${source}] ${message}`);
+    console.error(`[${getDateTimeString()}] [ERROR] [${source}] ${message}`);
     if (error && error instanceof ZodError) {
       console.error(
         `[${getDateTimeString()}][ERROR][${source}] `,
         JSON.stringify(error.issues, null, 2)
       );
     } else if (error) {
-      console.error(`[${getDateTimeString()}][ERROR][${source}] `, error);
+      console.error(`[${getDateTimeString()}] [ERROR] [${source}] `, error);
     }
   };
 
@@ -37,28 +37,28 @@ export const makeLogService = (
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.warning) {
       return;
     }
-    console.warn(`[${getDateTimeString()}][WARNING][${source}] ${message}`);
+    console.warn(`[${getDateTimeString()}] [WARNING] [${source}] ${message}`);
   };
 
   const logDebug = (message: string): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.debug) {
       return;
     }
-    console.debug(`[${getDateTimeString()}][DEBUG][${source}] ${message}`);
+    console.debug(`[${getDateTimeString()}] [DEBUG] [${source}] ${message}`);
   };
 
   const logSuccess = (message: string): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.success) {
       return;
     }
-    console.log(`[${getDateTimeString()}][SUCCESS][${source}] ${message}`);
+    console.log(`[${getDateTimeString()}] [SUCCESS] [${source}] ${message}`);
   };
 
   const logInfo = (message: string): void => {
     if (CURRENT_LOG_LEVEL > LOG_LEVELS.info) {
       return;
     }
-    console.info(`[${getDateTimeString()}][INFO][${source}] ${message}`);
+    console.info(`[${getDateTimeString()}] [INFO] [${source}] ${message}`);
   };
 
   return {

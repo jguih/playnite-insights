@@ -124,7 +124,7 @@
 {#snippet registrationInfo(label: string, value: string | number)}
 	<div class="flex flex-row justify-between gap-4">
 		<p class="text-nowrap text-sm">{label}</p>
-		<p class="break-all text-sm opacity-80">{value}</p>
+		<p class="overflow-x-auto text-nowrap text-sm opacity-80">{value}</p>
 	</div>
 	<Divider class={['border-background-3']} />
 {/snippet}
@@ -285,7 +285,9 @@
 				<Divider />
 				<div class="flex flex-row justify-between gap-4">
 					<p class="text-nowrap">SyncId</p>
-					<p class="break-all text-sm opacity-80">{syncService.syncIdSignal}</p>
+					<p class="overflow-x-auto text-nowrap text-sm opacity-80">
+						{syncService.syncIdSignal}
+					</p>
 				</div>
 				<Divider />
 			</div>

@@ -2,7 +2,6 @@ import {
 	AppClientError,
 	EmptyStrategy,
 	FetchClientStrategyError,
-	HttpClientNotSetError,
 	JsonStrategy,
 	serverSyncReconciliationResponseSchema,
 	type ClientSyncReconciliationCommand,
@@ -16,7 +15,7 @@ import type { ILogService } from '../logService.svelte';
 export type SynchronizationServiceDeps = {
 	keyValueRepository: KeyValueRepository;
 	gameNoteRepository: GameNoteRepository;
-	httpClient: IFetchClient | null;
+	httpClient: IFetchClient;
 	logService: ILogService;
 };
 
@@ -48,34 +47,26 @@ export class SynchronizationService {
 		this.#syncIdSignal = $state(null);
 	}
 
-	#withHttpClient = async <T>(cb: (props: { client: IFetchClient }) => Promise<T>): Promise<T> => {
-		const client = this.#httpClient;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	#reconcileWithServer = async () => {
 		try {
 			this.#logService.info(`Reconciliation started`);
-			await this.#withHttpClient(async ({ client }) => {
-				const notes = await this.#gameNoteRepository.getAllAsync();
-				const command: ClientSyncReconciliationCommand = {
-					notes,
-				};
-				const response = await client.httpPostAsync({
-					endpoint: '/api/sync',
-					strategy: new JsonStrategy(serverSyncReconciliationResponseSchema),
-					body: command,
-				});
-				await this.#keyValueRepository.putAsync({
-					keyvalue: { Key: 'sync-id', Value: response.syncId },
-				});
-				this.#syncIdSignal = response.syncId;
-				await this.#gameNoteRepository.upsertOrDeleteManyAsync(response.notes);
-				this.#logService.success(
-					`Reconciliation completed (Processed ${response.notes.length} notes. Stored new SyncId: ${response.syncId})`,
-				);
+			const notes = await this.#gameNoteRepository.getAllAsync();
+			const command: ClientSyncReconciliationCommand = {
+				notes,
+			};
+			const response = await this.#httpClient.httpPostAsync({
+				endpoint: '/api/sync',
+				strategy: new JsonStrategy(serverSyncReconciliationResponseSchema),
+				body: command,
 			});
+			await this.#keyValueRepository.putAsync({
+				keyvalue: { Key: 'sync-id', Value: response.syncId },
+			});
+			this.#syncIdSignal = response.syncId;
+			await this.#gameNoteRepository.upsertOrDeleteManyAsync(response.notes);
+			this.#logService.success(
+				`Reconciliation completed (Processed ${response.notes.length} notes. Stored new SyncId: ${response.syncId})`,
+			);
 		} catch (error) {
 			if (error instanceof IndexedDBNotInitializedError) {
 				this.#logService.error(
@@ -150,11 +141,9 @@ export class SynchronizationService {
 		deps: { onFinishReconcile?: () => void; waitForReconcile?: boolean } = {},
 	): Promise<void> => {
 		try {
-			await this.#withHttpClient(async ({ client }) => {
-				await client.httpGetAsync({
-					endpoint: '/api/sync/check',
-					strategy: new EmptyStrategy(),
-				});
+			await this.#httpClient.httpGetAsync({
+				endpoint: '/api/sync/check',
+				strategy: new EmptyStrategy(),
 			});
 		} catch (error) {
 			if (error instanceof FetchClientStrategyError) {

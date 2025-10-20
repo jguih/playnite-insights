@@ -8,7 +8,7 @@ export const GET: RequestHandler = async ({ request, url, locals: { services } }
 		const ifNoneMatch = request.headers.get('if-none-match');
 		const data = services.gameSessionService.getRecent();
 		if (!data || data.length === 0) {
-			return emptyResponse();
+			return json([], { headers: { 'Cache-Control': 'no-cache' } });
 		}
 		getRecentSessionsResponseSchema.parse(data);
 		const hash = createHashForObject(data);

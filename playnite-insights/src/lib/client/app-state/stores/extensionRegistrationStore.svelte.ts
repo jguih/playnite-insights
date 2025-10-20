@@ -24,14 +24,12 @@ export class ExtensionRegistrationStore extends ApiDataStore {
 
 	loadExtensionRegistrations = async () => {
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#dataSignal.isLoading = true;
-				const result = await client.httpGetAsync({
-					endpoint: '/api/extension-registration',
-					strategy: new JsonStrategy(getAllExtensionRegistrationsSchema),
-				});
-				this.#dataSignal.list = result.registrations;
+			this.#dataSignal.isLoading = true;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/extension-registration',
+				strategy: new JsonStrategy(getAllExtensionRegistrationsSchema),
 			});
+			this.#dataSignal.list = result.registrations;
 		} catch (err) {
 			handleClientErrors(
 				err,

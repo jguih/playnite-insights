@@ -52,16 +52,14 @@ export class GameNoteStore extends ApiDataStore {
 		if (!this.#serverHeartbeat.isAlive) return { notes: null, success: true };
 		if (override) this.#clearLastServerSync();
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				const lastSync = this.#getLastServerSync();
-				const notes = await client.httpGetAsync({
-					endpoint: `/api/sync/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
-					strategy: new JsonStrategy(getAllGameNotesResponseSchema),
-				});
-				this.#setLastServerSync();
-				await this.#gameNoteRepository.upsertOrDeleteManyAsync(notes, { override });
-				return { notes, success: true };
+			const lastSync = this.#getLastServerSync();
+			const notes = await this.httpClient.httpGetAsync({
+				endpoint: `/api/sync/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
+				strategy: new JsonStrategy(getAllGameNotesResponseSchema),
 			});
+			this.#setLastServerSync();
+			await this.#gameNoteRepository.upsertOrDeleteManyAsync(notes, { override });
+			return { notes, success: true };
 		} catch (err) {
 			if (
 				err instanceof FetchClientStrategyError &&

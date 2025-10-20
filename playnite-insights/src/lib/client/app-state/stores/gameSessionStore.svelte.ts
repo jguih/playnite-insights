@@ -23,15 +23,13 @@ export class GameSessionStore extends ApiDataStore {
 
 	loadRecentSessions = async () => {
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#recentSessionsSignal.isLoading = true;
-				const result = await client.httpGetAsync({
-					endpoint: '/api/session/recent',
-					strategy: new JsonStrategy(getRecentSessionsResponseSchema),
-				});
-				this.#recentSessionsSignal.list = result;
-				return result;
+			this.#recentSessionsSignal.isLoading = true;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/session/recent',
+				strategy: new JsonStrategy(getRecentSessionsResponseSchema),
 			});
+			this.#recentSessionsSignal.list = result;
+			return result;
 		} catch (err) {
 			handleClientErrors(err, `[loadRecentGameSessions] failed to fetch /api/session/recent`);
 			return null;

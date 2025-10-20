@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { toast } from '$lib/client/app-state/toast.svelte';
@@ -19,14 +18,12 @@
 	let password: string | null = $state(null);
 	let isLoading: boolean = $state(false);
 
-	if (browser) {
-		locator.instanceManager
-			.isRegistered()
-			.then((registered) => {
-				if (registered) goto('/', { replaceState: true });
-			})
-			.catch(() => {});
-	}
+	locator.instanceManager
+		.isRegistered()
+		.then((registered) => {
+			if (registered) goto('/', { replaceState: true });
+		})
+		.catch(() => {});
 
 	const registerInstance = async () => {
 		if (!password) throw new AppError('Instance password cannot be null');

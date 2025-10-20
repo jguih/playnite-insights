@@ -50,6 +50,10 @@ services:
     restart: always
     volumes:
       - playnite-insights-prod-data:/app/data
+    logging:
+      driver: journald
+      options:
+        tag: playatlas
 
 volumes:
   playnite-insights-dev-data:

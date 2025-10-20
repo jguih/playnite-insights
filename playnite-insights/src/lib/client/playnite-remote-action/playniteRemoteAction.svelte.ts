@@ -1,14 +1,9 @@
 import { m } from '$lib/paraglide/messages';
-import {
-	EmptyStrategy,
-	HttpClientNotSetError,
-	type IFetchClient,
-	type RemoteAction,
-} from '@playnite-insights/lib/client';
+import { EmptyStrategy, type IFetchClient, type RemoteAction } from '@playnite-insights/lib/client';
 import { toast } from '../app-state/toast.svelte';
 
 export type PlayniteRemoteActionDeps = {
-	httpClient: IFetchClient | null;
+	httpClient: IFetchClient;
 };
 
 export class PlayniteRemoteAction {
@@ -21,36 +16,26 @@ export class PlayniteRemoteAction {
 		this.#actionLoadingState = $state({ takeScreenShot: false });
 	}
 
-	protected withHttpClient = async <T>(
-		cb: (props: { client: IFetchClient }) => Promise<T>,
-	): Promise<T> => {
-		const client = this.#httpClient;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
-
 	takeScreenshotAsync = async () => {
 		try {
-			await this.withHttpClient(async ({ client }) => {
-				this.#actionLoadingState.takeScreenShot = true;
-				toast.info({
-					title: m.toast_remote_action_take_screenshot_in_progress_title(),
-					message: m.toast_remote_action_take_screenshot_in_progress_message(),
-					category: 'network',
-				});
-				const command: RemoteAction = {
-					action: 'screenshot',
-				};
-				await client.httpPostAsync({
-					endpoint: '/api/action',
-					body: command,
-					strategy: new EmptyStrategy(),
-				});
-				toast.success({
-					title: m.toast_remote_action_take_screenshot_success_title(),
-					message: m.toast_remote_action_take_screenshot_success_message(),
-					category: 'network',
-				});
+			this.#actionLoadingState.takeScreenShot = true;
+			toast.info({
+				title: m.toast_remote_action_take_screenshot_in_progress_title(),
+				message: m.toast_remote_action_take_screenshot_in_progress_message(),
+				category: 'network',
+			});
+			const command: RemoteAction = {
+				action: 'screenshot',
+			};
+			await this.#httpClient.httpPostAsync({
+				endpoint: '/api/action',
+				body: command,
+				strategy: new EmptyStrategy(),
+			});
+			toast.success({
+				title: m.toast_remote_action_take_screenshot_success_title(),
+				message: m.toast_remote_action_take_screenshot_success_message(),
+				category: 'network',
 			});
 		} catch (error) {
 			console.error(error);
