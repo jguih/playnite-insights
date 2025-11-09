@@ -1,3 +1,4 @@
+import { GameNoteRepository } from "@playnite-insights/core";
 import {
   GameNoteFactory,
   makeMocks,
@@ -21,11 +22,16 @@ import { makeGameNoteRepository } from "./repository";
 const mocks = makeMocks();
 const gameNoteFactory = new GameNoteFactory();
 let db: DatabaseSync;
+let repo: GameNoteRepository;
 
 describe("Game Note Repository", () => {
   beforeEach(async () => {
     vi.resetAllMocks();
     testUtils.clearAllTables(db);
+    repo = makeGameNoteRepository({
+      logService: mocks.logService,
+      getDb: () => db,
+    });
   });
 
   beforeAll(async () => {
@@ -40,7 +46,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, add missing notes", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const notes = gameNoteFactory.getNotes(100);
     const incomingNotes = gameNoteFactory.getNotes(50);
     // Act
@@ -54,7 +59,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, log info", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const notes = gameNoteFactory.getNotes(100);
     // Act
     repo.reconcileFromSource(notes);
@@ -68,7 +72,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, does not duplicate existing notes", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const notes = gameNoteFactory.getNotes(200);
     // Act
     repo.addMany(notes);
@@ -83,7 +86,6 @@ describe("Game Note Repository", () => {
     const now = new Date();
     const future = new Date(now);
     future.setMinutes(now.getMinutes() + 5);
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const notes = gameNoteFactory.getNotes(200, {
       LastUpdatedAt: now.toISOString(),
     });
@@ -105,7 +107,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, handles empty source without error", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const notes = gameNoteFactory.getNotes(10);
     // Act
     repo.addMany(notes);
@@ -117,7 +118,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, adds all notes if repository is initially empty", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const incomingNotes = gameNoteFactory.getNotes(200);
     // Act
     repo.reconcileFromSource(incomingNotes);
@@ -128,7 +128,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, adds only missing notes", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const notes = gameNoteFactory.getNotes(10);
     const incomingNotes = [
       ...notes.slice(0, 5),
@@ -144,7 +143,6 @@ describe("Game Note Repository", () => {
 
   it("on reconciliation, does not alter repository when reconciling the same dataset multiple times", () => {
     // Arrange
-    const repo = makeGameNoteRepository({ logService: mocks.logService });
     const initialNotes = gameNoteFactory.getNotes(200);
     repo.addMany(initialNotes);
     repo.reconcileFromSource(initialNotes);

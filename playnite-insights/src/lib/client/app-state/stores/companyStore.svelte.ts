@@ -1,5 +1,6 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
+	FetchClientStrategyError,
 	getAllCompaniesResponseSchema,
 	JsonStrategy,
 	type GetAllCompaniesResponse,
@@ -31,6 +32,7 @@ export class CompanyStore extends ApiDataStore {
 			this.#dataSignal.list = result;
 			return result;
 		} catch (err) {
+			if (err instanceof FetchClientStrategyError && err.statusCode === 204) return null;
 			handleClientErrors(err, `[loadCompanies] failed to fetch /api/company`);
 			return null;
 		} finally {

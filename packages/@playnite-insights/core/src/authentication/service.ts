@@ -157,19 +157,19 @@ export const makeAuthService = ({
         ? `Bearer ${url.searchParams.get("sessionId")}`
         : null);
 
-    if (!authorization) {
-      logService.warning(
-        `${requestDescription}: Request rejected for instance due to missing Authorization param`
-      );
-      return { isAuthorized: false, code: "invalid_request" };
-    }
-
     const instanceAuth = instanceAuthenticationRepository.get();
     if (!instanceAuth) {
       logService.warning(
         `${requestDescription}: Request rejected for instance due to missing instance registration`
       );
       return { isAuthorized: false, code: "instance_not_registered" };
+    }
+
+    if (!authorization) {
+      logService.warning(
+        `${requestDescription}: Request rejected for instance due to missing Authorization param`
+      );
+      return { isAuthorized: false, code: "invalid_request" };
     }
 
     const sessionId = authorization.split(" ").at(1);

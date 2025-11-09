@@ -5,16 +5,12 @@ import {
   gameNoteSchema,
 } from "@playnite-insights/lib/client";
 import z from "zod";
-import {
-  type BaseRepositoryDeps,
-  getDefaultRepositoryDeps,
-  repositoryCall,
-} from "../repository/base";
+import { type BaseRepositoryDeps, repositoryCall } from "../repository/base";
 
-export const makeGameNoteRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): GameNoteRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+export const makeGameNoteRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): GameNoteRepository => {
   const TABLE_NAME = "game_note";
 
   const getWhereClauseAndParamsFromFilters = (filters?: GameNoteFilters) => {

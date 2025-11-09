@@ -4,7 +4,7 @@
   "version": "2.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev --host",
+    "dev": "LOG_LEVEL=0 vite dev --host",
     "build": "vite build",
     "preview": "vite preview --host --port 3000",
     "prepare": "svelte-kit sync || echo ''",

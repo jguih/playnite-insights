@@ -1,5 +1,6 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
+	FetchClientStrategyError,
 	getAllPlatformsResponseSchema,
 	JsonStrategy,
 	type GetAllPlatformsResponse,
@@ -31,6 +32,7 @@ export class PlatformStore extends ApiDataStore {
 			this.#dataSignal.list = result;
 			return result;
 		} catch (err) {
+			if (err instanceof FetchClientStrategyError && err.statusCode === 204) return null;
 			handleClientErrors(err, `[loadPlatforms] failed to fetch /api/platform`);
 			return null;
 		} finally {

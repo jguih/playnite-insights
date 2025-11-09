@@ -10,7 +10,6 @@ import {
 } from '@playnite-insights/core';
 import {
 	config,
-	getDb as infraGetDb,
 	makeLogService as infraMakeLogService,
 	makeCompanyRepository,
 	makeCompletionStatusRepository,
@@ -32,15 +31,20 @@ import {
 	makeSynchronizationIdRepository,
 	makeUploadService,
 } from '@playnite-insights/infra';
+import { DatabaseSync } from 'node:sqlite';
+import { join } from 'path';
 
 export type ServerServicesDeps = {
-	getDb?: typeof infraGetDb;
+	getDb: () => DatabaseSync;
+	env: {
+		DATA_DIR: string;
+		PLAYNITE_HOST_ADDRESS: string;
+	};
 	makeLogService?: typeof infraMakeLogService;
 };
 
-export const makeServerServices = (deps: ServerServicesDeps = {}) => {
-	const { getDb, makeLogService } = {
-		getDb: infraGetDb,
+export const makeServerServices = (deps: ServerServicesDeps) => {
+	const { getDb, makeLogService, env }: ServerServicesDeps = {
 		makeLogService: infraMakeLogService,
 		...deps,
 	};
@@ -119,7 +123,7 @@ export const makeServerServices = (deps: ServerServicesDeps = {}) => {
 		getDb,
 		fileSystemService,
 		streamUtilsService,
-		...config,
+		// ...config,
 		...repositories,
 	};
 	// Services
@@ -128,11 +132,16 @@ export const makeServerServices = (deps: ServerServicesDeps = {}) => {
 		...commonDeps,
 		getManifestData: playniteGameRepository.getManifestData,
 		logService: makeLogService('LibraryManifestService'),
+		CONTENT_HASH_FILE_NAME: 'contentHash.txt',
+		FILES_DIR: join(env.DATA_DIR, '/files'),
+		LIBRARY_MANIFEST_FILE: join(env.DATA_DIR, '/manifest.json'),
 	});
 	const playniteLibraryImporterService = makePlayniteLibraryImporterService({
 		...commonDeps,
 		libraryManifestService: libraryManifestService,
 		logService: makeLogService('PlayniteLibraryImporterService'),
+		FILES_DIR: join(env.DATA_DIR, '/files'),
+		TMP_DIR: join(env.DATA_DIR, '/tmp'),
 	});
 	const uploadService = makeUploadService({
 		...commonDeps,
@@ -143,6 +152,8 @@ export const makeServerServices = (deps: ServerServicesDeps = {}) => {
 		...repositories,
 		uploadService: uploadService,
 		logService: makeLogService('MediaFilesService'),
+		FILES_DIR: join(env.DATA_DIR, '/files'),
+		SCREENSHOTS_DIR: join(env.DATA_DIR, '/upload', '/screenshots'),
 	});
 	const gameSessionService = makeGameSessionService({
 		...commonDeps,
@@ -155,6 +166,7 @@ export const makeServerServices = (deps: ServerServicesDeps = {}) => {
 	const signatureService = makeSignatureService({
 		...commonDeps,
 		logService: makeLogService('SignatureService'),
+		SECURITY_DIR: join(env.DATA_DIR, '/security'),
 	});
 	const extensionRegistrationService = makeExtensionRegistrationService({
 		...commonDeps,
@@ -167,7 +179,11 @@ export const makeServerServices = (deps: ServerServicesDeps = {}) => {
 		cryptographyService,
 	});
 	const synchronizationService = makeSynchronizationService({ ...commonDeps });
-	const playniteHostHttpClient = makePlayniteHostClient({ ...commonDeps });
+	const playniteHostHttpClient = makePlayniteHostClient({
+		...commonDeps,
+		signatureService,
+		PLAYNITE_HOST_ADDRESS: env.PLAYNITE_HOST_ADDRESS,
+	});
 
 	const services = {
 		logService,

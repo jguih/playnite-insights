@@ -1,5 +1,6 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
+	FetchClientStrategyError,
 	getRecentSessionsResponseSchema,
 	JsonStrategy,
 	type GetRecentSessionsResponse,
@@ -31,6 +32,7 @@ export class GameSessionStore extends ApiDataStore {
 			this.#recentSessionsSignal.list = result;
 			return result;
 		} catch (err) {
+			if (err instanceof FetchClientStrategyError && err.statusCode === 204) return null;
 			handleClientErrors(err, `[loadRecentGameSessions] failed to fetch /api/session/recent`);
 			return null;
 		} finally {

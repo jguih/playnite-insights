@@ -35,7 +35,11 @@ describe('/api/sync', () => {
 			logService: mocks.logService,
 			MIGRATIONS_DIR: mocks.config.MIGRATIONS_DIR,
 		});
-		services = makeServerServices({ getDb: () => db, makeLogService: () => mocks.logService });
+		services = makeServerServices({
+			getDb: () => db,
+			makeLogService: () => mocks.logService,
+			env: { DATA_DIR: '/data', PLAYNITE_HOST_ADDRESS: '' },
+		});
 	});
 
 	it('on reconciliation, server returns all notes and its syncId', async () => {

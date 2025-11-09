@@ -1,5 +1,6 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
+	FetchClientStrategyError,
 	getAllGamesResponseSchema,
 	JsonStrategy,
 	parseHomePageSearchParams,
@@ -181,6 +182,7 @@ export class GameStore extends ApiDataStore {
 			this.#loadVisibleOnly(result);
 			return result;
 		} catch (err) {
+			if (err instanceof FetchClientStrategyError && err.statusCode === 204) return null;
 			handleClientErrors(err, `[loadGames] failed to fetch /api/game`);
 			return null;
 		} finally {
