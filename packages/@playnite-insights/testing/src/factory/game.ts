@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { FullGame } from "@playnite-insights/lib/client";
+import type { FullGame } from "@playatlas/game-library/core";
 
 export class GameFactory {
   private buildGame = ({ ...props }: Partial<FullGame> = {}): FullGame => {

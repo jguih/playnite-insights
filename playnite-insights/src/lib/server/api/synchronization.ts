@@ -1,9 +1,5 @@
-import {
-	ApiError,
-	syncIdHeader,
-	type ApiErrorResponse,
-	type SynchronizationId,
-} from '@playnite-insights/lib/client';
+import { ApiError, type ApiErrorResponse } from '@playatlas/system/core';
+import { syncIdHeader, type SynchronizationId } from '@playnite-insights/lib/client';
 import type { ServerServices } from '../setup-services';
 import { getRequestDescription } from './authentication';
 

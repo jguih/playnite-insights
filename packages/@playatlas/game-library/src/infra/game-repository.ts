@@ -1,13 +1,13 @@
-import { repositoryCall } from "@playatlas/shared/app";
-import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import {
   fullGameRawSchema,
-  playniteGameSchema,
+  gameSchema,
   type FullGame,
   type GameFilters,
   type GameManifestData,
   type GameSorting,
-} from "@playnite-insights/lib/client";
+} from "@playatlas/game-library/core";
+import { repositoryCall } from "@playatlas/shared/app";
+import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
 import type { GameRepository } from "../core/types/game-repository";
 
@@ -95,7 +95,7 @@ export const makeGameRepository = (
         const query = `SELECT * FROM playnite_game WHERE Id = (?)`;
         const stmt = db.prepare(query);
         const result = stmt.get(id);
-        const game = z.optional(playniteGameSchema).parse(result);
+        const game = z.optional(gameSchema).parse(result);
         logService.debug(`Found game ${game?.Name}`);
         return game ?? null;
       },

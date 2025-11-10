@@ -3,7 +3,7 @@
 	import { getPlaytimeInHoursMinutesAndSeconds } from '$lib/client/utils/playnite-game';
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages';
-	import type { GameSessionStatus } from '@playnite-insights/lib/client';
+	import type { GameSessionStatus } from '@playatlas/game-library/core';
 	import { onMount } from 'svelte';
 
 	const locator = getLocatorContext();

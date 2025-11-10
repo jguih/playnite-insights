@@ -34,4 +34,5 @@ export default defineConfig({
 			external: ['sharp'],
 		},
 	},
+	envPrefix: 'PLAYATLAS',
 });

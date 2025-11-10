@@ -1,4 +1,5 @@
-import type { GameNote, SyncQueueItem } from '@playnite-insights/lib/client';
+import type { GameNote } from '@playatlas/game-library/core';
+import type { SyncQueueItem } from '@playnite-insights/lib/client';
 import type { SyncQueueRepository } from './syncQueueRepository.svelte';
 
 type GetAsyncArgs =

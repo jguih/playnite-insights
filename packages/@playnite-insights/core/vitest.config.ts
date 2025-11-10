@@ -14,4 +14,5 @@ export default defineConfig({
       },
     ],
   },
+  envPrefix: "PLAYATLAS",
 });

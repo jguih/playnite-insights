@@ -2,11 +2,8 @@
 	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { XIcon } from '@lucide/svelte';
-	import type {
-		GameSortBy,
-		GameSortOrder,
-		HomePageSearchParamKeys,
-	} from '@playnite-insights/lib/client';
+	import type { GameSortBy, GameSortOrder } from '@playatlas/game-library/core';
+	import type { HomePageSearchParamKeys } from '@playnite-insights/lib/client';
 	import type { Snippet } from 'svelte';
 	import LightButton from '../buttons/LightButton.svelte';
 	import Divider from '../Divider.svelte';

@@ -1,6 +1,6 @@
 import { withExtensionAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
-import { emptyResponse } from '@playnite-insights/lib/client';
+import { emptyResponse } from '@playatlas/system/app';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ request, url, locals: { services } }) =>

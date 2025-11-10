@@ -1,7 +1,7 @@
 import type { LogService } from "@playnite-insights/core";
-import { ApiError } from "@playnite-insights/lib/client";
 import type { DatabaseSync } from "node:sqlite";
 import { ZodError } from "zod";
+import { ApiError } from "../../../@playatlas/system/src/core/api";
 
 const PERFORMANCE_WARN_THRESHSOLD_MS = 50;
 

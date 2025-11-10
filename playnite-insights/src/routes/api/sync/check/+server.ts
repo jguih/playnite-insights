@@ -1,6 +1,6 @@
 import { withInstanceAuth } from '$lib/server/api/authentication';
 import { ensureSyncId } from '$lib/server/api/synchronization';
-import { emptyResponse } from '@playnite-insights/lib/client';
+import { emptyResponse } from '@playatlas/system/app';
 import type { RequestHandler } from '@sveltejs/kit';
 
 /**

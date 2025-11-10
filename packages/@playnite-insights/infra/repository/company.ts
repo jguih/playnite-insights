@@ -1,5 +1,5 @@
+import { companySchema, type Company } from "@playatlas/game-library/core";
 import type { CompanyRepository } from "@playnite-insights/core";
-import { companySchema, type Company } from "@playnite-insights/lib/client";
 import z from "zod";
 import { repositoryCall, type BaseRepositoryDeps } from "./base";
 

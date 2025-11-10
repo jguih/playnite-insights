@@ -4,7 +4,8 @@ import { toast } from '$lib/client/app-state/toast.svelte';
 import { IndexedDBNotInitializedError } from '$lib/client/db/errors/indexeddbNotInitialized';
 import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
 import { m } from '$lib/paraglide/messages';
-import type { GameNote, GameNoteFactory } from '@playnite-insights/lib/client';
+import type { GameNoteFactory } from '@playatlas/game-library/app';
+import type { GameNote } from '@playatlas/game-library/core';
 
 export type GameNoteEditorDeps = {
 	gameNoteFactory: GameNoteFactory;

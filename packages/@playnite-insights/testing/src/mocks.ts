@@ -21,8 +21,6 @@ import { LOG_LEVELS, type IFetchClient } from "@playnite-insights/lib/client";
 import { constants } from "fs/promises";
 import { join } from "path";
 import { vi } from "vitest";
-import { config as infraConfig } from "../../infra/config";
-import { monorepoRoot } from "./paths";
 
 export const makeMocks = () => {
   const config = {
@@ -37,11 +35,11 @@ export const makeMocks = () => {
     DB_FILE: "",
     CONTENT_HASH_FILE_NAME: "contentHash.txt",
     MIGRATIONS_DIR: join(
-      monorepoRoot,
+      process.env.PLAYATLAS_WORKDIR!,
       "packages/@playnite-insights/infra/migrations"
     ),
     PLAYNITE_HOST_ADDRESS: undefined,
-  } satisfies typeof infraConfig;
+  };
 
   const logService = {
     CURRENT_LOG_LEVEL: 1,

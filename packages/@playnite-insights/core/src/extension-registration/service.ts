@@ -1,7 +1,5 @@
-import {
-  ApiError,
-  type ExtensionRegistration,
-} from "@playnite-insights/lib/client";
+import { type ExtensionRegistration } from "@playnite-insights/lib/client";
+import { ApiError } from "../../../../@playatlas/system/src/core/api";
 import type {
   ExtensionRegistrationService,
   ExtensionRegistrationServiceDeps,

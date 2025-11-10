@@ -1,5 +1,5 @@
+import { platformSchema, type Platform } from "@playatlas/game-library/core";
 import type { PlatformRepository } from "@playnite-insights/core";
-import { platformSchema, type Platform } from "@playnite-insights/lib/client";
 import z from "zod";
 import { repositoryCall, type BaseRepositoryDeps } from "./base";
 

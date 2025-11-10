@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { ArrowLeft, PlusSquare, TrashIcon } from '@lucide/svelte';
-	import { type GameNote } from '@playnite-insights/lib/client';
+	import { type GameNote } from '@playatlas/game-library/core';
 	import type { KeyboardEventHandler } from 'svelte/elements';
 	import LightButton from '../../buttons/LightButton.svelte';
 	import SolidButton from '../../buttons/SolidButton.svelte';

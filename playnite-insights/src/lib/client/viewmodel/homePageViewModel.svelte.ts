@@ -1,10 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import {
-	gamePageSizes,
-	parseHomePageSearchParams,
-	type GameSortBy,
-	type GameSortOrder,
-} from '@playnite-insights/lib/client';
+import { gamePageSizes, type GameSortBy, type GameSortOrder } from '@playatlas/game-library/core';
+import { parseHomePageSearchParams } from '@playnite-insights/lib/client';
 import type { GameStore, GameStoreCacheItem } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 

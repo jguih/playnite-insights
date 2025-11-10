@@ -1,4 +1,4 @@
-import { PLAYATLAS_DATA_DIR, PLAYNITE_HOST_ADDRESS, TZ } from '$env/static/private';
+import { PLAYATLAS_DATA_DIR, PLAYATLAS_PLAYNITE_HOST_ADDRESS } from '$env/static/private';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { makeServerServices, type ServerServices } from '$lib/server/setup-services';
 import { getDb, initDatabase } from '@playnite-insights/infra';
@@ -18,11 +18,9 @@ export const init: ServerInit = async () => {
 			? '/app/infra/migrations'
 			: join(__dirname, '../../packages/@playnite-insights/infra/migrations');
 
-	console.log(MIGRATIONS_DIR);
-
 	const env = {
 		DATA_DIR: PLAYATLAS_DATA_DIR,
-		PLAYNITE_HOST_ADDRESS,
+		PLAYNITE_HOST_ADDRESS: PLAYATLAS_PLAYNITE_HOST_ADDRESS,
 		DB_FILE: join(PLAYATLAS_DATA_DIR, '/db'),
 		MIGRATIONS_DIR,
 		TMP_DIR: join(PLAYATLAS_DATA_DIR, '/tmp'),
@@ -34,7 +32,7 @@ export const init: ServerInit = async () => {
 	_services.logService.debug(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
 	_services.logService.debug(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
 	_services.logService.info(`LOG_LEVEL: ${_services.logService.CURRENT_LOG_LEVEL}`);
-	_services.logService.info(`TZ: ${TZ}`);
+	_services.logService.info(`TZ: ${process.env.TZ}`);
 	_services.logService.info(
 		`PLAYNITE_HOST_ADDRESS: ${_services.config.PLAYNITE_HOST_ADDRESS || 'undefined'}`,
 	);

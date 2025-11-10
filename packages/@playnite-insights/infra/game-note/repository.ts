@@ -1,9 +1,9 @@
-import type { GameNoteRepository } from "@playnite-insights/core";
 import {
   type GameNote,
   type GameNoteFilters,
   gameNoteSchema,
-} from "@playnite-insights/lib/client";
+} from "@playatlas/game-library/core";
+import type { GameNoteRepository } from "@playnite-insights/core";
 import z from "zod";
 import { type BaseRepositoryDeps, repositoryCall } from "../repository/base";
 

@@ -1,5 +1,5 @@
+import { gameSessionSchema } from "@playatlas/game-library/core";
 import type { GameSessionRepository } from "@playnite-insights/core";
-import { gameSessionSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import { type BaseRepositoryDeps, repositoryCall } from "../repository/base";
 import { getWhereClauseAndParamsFromFilters } from "./filtering";

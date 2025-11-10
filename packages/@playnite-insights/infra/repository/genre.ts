@@ -1,5 +1,5 @@
+import { type Genre, genreSchema } from "@playatlas/game-library/core";
 import type { GenreRepository } from "@playnite-insights/core";
-import { type Genre, genreSchema } from "@playnite-insights/lib/client";
 import z from "zod";
 import { type BaseRepositoryDeps, repositoryCall } from "./base";
 

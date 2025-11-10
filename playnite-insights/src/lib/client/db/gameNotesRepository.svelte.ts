@@ -1,9 +1,5 @@
-import {
-	gameNoteSchema,
-	SyncQueueFactory,
-	type GameNote,
-	type SyncQueueItem,
-} from '@playnite-insights/lib/client';
+import { gameNoteSchema, type GameNote } from '@playatlas/game-library/core';
+import { SyncQueueFactory, type SyncQueueItem } from '@playnite-insights/lib/client';
 import type { IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
 import type { IGameNotesRepository } from './IGameNotesRepository';
 import { runRequest, runTransaction } from './indexeddb';

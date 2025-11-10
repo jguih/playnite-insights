@@ -1,7 +1,7 @@
 import type {
   GameSession,
   GameSessionFilters,
-} from "@playnite-insights/lib/client";
+} from "@playatlas/game-library/core";
 
 export type GameSessionRepository = {
   getById: (sessionId: GameSession["SessionId"]) => GameSession | null;

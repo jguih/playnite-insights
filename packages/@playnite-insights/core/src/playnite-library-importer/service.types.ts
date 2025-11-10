@@ -1,8 +1,5 @@
-import type { GameRepository } from "@playatlas/game-library/core";
-import type {
-  PlayniteGame,
-  SyncGameListCommand,
-} from "@playnite-insights/lib/client";
+import type { Game, GameRepository } from "@playatlas/game-library/core";
+import type { SyncGameListCommand } from "@playnite-insights/lib/client";
 import { type LibraryManifestService } from "../library-manifest/service.types";
 import type {
   CompanyRepository,
@@ -41,7 +38,7 @@ export type ImportMediaFilesContext = {
   requestId: string;
   tmpDir: string;
   gameId: string | null;
-  game: PlayniteGame | null;
+  game: Game | null;
   mediaFilesHash: string | null;
   uploadCount: number;
   filesToHash: { filename: string; buffer: Buffer }[];

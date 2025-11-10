@@ -1,4 +1,4 @@
-import type { Platform } from "@playnite-insights/lib/client";
+import type { Platform } from "@playatlas/game-library/core";
 
 export type PlatformRepository = {
   add: (platform: Platform) => boolean;

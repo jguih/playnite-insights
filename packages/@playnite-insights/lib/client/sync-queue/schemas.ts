@@ -1,5 +1,5 @@
 import z from "zod";
-import { gameNoteSchema } from "../game-notes/schemas";
+import { gameNoteSchema } from "../../../../@playatlas/game-library/src/core/validation";
 import { ISODateSchema } from "../schemas";
 
 const baseQueueItem = {

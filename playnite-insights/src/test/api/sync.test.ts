@@ -23,8 +23,8 @@ describe('/api/sync', () => {
 		const now = new Date();
 		vi.resetAllMocks();
 		testUtils.clearAllTables(db);
-		sessionId = await testUtils.registerInstanceAndCreateSessionAsync(services);
-		syncId = testUtils.setSyncId(services, now);
+		sessionId = await testUtils.registerInstanceAndCreateSessionAsync(services.authService);
+		syncId = testUtils.setSyncId(services.synchronizationIdRepository, now);
 	});
 
 	beforeAll(async () => {

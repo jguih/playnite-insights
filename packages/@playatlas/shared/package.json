@@ -16,6 +16,7 @@
     "vitest": "^3.2.4",
     "@playnite-insights/lib": "workspace:*",
     "@playnite-insights/testing": "workspace:*",
+    "@playatlas/system": "workspace:*",
     "@types/busboy": "^1.5.4",
     "busboy": "^1.6.0",
     "zod": "^3.25.76"

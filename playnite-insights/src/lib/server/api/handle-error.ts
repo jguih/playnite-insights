@@ -1,4 +1,4 @@
-import { ApiError, type ApiErrorResponse } from '@playnite-insights/lib/client';
+import { ApiError, type ApiErrorResponse } from '@playatlas/system/core';
 import { json } from '@sveltejs/kit';
 import type { ServerServices } from '../setup-services';
 

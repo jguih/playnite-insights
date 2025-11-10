@@ -1,4 +1,4 @@
-import type { GameSessionFilters } from "@playnite-insights/lib/client";
+import type { GameSessionFilters } from "@playatlas/game-library/core";
 
 export const getWhereClauseAndParamsFromFilters = (
   filters?: GameSessionFilters

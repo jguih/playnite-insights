@@ -1,4 +1,5 @@
-import { homePageSearchParamsKeys, type FullGame } from '@playnite-insights/lib/client';
+import type { FullGame } from '@playatlas/game-library/core';
+import { homePageSearchParamsKeys } from '@playnite-insights/lib/client';
 import { GameFactory, makeMocks, testUtils } from '@playnite-insights/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IApplicationSettingsStore } from './applicationSettingsStore.svelte';

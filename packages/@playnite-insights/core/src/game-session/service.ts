@@ -3,7 +3,7 @@ import {
   type GameSession,
   type GameSessionFilters,
   sessionStatus,
-} from "@playnite-insights/lib/client";
+} from "@playatlas/game-library/core";
 import {
   type GameSessionService,
   type GameSessionServiceDeps,

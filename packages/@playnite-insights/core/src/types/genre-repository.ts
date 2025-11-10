@@ -1,4 +1,4 @@
-import { type Genre } from "@playnite-insights/lib/client";
+import type { Genre } from "@playatlas/game-library/core";
 
 export type GenreRepository = {
   add: (genre: Genre) => boolean;

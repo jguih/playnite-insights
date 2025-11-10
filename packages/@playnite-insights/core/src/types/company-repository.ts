@@ -1,4 +1,4 @@
-import type { Company } from "@playnite-insights/lib/client";
+import type { Company } from "@playatlas/game-library/core";
 
 export type CompanyRepository = {
   add: (platform: Company) => boolean;

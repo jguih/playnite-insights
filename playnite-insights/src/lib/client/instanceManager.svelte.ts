@@ -1,5 +1,5 @@
+import { apiErrorSchema } from '@playatlas/system/core';
 import {
-	apiErrorSchema,
 	AppClientError,
 	EmptyStrategy,
 	FetchClientStrategyError,

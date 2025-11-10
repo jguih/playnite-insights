@@ -1,7 +1,7 @@
 import {
   type GameNote,
   type GameNoteFilters,
-} from "@playnite-insights/lib/client";
+} from "@playatlas/game-library/core";
 
 export type GameNoteRepository = {
   add: (note: GameNote) => GameNote;

@@ -1,6 +1,7 @@
 import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
-import { emptyResponse, getAllGenresResponseSchema } from '@playnite-insights/lib/client';
+import { getAllGenresResponseSchema } from '@playatlas/game-library/core';
+import { emptyResponse } from '@playatlas/system/app';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url, locals: { services } }) =>

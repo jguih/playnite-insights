@@ -1,4 +1,4 @@
-import { ApiError } from "@playnite-insights/lib/client";
+import { ApiError } from "@playatlas/system/core";
 import { ZodError } from "zod";
 import type { LogService } from "../core/types/log-service";
 

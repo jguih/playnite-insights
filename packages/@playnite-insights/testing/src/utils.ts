@@ -1,9 +1,12 @@
 import { faker } from "@faker-js/faker";
+import type {
+  AuthService,
+  SynchronizationIdRepository,
+} from "@playnite-insights/core";
 import { syncIdHeader } from "@playnite-insights/lib/client";
 import type { Cookies, RequestEvent } from "@sveltejs/kit";
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import type { ServerServices } from "../../../../playnite-insights/src/lib/server/setup-services";
 import type { MakeJsonRequestDeps, MakeRequestEventDeps } from "./utils.types";
 
 const shuffleArray = <T>(array: T[]): T[] => {
@@ -75,17 +78,20 @@ const makeRequestEvent = (data: MakeRequestEventDeps): RequestEvent => {
 };
 
 const registerInstanceAndCreateSessionAsync = async (
-  services: ServerServices
+  authService: AuthService
 ): Promise<string> => {
   const pass = faker.string.uuid();
-  await services.authService.registerInstanceAsync(pass);
-  const sessionId = await services.authService.loginInstanceAsync(pass);
+  await authService.registerInstanceAsync(pass);
+  const sessionId = await authService.loginInstanceAsync(pass);
   return sessionId;
 };
 
-const setSyncId = (services: ServerServices, now: Date): string => {
+const setSyncId = (
+  synchronizationIdRepository: SynchronizationIdRepository,
+  now: Date
+): string => {
   const syndId = randomUUID();
-  services.synchronizationIdRepository.set({
+  synchronizationIdRepository.set({
     Id: 1,
     SyncId: syndId,
     CreatedAt: now.toISOString(),

@@ -17,6 +17,7 @@ import {
 import { getDb } from "../database/database";
 import { initDatabase } from "../database/init";
 import { defaultFileSystemService } from "../services/file-system";
+import { makeLogService } from "../services/log";
 import { makeGameNoteRepository } from "./repository";
 
 const mocks = makeMocks();
@@ -39,7 +40,7 @@ describe("Game Note Repository", () => {
     await initDatabase({
       db,
       fileSystemService: defaultFileSystemService,
-      logService: mocks.logService,
+      logService: makeLogService(),
       MIGRATIONS_DIR: mocks.config.MIGRATIONS_DIR,
     });
   });

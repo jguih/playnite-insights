@@ -1,7 +1,7 @@
 import { withInstanceAuth } from '$lib/server/api/authentication';
+import type { ApiErrorResponse } from '@playatlas/system/core';
 import {
 	clientSyncReconciliationCommandSchema,
-	type ApiErrorResponse,
 	type ServerSyncReconciliationResponse,
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
