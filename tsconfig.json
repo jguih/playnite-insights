@@ -18,6 +18,12 @@
       ],
       "@playnite-insights/testing": [
         "./packages/@playnite-insights/testing"
+      ],
+      "@playatlas/game-library": [
+        "./packages/@playatlas/game-library"
+      ],
+      "@playatlas/shared": [
+        "./packages/@playatlas/shared"
       ]
     }
   }

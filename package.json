@@ -8,7 +8,9 @@
     "packages/@playnite-insights/lib",
     "packages/@playnite-insights/infra",
     "packages/@playnite-insights/core",
-    "packages/@playnite-insights/testing"
+    "packages/@playnite-insights/testing",
+    "packages/@playatlas/game-library",
+    "packages/@playatlas/shared"
   ],
   "scripts": {
     "dev": "pnpm --filter playnite-insights run dev",

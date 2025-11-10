@@ -5,4 +5,6 @@ packages:
   - "packages/@playnite-insights/infra"
   - "packages/@playnite-insights/core"
   - "packages/@playnite-insights/testing"
+  - "packages/@playatlas/game-library"
+  - "packages/@playatlas/shared"
 injectWorkspacePackages: true
