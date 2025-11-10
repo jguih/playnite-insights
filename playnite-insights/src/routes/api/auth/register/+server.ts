@@ -1,5 +1,5 @@
 import { handleApiError } from '$lib/server/api/handle-error';
-import { registerInstanceCommandSchema } from '@playnite-insights/lib/client';
+import { registerInstanceCommandSchema } from '@playatlas/auth/core';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, url, locals: { services } }) => {

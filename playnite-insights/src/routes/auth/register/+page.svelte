@@ -6,12 +6,8 @@
 	import BaseInput from '$lib/client/components/forms/BaseInput.svelte';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 	import { m } from '$lib/paraglide/messages';
-	import {
-		AppError,
-		EmptyStrategy,
-		HttpClientNotSetError,
-		type RegisterInstanceCommand,
-	} from '@playnite-insights/lib/client';
+	import type { RegisterInstanceCommand } from '@playatlas/auth/core';
+	import { AppError, EmptyStrategy, HttpClientNotSetError } from '@playnite-insights/lib/client';
 	import type { FormEventHandler } from 'svelte/elements';
 
 	const locator = getLocatorContext();

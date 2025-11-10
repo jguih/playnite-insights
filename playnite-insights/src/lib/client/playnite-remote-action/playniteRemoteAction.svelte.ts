@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import { EmptyStrategy, type IFetchClient, type RemoteAction } from '@playnite-insights/lib/client';
+import type { RemoteAction } from '@playatlas/playnite-integration/core';
+import { EmptyStrategy, type IFetchClient } from '@playnite-insights/lib/client';
 import { toast } from '../app-state/toast.svelte';
 
 export type PlayniteRemoteActionDeps = {

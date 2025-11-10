@@ -2,11 +2,8 @@ import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svel
 import type { ServerHeartbeat } from '$lib/client/event-source-manager/serverHeartbeat.svelte';
 import type { IDateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
-import {
-	FetchClientStrategyError,
-	getAllGameNotesResponseSchema,
-	JsonStrategy,
-} from '@playnite-insights/lib/client';
+import { getAllGameNotesResponseSchema } from '@playatlas/game-library/core';
+import { FetchClientStrategyError, JsonStrategy } from '@playnite-insights/lib/client';
 import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
 export type GameNoteStoreDeps = ApiDataStoreDeps & {

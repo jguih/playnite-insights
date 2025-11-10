@@ -52,8 +52,12 @@
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/infra": "workspace:*",
     "@playnite-insights/lib": "workspace:*",
+    "@playatlas/auth": "workspace:*",
     "@playatlas/game-library": "workspace:*",
+    "@playatlas/playnite-integration": "workspace:*",
     "@playatlas/shared": "workspace:*",
+    "@playatlas/sync": "workspace:*",
+    "@playatlas/system": "workspace:*",
     "echarts": "^5.6.0",
     "sharp": "^0.34.3",
     "zod": "^3.25.74"

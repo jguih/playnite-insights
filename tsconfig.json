@@ -19,12 +19,24 @@
       "@playnite-insights/testing": [
         "./packages/@playnite-insights/testing"
       ],
+      "@playatlas/auth": [
+        "./packages/@playatlas/auth"
+      ],
       "@playatlas/game-library": [
         "./packages/@playatlas/game-library"
       ],
+      "@playatlas/playnite-integration": [
+        "./packages/@playatlas/playnite-integration"
+      ],
       "@playatlas/shared": [
         "./packages/@playatlas/shared"
-      ]
+      ],
+      "@playatlas/sync": [
+        "./packages/@playatlas/sync"
+      ],
+      "@playatlas/system": [
+        "./packages/@playatlas/system"
+      ],
     }
   }
 }

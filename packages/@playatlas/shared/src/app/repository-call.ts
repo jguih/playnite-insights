@@ -1,6 +1,6 @@
 import { ApiError } from "@playnite-insights/lib/client";
 import { ZodError } from "zod";
-import type { LogService } from "../core/log-service";
+import type { LogService } from "../core/types/log-service";
 
 const PERFORMANCE_WARN_THRESHOLD_MS = 50;
 

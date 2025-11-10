@@ -1,5 +1,5 @@
 import z from "zod";
-import { companySchema } from "../../company";
+import { companySchema } from "../../validation/schemas/company";
 
 export const getAllCompaniesResponseSchema = z.array(companySchema);
 
