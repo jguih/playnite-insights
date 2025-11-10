@@ -1,12 +1,12 @@
 import type { FullGame, GameActivity, GameSession } from '@playnite-insights/lib/client';
 import type { GameSessionStore } from '../app-state/stores/gameSessionStore.svelte';
 import type { GameStore } from '../app-state/stores/gameStore.svelte';
-import type { DateTimeHandler } from '../utils/dateTimeHandler.svelte';
+import type { IDateTimeHandler } from '../utils/dateTimeHandler.svelte';
 
 export type RecentActivityViewModelProps = {
 	gameStore: GameStore;
 	gameSessionStore: GameSessionStore;
-	dateTimeHandler: DateTimeHandler;
+	dateTimeHandler: IDateTimeHandler;
 };
 
 export class RecentActivityViewModel {

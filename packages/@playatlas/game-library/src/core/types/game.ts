@@ -1,10 +1,10 @@
 import z from "zod";
+import { gamePageSizes, gameSortBy, gameSortOrder } from "../constants/game";
 import {
   fullGameRawSchema,
   fullGameSchema,
   gameSchema,
-} from "../../validation/schemas/game";
-import { gamePageSizes, gameSortBy, gameSortOrder } from "../constants/game";
+} from "../validation/schemas/game";
 
 export type Game = z.infer<typeof gameSchema>;
 export type FullGame = z.infer<typeof fullGameSchema>;

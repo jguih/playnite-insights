@@ -11,7 +11,6 @@ export type * from "./instance-authentication-repository";
 export type * from "./instance-sessions-repository";
 export type * from "./log-service";
 export type * from "./platform-repository";
-export type * from "./playnite-game-repository";
 export type * from "./playnite-library-metrics-repository";
 export type * from "./signature-service";
 export type * from "./stream-utils-service";

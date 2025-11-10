@@ -7,7 +7,7 @@ import {
 	getAllGameNotesResponseSchema,
 	updateGameNoteCommandSchema,
 	updateGameNoteResponseSchema,
-	type GameLibraryApiErrorCode,
+	type GameLibraryApiErrorResponse,
 	type GameNote,
 } from '@playatlas/game-library/core';
 import { emptyResponse } from '@playatlas/system/app';
@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ request, url, locals: { services } 
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.gameNoteRepository.getById(command.Id);
 		if (existingNote) {
-			const response: GameLibraryApiErrorCode = {
+			const response: GameLibraryApiErrorResponse = {
 				error: {
 					code: 'note_already_exists',
 					note: existingNote,

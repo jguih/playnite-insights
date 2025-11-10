@@ -12,11 +12,6 @@ import type { IncomingHttpHeaders } from "http";
 import { extname, join } from "path";
 import sharp from "sharp";
 import { type ReadableStream } from "stream/web";
-import { config } from "../config";
-import { defaultImageRepository } from "../repository/image";
-import { defaultFileSystemService } from "./file-system";
-import { defaultLogger } from "./log";
-import { defaultStreamUtilsService } from "./stream-utils";
 
 export type UploadServiceDeps = {
   streamUtilsService: StreamUtilsService;
@@ -26,24 +21,13 @@ export type UploadServiceDeps = {
   TMP_DIR: string;
 };
 
-export const makeUploadService = (
-  deps: Partial<UploadServiceDeps> = {}
-): UploadService => {
-  const {
-    streamUtilsService,
-    logService,
-    fileSystemService,
-    imageRepository,
-    TMP_DIR,
-  }: UploadServiceDeps = {
-    streamUtilsService: defaultStreamUtilsService,
-    logService: defaultLogger,
-    fileSystemService: defaultFileSystemService,
-    imageRepository: defaultImageRepository,
-    TMP_DIR: config.TMP_DIR,
-    ...deps,
-  };
-
+export const makeUploadService = ({
+  streamUtilsService,
+  logService,
+  fileSystemService,
+  imageRepository,
+  TMP_DIR,
+}: UploadServiceDeps): UploadService => {
   const uploadImagesAsync: UploadService["uploadImagesAsync"] = async (
     request,
     path,

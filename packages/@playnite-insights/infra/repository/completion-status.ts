@@ -1,16 +1,12 @@
 import type { CompletionStatusRepository } from "@playnite-insights/core";
 import { completionStatusSchema } from "@playnite-insights/lib/client";
 import z from "zod";
-import {
-  type BaseRepositoryDeps,
-  getDefaultRepositoryDeps,
-  repositoryCall,
-} from "./base";
+import { type BaseRepositoryDeps, repositoryCall } from "./base";
 
-export const makeCompletionStatusRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): CompletionStatusRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+export const makeCompletionStatusRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): CompletionStatusRepository => {
   const TABLE_NAME = `completion_status`;
 
   const add: CompletionStatusRepository["add"] = (completionStatus) => {
@@ -144,6 +140,3 @@ export const makeCompletionStatusRepository = (
     all,
   };
 };
-
-export const defaultCompletionStatusRepository: CompletionStatusRepository =
-  makeCompletionStatusRepository();

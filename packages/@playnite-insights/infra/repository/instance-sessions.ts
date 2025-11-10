@@ -1,15 +1,11 @@
 import { type InstanceSessionsRepository } from "@playnite-insights/core";
 import { instanceSessionSchema } from "@playnite-insights/lib/client";
-import {
-  type BaseRepositoryDeps,
-  getDefaultRepositoryDeps,
-  repositoryCall,
-} from "./base";
+import { type BaseRepositoryDeps, repositoryCall } from "./base";
 
-export const makeInstanceSessionsRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): InstanceSessionsRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+export const makeInstanceSessionsRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): InstanceSessionsRepository => {
   const TABLE_NAME = "instance_sessions";
 
   const add: InstanceSessionsRepository["add"] = (newSession) => {

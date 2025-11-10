@@ -1,15 +1,11 @@
 import { type InstanceAuthenticationRepository } from "@playnite-insights/core";
 import { instanceAuthenticationSchema } from "@playnite-insights/lib/client";
-import {
-  getDefaultRepositoryDeps,
-  repositoryCall,
-  type BaseRepositoryDeps,
-} from "./base";
+import { repositoryCall, type BaseRepositoryDeps } from "./base";
 
-export const makeInstanceAuthenticationRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): InstanceAuthenticationRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+export const makeInstanceAuthenticationRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): InstanceAuthenticationRepository => {
   const TABLE_NAME = "instance_authentication";
 
   const get: InstanceAuthenticationRepository["get"] = () => {

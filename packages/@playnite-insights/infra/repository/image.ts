@@ -1,17 +1,12 @@
 import { type ImageRepository } from "@playnite-insights/core";
 import { imageSchema } from "@playnite-insights/lib/client";
 import z from "zod";
-import {
-  type BaseRepositoryDeps,
-  getDefaultRepositoryDeps,
-  repositoryCall,
-} from "./base";
+import { type BaseRepositoryDeps, repositoryCall } from "./base";
 
-export const makeImageRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): ImageRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
-
+export const makeImageRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): ImageRepository => {
   const add: ImageRepository["add"] = (image) => {
     return repositoryCall(
       logService,
@@ -88,5 +83,3 @@ export const makeImageRepository = (
 
   return { add, all, getByChecksum };
 };
-
-export const defaultImageRepository: ImageRepository = makeImageRepository();

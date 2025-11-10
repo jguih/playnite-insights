@@ -1,9 +1,6 @@
 import { withInstanceAuth } from '$lib/server/api/authentication';
-import {
-	EmptyStrategy,
-	FetchClientStrategyError,
-	remoteActionSchema,
-} from '@playnite-insights/lib/client';
+import { remoteActionSchema } from '@playatlas/playnite-integration/core';
+import { EmptyStrategy, FetchClientStrategyError } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, url, locals: { services } }) =>

@@ -39,6 +39,7 @@ export type ServerServicesDeps = {
 	env: {
 		DATA_DIR: string;
 		PLAYNITE_HOST_ADDRESS: string;
+		TMP_DIR: string;
 	};
 	makeLogService?: typeof infraMakeLogService;
 };
@@ -146,6 +147,7 @@ export const makeServerServices = (deps: ServerServicesDeps) => {
 	const uploadService = makeUploadService({
 		...commonDeps,
 		logService: makeLogService('UploadService'),
+		TMP_DIR: env.TMP_DIR,
 	});
 	const mediaFilesService = makeMediaFilesService({
 		...commonDeps,

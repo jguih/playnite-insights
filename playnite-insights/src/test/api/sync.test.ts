@@ -38,7 +38,7 @@ describe('/api/sync', () => {
 		services = makeServerServices({
 			getDb: () => db,
 			makeLogService: () => mocks.logService,
-			env: { DATA_DIR: '/data', PLAYNITE_HOST_ADDRESS: '' },
+			env: { DATA_DIR: '/data', PLAYNITE_HOST_ADDRESS: '', TMP_DIR: '/tmp' },
 		});
 	});
 

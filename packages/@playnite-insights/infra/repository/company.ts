@@ -1,16 +1,12 @@
 import type { CompanyRepository } from "@playnite-insights/core";
 import { companySchema, type Company } from "@playnite-insights/lib/client";
 import z from "zod";
-import {
-  getDefaultRepositoryDeps,
-  repositoryCall,
-  type BaseRepositoryDeps,
-} from "./base";
+import { repositoryCall, type BaseRepositoryDeps } from "./base";
 
-export const makeCompanyRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): CompanyRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+export const makeCompanyRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): CompanyRepository => {
   const TABLE_NAME = "company";
 
   const add = (company: Company): boolean => {
@@ -152,6 +148,3 @@ export const makeCompanyRepository = (
     all,
   };
 };
-
-export const defaultCompanyRepository: CompanyRepository =
-  makeCompanyRepository();

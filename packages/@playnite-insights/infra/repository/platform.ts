@@ -1,16 +1,12 @@
 import type { PlatformRepository } from "@playnite-insights/core";
 import { platformSchema, type Platform } from "@playnite-insights/lib/client";
 import z from "zod";
-import {
-  getDefaultRepositoryDeps,
-  repositoryCall,
-  type BaseRepositoryDeps,
-} from "./base";
+import { repositoryCall, type BaseRepositoryDeps } from "./base";
 
-export const makePlatformRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): PlatformRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
+export const makePlatformRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): PlatformRepository => {
   const TABLE_NAME = "platform";
 
   const add = (platform: Platform): boolean => {
@@ -192,6 +188,3 @@ export const makePlatformRepository = (
     all,
   };
 };
-
-export const defaultPlatformRepository: PlatformRepository =
-  makePlatformRepository();

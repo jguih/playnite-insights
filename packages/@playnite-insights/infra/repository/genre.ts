@@ -1,17 +1,12 @@
 import type { GenreRepository } from "@playnite-insights/core";
 import { type Genre, genreSchema } from "@playnite-insights/lib/client";
 import z from "zod";
-import {
-  type BaseRepositoryDeps,
-  getDefaultRepositoryDeps,
-  repositoryCall,
-} from "./base";
+import { type BaseRepositoryDeps, repositoryCall } from "./base";
 
-export const makeGenreRepository = (
-  deps: Partial<BaseRepositoryDeps> = {}
-): GenreRepository => {
-  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
-
+export const makeGenreRepository = ({
+  getDb,
+  logService,
+}: BaseRepositoryDeps): GenreRepository => {
   const add = (genre: Genre): boolean => {
     return repositoryCall(
       logService,
@@ -150,5 +145,3 @@ export const makeGenreRepository = (
     upsertMany,
   };
 };
-
-export const defaultGenreRepository: GenreRepository = makeGenreRepository();
