@@ -1,3 +1,4 @@
+import type { GameRepository } from "@playatlas/game-library/core";
 import type {
   CompanyRepository,
   CompletionStatusRepository,
@@ -12,7 +13,6 @@ import type {
   LibraryManifestService,
   LogService,
   PlatformRepository,
-  PlayniteGameRepository,
   PlayniteLibraryMetricsRepository,
   SignatureService,
   StreamUtilsService,
@@ -110,7 +110,7 @@ export const makeMocks = () => {
     updateManyPlatforms: vi.fn(),
     updateManyPublishers: vi.fn(),
     removeMany: vi.fn(),
-  } satisfies PlayniteGameRepository;
+  } satisfies GameRepository;
 
   const gameSessionRepository = {
     getById: vi.fn(),

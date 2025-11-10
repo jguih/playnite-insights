@@ -11,5 +11,6 @@
     "strict": true,
     "moduleResolution": "bundler",
     "module": "es2015"
-  }
+  },
+  "include": ["src", "vitest.config.ts"]
 }

@@ -1,12 +1,9 @@
+import type { GameRepository } from "@playatlas/game-library/core";
 import { type PlayniteLibraryManifest } from "@playnite-insights/lib/client";
-import type {
-  FileSystemService,
-  LogService,
-  PlayniteGameRepository,
-} from "../types";
+import type { FileSystemService, LogService } from "../types";
 
 export type LibraryManifestServiceDeps = {
-  getManifestData: PlayniteGameRepository["getManifestData"];
+  getManifestData: GameRepository["getManifestData"];
   fileSystemService: FileSystemService;
   logService: LogService;
   LIBRARY_MANIFEST_FILE: string;

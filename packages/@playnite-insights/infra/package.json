@@ -18,6 +18,8 @@
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/lib": "workspace:*",
     "@playnite-insights/testing": "workspace:*",
+    "@playatlas/game-library": "workspace:*",
+    "@playatlas/shared": "workspace:*",
     "@types/busboy": "^1.5.4",
     "busboy": "^1.6.0",
     "sharp": "^0.34.3",

@@ -9,7 +9,7 @@ import {
   type GameSorting,
 } from "@playnite-insights/lib/client";
 import z from "zod";
-import { GameRepository } from "../core/types/game-repository";
+import type { GameRepository } from "../core/types/game-repository";
 
 type GameRepositoryDeps = BaseRepositoryDeps;
 

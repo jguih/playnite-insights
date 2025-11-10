@@ -1,3 +1,4 @@
+import type { GameRepository } from "@playatlas/game-library/core";
 import type {
   PlayniteGame,
   SyncGameListCommand,
@@ -7,7 +8,6 @@ import type {
   CompanyRepository,
   GenreRepository,
   PlatformRepository,
-  PlayniteGameRepository,
   PlayniteLibraryMetricsRepository,
 } from "../types";
 import { type CompletionStatusRepository } from "../types/completion-status-repository";
@@ -17,7 +17,7 @@ import { type LogService } from "../types/log-service";
 import { type StreamUtilsService } from "../types/stream-utils-service";
 
 export type PlayniteLibraryImporterServiceDeps = {
-  playniteGameRepository: PlayniteGameRepository;
+  playniteGameRepository: GameRepository;
   libraryManifestService: LibraryManifestService;
   playniteLibraryMetricsRepository: PlayniteLibraryMetricsRepository;
   gameSessionRepository: GameSessionRepository;

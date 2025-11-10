@@ -12,6 +12,8 @@
     "zod": "^3.25.76",
     "@playnite-insights/lib": "workspace:*",
     "@playnite-insights/core": "workspace:*",
+    "@playatlas/game-library": "workspace:*",
+    "@playatlas/shared": "workspace:*",
     "vitest": "^3.2.4"
   },
   "exports": {

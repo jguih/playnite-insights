@@ -1,3 +1,4 @@
+import { makeGameRepository } from '@playatlas/game-library/infra';
 import {
 	makeAuthService,
 	makeExtensionRegistrationService,
@@ -23,7 +24,6 @@ import {
 	makeInstanceAuthenticationRepository,
 	makeInstanceSessionsRepository,
 	makePlatformRepository,
-	makePlayniteGameRepository,
 	makePlayniteHostClient,
 	makePlayniteLibraryMetricsRepository,
 	makeSignatureService,
@@ -64,8 +64,8 @@ export const makeServerServices = (deps: ServerServicesDeps) => {
 		logService: makeLogService('GenreRepository'),
 		getDb,
 	});
-	const playniteGameRepository = makePlayniteGameRepository({
-		logService: makeLogService('PlayniteGameRepository'),
+	const playniteGameRepository = makeGameRepository({
+		logService: makeLogService('GameRepository'),
 		getDb,
 	});
 	const playniteLibraryMetricsRepository = makePlayniteLibraryMetricsRepository({
