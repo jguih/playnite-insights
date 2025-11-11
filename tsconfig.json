@@ -34,6 +34,12 @@
       "@playatlas/system/*": [
         "./packages/@playatlas/system/*"
       ],
+      "@playatlas/game-note/*": [
+        "./packages/@playatlas/game-note/*"
+      ],
+      "@playatlas/game-session/*": [
+        "./packages/@playatlas/game-session/*"
+      ],
     }
   }
 }

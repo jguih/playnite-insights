@@ -7,6 +7,8 @@ packages:
   - "packages/@playnite-insights/testing"
   - "packages/@playatlas/auth"
   - "packages/@playatlas/game-library"
+  - "packages/@playatlas/game-note"
+  - "packages/@playatlas/game-session"
   - "packages/@playatlas/playnite-integration"
   - "packages/@playatlas/shared"
   - "packages/@playatlas/sync"

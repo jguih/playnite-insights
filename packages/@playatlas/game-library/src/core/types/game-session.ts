@@ -1,10 +1,10 @@
 import type { DateFilter } from "@playatlas/shared/core";
 import z from "zod";
+import type { sessionStatus } from "../constants/game-session";
 import {
   closeGameSessionSchema,
   gameSessionSchema,
   openGameSessionSchema,
-  sessionStatus,
 } from "../validation/schemas/game-session";
 
 export type GameSession = z.infer<typeof gameSessionSchema>;
