@@ -1,6 +1,5 @@
 export * from "./api";
 export * from "./authentication";
-export * from "./completion-status";
 export * from "./error";
 export * from "./extension-registration";
 export * from "./fetch-client";
@@ -8,7 +7,6 @@ export * from "./home-page";
 export * from "./image";
 export * from "./key-value";
 export * from "./library-manifest";
-export * from "./log";
 export * from "./playnite-library-metrics";
 export * from "./sync-queue";
 export * from "./synchronization-id";

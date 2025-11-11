@@ -1,7 +1,6 @@
+import type { FileSystemService, LogService } from "@playatlas/shared/core";
 import type {
-  FileSystemService,
   ImageRepository,
-  LogService,
   StreamUtilsService,
   UploadService,
 } from "@playnite-insights/core";

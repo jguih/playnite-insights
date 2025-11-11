@@ -1,6 +1,6 @@
-import { withExtensionAuth } from '$lib/server/api/authentication';
-import { createHashForObject } from '$lib/server/api/hash';
-import { emptyResponse } from '@playatlas/system/app';
+import { withExtensionAuth } from '$lib/infra/api/authentication';
+import { createHashForObject } from '$lib/infra/api/hash';
+import { emptyResponse } from '$lib/infra/api/utils';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ request, url, locals: { services } }) =>

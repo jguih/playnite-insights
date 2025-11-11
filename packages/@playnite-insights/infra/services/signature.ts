@@ -1,12 +1,12 @@
 import {
   type FileSystemService,
   type LogService,
-  type SignatureService,
-} from "@playnite-insights/core";
+} from "@playatlas/shared/core";
+import { defaultLogger } from "@playatlas/shared/infra";
+import { defaultFileSystemService } from "@playatlas/system/infra";
+import { type SignatureService } from "@playnite-insights/core";
 import { createVerify, sign as cryptoSign, generateKeyPairSync } from "crypto";
 import { join } from "path";
-import { defaultFileSystemService } from "./file-system";
-import { defaultLogger } from "./log";
 
 export type SignatureServiceDeps = {
   fileSystemService?: FileSystemService;

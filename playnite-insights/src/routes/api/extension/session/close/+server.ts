@@ -1,6 +1,6 @@
-import { withExtensionAuth } from '$lib/server/api/authentication';
+import { withExtensionAuth } from '$lib/infra/api/authentication';
+import { badRequest, emptyResponse } from '$lib/infra/api/utils';
 import { closeGameSessionSchema } from '@playatlas/game-library/core';
-import { badRequest, emptyResponse } from '@playatlas/system/app';
 import { defaultSSEManager } from '@playnite-insights/infra';
 import { json, type RequestHandler } from '@sveltejs/kit';
 

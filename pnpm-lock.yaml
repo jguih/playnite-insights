@@ -55,9 +55,6 @@ importers:
       '@playatlas/shared':
         specifier: workspace:*
         version: file:packages/@playatlas/shared(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
-      '@playatlas/system':
-        specifier: workspace:*
-        version: file:packages/@playatlas/system(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@playnite-insights/lib':
         specifier: workspace:*
         version: link:../../@playnite-insights/lib
@@ -119,7 +116,7 @@ importers:
         version: 9.9.0
       '@playatlas/system':
         specifier: workspace:*
-        version: file:packages/@playatlas/system(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+        version: link:../system
       '@playnite-insights/lib':
         specifier: workspace:*
         version: link:../../@playnite-insights/lib
@@ -182,12 +179,6 @@ importers:
       '@playatlas/shared':
         specifier: workspace:*
         version: file:packages/@playatlas/shared(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
-      '@playnite-insights/lib':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/lib
-      '@playnite-insights/testing':
-        specifier: workspace:*
-        version: file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -348,7 +339,7 @@ importers:
         version: link:../packages/@playatlas/sync
       '@playatlas/system':
         specifier: workspace:*
-        version: file:packages/@playatlas/system(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+        version: link:../packages/@playatlas/system
       '@playnite-insights/core':
         specifier: workspace:*
         version: link:../packages/@playnite-insights/core
@@ -3416,7 +3407,6 @@ snapshots:
     dependencies:
       '@faker-js/faker': 9.9.0
       '@playatlas/shared': file:packages/@playatlas/shared(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
-      '@playatlas/system': file:packages/@playatlas/system(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@playnite-insights/lib': file:packages/@playnite-insights/lib(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@playnite-insights/testing': file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@types/busboy': 1.5.4
@@ -3479,8 +3469,6 @@ snapshots:
     dependencies:
       '@faker-js/faker': 9.9.0
       '@playatlas/shared': file:packages/@playatlas/shared(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
-      '@playnite-insights/lib': file:packages/@playnite-insights/lib(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
-      '@playnite-insights/testing': file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@types/busboy': 1.5.4
       busboy: 1.6.0
       vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)

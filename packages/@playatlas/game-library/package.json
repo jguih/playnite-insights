@@ -8,6 +8,10 @@
     "./core": "./src/core/index.ts",
     "./infra": "./src/infra/index.ts"
   },
+  "scripts": {
+    "test:unit": "vitest run",
+    "test:watch": "vitest --watch"
+  },
   "devDependencies": {
     "@types/node": "^24.0.14"
   },
@@ -17,7 +21,6 @@
     "@playnite-insights/lib": "workspace:*",
     "@playnite-insights/testing": "workspace:*",
     "@playatlas/shared": "workspace:*",
-    "@playatlas/system": "workspace:*",
     "@types/busboy": "^1.5.4",
     "busboy": "^1.6.0",
     "zod": "^3.25.76"

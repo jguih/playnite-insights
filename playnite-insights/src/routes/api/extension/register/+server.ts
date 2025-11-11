@@ -1,4 +1,4 @@
-import { handleApiError } from '$lib/server/api/handle-error';
+import { handleApiError } from '$lib/infra/api/handle-error';
 import { registerExtensionCommandSchema } from '@playatlas/playnite-integration/core';
 import { defaultSSEManager } from '@playnite-insights/infra';
 import { json, type RequestHandler } from '@sveltejs/kit';

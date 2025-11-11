@@ -1,4 +1,4 @@
-import { defaultFileSystemService, getDb, initDatabase } from '@playnite-insights/infra';
+import { defaultFileSystemService, getDb, initDatabase } from '@playatlas/system/infra';
 import {
 	serverSyncReconciliationResponseSchema,
 	type ClientSyncReconciliationCommand,

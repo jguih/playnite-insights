@@ -1,4 +1,4 @@
-import { handleApiError } from '$lib/server/api/handle-error';
+import { handleApiError } from '$lib/infra/api/handle-error';
 import { registerInstanceCommandSchema } from '@playatlas/auth/core';
 import { json, type RequestHandler } from '@sveltejs/kit';
 

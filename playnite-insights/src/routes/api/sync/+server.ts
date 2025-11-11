@@ -1,5 +1,5 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
-import type { ApiErrorResponse } from '@playatlas/system/core';
+import { withInstanceAuth } from '$lib/infra/api/authentication';
+import type { ApiErrorResponse } from '$lib/infra/api/error';
 import {
 	clientSyncReconciliationCommandSchema,
 	type ServerSyncReconciliationResponse,

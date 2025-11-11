@@ -1,7 +1,7 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
-import { createHashForObject } from '$lib/server/api/hash';
+import { withInstanceAuth } from '$lib/infra/api/authentication';
+import { createHashForObject } from '$lib/infra/api/hash';
+import { emptyResponse } from '$lib/infra/api/utils';
 import { getAllGenresResponseSchema } from '@playatlas/game-library/core';
-import { emptyResponse } from '@playatlas/system/app';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url, locals: { services } }) =>

@@ -1,7 +1,7 @@
 import { PLAYATLAS_DATA_DIR, PLAYATLAS_PLAYNITE_HOST_ADDRESS } from '$env/static/private';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { makeServerServices, type ServerServices } from '$lib/server/setup-services';
-import { getDb, initDatabase } from '@playnite-insights/infra';
+import { getDb, initDatabase } from '@playatlas/system/infra';
 import { type Handle, type ServerInit } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
 import { dirname, join } from 'path';

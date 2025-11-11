@@ -12,5 +12,5 @@
     "moduleResolution": "bundler",
     "module": "es2015",
   },
-  "include": ["src", "vitest.config.ts"]
+  "include": ["src", "vitest.config.ts", "src/app/repository-call.ts"]
 }

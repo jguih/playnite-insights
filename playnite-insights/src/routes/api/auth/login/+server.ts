@@ -1,6 +1,6 @@
-import { handleApiError } from '$lib/server/api/handle-error';
+import { ApiError } from '$lib/infra/api/error';
+import { handleApiError } from '$lib/infra/api/handle-error';
 import { registerInstanceCommandSchema, type LoginInstanceResponse } from '@playatlas/auth/core';
-import { ApiError } from '@playatlas/system/core';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, url, locals: { services } }) => {

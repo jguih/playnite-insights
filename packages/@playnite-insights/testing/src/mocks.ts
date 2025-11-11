@@ -1,18 +1,20 @@
-import type { GameRepository } from "@playatlas/game-library/core";
 import type {
   CompanyRepository,
   CompletionStatusRepository,
+  GameNoteRepository, GameRepository, GameSessionRepository,
+  GenreRepository,
+  PlatformRepository
+} from "@playatlas/game-library/core";
+import type {
+  FileSystemService,
+  LogService,
+} from "@playatlas/system/core";
+import type {
   CryptographyService,
   ExtensionRegistrationRepository,
-  FileSystemService,
-  GameNoteRepository,
-  GameSessionRepository,
-  GenreRepository,
   InstanceAuthenticationRepository,
   InstanceSessionsRepository,
   LibraryManifestService,
-  LogService,
-  PlatformRepository,
   PlayniteLibraryMetricsRepository,
   SignatureService,
   StreamUtilsService,

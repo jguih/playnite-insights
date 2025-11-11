@@ -1,4 +1,4 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
+import { withInstanceAuth } from '$lib/infra/api/authentication';
 import { remoteActionSchema } from '@playatlas/playnite-integration/core';
 import { EmptyStrategy, FetchClientStrategyError } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';

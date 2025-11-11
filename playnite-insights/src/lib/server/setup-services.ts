@@ -1,4 +1,6 @@
-import { makeGameRepository } from '@playatlas/game-library/infra';
+import { makeGameNoteRepository, makeGameRepository } from '@playatlas/game-library/infra';
+import { makeLogService as infraMakeLogService } from '@playatlas/shared/infra';
+import { makeFileSystemService } from '@playatlas/system/infra';
 import {
 	makeAuthService,
 	makeExtensionRegistrationService,
@@ -11,13 +13,10 @@ import {
 } from '@playnite-insights/core';
 import {
 	config,
-	makeLogService as infraMakeLogService,
 	makeCompanyRepository,
 	makeCompletionStatusRepository,
 	makeCryptographyService,
 	makeExtensionRegistrationRepository,
-	makeFileSystemService,
-	makeGameNoteRepository,
 	makeGameSessionRepository,
 	makeGenreRepository,
 	makeImageRepository,

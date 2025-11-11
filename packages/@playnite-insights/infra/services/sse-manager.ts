@@ -1,6 +1,6 @@
-import type { LogService } from "@playnite-insights/core";
+import type { LogService } from "@playatlas/shared/core";
+import { makeLogService } from "@playatlas/shared/infra";
 import { type APISSEvent } from "@playnite-insights/lib/client";
-import { makeLogService } from "./log";
 
 export type EventStreamDeps = {
   onCancel?: () => void;

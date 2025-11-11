@@ -1,4 +1,4 @@
-import { withExtensionAuth } from '$lib/server/api/authentication';
+import { withExtensionAuth } from '$lib/infra/api/authentication';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, url, locals: { services } }) =>

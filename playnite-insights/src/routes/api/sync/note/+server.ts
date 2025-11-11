@@ -1,6 +1,8 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
-import { createHashForObject } from '$lib/server/api/hash';
-import { ensureSyncId } from '$lib/server/api/synchronization';
+import { withInstanceAuth } from '$lib/infra/api/authentication';
+import type { ApiErrorResponse } from '$lib/infra/api/error';
+import { createHashForObject } from '$lib/infra/api/hash';
+import { ensureSyncId } from '$lib/infra/api/synchronization';
+import { emptyResponse } from '$lib/infra/api/utils';
 import {
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
@@ -10,8 +12,6 @@ import {
 	type GameLibraryApiErrorResponse,
 	type GameNote,
 } from '@playatlas/game-library/core';
-import { emptyResponse } from '@playatlas/system/app';
-import type { ApiErrorResponse } from '@playatlas/system/core';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url, locals: { services } }) =>

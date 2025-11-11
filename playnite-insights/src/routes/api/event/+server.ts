@@ -1,4 +1,4 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
+import { withInstanceAuth } from '$lib/infra/api/authentication';
 import { defaultSSEManager } from '@playnite-insights/infra';
 import type { RequestHandler } from '@sveltejs/kit';
 

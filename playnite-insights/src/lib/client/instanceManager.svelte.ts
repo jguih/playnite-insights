@@ -1,4 +1,4 @@
-import { apiErrorSchema } from '@playatlas/system/core';
+import { apiErrorSchema } from '$lib/infra/api/error';
 import {
 	AppClientError,
 	EmptyStrategy,

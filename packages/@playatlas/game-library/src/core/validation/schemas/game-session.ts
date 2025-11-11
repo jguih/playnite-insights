@@ -1,11 +1,6 @@
 import { ISODateSchema } from "@playatlas/shared/core";
 import z from "zod";
-
-export const sessionStatus = {
-  inProgress: "in_progress",
-  closed: "closed",
-  stale: "stale",
-} as const;
+import { sessionStatus } from "../../constants/game-session";
 
 export const gameSessionSchema = z.object({
   SessionId: z.string(),

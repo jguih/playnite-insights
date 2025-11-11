@@ -1,6 +1,4 @@
-import { ApiError } from "@playatlas/system/core";
-import { ZodError } from "zod";
-import type { LogService } from "../core/types/log-service";
+import type { LogService } from "../core/types/service/log";
 
 const PERFORMANCE_WARN_THRESHOLD_MS = 50;
 
@@ -27,26 +25,6 @@ export const repositoryCall = <T>(
       } failed after ${duration.toFixed(1)}ms`,
       error
     );
-    if (error instanceof ApiError) throw error;
-    if (error instanceof ZodError) {
-      throw new ApiError(
-        {
-          error: {
-            code: "validation_error",
-            issues: error.issues.map((issue) => ({
-              path: issue.path.join("."),
-              message: issue.message,
-            })),
-          },
-        },
-        "Validation Error"
-      );
-    }
-    throw new ApiError(
-      { error: { code: "internal_error" } },
-      "SQLite database error",
-      500,
-      { cause: error }
-    );
+    throw error;
   }
 };

@@ -1,4 +1,4 @@
-import { withExtensionAuth } from '$lib/server/api/authentication';
+import { withExtensionAuth } from '$lib/infra/api/authentication';
 import { defaultSSEManager } from '@playnite-insights/infra';
 import { syncGameListCommandSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
