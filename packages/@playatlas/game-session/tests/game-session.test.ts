@@ -1,27 +1,33 @@
 import { faker } from "@faker-js/faker";
-import type {
-  CloseSessionCommand,
-  GameSession,
-  OpenSessionCommand,
-} from "@playnite-insights/lib/client";
-import { makeMocks } from "@playnite-insights/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeGameSessionService } from "./service";
+import { makeGameSessionService } from "../src/app/service/game-session";
+import type { GameSession } from "../src/core/types/game-session";
 import type {
+  CloseGameSessionArgs,
   GameSessionService,
   GameSessionServiceDeps,
-} from "./service.types";
+} from "../src/core/types/service/game-session";
 
-vi.mock("$lib/infrastructure/database", () => ({}));
+let deps = {
+  logService: {
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    success: vi.fn(),
+    debug: vi.fn(),
+    LOG_LEVELS: 0,
+    CURRENT_LOG_LEVEL: 0,
+  },
+  gameSessionRepository: {
+    getById: vi.fn(),
+    add: vi.fn(),
+    update: vi.fn(),
+    all: vi.fn(),
+    findAllBy: vi.fn(),
+  },
+} satisfies GameSessionServiceDeps;
 
-const createDeps = () => {
-  const mocks = makeMocks();
-  return {
-    ...mocks,
-  } satisfies GameSessionServiceDeps;
-};
-let deps: ReturnType<typeof createDeps>;
-let service: GameSessionService;
+let service: GameSessionService = makeGameSessionService(deps);
 
 const getSession = ({
   status,
@@ -42,34 +48,17 @@ const getSession = ({
 describe("Game session service", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    deps = createDeps();
-    service = makeGameSessionService(deps);
-  });
-
-  it("on open, fails when no existing game is found", () => {
-    // Arrange
-    deps.playniteGameRepository.getById.mockReturnValueOnce(undefined);
-    const command: OpenSessionCommand = {
-      ClientUtcNow: new Date().toISOString(),
-      SessionId: faker.string.uuid(),
-      GameId: faker.string.uuid(),
-      StartTime: faker.date.recent().toISOString(),
-    };
-    // Act
-    const result = service.open(command);
-    // Assert
-    expect(result).toBeFalsy();
   });
 
   it("on close, fails with invalid command", () => {
     // Arrange
     const session = getSession({ status: "in_progress" });
     const now = new Date();
-    deps.playniteGameRepository.getById.mockReturnValueOnce(session);
-    const command: CloseSessionCommand = {
+    const command: CloseGameSessionArgs = {
       ClientUtcNow: now.toISOString(),
       SessionId: session.SessionId,
       GameId: session.GameId!,
+      GameName: "Test Game",
       StartTime: now.toISOString(),
       EndTime: null, // Invalid
       Duration: null, // Invalid
@@ -85,19 +74,17 @@ describe("Game session service", () => {
     // Arrange
     const now = new Date();
     const gameId = faker.string.uuid();
-    const command: CloseSessionCommand = {
+    const command: CloseGameSessionArgs = {
       ClientUtcNow: now.toISOString(),
       SessionId: faker.string.uuid(),
       GameId: gameId,
+      GameName: "Test Game",
       StartTime: faker.date.recent().toISOString(),
       EndTime: now.toISOString(),
       Duration: 1200,
       Status: "closed",
     };
     deps.gameSessionRepository.getById.mockReturnValueOnce(undefined);
-    deps.playniteGameRepository.getById.mockReturnValueOnce({
-      Name: "Test Game",
-    });
     deps.gameSessionRepository.add.mockReturnValueOnce(true);
     // Act
     const result = service.close(command);
@@ -110,19 +97,17 @@ describe("Game session service", () => {
     // Arrange
     const now = new Date();
     const gameId = faker.string.uuid();
-    const command: CloseSessionCommand = {
+    const command: CloseGameSessionArgs = {
       ClientUtcNow: now.toISOString(),
       SessionId: faker.string.uuid(),
       GameId: gameId,
+      GameName: faker.lorem.words(2),
       StartTime: faker.date.recent().toISOString(),
       EndTime: null,
       Duration: null,
       Status: "stale",
     };
     deps.gameSessionRepository.getById.mockReturnValueOnce(undefined);
-    deps.playniteGameRepository.getById.mockReturnValueOnce({
-      Name: "Test Game",
-    });
     deps.gameSessionRepository.add.mockReturnValueOnce(true);
     // Act
     const result = service.close(command);

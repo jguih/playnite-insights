@@ -4,17 +4,22 @@ import {
   type GameSession,
   type OpenSessionCommand,
 } from "../game-session";
-import type { GameRepository } from "../repository/game";
 import type { GameSessionRepository } from "../repository/game-session";
 
+export type OpenGameSessionArgs = OpenSessionCommand & {
+  GameName?: string | null;
+};
+export type CloseGameSessionArgs = CloseSessionCommand & {
+  GameName?: string | null;
+};
+
 export type GameSessionService = {
-  open: (command: OpenSessionCommand) => boolean;
-  close: (command: CloseSessionCommand) => boolean;
+  open: (args: OpenGameSessionArgs) => boolean;
+  close: (args: CloseGameSessionArgs) => boolean;
   getRecent: () => GameSession[] | null;
 };
 
 export type GameSessionServiceDeps = {
   logService: LogService;
   gameSessionRepository: GameSessionRepository;
-  playniteGameRepository: GameRepository;
 };

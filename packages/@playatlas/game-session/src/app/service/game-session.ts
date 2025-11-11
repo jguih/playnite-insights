@@ -1,6 +1,5 @@
 import { sessionStatus } from "../../core/constants/game-session";
 import {
-  type CloseSessionCommand,
   type GameSession,
   type GameSessionFilters,
 } from "../../core/types/game-session";
@@ -8,63 +7,18 @@ import {
   type GameSessionService,
   type GameSessionServiceDeps,
 } from "../../core/types/service/game-session";
+import * as rules from "../../core/validation/rules";
 
 export const makeGameSessionService = ({
   logService,
   gameSessionRepository,
-  playniteGameRepository,
 }: GameSessionServiceDeps): GameSessionService => {
-  const _isValidInProgressSession = (session: GameSession) => {
-    return (
-      session.GameId !== null && session.Status === sessionStatus.inProgress
-    );
-  };
-
-  const _isValidClosedSession = (session: GameSession) => {
-    return (
-      session.Status === sessionStatus.closed &&
-      session.Duration !== null &&
-      session.EndTime !== null
-    );
-  };
-
-  const _isValidCloseCommand = (
-    command: CloseSessionCommand
-  ): command is CloseSessionCommand & {
-    Duration: number;
-    EndTime: string;
-    Status: typeof sessionStatus.closed;
-  } => {
-    return (
-      command.Duration !== undefined &&
-      command.Duration !== null &&
-      command.EndTime !== undefined &&
-      command.EndTime !== null &&
-      command.Status === sessionStatus.closed
-    );
-  };
-
-  const _isValidStaleCommand = (
-    command: CloseSessionCommand
-  ): command is CloseSessionCommand & {
-    Status: typeof sessionStatus.stale;
-  } => {
-    return command.Status === sessionStatus.stale;
-  };
-
   const open: GameSessionService["open"] = (command) => {
-    const existingGame = playniteGameRepository.getById(command.GameId);
-    if (!existingGame) {
-      logService.warning(
-        `Attempted to open session for non existent game, skipping`
-      );
-      return false;
-    }
     const startTime = new Date().toISOString();
     const newSession: GameSession = {
       SessionId: command.SessionId,
       GameId: command.GameId,
-      GameName: existingGame.Name,
+      GameName: command.GameName ?? null,
       StartTime: startTime,
       Status: sessionStatus.inProgress,
       EndTime: null,
@@ -73,7 +27,7 @@ export const makeGameSessionService = ({
     const result = gameSessionRepository.add(newSession);
     if (result) {
       logService.info(
-        `Created open session ${command.SessionId} for ${existingGame.Name}`
+        `Created open session ${command.SessionId} for ${command.GameName}`
       );
     }
     return result;
@@ -83,27 +37,27 @@ export const makeGameSessionService = ({
     const existing = gameSessionRepository.getById(command.SessionId);
 
     if (existing) {
-      if (_isValidClosedSession(existing)) {
+      if (rules.isValidClosedSession(existing)) {
         logService.warning(
           `Attempted to close already closed session, skipping`
         );
         return false;
       }
-      if (!_isValidInProgressSession(existing)) {
+      if (!rules.isValidInProgressSession(existing)) {
         logService.warning(
           `Failed to close session ${existing.SessionId}, existing in progress session is invalid and will be marked as stale`
         );
         existing.Status = sessionStatus.stale;
         return gameSessionRepository.update(existing);
       }
-      if (_isValidStaleCommand(command)) {
+      if (rules.isValidStaleCommand(command)) {
         logService.info(
           `Marking existing in progress session (ID: ${existing.SessionId}) as stale`
         );
         existing.Status = command.Status;
         return gameSessionRepository.update(existing);
       }
-      if (!_isValidCloseCommand(command)) {
+      if (!rules.isValidCloseCommand(command)) {
         logService.warning(
           `Attempted to close session with invalid command. Duration and EndTime needs to be valid`
         );
@@ -119,7 +73,6 @@ export const makeGameSessionService = ({
       return result;
     }
 
-    const existingGame = playniteGameRepository.getById(command.GameId);
     const clientUtcNow = new Date(command.ClientUtcNow).getTime();
     const serverUtcNow = Date.now();
     const driftMs = clientUtcNow - serverUtcNow;
@@ -129,12 +82,12 @@ export const makeGameSessionService = ({
       `Calculated time drift between client (Playnite Insights Exporter) and server: ${driftMs}ms`
     );
 
-    if (_isValidCloseCommand(command) && existingGame) {
+    if (rules.isValidCloseCommand(command)) {
       const endTime = new Date(new Date(command.EndTime).getTime() - driftMs);
       const newSession: GameSession = {
         SessionId: command.SessionId,
         GameId: command.GameId,
-        GameName: existingGame.Name,
+        GameName: command.GameName ?? null,
         StartTime: startTime.toISOString(),
         Status: command.Status,
         EndTime: endTime.toISOString(),
@@ -143,17 +96,17 @@ export const makeGameSessionService = ({
       const result = gameSessionRepository.add(newSession);
       if (result) {
         logService.info(
-          `Created closed session ${command.SessionId} for ${existingGame.Name}`
+          `Created closed session ${command.SessionId} for ${command.GameName}`
         );
       }
       return result;
     }
 
-    if (_isValidStaleCommand(command) && existingGame) {
+    if (rules.isValidStaleCommand(command)) {
       const newSession: GameSession = {
         SessionId: command.SessionId,
         GameId: command.GameId,
-        GameName: existingGame.Name,
+        GameName: command.GameName ?? null,
         StartTime: startTime.toISOString(),
         Status: command.Status,
         EndTime: null,
@@ -162,7 +115,7 @@ export const makeGameSessionService = ({
       const result = gameSessionRepository.add(newSession);
       if (result) {
         logService.info(
-          `Created stale session ${command.SessionId} for ${existingGame.Name}`
+          `Created stale session ${command.SessionId} for ${command.GameName}`
         );
       }
       return result;
