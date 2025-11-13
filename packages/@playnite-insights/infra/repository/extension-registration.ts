@@ -1,12 +1,16 @@
 import { type ExtensionRegistrationRepository } from "@playnite-insights/core";
 import { extensionRegistrationSchema } from "@playnite-insights/lib/client";
 import z from "zod";
-import { type BaseRepositoryDeps, repositoryCall } from "./base";
+import {
+  type BaseRepositoryDeps,
+  getDefaultRepositoryDeps,
+  repositoryCall,
+} from "./base";
 
-export const makeExtensionRegistrationRepository = ({
-  getDb,
-  logService,
-}: BaseRepositoryDeps): ExtensionRegistrationRepository => {
+export const makeExtensionRegistrationRepository = (
+  deps: Partial<BaseRepositoryDeps> = {}
+): ExtensionRegistrationRepository => {
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
   const TABLE_NAME = `extension_registration`;
 
   const add: ExtensionRegistrationRepository["add"] = (newRegistration) => {
@@ -151,3 +155,6 @@ export const makeExtensionRegistrationRepository = ({
 
   return { add, update, getByExtensionId, getByRegistrationId, remove, all };
 };
+
+export const defaultExtensionRegistrationRepository: ExtensionRegistrationRepository =
+  makeExtensionRegistrationRepository();

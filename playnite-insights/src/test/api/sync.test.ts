@@ -1,4 +1,4 @@
-import { defaultFileSystemService, getDb, initDatabase } from '@playatlas/system/infra';
+import { defaultFileSystemService, getDb, initDatabase } from '@playnite-insights/infra';
 import {
 	serverSyncReconciliationResponseSchema,
 	type ClientSyncReconciliationCommand,
@@ -23,8 +23,8 @@ describe('/api/sync', () => {
 		const now = new Date();
 		vi.resetAllMocks();
 		testUtils.clearAllTables(db);
-		sessionId = await testUtils.registerInstanceAndCreateSessionAsync(services.authService);
-		syncId = testUtils.setSyncId(services.synchronizationIdRepository, now);
+		sessionId = await testUtils.registerInstanceAndCreateSessionAsync(services);
+		syncId = testUtils.setSyncId(services, now);
 	});
 
 	beforeAll(async () => {
@@ -38,7 +38,7 @@ describe('/api/sync', () => {
 		services = makeServerServices({
 			getDb: () => db,
 			makeLogService: () => mocks.logService,
-			env: { DATA_DIR: '/data', PLAYNITE_HOST_ADDRESS: '', TMP_DIR: '/tmp' },
+			env: { DATA_DIR: '/data', PLAYNITE_HOST_ADDRESS: '' },
 		});
 	});
 

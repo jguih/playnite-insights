@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GameNote } from '@playatlas/game-library/core';
+	import type { GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 	import BaseButton from '../../buttons/BaseButton.svelte';
 

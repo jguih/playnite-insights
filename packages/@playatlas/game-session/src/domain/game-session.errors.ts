@@ -1,5 +1,5 @@
 import { sessionStatus } from "./game-session.constants";
-import type { GameSessionId } from "./game-session.entity";
+import type { GameSessionDuration, GameSessionId } from "./game-session.entity";
 
 export class GameSessionError extends Error {
   constructor(message: string) {
@@ -54,6 +54,14 @@ export class InvalidGameSessionStatusError extends GameSessionError {
       `Invalid game session status: ${
         props.sessionStatus
       }. Valid statuses are: ${Object.values(sessionStatus).join(", ")}`
+    );
+  }
+}
+
+export class InvalidGameSessionDurationError extends GameSessionError {
+  constructor(props: { sessionDuration: GameSessionDuration }) {
+    super(
+      `Invalid game session duration: ${props.sessionDuration}. Duration must be a positive integer grater than 0.`
     );
   }
 }

@@ -5,7 +5,7 @@ import {
   gamePageSizes,
   gameSortBy,
   gameSortOrder,
-} from "@playatlas/game-library/core";
+} from "../playnite-game";
 import { homePageSearchParamsKeys } from "./schemas";
 import type {
   HomePageFilterParams,

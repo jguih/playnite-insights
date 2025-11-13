@@ -8,8 +8,7 @@
     "@types/node": "^24.0.14"
   },
   "dependencies": {
-    "zod": "^3.25.76",
-    "@playatlas/game-library": "workspace:*"
+    "zod": "^3.25.76"
   },
   "exports": {
     "./client": "./client/index.ts"

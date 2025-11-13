@@ -29,7 +29,7 @@
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte.js';
 	import { m } from '$lib/paraglide/messages.js';
 	import { ArrowLeft, ChevronDown, ChevronUp, Menu, PlusIcon } from '@lucide/svelte';
-	import { type GameNote } from '@playatlas/game-library/core';
+	import { type GameNote } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 
 	const { data } = $props();

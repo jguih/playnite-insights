@@ -1,6 +1,3 @@
-import { makeGameNoteRepository, makeGameRepository } from '@playatlas/game-library/infra';
-import { makeLogService as infraMakeLogService } from '@playatlas/shared/infra';
-import { makeFileSystemService } from '@playatlas/system/infra';
 import {
 	makeAuthService,
 	makeExtensionRegistrationService,
@@ -13,16 +10,20 @@ import {
 } from '@playnite-insights/core';
 import {
 	config,
+	makeLogService as infraMakeLogService,
 	makeCompanyRepository,
 	makeCompletionStatusRepository,
 	makeCryptographyService,
 	makeExtensionRegistrationRepository,
+	makeFileSystemService,
+	makeGameNoteRepository,
 	makeGameSessionRepository,
 	makeGenreRepository,
 	makeImageRepository,
 	makeInstanceAuthenticationRepository,
 	makeInstanceSessionsRepository,
 	makePlatformRepository,
+	makePlayniteGameRepository,
 	makePlayniteHostClient,
 	makePlayniteLibraryMetricsRepository,
 	makeSignatureService,
@@ -38,7 +39,6 @@ export type ServerServicesDeps = {
 	env: {
 		DATA_DIR: string;
 		PLAYNITE_HOST_ADDRESS: string;
-		TMP_DIR: string;
 	};
 	makeLogService?: typeof infraMakeLogService;
 };
@@ -64,8 +64,8 @@ export const makeServerServices = (deps: ServerServicesDeps) => {
 		logService: makeLogService('GenreRepository'),
 		getDb,
 	});
-	const playniteGameRepository = makeGameRepository({
-		logService: makeLogService('GameRepository'),
+	const playniteGameRepository = makePlayniteGameRepository({
+		logService: makeLogService('PlayniteGameRepository'),
 		getDb,
 	});
 	const playniteLibraryMetricsRepository = makePlayniteLibraryMetricsRepository({
@@ -146,7 +146,6 @@ export const makeServerServices = (deps: ServerServicesDeps) => {
 	const uploadService = makeUploadService({
 		...commonDeps,
 		logService: makeLogService('UploadService'),
-		TMP_DIR: env.TMP_DIR,
 	});
 	const mediaFilesService = makeMediaFilesService({
 		...commonDeps,

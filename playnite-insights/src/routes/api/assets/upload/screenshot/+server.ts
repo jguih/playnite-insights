@@ -1,4 +1,4 @@
-import { handleApiError } from '$lib/infra/api/handle-error';
+import { handleApiError } from '$lib/server/api/handle-error';
 import { defaultSSEManager } from '@playnite-insights/infra';
 import type { UploadScreenshotResponse } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';

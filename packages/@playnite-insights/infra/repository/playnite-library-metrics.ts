@@ -1,10 +1,14 @@
 import type { PlayniteLibraryMetricsRepository } from "@playnite-insights/core";
-import { type BaseRepositoryDeps, repositoryCall } from "./base";
+import {
+  type BaseRepositoryDeps,
+  getDefaultRepositoryDeps,
+  repositoryCall,
+} from "./base";
 
-export const makePlayniteLibraryMetricsRepository = ({
-  getDb,
-  logService,
-}: BaseRepositoryDeps): PlayniteLibraryMetricsRepository => {
+export const makePlayniteLibraryMetricsRepository = (
+  deps: Partial<BaseRepositoryDeps> = {}
+): PlayniteLibraryMetricsRepository => {
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
   const TABLE_NAME = "playnite_library_metrics";
 
   const add: PlayniteLibraryMetricsRepository["add"] = (newMetrics) => {
@@ -118,3 +122,6 @@ export const makePlayniteLibraryMetricsRepository = ({
     getTotalPlaytimeOverLast6Months,
   };
 };
+
+export const defaultPlayniteLibraryMetricsRepository: PlayniteLibraryMetricsRepository =
+  makePlayniteLibraryMetricsRepository();

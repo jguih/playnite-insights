@@ -1,20 +1,18 @@
 import type {
   CompanyRepository,
   CompletionStatusRepository,
-  GameNoteRepository, GameRepository, GameSessionRepository,
-  GenreRepository,
-  PlatformRepository
-} from "@playatlas/game-library/core";
-import type {
-  FileSystemService,
-  LogService,
-} from "@playatlas/system/core";
-import type {
   CryptographyService,
   ExtensionRegistrationRepository,
+  FileSystemService,
+  GameNoteRepository,
+  GameSessionRepository,
+  GenreRepository,
   InstanceAuthenticationRepository,
   InstanceSessionsRepository,
   LibraryManifestService,
+  LogService,
+  PlatformRepository,
+  PlayniteGameRepository,
   PlayniteLibraryMetricsRepository,
   SignatureService,
   StreamUtilsService,
@@ -23,6 +21,8 @@ import { LOG_LEVELS, type IFetchClient } from "@playnite-insights/lib/client";
 import { constants } from "fs/promises";
 import { join } from "path";
 import { vi } from "vitest";
+import { config as infraConfig } from "../../infra/config";
+import { monorepoRoot } from "./paths";
 
 export const makeMocks = () => {
   const config = {
@@ -37,11 +37,11 @@ export const makeMocks = () => {
     DB_FILE: "",
     CONTENT_HASH_FILE_NAME: "contentHash.txt",
     MIGRATIONS_DIR: join(
-      process.env.PLAYATLAS_WORKDIR!,
+      monorepoRoot,
       "packages/@playnite-insights/infra/migrations"
     ),
     PLAYNITE_HOST_ADDRESS: undefined,
-  };
+  } satisfies typeof infraConfig;
 
   const logService = {
     CURRENT_LOG_LEVEL: 1,
@@ -110,7 +110,7 @@ export const makeMocks = () => {
     updateManyPlatforms: vi.fn(),
     updateManyPublishers: vi.fn(),
     removeMany: vi.fn(),
-  } satisfies GameRepository;
+  } satisfies PlayniteGameRepository;
 
   const gameSessionRepository = {
     getById: vi.fn(),

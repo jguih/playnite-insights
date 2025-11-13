@@ -1,9 +1,10 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
+	FetchClientStrategyError,
 	getAllCompaniesResponseSchema,
+	JsonStrategy,
 	type GetAllCompaniesResponse,
-} from '@playatlas/game-library/core';
-import { FetchClientStrategyError, JsonStrategy } from '@playnite-insights/lib/client';
+} from '@playnite-insights/lib/client';
 import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 
 export type CompanyStoreDeps = ApiDataStoreDeps;

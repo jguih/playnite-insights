@@ -1,11 +1,15 @@
 import type { SynchronizationIdRepository } from "@playnite-insights/core";
 import { synchronizationIdSchema } from "@playnite-insights/lib/client";
-import { repositoryCall, type BaseRepositoryDeps } from "./base";
+import {
+  getDefaultRepositoryDeps,
+  repositoryCall,
+  type BaseRepositoryDeps,
+} from "./base";
 
-export const makeSynchronizationIdRepository = ({
-  getDb,
-  logService,
-}: BaseRepositoryDeps): SynchronizationIdRepository => {
+export const makeSynchronizationIdRepository = (
+  deps: Partial<BaseRepositoryDeps> = {}
+): SynchronizationIdRepository => {
+  const { getDb, logService } = { ...getDefaultRepositoryDeps(), ...deps };
   const TABLE_NAME = "synchronization_id";
 
   const get: SynchronizationIdRepository["get"] = () => {

@@ -1,5 +1,7 @@
-import type { ValidAuthenticationHeader } from "@playnite-insights/lib/client";
-import type { ApiErrorCode } from "../../../../@playatlas/system/src/core/api";
+import type {
+  ApiErrorCode,
+  ValidAuthenticationHeader,
+} from "@playnite-insights/lib/client";
 import type { CryptographyService } from "../types/cryptography-service";
 import type { ExtensionRegistrationRepository } from "../types/extension-registration-repository";
 import type { InstanceAuthenticationRepository } from "../types/instance-authentication-repository";

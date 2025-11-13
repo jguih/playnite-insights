@@ -1,5 +1,5 @@
-import { gameNoteSchema } from "@playatlas/game-library/core";
 import z from "zod";
+import { gameNoteSchema } from "../../game-notes/schemas";
 
 export const clientSyncReconciliationCommandSchema = z.object({
   notes: z.array(gameNoteSchema),

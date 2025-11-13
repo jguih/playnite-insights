@@ -1,8 +1,4 @@
-import type {
-  GamePageSize,
-  GameSortBy,
-  GameSortOrder,
-} from "@playatlas/game-library/core";
+import type { GamePageSize, GameSortBy, GameSortOrder } from "../playnite-game";
 import { homePageSearchParamsKeys } from "./schemas";
 
 export type HomePageSearchParamKeys =

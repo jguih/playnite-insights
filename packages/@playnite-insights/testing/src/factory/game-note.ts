@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { type GameNote } from "@playatlas/game-library/core";
+import { type GameNote } from "@playnite-insights/lib/client";
 
 export class GameNoteFactory {
   private buildNote = (props: Partial<GameNote> = {}): GameNote => {

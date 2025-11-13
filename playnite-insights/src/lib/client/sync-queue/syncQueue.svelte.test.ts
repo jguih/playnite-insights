@@ -1,8 +1,9 @@
-import { GameNoteFactory } from '@playatlas/game-library/app';
-import type { GameLibraryApiErrorResponse, GameNote } from '@playatlas/game-library/core';
 import {
 	FetchClientStrategyError,
+	GameNoteFactory,
 	SyncQueueFactory,
+	type ApiErrorResponse,
+	type GameNote,
 	type IFetchClient,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
@@ -133,7 +134,7 @@ describe('SyncQueue', () => {
 		const note = await createAndUpdateNoteAsync();
 		const existingNote: GameNote = { ...note, GameId: crypto.randomUUID() };
 		const [createQueueItem] = await syncQueueRepository.getAllAsync();
-		const apiError: GameLibraryApiErrorResponse = {
+		const apiError: ApiErrorResponse = {
 			error: { code: 'note_already_exists', note: existingNote },
 		};
 		fakeFetchClient.httpPostAsync.mockImplementationOnce(() => {

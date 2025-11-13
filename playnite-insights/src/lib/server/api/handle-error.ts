@@ -1,6 +1,6 @@
+import { ApiError, type ApiErrorResponse } from '@playnite-insights/lib/client';
 import { json } from '@sveltejs/kit';
-import type { ServerServices } from '../../server/setup-services';
-import { ApiError, type ApiErrorResponse } from './error';
+import type { ServerServices } from '../setup-services';
 
 const handleErrorCode = (code: string) => {
 	switch (code) {

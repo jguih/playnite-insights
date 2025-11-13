@@ -1,7 +1,11 @@
-import { syncIdHeader, type SynchronizationId } from '@playnite-insights/lib/client';
-import type { ServerServices } from '../../server/setup-services';
+import {
+	ApiError,
+	syncIdHeader,
+	type ApiErrorResponse,
+	type SynchronizationId,
+} from '@playnite-insights/lib/client';
+import type { ServerServices } from '../setup-services';
 import { getRequestDescription } from './authentication';
-import { ApiError, type ApiErrorResponse } from './error';
 
 export type EnsureSyncIdDeps = {
 	request: Request;

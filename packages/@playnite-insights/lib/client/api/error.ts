@@ -1,4 +1,5 @@
 import z from "zod";
+import { gameNoteSchema } from "../game-notes";
 
 export class ApiError extends Error {
   public readonly response: ApiErrorResponse;
@@ -56,6 +57,10 @@ const errorSchema = z.discriminatedUnion("code", [
   z.object({
     code: z.literal("not_authorized"),
     message: z.string().optional(),
+  }),
+  z.object({
+    code: z.literal("note_already_exists"),
+    note: gameNoteSchema,
   }),
   z.object({
     code: z.literal("missing_or_invalid_sync_id"),

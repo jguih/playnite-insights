@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import type { FullGame } from '@playatlas/game-library/core';
+import type { FullGame } from '@playnite-insights/lib/client';
 import type { CompanyStore } from '../app-state/stores/companyStore.svelte';
 import type { GameStore } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl, getPlaytimeInHoursAndMinutes } from '../utils/playnite-game';

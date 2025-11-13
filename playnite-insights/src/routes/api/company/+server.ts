@@ -1,7 +1,6 @@
-import { withInstanceAuth } from '$lib/infra/api/authentication';
-import { createHashForObject } from '$lib/infra/api/hash';
-import { emptyResponse } from '$lib/infra/api/utils';
-import { getAllCompaniesResponseSchema } from '@playatlas/game-library/core';
+import { withInstanceAuth } from '$lib/server/api/authentication';
+import { createHashForObject } from '$lib/server/api/hash';
+import { emptyResponse, getAllCompaniesResponseSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url, locals: { services } }) =>

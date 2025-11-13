@@ -1,7 +1,6 @@
-import { withExtensionAuth } from '$lib/infra/api/authentication';
-import { badRequest, emptyResponse } from '$lib/infra/api/utils';
-import { openGameSessionSchema } from '@playatlas/game-library/core';
+import { withExtensionAuth } from '$lib/server/api/authentication';
 import { defaultSSEManager } from '@playnite-insights/infra';
+import { badRequest, emptyResponse, openGameSessionSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, url, locals: { services } }) =>

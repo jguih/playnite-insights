@@ -1,5 +1,5 @@
-import { withInstanceAuth } from '$lib/infra/api/authentication';
-import { ApiError } from '$lib/infra/api/error';
+import { withInstanceAuth } from '$lib/server/api/authentication';
+import { ApiError } from '@playnite-insights/lib/client';
 import { type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ params, request, url, locals: { services } }) =>

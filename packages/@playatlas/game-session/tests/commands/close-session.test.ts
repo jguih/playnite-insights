@@ -1,11 +1,26 @@
 import { faker } from "@faker-js/faker";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CloseGameSessionCommand } from "../../src/commands/close-session/close-session.command";
+import {
+  makeCloseGameSessionCommand,
+  type CloseGameSessionCommand,
+} from "../../src/commands/close-session/close-session.command";
+import {
+  closeGameSessionRequestDtoSchema,
+  type CloseGameSessionRequestDto,
+} from "../../src/commands/close-session/close-session.request.dto";
 import {
   makeCloseGameSessionService,
   type CloseGameSessionServiceDeps,
 } from "../../src/commands/close-session/close-session.service";
-import { makeGameSession } from "../../src/domain/game-session.entity";
+import {
+  makeClosedGameSession,
+  makeGameSession,
+  type GameSession,
+} from "../../src/domain/game-session.entity";
+import {
+  GameSessionAlreadyClosedError,
+  InvalidGameSessionDurationError,
+} from "../../src/domain/game-session.errors";
 
 let deps = {
   logger: {
@@ -27,12 +42,31 @@ let deps = {
 
 const service = makeCloseGameSessionService({ ...deps });
 
-describe("Game session service", () => {
+const factory = {
+  makeInProgressSession: (): GameSession =>
+    makeGameSession({
+      sessionId: faker.string.uuid(),
+      startTime: faker.date.recent(),
+      gameId: faker.string.uuid(),
+      gameName: faker.lorem.words(3),
+    }),
+  makeClosedSession: (now: Date): GameSession =>
+    makeClosedGameSession({
+      sessionId: faker.string.uuid(),
+      startTime: faker.date.recent(),
+      gameId: faker.string.uuid(),
+      gameName: faker.lorem.words(3),
+      duration: faker.number.int({ min: 0, max: 3200 }),
+      endTime: now,
+    }),
+};
+
+describe("Close Game Session Service", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it("on close, create new closed session", () => {
+  it("create new closed session", () => {
     // Arrange
     const now = new Date();
     const gameId = faker.string.uuid();
@@ -54,25 +88,16 @@ describe("Game session service", () => {
     expect(result.created).toBeTruthy();
   });
 
-  it("on close, close existing in progress session", () => {
+  it("close existing in progress session", () => {
     // Arrange
     const now = new Date();
-    const gameId = faker.string.uuid();
-    const gameName = faker.lorem.words(3);
-    const sessionId = faker.string.uuid();
-    const startTime = faker.date.recent();
-    const inProgressSession = makeGameSession({
-      sessionId: sessionId,
-      startTime,
-      gameId,
-      gameName,
-    });
+    const inProgressSession = factory.makeInProgressSession();
     const command: CloseGameSessionCommand = {
       clientUtcNow: now.toISOString(),
-      sessionId,
-      gameId,
-      gameName,
-      startTime,
+      sessionId: inProgressSession.getSessionId(),
+      gameId: inProgressSession.getGameId()!,
+      gameName: inProgressSession.getGameName(),
+      startTime: inProgressSession.getStartTime(),
       endTime: now,
       duration: 1200,
     };
@@ -84,5 +109,56 @@ describe("Game session service", () => {
     expect(deps.repository.update).toHaveBeenCalledOnce();
     expect(result.created).toBeFalsy();
     expect(result.closed).toBeTruthy();
+  });
+
+  it.each([{ duration: -30 }, { duration: -4000 }, { duration: -1 }])(
+    "throws when closing a session with an invalid duration",
+    ({ duration }) => {
+      // Arrange
+      const now = new Date();
+      const inProgress = factory.makeInProgressSession();
+      const command: CloseGameSessionCommand = {
+        clientUtcNow: now.toISOString(),
+        sessionId: inProgress.getSessionId(),
+        gameId: inProgress.getGameId()!,
+        gameName: inProgress.getGameName(),
+        startTime: inProgress.getStartTime(),
+        endTime: now,
+        duration: duration,
+      };
+      deps.repository.findById.mockReturnValueOnce(inProgress);
+      // Act & Assert
+      expect(() => service.execute(command)).toThrowError(
+        InvalidGameSessionDurationError
+      );
+      expect(deps.repository.update).not.toHaveBeenCalled();
+    }
+  );
+
+  it("throws when attempting to close an already closed session", () => {
+    // Arrange
+    const now = new Date();
+    const closed = factory.makeClosedSession(now);
+    const requestDto: CloseGameSessionRequestDto = {
+      ClientUtcNow: now.toISOString(),
+      SessionId: closed.getSessionId(),
+      GameId: closed.getGameId()!,
+      StartTime: closed.getStartTime().toISOString(),
+      EndTime: closed.getEndTime()!.toISOString(),
+      Duration: closed.getDuration()!,
+    };
+    const command = makeCloseGameSessionCommand(
+      requestDto,
+      closed.getGameName()
+    );
+    deps.repository.findById.mockReturnValueOnce(closed);
+    // Act & Assert
+    expect(() =>
+      closeGameSessionRequestDtoSchema.parse(requestDto)
+    ).not.toThrow();
+    expect(() => service.execute(command)).toThrowError(
+      GameSessionAlreadyClosedError
+    );
+    expect(deps.repository.update).not.toHaveBeenCalled();
   });
 });

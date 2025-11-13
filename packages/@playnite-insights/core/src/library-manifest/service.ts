@@ -1,6 +1,8 @@
-import { type PlayniteLibraryManifest } from "@playnite-insights/lib/client";
+import {
+  ApiError,
+  type PlayniteLibraryManifest,
+} from "@playnite-insights/lib/client";
 import { join } from "path";
-import { ApiError } from "../../../../@playatlas/system/src/core/api";
 import type {
   LibraryManifestService,
   LibraryManifestServiceDeps,

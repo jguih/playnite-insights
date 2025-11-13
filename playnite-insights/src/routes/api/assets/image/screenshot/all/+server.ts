@@ -1,7 +1,6 @@
-import { handleApiError } from '$lib/infra/api/handle-error';
-import { createHashForObject } from '$lib/infra/api/hash';
-import { emptyResponse } from '$lib/infra/api/utils';
-import { type GetAllScreenshotsResponse } from '@playnite-insights/lib/client';
+import { handleApiError } from '$lib/server/api/handle-error';
+import { createHashForObject } from '$lib/server/api/hash';
+import { emptyResponse, type GetAllScreenshotsResponse } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ request, locals: { services } }) => {

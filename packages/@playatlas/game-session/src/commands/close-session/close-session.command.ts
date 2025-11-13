@@ -15,12 +15,12 @@ export const makeCloseGameSessionCommand = (
   gameName: string | null
 ): CloseGameSessionCommand => {
   return {
-    clientUtcNow: requestDto.clientUtcNow,
-    sessionId: requestDto.sessionId,
-    gameId: requestDto.gameId,
-    startTime: new Date(requestDto.startTime),
-    endTime: new Date(requestDto.endTime),
-    duration: requestDto.duration,
+    clientUtcNow: requestDto.ClientUtcNow,
+    sessionId: requestDto.SessionId,
+    gameId: requestDto.GameId,
+    startTime: new Date(requestDto.StartTime),
+    endTime: new Date(requestDto.EndTime),
+    duration: requestDto.Duration,
     gameName,
   };
 };

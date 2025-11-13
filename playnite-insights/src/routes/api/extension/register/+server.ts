@@ -1,6 +1,6 @@
-import { handleApiError } from '$lib/infra/api/handle-error';
-import { registerExtensionCommandSchema } from '@playatlas/playnite-integration/core';
+import { handleApiError } from '$lib/server/api/handle-error';
 import { defaultSSEManager } from '@playnite-insights/infra';
+import { registerExtensionCommandSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, url, locals: { services } }) => {

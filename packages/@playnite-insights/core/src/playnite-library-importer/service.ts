@@ -1,8 +1,10 @@
-import type { Game, Platform } from "@playatlas/game-library/core";
 import {
+  ApiError,
   validAuthenticationHeaders,
   type CompletionStatus,
   type IncomingPlayniteGameDTO,
+  type Platform,
+  type PlayniteGame,
   type PlayniteLibraryMetrics,
 } from "@playnite-insights/lib/client";
 import busboy from "busboy";
@@ -10,7 +12,6 @@ import { createHash } from "crypto";
 import type { IncomingHttpHeaders } from "http";
 import { join } from "path";
 import { type ReadableStream } from "stream/web";
-import { ApiError } from "../../../../@playatlas/system/src/core/api";
 import {
   type ImportMediaFilesContext,
   type PlayniteLibraryImporterService,
@@ -32,7 +33,9 @@ export const makePlayniteLibraryImporterService = ({
   platformRepository,
   companyRepository,
 }: PlayniteLibraryImporterServiceDeps): PlayniteLibraryImporterService => {
-  const _fromDtoToPlayniteGame = (game: IncomingPlayniteGameDTO): Game => {
+  const _fromDtoToPlayniteGame = (
+    game: IncomingPlayniteGameDTO
+  ): PlayniteGame => {
     return {
       Id: game.Id,
       IsInstalled: +game.IsInstalled,
@@ -114,7 +117,9 @@ export const makePlayniteLibraryImporterService = ({
       uniqueCompletionStatuses.length > 0 &&
         completionStatusRepository.upsertMany(uniqueCompletionStatuses);
 
-      const gamesToUpsert: Game[] = addedOrUpdated.map(_fromDtoToPlayniteGame);
+      const gamesToUpsert: PlayniteGame[] = addedOrUpdated.map(
+        _fromDtoToPlayniteGame
+      );
       gamesToUpsert.length > 0 &&
         playniteGameRepository.upsertMany(gamesToUpsert);
 

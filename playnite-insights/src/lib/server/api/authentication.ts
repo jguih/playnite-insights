@@ -1,6 +1,6 @@
 import { validAuthenticationHeaders } from '@playnite-insights/lib/client';
 import { json } from '@sveltejs/kit';
-import type { ServerServices } from '../../server/setup-services';
+import type { ServerServices } from '../setup-services';
 import { handleApiError } from './handle-error';
 import { computeBase64HashAsync } from './hash';
 

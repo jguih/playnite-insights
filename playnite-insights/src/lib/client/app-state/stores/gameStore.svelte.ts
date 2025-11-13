@@ -1,13 +1,11 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
-	getAllGamesResponseSchema,
-	type FullGame,
-	type GetAllGamesResponse,
-} from '@playatlas/game-library/core';
-import {
 	FetchClientStrategyError,
+	getAllGamesResponseSchema,
 	JsonStrategy,
 	parseHomePageSearchParams,
+	type FullGame,
+	type GetAllGamesResponse,
 	type HomePageFilterParams,
 	type HomePagePaginationParams,
 	type HomePageSortingParams,

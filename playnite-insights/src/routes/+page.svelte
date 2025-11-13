@@ -20,11 +20,13 @@
 	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
-	import { gameSortBy, gameSortOrder, type Game } from '@playatlas/game-library/core';
 	import {
+		gameSortBy,
+		gameSortOrder,
 		homePageSearchParamsFilterKeys,
 		homePageSearchParamsKeys,
 		type HomePageSearchParamKeys,
+		type PlayniteGame,
 	} from '@playnite-insights/lib/client';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 
@@ -125,7 +127,7 @@
 	});
 </script>
 
-{#snippet gameCard(game: Game)}
+{#snippet gameCard(game: PlayniteGame)}
 	<li
 		class={[
 			'm-0 aspect-[1/1.6] p-0 shadow outline-0',

@@ -1,17 +1,16 @@
-import { withInstanceAuth } from '$lib/infra/api/authentication';
-import type { ApiErrorResponse } from '$lib/infra/api/error';
-import { createHashForObject } from '$lib/infra/api/hash';
-import { ensureSyncId } from '$lib/infra/api/synchronization';
-import { emptyResponse } from '$lib/infra/api/utils';
+import { withInstanceAuth } from '$lib/server/api/authentication';
+import { createHashForObject } from '$lib/server/api/hash';
+import { ensureSyncId } from '$lib/server/api/synchronization';
 import {
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
+	emptyResponse,
 	getAllGameNotesResponseSchema,
 	updateGameNoteCommandSchema,
 	updateGameNoteResponseSchema,
-	type GameLibraryApiErrorResponse,
+	type ApiErrorResponse,
 	type GameNote,
-} from '@playatlas/game-library/core';
+} from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = ({ request, url, locals: { services } }) =>
@@ -59,7 +58,7 @@ export const POST: RequestHandler = async ({ request, url, locals: { services } 
 		const command = createGameNoteCommandSchema.parse(jsonBody);
 		const existingNote = services.gameNoteRepository.getById(command.Id);
 		if (existingNote) {
-			const response: GameLibraryApiErrorResponse = {
+			const response: ApiErrorResponse = {
 				error: {
 					code: 'note_already_exists',
 					note: existingNote,

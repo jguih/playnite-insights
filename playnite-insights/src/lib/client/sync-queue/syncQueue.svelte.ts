@@ -1,16 +1,14 @@
 import { m } from '$lib/paraglide/messages';
 import {
+	apiErrorSchema,
 	createGameNoteCommandSchema,
 	createGameNoteResponseSchema,
-	gameLibraryApiErrorSchema,
-	updateGameNoteCommandSchema,
-	updateGameNoteResponseSchema,
-	type GameNote,
-} from '@playatlas/game-library/core';
-import {
 	EmptyStrategy,
 	FetchClientStrategyError,
 	JsonStrategy,
+	updateGameNoteCommandSchema,
+	updateGameNoteResponseSchema,
+	type GameNote,
 	type IFetchClient,
 	type SyncQueueItem,
 } from '@playnite-insights/lib/client';
@@ -88,7 +86,7 @@ export class SyncQueue {
 		} catch (error) {
 			if (error instanceof FetchClientStrategyError && error.statusCode === 409) {
 				// When note already exists (conflict)
-				const apiError = gameLibraryApiErrorSchema.parse(error.data);
+				const apiError = apiErrorSchema.parse(error.data);
 				if (!(apiError.error.code === 'note_already_exists')) throw error;
 				await this.updateGameNoteAndDeleteQueueItemAsync(apiError.error.note, queueItem);
 			} else {

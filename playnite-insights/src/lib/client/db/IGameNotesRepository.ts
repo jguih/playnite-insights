@@ -1,4 +1,4 @@
-import type { GameNote } from '@playatlas/game-library/core';
+import type { GameNote } from '@playnite-insights/lib/client';
 import type { GameNoteRepository } from './gameNotesRepository.svelte';
 
 type GetAsyncArgs = { filterBy: typeof GameNoteRepository.FILTER_BY.Id } & Pick<GameNote, 'Id'>;

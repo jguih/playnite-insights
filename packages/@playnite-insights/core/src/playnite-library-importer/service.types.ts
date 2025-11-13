@@ -1,10 +1,13 @@
-import type { Game, GameRepository } from "@playatlas/game-library/core";
-import type { SyncGameListCommand } from "@playnite-insights/lib/client";
+import type {
+  PlayniteGame,
+  SyncGameListCommand,
+} from "@playnite-insights/lib/client";
 import { type LibraryManifestService } from "../library-manifest/service.types";
 import type {
   CompanyRepository,
   GenreRepository,
   PlatformRepository,
+  PlayniteGameRepository,
   PlayniteLibraryMetricsRepository,
 } from "../types";
 import { type CompletionStatusRepository } from "../types/completion-status-repository";
@@ -14,7 +17,7 @@ import { type LogService } from "../types/log-service";
 import { type StreamUtilsService } from "../types/stream-utils-service";
 
 export type PlayniteLibraryImporterServiceDeps = {
-  playniteGameRepository: GameRepository;
+  playniteGameRepository: PlayniteGameRepository;
   libraryManifestService: LibraryManifestService;
   playniteLibraryMetricsRepository: PlayniteLibraryMetricsRepository;
   gameSessionRepository: GameSessionRepository;
@@ -38,7 +41,7 @@ export type ImportMediaFilesContext = {
   requestId: string;
   tmpDir: string;
   gameId: string | null;
-  game: Game | null;
+  game: PlayniteGame | null;
   mediaFilesHash: string | null;
   uploadCount: number;
   filesToHash: { filename: string; buffer: Buffer }[];

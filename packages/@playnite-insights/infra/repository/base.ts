@@ -1,13 +1,22 @@
 import type { LogService } from "@playnite-insights/core";
+import { ApiError } from "@playnite-insights/lib/client";
 import type { DatabaseSync } from "node:sqlite";
 import { ZodError } from "zod";
-import { ApiError } from "../../../@playatlas/system/src/core/api";
+import { getDb as _getDb } from "../database/database";
+import { defaultLogger } from "../services/log";
 
 const PERFORMANCE_WARN_THRESHSOLD_MS = 50;
 
 export type BaseRepositoryDeps = {
   getDb: () => DatabaseSync;
   logService: LogService;
+};
+
+export const getDefaultRepositoryDeps = (): Required<BaseRepositoryDeps> => {
+  return {
+    getDb: _getDb,
+    logService: defaultLogger,
+  };
 };
 
 export const repositoryCall = <T>(

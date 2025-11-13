@@ -1,6 +1,6 @@
-import { withExtensionAuth } from '$lib/infra/api/authentication';
-import { createHashForObject } from '$lib/infra/api/hash';
-import { emptyResponse } from '$lib/infra/api/utils';
+import { withExtensionAuth } from '$lib/server/api/authentication';
+import { createHashForObject } from '$lib/server/api/hash';
+import { emptyResponse } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ request, url, locals: { services } }) =>

@@ -1,8 +1,8 @@
 import {
+  ApiError,
   type InstanceAuthentication,
   type InstanceSession,
 } from "@playnite-insights/lib/client";
-import { ApiError } from "../../../../@playatlas/system/src/core/api";
 import { type AuthService, type AuthServiceDeps } from "./service.types";
 
 export const makeAuthService = ({

@@ -1,5 +1,9 @@
-import { gamePageSizes, gameSortBy, gameSortOrder } from '@playatlas/game-library/core';
-import { homePageSearchParamsKeys as paramKeys } from '@playnite-insights/lib/client';
+import {
+	gamePageSizes,
+	gameSortBy,
+	gameSortOrder,
+	homePageSearchParamsKeys as paramKeys,
+} from '@playnite-insights/lib/client';
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 

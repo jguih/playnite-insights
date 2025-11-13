@@ -1,4 +1,6 @@
 export * from "./cryptography";
+export * from "./file-system";
+export * from "./log";
 export * from "./playnite-host-http-client";
 export * from "./signature";
 export * from "./sse-manager";

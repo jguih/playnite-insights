@@ -3,6 +3,7 @@ import {
   GameSessionAlreadyClosedError,
   GameSessionAlreadyStaleError,
   GameSessionNotInProgressError,
+  InvalidGameSessionDurationError,
 } from "./game-session.errors";
 import type {
   CloseGameSessionProps,
@@ -16,7 +17,7 @@ type GameSessionStartTime = Date;
 type GameSessionEndTime = Date | null;
 type GameSessionGameId = string | null;
 type GameSessionGameName = string | null;
-type GameSessionDuration = number | null;
+export type GameSessionDuration = number | null;
 
 export type GameSession = {
   getSessionId(): GameSessionId;
@@ -50,6 +51,10 @@ export const makeGameSession = (props: MakeGameSessionProps): GameSession => {
     close: (props) => {
       if (_status !== "in_progress") throw new GameSessionNotInProgressError();
       if (props.endTime < _startTime) throw new EndTimeBeforeStartTimeError();
+      if (props.duration < 0)
+        throw new InvalidGameSessionDurationError({
+          sessionDuration: props.duration,
+        });
       _endTime = props.endTime;
       _duration = props.duration;
       _status = "closed";

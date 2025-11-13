@@ -1,6 +1,4 @@
-import { GameNoteFactory } from '@playatlas/game-library/app';
-import type { GameNote } from '@playatlas/game-library/core';
-import { SyncQueueFactory } from '@playnite-insights/lib/client';
+import { GameNoteFactory, SyncQueueFactory, type GameNote } from '@playnite-insights/lib/client';
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IndexedDbSignal } from '../app-state/indexeddbManager.svelte';

@@ -1,6 +1,6 @@
-import { GameNoteFactory } from '@playatlas/game-library/app';
 import {
 	FetchClient,
+	GameNoteFactory,
 	syncIdHeader,
 	SyncQueueFactory,
 	type IFetchClient,
