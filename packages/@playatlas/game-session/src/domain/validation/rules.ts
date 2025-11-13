@@ -1,16 +1,15 @@
-import { sessionStatus } from "../constants/game-session";
-import type { GameSession } from "../types/game-session";
-import type { CloseGameSessionArgs } from "../types/service/game-session";
+import { sessionStatus } from "../game-session.constants";
+import type { GameSession } from "../game-session.entity";
 
 export const isValidInProgressSession = (session: GameSession) => {
   return session.GameId !== null && session.Status === sessionStatus.inProgress;
 };
 
-export const isValidClosedSession = (session: GameSession) => {
+export const isSessionClosed = (session: GameSession) => {
   return (
-    session.Status === sessionStatus.closed &&
-    session.Duration !== null &&
-    session.EndTime !== null
+    session.getStatus() === "closed" &&
+    session.getDuration() !== null &&
+    session.getEndTime() !== null
   );
 };
 

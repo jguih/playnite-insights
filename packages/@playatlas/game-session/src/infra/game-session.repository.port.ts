@@ -1,4 +1,7 @@
-import type { GameSession, GameSessionFilters } from "../game-session";
+import type {
+  GameSession,
+  GameSessionFilters,
+} from "../domain/game-session.types";
 
 export type GameSessionRepository = {
   getById: (sessionId: GameSession["SessionId"]) => GameSession | null;

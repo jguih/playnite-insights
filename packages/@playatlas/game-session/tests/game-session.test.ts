@@ -1,12 +1,12 @@
 import { faker } from "@faker-js/faker";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { makeGameSessionService } from "../src/app/service/game-session";
-import type { GameSession } from "../src/core/types/game-session";
 import type {
   CloseGameSessionArgs,
   GameSessionService,
   GameSessionServiceDeps,
-} from "../src/core/types/service/game-session";
+} from "../src/core/game-session.service";
+import type { GameSession } from "../src/core/types/game-session.entity";
 
 let deps = {
   logService: {

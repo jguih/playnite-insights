@@ -1,13 +1,10 @@
-import { sessionStatus } from "../../core/constants/game-session";
-import {
-  type GameSession,
-  type GameSessionFilters,
-} from "../../core/types/game-session";
-import {
-  type GameSessionService,
-  type GameSessionServiceDeps,
-} from "../../core/types/service/game-session";
-import * as rules from "../../core/validation/rules";
+import { sessionStatus } from "../../domain/game-session.constants";
+import type { GameSession } from "../../domain/game-session.entity";
+import type {
+  GameSessionService,
+  GameSessionServiceDeps,
+} from "../../domain/game-session.service";
+import * as rules from "../../domain/validation/rules";
 
 export const makeGameSessionService = ({
   logService,
@@ -37,7 +34,7 @@ export const makeGameSessionService = ({
     const existing = gameSessionRepository.getById(command.SessionId);
 
     if (existing) {
-      if (rules.isValidClosedSession(existing)) {
+      if (rules.isSessionClosed(existing)) {
         logService.warning(
           `Attempted to close already closed session, skipping`
         );
