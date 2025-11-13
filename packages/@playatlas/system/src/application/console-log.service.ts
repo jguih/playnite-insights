@@ -1,18 +1,16 @@
+import type { LogService } from "@playatlas/common/domain";
+import { isValidLogLevel, logLevel } from "@playatlas/common/domain";
 import { ZodError } from "zod/v4";
-import { LOG_LEVELS } from "../../core/constants/log-levels";
-import { type LogService } from "../../core/types/service/log";
-import { isValidLogLevel } from "../../core/validation/log";
 
 export const DEFAULT_SOURCE = "General";
 
-const logLevel = Number(process.env.LOG_LEVEL);
-export const currentLogLevel = isValidLogLevel(logLevel)
-  ? logLevel
-  : LOG_LEVELS.info;
+const _logLevel = Number(process.env.PLAYATLAS_LOG_LEVEL);
+export const currentLogLevel = isValidLogLevel(_logLevel)
+  ? _logLevel
+  : logLevel.info;
 
-export const makeLogService = (
-  source: string = DEFAULT_SOURCE,
-  CURRENT_LOG_LEVEL: (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS] = currentLogLevel
+export const makeConsoleLogService = (
+  source: string = DEFAULT_SOURCE
 ): LogService => {
   const getDateTimeString = (): string => {
     const now = new Date();
@@ -20,7 +18,7 @@ export const makeLogService = (
   };
 
   const logError = (message: string, error?: unknown): void => {
-    if (CURRENT_LOG_LEVEL > LOG_LEVELS.error) {
+    if (currentLogLevel > logLevel.error) {
       return;
     }
     console.error(`[${getDateTimeString()}] [ERROR] [${source}] ${message}`);
@@ -35,28 +33,28 @@ export const makeLogService = (
   };
 
   const logWarning = (message: string): void => {
-    if (CURRENT_LOG_LEVEL > LOG_LEVELS.warning) {
+    if (currentLogLevel > logLevel.warning) {
       return;
     }
     console.warn(`[${getDateTimeString()}] [WARNING] [${source}] ${message}`);
   };
 
   const logDebug = (message: string): void => {
-    if (CURRENT_LOG_LEVEL > LOG_LEVELS.debug) {
+    if (currentLogLevel > logLevel.debug) {
       return;
     }
     console.debug(`[${getDateTimeString()}] [DEBUG] [${source}] ${message}`);
   };
 
   const logSuccess = (message: string): void => {
-    if (CURRENT_LOG_LEVEL > LOG_LEVELS.success) {
+    if (currentLogLevel > logLevel.success) {
       return;
     }
     console.log(`[${getDateTimeString()}] [SUCCESS] [${source}] ${message}`);
   };
 
   const logInfo = (message: string): void => {
-    if (CURRENT_LOG_LEVEL > LOG_LEVELS.info) {
+    if (currentLogLevel > logLevel.info) {
       return;
     }
     console.info(`[${getDateTimeString()}] [INFO] [${source}] ${message}`);
@@ -68,8 +66,7 @@ export const makeLogService = (
     info: logInfo,
     success: logSuccess,
     debug: logDebug,
-    CURRENT_LOG_LEVEL,
   };
 };
 
-export const defaultLogger = makeLogService(DEFAULT_SOURCE);
+export const defaultLogger = makeConsoleLogService(DEFAULT_SOURCE);

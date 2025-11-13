@@ -1,7 +1,7 @@
 import type { CloseGameSessionRequestDto } from "./close-session.request.dto";
 
 export type CloseGameSessionCommand = {
-  clientUtcNow: string;
+  clientUtcNow: Date;
   sessionId: string;
   gameId: string;
   startTime: Date;
@@ -15,7 +15,7 @@ export const makeCloseGameSessionCommand = (
   gameName: string | null
 ): CloseGameSessionCommand => {
   return {
-    clientUtcNow: requestDto.ClientUtcNow,
+    clientUtcNow: new Date(requestDto.ClientUtcNow),
     sessionId: requestDto.SessionId,
     gameId: requestDto.GameId,
     startTime: new Date(requestDto.StartTime),

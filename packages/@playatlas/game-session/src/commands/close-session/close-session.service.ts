@@ -1,4 +1,4 @@
-import type { LogService } from "@playatlas/shared/core";
+import type { LogService } from "@playatlas/common/core";
 import { makeClosedGameSession } from "../../domain/game-session.entity";
 import type { GameSessionRepository } from "../../infra/game-session.repository.port";
 import type { CloseGameSessionCommand } from "./close-session.command";
@@ -29,7 +29,7 @@ export const makeCloseGameSessionService = ({
           `Session not found: ${command.sessionId}. Creating closed session...`
         );
 
-        const clientUtcNow = new Date(command.clientUtcNow).getTime();
+        const clientUtcNow = command.clientUtcNow.getTime();
         const driftMs = clientUtcNow - serverUtcNow;
         const startTime = new Date(
           new Date(command.startTime).getTime() - driftMs

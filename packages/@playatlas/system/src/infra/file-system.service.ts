@@ -1,4 +1,4 @@
-import { type FileSystemService } from "@playatlas/shared/core";
+import { type FileSystemService } from "@playatlas/common/domain";
 import * as fsAsync from "fs/promises";
 
 export const makeFileSystemService = (): FileSystemService => {

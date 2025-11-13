@@ -1,4 +1,4 @@
-export const LOG_LEVELS = {
+export const logLevel = {
   debug: 0,
   info: 1,
   success: 2,
@@ -6,4 +6,4 @@ export const LOG_LEVELS = {
   error: 4,
 } as const;
 
-export type ValidLogLevels = typeof LOG_LEVELS;
+export type LogLevel = keyof typeof logLevel;

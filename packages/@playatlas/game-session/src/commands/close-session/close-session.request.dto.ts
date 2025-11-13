@@ -1,4 +1,4 @@
-import { ISODateSchema } from "@playatlas/shared/core";
+import { ISODateSchema } from "@playatlas/common/core";
 import z from "zod";
 
 export const closeGameSessionRequestDtoSchema = z.object({

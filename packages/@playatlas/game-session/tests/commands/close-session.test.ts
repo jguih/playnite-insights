@@ -70,20 +70,26 @@ describe("Close Game Session Service", () => {
     // Arrange
     const now = new Date();
     const gameId = faker.string.uuid();
-    const command: CloseGameSessionCommand = {
-      clientUtcNow: now.toISOString(),
-      sessionId: faker.string.uuid(),
-      gameId: gameId,
-      gameName: "Test Game",
-      startTime: faker.date.recent(),
-      endTime: now,
-      duration: 1200,
+    const requestDto: CloseGameSessionRequestDto = {
+      ClientUtcNow: now.toISOString(),
+      SessionId: faker.string.uuid(),
+      GameId: gameId,
+      StartTime: faker.date.recent().toISOString(),
+      EndTime: now.toISOString(),
+      Duration: 1200,
     };
+    const command: CloseGameSessionCommand = makeCloseGameSessionCommand(
+      requestDto,
+      faker.lorem.words(3)
+    );
     deps.repository.findById.mockReturnValueOnce(undefined);
     deps.repository.add.mockReturnValueOnce(true);
     // Act
     const result = service.execute(command);
     // Assert
+    expect(() =>
+      closeGameSessionRequestDtoSchema.parse(requestDto)
+    ).not.toThrow();
     expect(deps.repository.add).toHaveBeenCalledOnce();
     expect(result.created).toBeTruthy();
   });
@@ -92,20 +98,26 @@ describe("Close Game Session Service", () => {
     // Arrange
     const now = new Date();
     const inProgressSession = factory.makeInProgressSession();
-    const command: CloseGameSessionCommand = {
-      clientUtcNow: now.toISOString(),
-      sessionId: inProgressSession.getSessionId(),
-      gameId: inProgressSession.getGameId()!,
-      gameName: inProgressSession.getGameName(),
-      startTime: inProgressSession.getStartTime(),
-      endTime: now,
-      duration: 1200,
+    const requestDto: CloseGameSessionRequestDto = {
+      ClientUtcNow: now.toISOString(),
+      SessionId: inProgressSession.getSessionId(),
+      GameId: inProgressSession.getGameId()!,
+      StartTime: inProgressSession.getStartTime().toISOString(),
+      EndTime: now.toISOString(),
+      Duration: 1200,
     };
+    const command: CloseGameSessionCommand = makeCloseGameSessionCommand(
+      requestDto,
+      inProgressSession.getGameName()
+    );
     deps.repository.findById.mockReturnValueOnce(inProgressSession);
     deps.repository.update.mockReturnValueOnce(true);
     // Act
     const result = service.execute(command);
     // Assert
+    expect(() =>
+      closeGameSessionRequestDtoSchema.parse(requestDto)
+    ).not.toThrow();
     expect(deps.repository.update).toHaveBeenCalledOnce();
     expect(result.created).toBeFalsy();
     expect(result.closed).toBeTruthy();
@@ -117,17 +129,23 @@ describe("Close Game Session Service", () => {
       // Arrange
       const now = new Date();
       const inProgress = factory.makeInProgressSession();
-      const command: CloseGameSessionCommand = {
-        clientUtcNow: now.toISOString(),
-        sessionId: inProgress.getSessionId(),
-        gameId: inProgress.getGameId()!,
-        gameName: inProgress.getGameName(),
-        startTime: inProgress.getStartTime(),
-        endTime: now,
-        duration: duration,
+      const requestDto: CloseGameSessionRequestDto = {
+        ClientUtcNow: now.toISOString(),
+        SessionId: inProgress.getSessionId(),
+        GameId: inProgress.getGameId()!,
+        StartTime: inProgress.getStartTime().toISOString(),
+        EndTime: now.toISOString(),
+        Duration: duration,
       };
+      const command: CloseGameSessionCommand = makeCloseGameSessionCommand(
+        requestDto,
+        inProgress.getGameName()
+      );
       deps.repository.findById.mockReturnValueOnce(inProgress);
       // Act & Assert
+      expect(() =>
+        closeGameSessionRequestDtoSchema.parse(requestDto)
+      ).not.toThrow();
       expect(() => service.execute(command)).toThrowError(
         InvalidGameSessionDurationError
       );

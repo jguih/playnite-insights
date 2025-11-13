@@ -21,15 +21,31 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
-      '@playnite-insights/lib':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/lib
-      '@playnite-insights/testing':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/testing
+        version: link:../common
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/common:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -52,15 +68,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
-      '@playnite-insights/lib':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/lib
-      '@playnite-insights/testing':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/testing
+        version: link:../common
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -83,9 +93,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../common
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -108,9 +118,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../common
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -133,46 +143,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
-      '@playnite-insights/lib':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/lib
-      '@playnite-insights/testing':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/testing
-      '@types/busboy':
-        specifier: ^1.5.4
-        version: 1.5.4
-      busboy:
-        specifier: ^1.6.0
-        version: 1.6.0
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
-      zod:
-        specifier: ^3.25.76
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: ^24.0.14
-        version: 24.0.14
-
-  packages/@playatlas/shared:
-    dependencies:
-      '@faker-js/faker':
-        specifier: ^9.9.0
-        version: 9.9.0
-      '@playatlas/system':
-        specifier: workspace:*
-        version: link:../system
-      '@playnite-insights/lib':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/lib
-      '@playnite-insights/testing':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/testing
+        version: link:../common
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -195,15 +168,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
-      '@playnite-insights/lib':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/lib
-      '@playnite-insights/testing':
-        specifier: workspace:*
-        version: link:../../@playnite-insights/testing
+        version: link:../common
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -226,9 +193,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
-      '@playatlas/shared':
+      '@playatlas/common':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../common
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4

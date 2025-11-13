@@ -1,4 +1,4 @@
-import type { LogService } from "../core/types/service/log";
+import type { LogService } from "../domain/log-service.types";
 
 const PERFORMANCE_WARN_THRESHOLD_MS = 50;
 

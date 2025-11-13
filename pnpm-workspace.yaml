@@ -10,7 +10,7 @@ packages:
   - "packages/@playatlas/game-note"
   - "packages/@playatlas/game-session"
   - "packages/@playatlas/playnite-integration"
-  - "packages/@playatlas/shared"
+  - "packages/@playatlas/common"
   - "packages/@playatlas/sync"
   - "packages/@playatlas/system"
 injectWorkspacePackages: true
