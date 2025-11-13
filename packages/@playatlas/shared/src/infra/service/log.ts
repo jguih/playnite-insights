@@ -1,6 +1,7 @@
-import { isValidLogLevel, LOG_LEVELS } from "@playnite-insights/lib/client";
 import { ZodError } from "zod/v4";
+import { LOG_LEVELS } from "../../core/constants/log-levels";
 import { type LogService } from "../../core/types/service/log";
+import { isValidLogLevel } from "../../core/validation/log";
 
 export const DEFAULT_SOURCE = "General";
 
@@ -67,7 +68,6 @@ export const makeLogService = (
     info: logInfo,
     success: logSuccess,
     debug: logDebug,
-    LOG_LEVELS,
     CURRENT_LOG_LEVEL,
   };
 };

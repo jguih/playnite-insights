@@ -1,28 +1,26 @@
-import type {
-  GameSessionStatusClosed,
-  GameSessionStatusStale,
-} from "../../domain/game-session.types";
 import type { CloseGameSessionRequestDto } from "./close-session.request.dto";
 
 export type CloseGameSessionCommand = {
-  ClientUtcNow: string;
-  SessionId: string;
-  GameId: string;
-  StartTime: string;
-  Status: GameSessionStatusClosed | GameSessionStatusStale;
-  EndTime?: string | null;
-  Duration?: string | null;
-  GameName?: string | null;
+  clientUtcNow: string;
+  sessionId: string;
+  gameId: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number;
+  gameName: string | null;
 };
 
 export const makeCloseGameSessionCommand = (
-  requestDto: CloseGameSessionRequestDto
+  requestDto: CloseGameSessionRequestDto,
+  gameName: string | null
 ): CloseGameSessionCommand => {
   return {
-    ClientUtcNow: requestDto.ClientUtcNow,
-    SessionId: requestDto.SessionId,
-    GameId: requestDto.GameId,
-    StartTime: requestDto.StartTime,
-    Status: "closed",
+    clientUtcNow: requestDto.clientUtcNow,
+    sessionId: requestDto.sessionId,
+    gameId: requestDto.gameId,
+    startTime: new Date(requestDto.startTime),
+    endTime: new Date(requestDto.endTime),
+    duration: requestDto.duration,
+    gameName,
   };
 };

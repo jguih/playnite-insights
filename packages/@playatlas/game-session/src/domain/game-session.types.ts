@@ -17,19 +17,11 @@ export type GameActivity = {
   sessions: GameSession[];
 };
 
-// export type GameSessionFilters = {
-//   startTime?: DateFilter[];
-//   status?: {
-//     op: "in" | "not in";
-//     types: GameSession["Status"][];
-//   };
-// };
-
 export type MakeGameSessionProps = {
   sessionId: string;
   startTime: Date;
-  gameId?: string;
-  gameName?: string;
+  gameId?: string | null;
+  gameName?: string | null;
 };
 
 export type MakeClosedGameSessionProps = MakeGameSessionProps & {

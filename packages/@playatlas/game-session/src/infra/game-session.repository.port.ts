@@ -1,12 +1,10 @@
-import type {
-  GameSession,
-  GameSessionFilters,
-} from "../domain/game-session.types";
+import type { GameSession, GameSessionId } from "../domain/game-session.entity";
+import type { GameSessionFilters } from "./game-session.repository";
 
 export type GameSessionRepository = {
-  getById: (sessionId: GameSession["SessionId"]) => GameSession | null;
   add: (newSession: GameSession) => boolean;
   update: (session: GameSession) => boolean;
   all: () => GameSession[];
+  findById: (sessionId: GameSessionId) => GameSession | null;
   findAllBy: (params: { filters?: GameSessionFilters }) => GameSession[];
 };

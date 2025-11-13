@@ -12,16 +12,16 @@ import type {
 } from "./game-session.types";
 
 export type GameSessionId = string;
-export type GameSessionStartTime = Date;
-export type GameSessionEndTime = Date | null;
-export type GameSessionGameId = string | null;
-export type GameSessionGameName = string | null;
-export type GameSessionDuration = number | null;
+type GameSessionStartTime = Date;
+type GameSessionEndTime = Date | null;
+type GameSessionGameId = string | null;
+type GameSessionGameName = string | null;
+type GameSessionDuration = number | null;
 
 export type GameSession = {
   getSessionId(): GameSessionId;
-  getStatus(): GameSessionStatus;
   getStartTime(): GameSessionStartTime;
+  getStatus(): GameSessionStatus;
   getEndTime(): GameSessionEndTime;
   getGameId(): GameSessionGameId;
   getGameName(): GameSessionGameName;
@@ -61,7 +61,9 @@ export const makeGameSession = (props: MakeGameSessionProps): GameSession => {
   return newSession;
 };
 
-export const makeClosedGameSession = (props: MakeClosedGameSessionProps) => {
+export const makeClosedGameSession = (
+  props: MakeClosedGameSessionProps
+): GameSession => {
   const _sessionId: GameSessionId = props.sessionId;
   const _startTime: GameSessionStartTime = props.startTime;
   const _gameId: GameSessionGameId = props.gameId ?? null;
@@ -82,13 +84,15 @@ export const makeClosedGameSession = (props: MakeClosedGameSessionProps) => {
       throw new GameSessionAlreadyClosedError();
     },
     stale: () => {
-      throw new GameSessionAlreadyStaleError();
+      throw new GameSessionAlreadyClosedError();
     },
   };
   return newSession;
 };
 
-export const makeStaleGameSession = (props: MakeGameSessionProps) => {
+export const makeStaleGameSession = (
+  props: MakeGameSessionProps
+): GameSession => {
   const _sessionId: GameSessionId = props.sessionId;
   const _startTime: GameSessionStartTime = props.startTime;
   const _gameId: GameSessionGameId = props.gameId ?? null;
@@ -106,19 +110,11 @@ export const makeStaleGameSession = (props: MakeGameSessionProps) => {
     getGameName: () => _gameName,
     getDuration: () => _duration,
     close: () => {
-      throw new GameSessionAlreadyClosedError();
+      throw new GameSessionAlreadyStaleError();
     },
     stale: () => {
       throw new GameSessionAlreadyStaleError();
     },
   };
   return newSession;
-};
-
-export const closeGameSession = (session: GameSession) => {
-  // Close game session logic and validation
-};
-
-export const staleGameSession = (session: GameSession) => {
-  // Stale game session logic and validation
 };

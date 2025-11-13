@@ -3,13 +3,13 @@ import z from "zod";
 import { sessionStatus } from "../../domain/game-session.constants";
 
 export const closeGameSessionRequestDtoSchema = z.object({
-  ClientUtcNow: ISODateSchema,
-  SessionId: z.string(),
-  GameId: z.string(),
-  StartTime: z.string(),
-  EndTime: z.string().optional().nullable(),
-  Duration: z.number().optional().nullable(),
-  Status: z.enum([sessionStatus.closed, sessionStatus.stale]),
+  clientUtcNow: ISODateSchema,
+  sessionId: z.string(),
+  gameId: z.string(),
+  startTime: ISODateSchema,
+  endTime: ISODateSchema,
+  duration: z.number(),
+  status: z.enum([sessionStatus.closed]),
 });
 
 export type CloseGameSessionRequestDto = z.infer<

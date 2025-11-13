@@ -31,7 +31,7 @@ export const makeGameSessionService = ({
   };
 
   const close: GameSessionService["close"] = (command) => {
-    const existing = gameSessionRepository.getById(command.SessionId);
+    const existing = gameSessionRepository.findById(command.SessionId);
 
     if (existing) {
       if (rules.isSessionClosed(existing)) {

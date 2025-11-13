@@ -1,9 +1,36 @@
 import { repositoryCall } from "@playatlas/shared/app";
+import type { DateFilter } from "@playatlas/shared/core";
 import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
-import type { GameSessionFilters } from "../domain/game-session.types";
-import { gameSessionSchema } from "../domain/validation/game-session.schemas";
+import { sessionStatus } from "../domain/game-session.constants";
+import type { GameSession } from "../domain/game-session.entity";
+import type { GameSessionStatus } from "../domain/game-session.types";
+import { userMapper } from "../user.mapper";
 import type { GameSessionRepository } from "./game-session.repository.port";
+
+export const gameSessionSchema = z.object({
+  SessionId: z.string(),
+  GameId: z.string().nullable(),
+  GameName: z.string().nullable(),
+  StartTime: z.string(),
+  EndTime: z.string().nullable(),
+  Duration: z.number().nullable(),
+  Status: z.enum([
+    sessionStatus.inProgress,
+    sessionStatus.closed,
+    sessionStatus.stale,
+  ]),
+});
+
+export type GameSessionModel = z.infer<typeof gameSessionSchema>;
+
+export type GameSessionFilters = {
+  startTime?: DateFilter[];
+  status?: {
+    op: "in" | "not in";
+    types: GameSessionStatus[];
+  };
+};
 
 export const makeGameSessionRepository = ({
   getDb,
@@ -69,7 +96,7 @@ export const makeGameSessionRepository = ({
     };
   };
 
-  const getById: GameSessionRepository["getById"] = (sessionId) => {
+  const findById: GameSessionRepository["findById"] = (sessionId) => {
     return repositoryCall(
       logService,
       () => {
@@ -77,10 +104,10 @@ export const makeGameSessionRepository = ({
         const query = `SELECT * FROM game_session WHERE SessionId = (?)`;
         const stmt = db.prepare(query);
         const result = stmt.get(sessionId);
-        const session = z.optional(gameSessionSchema).parse(result);
-        return session ?? null;
+        const model = z.optional(gameSessionSchema).parse(result);
+        return model ? userMapper.toDomain(model) : null;
       },
-      `getById(${sessionId})`
+      `findById(${sessionId})`
     );
   };
 
@@ -88,6 +115,7 @@ export const makeGameSessionRepository = ({
     return repositoryCall(
       logService,
       () => {
+        const persistence = userMapper.toPersistence(session);
         const db = getDb();
         const query = `
         INSERT INTO game_session
@@ -97,18 +125,18 @@ export const makeGameSessionRepository = ({
       `;
         const stmt = db.prepare(query);
         stmt.run(
-          session.SessionId,
-          session.GameId,
-          session.GameName,
-          session.StartTime,
-          session.EndTime,
-          session.Duration,
-          session.Status
+          persistence.SessionId,
+          persistence.GameId,
+          persistence.GameName,
+          persistence.StartTime,
+          persistence.EndTime,
+          persistence.Duration,
+          persistence.Status
         );
-        logService.debug(`Created session ${session.SessionId}`);
+        logService.debug(`Created session ${persistence.SessionId}`);
         return true;
       },
-      `add(${session.SessionId}, ${session.GameName})`
+      `add(${session.getSessionId()}, ${session.getGameName()})`
     );
   };
 
@@ -116,6 +144,7 @@ export const makeGameSessionRepository = ({
     return repositoryCall(
       logService,
       () => {
+        const persistence = userMapper.toPersistence(session);
         const query = `
           UPDATE game_session
           SET
@@ -131,18 +160,18 @@ export const makeGameSessionRepository = ({
         const db = getDb();
         const stmt = db.prepare(query);
         stmt.run(
-          session.GameId,
-          session.GameName,
-          session.StartTime,
-          session.EndTime,
-          session.Duration,
-          session.Status,
-          session.SessionId
+          persistence.GameId,
+          persistence.GameName,
+          persistence.StartTime,
+          persistence.EndTime,
+          persistence.Duration,
+          persistence.Status,
+          persistence.SessionId
         );
-        logService.debug(`Updated session ${session.SessionId}`);
+        logService.debug(`Updated session ${persistence.SessionId}`);
         return true;
       },
-      `update(${session.SessionId}, ${session.GameName})`
+      `update(${session.getSessionId()}, ${session.getGameName()})`
     );
   };
 
@@ -155,8 +184,13 @@ export const makeGameSessionRepository = ({
         const stmt = db.prepare(query);
         const result = stmt.all();
         const sessions = z.array(gameSessionSchema).parse(result);
-        logService.debug(`Found ${sessions?.length ?? 0} sessions`);
-        return sessions;
+        const entities: GameSession[] = [];
+        for (const session of sessions) {
+          const domainEntity = userMapper.toDomain(session);
+          entities.push(domainEntity);
+        }
+        logService.debug(`Found ${entities?.length ?? 0} sessions`);
+        return entities;
       },
       `all()`
     );
@@ -179,11 +213,16 @@ export const makeGameSessionRepository = ({
         const stmt = db.prepare(query);
         const result = stmt.all(...params);
         const sessions = z.array(gameSessionSchema).parse(result);
-        return sessions;
+        const entities: GameSession[] = [];
+        for (const session of sessions) {
+          const domainEntity = userMapper.toDomain(session);
+          entities.push(domainEntity);
+        }
+        return entities;
       },
       `findAllBy()`
     );
   };
 
-  return { getById, add, update, all, findAllBy };
+  return { findById, add, update, all, findAllBy };
 };
