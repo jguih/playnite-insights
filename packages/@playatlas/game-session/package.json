@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    "./app": "./src/app/index.ts",
-    "./core": "./src/core/index.ts",
+    "./commands/close-session": "./src/commands/close-session/index.ts",
+    "./commands/open-session": "./src/commands/open-session/index.ts",
+    "./domain": "./src/domain/index.ts",
     "./infra": "./src/infra/index.ts"
   },
   "scripts": {

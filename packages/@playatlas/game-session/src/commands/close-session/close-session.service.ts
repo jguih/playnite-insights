@@ -1,4 +1,4 @@
-import type { LogService } from "@playatlas/common/core";
+import type { LogService } from "@playatlas/common/domain";
 import { makeClosedGameSession } from "../../domain/game-session.entity";
 import type { GameSessionRepository } from "../../infra/game-session.repository.port";
 import type { CloseGameSessionCommand } from "./close-session.command";

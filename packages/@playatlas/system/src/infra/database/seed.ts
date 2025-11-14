@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { LogService } from "@playatlas/shared/core";
+import type { LogService } from "@playatlas/common/domain";
 import { DatabaseSync } from "node:sqlite";
 
 export const seedDb = (db: DatabaseSync, logService: LogService) => {

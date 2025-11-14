@@ -1,4 +1,4 @@
-import type { LogService } from "@playatlas/shared/core";
+import type { LogService } from "@playatlas/common/domain";
 import type { CloseGameSessionCommand } from "../commands/close-session/close-session.command";
 import type { OpenGameSessionCommand } from "../commands/open-session/open-session.command";
 import type { GameSessionRepository } from "../infra/game-session.repository.port";

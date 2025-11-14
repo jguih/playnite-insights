@@ -1,6 +1,8 @@
-import { repositoryCall } from "@playatlas/shared/app";
-import type { DateFilter } from "@playatlas/shared/core";
-import { type BaseRepositoryDeps } from "@playatlas/shared/core";
+import type { DateFilter } from "@playatlas/common/domain";
+import {
+  repositoryCall,
+  type BaseRepositoryDeps,
+} from "@playatlas/common/infra";
 import z from "zod";
 import { sessionStatus } from "../domain/game-session.constants";
 import type { GameSession } from "../domain/game-session.entity";
