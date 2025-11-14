@@ -1,8 +1,15 @@
 {
-  "extends": [
-    "./playnite-insights/tsconfig.json"
-  ],
   "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "moduleResolution": "bundler",
+    "preserveSymlinks": false,
     "paths": {
       "@playnite-insights/lib/*": [
         "./packages/@playnite-insights/lib/*"
@@ -25,8 +32,8 @@
       "@playatlas/playnite-integration/*": [
         "./packages/@playatlas/playnite-integration/*"
       ],
-      "@playatlas/common/*": [
-        "./packages/@playatlas/common/*"
+      "@playatlas/common": [
+        "./packages/@playatlas/common"
       ],
       "@playatlas/sync/*": [
         "./packages/@playatlas/sync/*"

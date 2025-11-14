@@ -29,7 +29,6 @@ let deps = {
     info: vi.fn(),
     success: vi.fn(),
     debug: vi.fn(),
-    CURRENT_LOG_LEVEL: 0,
   },
   repository: {
     findById: vi.fn(),

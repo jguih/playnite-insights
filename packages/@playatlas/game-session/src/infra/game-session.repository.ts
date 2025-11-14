@@ -118,6 +118,7 @@ export const makeGameSessionRepository = ({
       logService,
       () => {
         const persistence = userMapper.toPersistence(session);
+        gameSessionSchema.parse(persistence);
         const db = getDb();
         const query = `
         INSERT INTO game_session
@@ -147,6 +148,7 @@ export const makeGameSessionRepository = ({
       logService,
       () => {
         const persistence = userMapper.toPersistence(session);
+        gameSessionSchema.parse(persistence);
         const query = `
           UPDATE game_session
           SET
