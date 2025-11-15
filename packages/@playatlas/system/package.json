@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    "./app": "./src/app/index.ts",
-    "./core": "./src/core/index.ts",
+    "./application": "./src/application/index.ts",
+    "./domain": "./src/domain/index.ts",
     "./infra": "./src/infra/index.ts"
   },
   "devDependencies": {

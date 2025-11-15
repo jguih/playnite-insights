@@ -13,4 +13,5 @@ packages:
   - "packages/@playatlas/common"
   - "packages/@playatlas/sync"
   - "packages/@playatlas/system"
+  - "packages/@playatlas/integration-testing"
 injectWorkspacePackages: true

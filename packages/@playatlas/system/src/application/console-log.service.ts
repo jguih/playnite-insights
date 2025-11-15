@@ -1,13 +1,9 @@
 import type { LogService } from "@playatlas/common/domain";
-import { isValidLogLevel, logLevel } from "@playatlas/common/domain";
+import { logLevel } from "@playatlas/common/domain";
 import { ZodError } from "zod/v4";
+import { getSystemConfig } from "../domain/system-config.entity";
 
 export const DEFAULT_SOURCE = "General";
-
-const _logLevel = Number(process.env.PLAYATLAS_LOG_LEVEL);
-export const currentLogLevel = isValidLogLevel(_logLevel)
-  ? _logLevel
-  : logLevel.info;
 
 export const makeConsoleLogService = (
   source: string = DEFAULT_SOURCE
@@ -16,6 +12,8 @@ export const makeConsoleLogService = (
     const now = new Date();
     return now.toLocaleString();
   };
+  const systemConfig = getSystemConfig();
+  const currentLogLevel = systemConfig.getLogLevel();
 
   const logError = (message: string, error?: unknown): void => {
     if (currentLogLevel > logLevel.error) {
@@ -24,7 +22,7 @@ export const makeConsoleLogService = (
     console.error(`[${getDateTimeString()}] [ERROR] [${source}] ${message}`);
     if (error && error instanceof ZodError) {
       console.error(
-        `[${getDateTimeString()}][ERROR][${source}] `,
+        `[${getDateTimeString()}] [ERROR] [${source}] `,
         JSON.stringify(error.issues, null, 2)
       );
     } else if (error) {

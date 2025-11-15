@@ -10,6 +10,9 @@
     "strict": true,
     "moduleResolution": "bundler",
     "preserveSymlinks": false,
+    "module": "esnext",
+		"noEmit": true,
+		"target": "esnext",
     "paths": {
       "@playnite-insights/lib/*": [
         "./packages/@playnite-insights/lib/*"
