@@ -19,7 +19,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { type GameNoteRepository } from "../src/core/types/repository/game-note";
+import { type GameNoteRepository } from "../src/domain/types/repository/game-note";
 import { makeGameNoteRepository } from "../src/infra/repository/game-note";
 
 const mocks = makeMocks();

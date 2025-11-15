@@ -9,9 +9,9 @@ import {
   type GameFilters,
   type GameManifestData,
   type GameSorting,
-} from "@playatlas/game-library/core";
+} from "@playatlas/game-library/src/domain";
 import z from "zod";
-import type { GameRepository } from "../../core/types/repository/game";
+import { GameRepository } from "./game.repository.port";
 
 type GameRepositoryDeps = BaseRepositoryDeps;
 

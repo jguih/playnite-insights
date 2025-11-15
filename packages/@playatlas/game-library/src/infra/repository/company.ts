@@ -1,8 +1,11 @@
-import { companySchema, type Company } from "@playatlas/game-library/core";
+import {
+  companySchema,
+  type Company,
+} from "@playatlas/game-library/src/domain";
 import { repositoryCall } from "@playatlas/shared/app";
 import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
-import type { CompanyRepository } from "../../core/types/repository/company";
+import type { CompanyRepository } from "../../domain/types/repository/company";
 
 export const makeCompanyRepository = ({
   getDb,

@@ -4,9 +4,9 @@ import z from "zod";
 import {
   type GameNote,
   type GameNoteFilters,
-} from "../../core/types/game-note";
-import type { GameNoteRepository } from "../../core/types/repository/game-note";
-import { gameNoteSchema } from "../../core/validation/schemas/game-note";
+} from "../../domain/types/game-note";
+import type { GameNoteRepository } from "../../domain/types/repository/game-note";
+import { gameNoteSchema } from "../../domain/validation/schemas/game-note";
 
 export const makeGameNoteRepository = ({
   getDb,

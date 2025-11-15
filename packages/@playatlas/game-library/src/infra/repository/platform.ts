@@ -1,8 +1,11 @@
-import { platformSchema, type Platform } from "@playatlas/game-library/core";
+import {
+  platformSchema,
+  type Platform,
+} from "@playatlas/game-library/src/domain";
 import { repositoryCall } from "@playatlas/shared/app";
 import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
-import type { PlatformRepository } from "../../core/types/repository/platform";
+import type { PlatformRepository } from "../../domain/types/repository/platform";
 
 export const makePlatformRepository = ({
   getDb,

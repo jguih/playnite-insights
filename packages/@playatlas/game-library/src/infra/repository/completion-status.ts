@@ -1,8 +1,8 @@
 import { repositoryCall } from "@playatlas/shared/app";
 import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
-import type { CompletionStatusRepository } from "../../core/types/repository/completion-status";
-import { completionStatusSchema } from "../../core/validation/schemas/completion-status";
+import type { CompletionStatusRepository } from "../../domain/types/repository/completion-status";
+import { completionStatusSchema } from "../../domain/validation/schemas/completion-status";
 
 export const makeCompletionStatusRepository = ({
   getDb,

@@ -1,8 +1,8 @@
-import { type Genre, genreSchema } from "@playatlas/game-library/core";
+import { type Genre, genreSchema } from "@playatlas/game-library/src/domain";
 import { repositoryCall } from "@playatlas/shared/app";
 import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
-import type { GenreRepository } from "../../core/types/repository/genre";
+import type { GenreRepository } from "../../domain/types/repository/genre";
 
 export const makeGenreRepository = ({
   getDb,
