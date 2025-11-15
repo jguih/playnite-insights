@@ -3,15 +3,44 @@ import {
   type BaseRepositoryDeps,
 } from "@playatlas/common/infra";
 import {
-  fullGameRawSchema,
-  gameSchema,
-  type FullGame,
   type GameFilters,
   type GameManifestData,
   type GameSorting,
 } from "@playatlas/game-library/src/domain";
 import z from "zod";
+import { fullGameMapper, gameMapper } from "../game.mapper";
 import { GameRepository } from "./game.repository.port";
+
+export const GROUPADD_SEPARATOR = ",";
+
+export const gameSchema = z.object({
+  Id: z.string(),
+  Name: z.string().nullable(),
+  Description: z.string().nullable(),
+  ReleaseDate: z.string().nullable(),
+  Playtime: z.number(),
+  LastActivity: z.string().nullable(),
+  Added: z.string().nullable(),
+  InstallDirectory: z.string().nullable(),
+  IsInstalled: z.number(),
+  BackgroundImage: z.string().nullable(),
+  CoverImage: z.string().nullable(),
+  Icon: z.string().nullable(),
+  Hidden: z.number(),
+  CompletionStatusId: z.string().nullable(),
+  ContentHash: z.string(),
+});
+
+export type GameModel = z.infer<typeof gameSchema>;
+
+export const fullGameSchema = gameSchema.extend({
+  Developers: z.string().nullable(),
+  Publishers: z.string().nullable(),
+  Genres: z.string().nullable(),
+  Platforms: z.string().nullable(),
+});
+
+export type FullGameModel = z.infer<typeof fullGameSchema>;
 
 type GameRepositoryDeps = BaseRepositoryDeps;
 
@@ -99,7 +128,7 @@ export const makeGameRepository = (
         const result = stmt.get(id);
         const game = z.optional(gameSchema).parse(result);
         logService.debug(`Found game ${game?.Name}`);
-        return game ?? null;
+        return game ? gameMapper.toDomain(game) : null;
       },
       `getById(${id})`
     );
@@ -169,7 +198,8 @@ export const makeGameRepository = (
         const stmt = db.prepare(query);
         db.exec("BEGIN TRANSACTION");
         try {
-          for (const game of games)
+          for (const domainGame of games) {
+            const game = gameMapper.toPersistence(domainGame);
             stmt.run(
               game.Id,
               game.Name,
@@ -187,6 +217,7 @@ export const makeGameRepository = (
               game.Hidden,
               game.CompletionStatusId
             );
+          }
           db.exec("COMMIT");
         } catch (error) {
           db.exec("ROLLBACK");
@@ -504,20 +535,8 @@ export const makeGameRepository = (
           ORDER BY pg.Id ASC;`;
         const stmt = db.prepare(query);
         const result = stmt.all();
-        const raw = z.array(fullGameRawSchema).parse(result);
-        const games = raw.map((g) => {
-          const devs = g.Developers ? g.Developers.split(separator) : [];
-          const publishers = g.Publishers ? g.Publishers.split(separator) : [];
-          const platforms = g.Platforms ? g.Platforms.split(separator) : [];
-          const genres = g.Genres ? g.Genres.split(separator) : [];
-          return {
-            ...g,
-            Developers: devs,
-            Publishers: publishers,
-            Platforms: platforms,
-            Genres: genres,
-          } as FullGame;
-        });
+        const raw = z.array(fullGameSchema).parse(result);
+        const games = raw.map(fullGameMapper.toDomain);
         logService.debug(`Found ${games?.length ?? 0} games`);
         return games;
       },

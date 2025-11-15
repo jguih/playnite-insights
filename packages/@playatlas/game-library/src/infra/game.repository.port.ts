@@ -1,5 +1,6 @@
+import { FullGame, Game, GameId } from "../domain/game.entity";
 import type { Company } from "../domain/types/company";
-import type { FullGame, Game, GameFilters } from "../domain/types/game";
+import type { GameFilters } from "../domain/types/game";
 import type { GameManifestData } from "../domain/types/game-manifest-data";
 import type { Genre } from "../domain/types/genre";
 import type { Platform } from "../domain/types/platform";
@@ -13,15 +14,15 @@ export type GameRepository = {
   getTotalPlaytimeSeconds: (filters?: GameFilters) => number;
   all: () => FullGame[];
   upsertMany: (games: Game[]) => void;
-  updateManyGenres: (gameGenresMap: Map<Game["Id"], Genre["Id"][]>) => void;
+  updateManyGenres: (gameGenresMap: Map<GameId, Genre["Id"][]>) => void;
   updateManyDevelopers: (
-    gameDevelopersMap: Map<Game["Id"], Company["Id"][]>
+    gameDevelopersMap: Map<GameId, Company["Id"][]>
   ) => void;
   updateManyPublishers: (
-    gamePublishersMap: Map<Game["Id"], Company["Id"][]>
+    gamePublishersMap: Map<GameId, Company["Id"][]>
   ) => void;
   updateManyPlatforms: (
-    gamePlatformsMap: Map<Game["Id"], Platform["Id"][]>
+    gamePlatformsMap: Map<GameId, Platform["Id"][]>
   ) => void;
-  removeMany: (gameIds: Game["Id"][]) => void;
+  removeMany: (gameIds: GameId[]) => void;
 };

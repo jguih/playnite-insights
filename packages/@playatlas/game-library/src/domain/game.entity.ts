@@ -1,7 +1,9 @@
-import { MakeGameProps } from "./game.entity.types";
+import { MakeFullGameProps, MakeGameProps } from "./game.entity.types";
 
-export type Game = {
-  getId: () => string;
+export type GameId = string;
+
+export type Game = Readonly<{
+  getId: () => GameId;
   getName: () => string | null;
   getDescription: () => string | null;
   getReleaseDate: () => Date | null;
@@ -16,26 +18,26 @@ export type Game = {
   getIcon: () => string | null;
   getCompletionStatusId: () => string | null;
   getContentHash: () => string;
-};
+}>;
 
 export const makeGame = (props: MakeGameProps): Game => {
-  const _id = props.Id;
-  let _name = props.Name ?? null;
-  let _description = props.Description ?? null;
-  let _releaseDate = props.ReleaseDate ?? null;
-  let _playtime = props.Playtime ?? 0;
-  let _lastActivity = props.LastActivity ?? null;
-  let _added = props.Added ?? null;
-  let _installDirectory = props.InstallDirectory ?? null;
-  let _isInstalled = Boolean(props.IsInstalled);
-  let _backgroundImage = props.BackgroundImage ?? null;
-  let _coverImage = props.CoverImage ?? null;
-  let _icon = props.Icon ?? null;
-  let _hidden = Boolean(props.Hidden);
-  let _completionStatusId = props.CompletionStatusId ?? null;
-  const _contentHash = props.ContentHash;
+  const _id = props.id;
+  let _name = props.name ?? null;
+  let _description = props.description ?? null;
+  let _releaseDate = props.releaseDate ?? null;
+  let _playtime = props.playtime ?? 0;
+  let _lastActivity = props.lastActivity ?? null;
+  let _added = props.added ?? null;
+  let _installDirectory = props.installDirectory ?? null;
+  let _isInstalled = Boolean(props.isInstalled);
+  let _backgroundImage = props.backgroundImage ?? null;
+  let _coverImage = props.coverImage ?? null;
+  let _icon = props.icon ?? null;
+  let _hidden = Boolean(props.hidden);
+  let _completionStatusId = props.completionStatusId ?? null;
+  const _contentHash = props.contentHash;
 
-  return {
+  return Object.freeze({
     getId: () => _id,
     getName: () => _name,
     getDescription: () => _description,
@@ -51,5 +53,34 @@ export const makeGame = (props: MakeGameProps): Game => {
     getIcon: () => _icon,
     getCompletionStatusId: () => _completionStatusId,
     getContentHash: () => _contentHash,
-  };
+  });
+};
+
+export type FullGame = Readonly<
+  Game & {
+    /** Returns a list of developer ids */
+    getDevelopers: () => string[];
+    /** Returns a list of publisher ids */
+    getPublishers: () => string[];
+    /** Returns a list of genre ids */
+    getGenres: () => string[];
+    /** Returns a list of platform ids */
+    getPlatforms: () => string[];
+  }
+>;
+
+export const makeFullGame = (props: MakeFullGameProps): FullGame => {
+  const game = makeGame(props);
+  const _developers = props.developers;
+  const _publishers = props.publishers;
+  const _genres = props.genres;
+  const _platforms = props.platforms;
+
+  return Object.freeze({
+    ...game,
+    getDevelopers: () => _developers,
+    getPublishers: () => _publishers,
+    getGenres: () => _genres,
+    getPlatforms: () => _platforms,
+  });
 };

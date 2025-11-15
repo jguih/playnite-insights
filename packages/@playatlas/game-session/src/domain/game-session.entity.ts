@@ -19,17 +19,17 @@ type GameSessionGameId = string | null;
 type GameSessionGameName = string | null;
 export type GameSessionDuration = number | null;
 
-export type GameSession = {
-  getSessionId(): GameSessionId;
-  getStartTime(): GameSessionStartTime;
-  getStatus(): GameSessionStatus;
-  getEndTime(): GameSessionEndTime;
-  getGameId(): GameSessionGameId;
-  getGameName(): GameSessionGameName;
-  getDuration(): GameSessionDuration;
+export type GameSession = Readonly<{
+  getSessionId: () => GameSessionId;
+  getStartTime: () => GameSessionStartTime;
+  getStatus: () => GameSessionStatus;
+  getEndTime: () => GameSessionEndTime;
+  getGameId: () => GameSessionGameId;
+  getGameName: () => GameSessionGameName;
+  getDuration: () => GameSessionDuration;
   close(props: CloseGameSessionProps): void;
-  stale(): void;
-};
+  stale: () => void;
+}>;
 
 export const makeGameSession = (props: MakeGameSessionProps): GameSession => {
   const _sessionId: GameSessionId = props.sessionId;
@@ -40,7 +40,7 @@ export const makeGameSession = (props: MakeGameSessionProps): GameSession => {
   let _endTime: GameSessionEndTime = null;
   let _duration: GameSessionDuration = null;
 
-  const newSession: GameSession = {
+  const newSession: GameSession = Object.freeze({
     getSessionId: () => _sessionId,
     getStatus: () => _status,
     getStartTime: () => _startTime,
@@ -62,7 +62,7 @@ export const makeGameSession = (props: MakeGameSessionProps): GameSession => {
     stale: () => {
       _status = "stale";
     },
-  };
+  });
   return newSession;
 };
 
@@ -77,7 +77,7 @@ export const makeClosedGameSession = (
   let _endTime: GameSessionEndTime = props.endTime;
   let _duration: GameSessionDuration = props.duration;
 
-  const newSession: GameSession = {
+  const newSession: GameSession = Object.freeze({
     getSessionId: () => _sessionId,
     getStatus: () => _status,
     getStartTime: () => _startTime,
@@ -91,7 +91,7 @@ export const makeClosedGameSession = (
     stale: () => {
       throw new GameSessionAlreadyClosedError();
     },
-  };
+  });
   return newSession;
 };
 
@@ -106,7 +106,7 @@ export const makeStaleGameSession = (
   let _endTime: GameSessionEndTime = null;
   let _duration: GameSessionDuration = null;
 
-  const newSession: GameSession = {
+  const newSession: GameSession = Object.freeze({
     getSessionId: () => _sessionId,
     getStatus: () => _status,
     getStartTime: () => _startTime,
@@ -120,6 +120,6 @@ export const makeStaleGameSession = (
     stale: () => {
       throw new GameSessionAlreadyStaleError();
     },
-  };
+  });
   return newSession;
 };
