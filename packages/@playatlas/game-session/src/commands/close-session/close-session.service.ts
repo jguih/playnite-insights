@@ -5,7 +5,7 @@ import type { CloseGameSessionCommand } from "./close-session.command";
 
 export type CloseGameSessionServiceDeps = {
   repository: GameSessionRepository;
-  logger: LogService;
+  logService: LogService;
 };
 
 export type CloseGameSessionServiceResult = {
@@ -15,7 +15,7 @@ export type CloseGameSessionServiceResult = {
 
 export const makeCloseGameSessionService = ({
   repository,
-  logger,
+  logService,
 }: CloseGameSessionServiceDeps) => {
   return {
     execute: (
@@ -25,7 +25,7 @@ export const makeCloseGameSessionService = ({
       const serverUtcNow = Date.now();
 
       if (!session) {
-        logger.warning(
+        logService.warning(
           `Session not found: ${command.sessionId}. Creating closed session...`
         );
 
@@ -36,7 +36,7 @@ export const makeCloseGameSessionService = ({
         );
         const endTime = new Date(new Date(command.endTime).getTime() - driftMs);
 
-        logger.info(
+        logService.info(
           `Calculated time drift between client (Playnite Insights Exporter) and server: ${driftMs}ms`
         );
 
@@ -50,7 +50,7 @@ export const makeCloseGameSessionService = ({
         });
         repository.add(closed);
 
-        logger.info(
+        logService.info(
           `Created closed session ${command.sessionId} for ${command.gameName}`
         );
         return { created: true, closed: false };
@@ -62,7 +62,7 @@ export const makeCloseGameSessionService = ({
       });
 
       repository.update(session);
-      logger.info(`Closed session ${session.getSessionId()}`);
+      logService.info(`Closed session ${session.getSessionId()}`);
       return { created: false, closed: true };
     },
   };

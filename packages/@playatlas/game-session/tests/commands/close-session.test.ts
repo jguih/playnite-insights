@@ -23,7 +23,7 @@ import {
 } from "../../src/domain/game-session.errors";
 
 let deps = {
-  logger: {
+  logService: {
     error: vi.fn(),
     warning: vi.fn(),
     info: vi.fn(),

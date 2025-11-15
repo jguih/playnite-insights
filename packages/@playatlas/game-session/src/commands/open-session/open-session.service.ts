@@ -5,12 +5,12 @@ import { OpenGameSessionCommand } from "./open-session.command";
 
 export type OpenGameSessionServiceDeps = {
   repository: GameSessionRepository;
-  logger: LogService;
+  logService: LogService;
 };
 
 export const makeOpenGameSessionService = ({
   repository,
-  logger,
+  logService,
 }: OpenGameSessionServiceDeps) => {
   return {
     execute: (command: OpenGameSessionCommand): void => {
@@ -22,7 +22,7 @@ export const makeOpenGameSessionService = ({
         gameName: command.gameName,
       });
       repository.add(session);
-      logger.info(
+      logService.info(
         `Created open session ${command.sessionId} for ${command.gameName}`
       );
     },

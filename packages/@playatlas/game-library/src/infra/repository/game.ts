@@ -1,4 +1,8 @@
 import {
+  repositoryCall,
+  type BaseRepositoryDeps,
+} from "@playatlas/common/infra";
+import {
   fullGameRawSchema,
   gameSchema,
   type FullGame,
@@ -6,8 +10,6 @@ import {
   type GameManifestData,
   type GameSorting,
 } from "@playatlas/game-library/core";
-import { repositoryCall } from "@playatlas/shared/app";
-import { type BaseRepositoryDeps } from "@playatlas/shared/core";
 import z from "zod";
 import type { GameRepository } from "../../core/types/repository/game";
 
