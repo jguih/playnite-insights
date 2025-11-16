@@ -7,11 +7,11 @@ export type MakeGameProps = {
   lastActivity?: Date | null;
   added?: Date | null;
   installDirectory?: string | null;
-  isInstalled?: boolean | number;
+  isInstalled?: boolean;
   backgroundImage?: string | null;
   coverImage?: string | null;
   icon?: string | null;
-  hidden?: boolean | number;
+  hidden?: boolean;
   completionStatusId?: string | null;
   contentHash: string;
 };

@@ -5,6 +5,6 @@ export type GameSessionRepository = {
   add: (newSession: GameSession) => boolean;
   update: (session: GameSession) => boolean;
   all: () => GameSession[];
-  findById: (sessionId: GameSessionId) => GameSession | null;
-  findAllBy: (params: { filters?: GameSessionFilters }) => GameSession[];
+  getById: (sessionId: GameSessionId) => GameSession | null;
+  getAllBy: (params: { filters?: GameSessionFilters }) => GameSession[];
 };

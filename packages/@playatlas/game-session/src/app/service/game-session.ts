@@ -31,7 +31,7 @@ export const makeGameSessionService = ({
   };
 
   const close: GameSessionService["close"] = (command) => {
-    const existing = gameSessionRepository.findById(command.SessionId);
+    const existing = gameSessionRepository.getById(command.SessionId);
 
     if (existing) {
       if (rules.isSessionClosed(existing)) {
@@ -148,7 +148,7 @@ export const makeGameSessionService = ({
         types: ["stale"],
       },
     };
-    sessions = gameSessionRepository.findAllBy({ filters });
+    sessions = gameSessionRepository.getAllBy({ filters });
 
     return sessions ?? null;
   };

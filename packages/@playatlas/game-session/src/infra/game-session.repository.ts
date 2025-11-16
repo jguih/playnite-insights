@@ -7,7 +7,7 @@ import z from "zod";
 import { sessionStatus } from "../domain/game-session.constants";
 import type { GameSession } from "../domain/game-session.entity";
 import type { GameSessionStatus } from "../domain/game-session.types";
-import { userMapper } from "../user.mapper";
+import { gameSessionMapper } from "../game-session.mapper";
 import type { GameSessionRepository } from "./game-session.repository.port";
 
 export const gameSessionSchema = z.object({
@@ -98,7 +98,7 @@ export const makeGameSessionRepository = ({
     };
   };
 
-  const findById: GameSessionRepository["findById"] = (sessionId) => {
+  const getById: GameSessionRepository["getById"] = (sessionId) => {
     return repositoryCall(
       logService,
       () => {
@@ -107,9 +107,9 @@ export const makeGameSessionRepository = ({
         const stmt = db.prepare(query);
         const result = stmt.get(sessionId);
         const model = z.optional(gameSessionSchema).parse(result);
-        return model ? userMapper.toDomain(model) : null;
+        return model ? gameSessionMapper.toDomain(model) : null;
       },
-      `findById(${sessionId})`
+      `getById(${sessionId})`
     );
   };
 
@@ -117,7 +117,7 @@ export const makeGameSessionRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const persistence = userMapper.toPersistence(session);
+        const persistence = gameSessionMapper.toPersistence(session);
         gameSessionSchema.parse(persistence);
         const db = getDb();
         const query = `
@@ -147,7 +147,7 @@ export const makeGameSessionRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const persistence = userMapper.toPersistence(session);
+        const persistence = gameSessionMapper.toPersistence(session);
         gameSessionSchema.parse(persistence);
         const query = `
           UPDATE game_session
@@ -190,7 +190,7 @@ export const makeGameSessionRepository = ({
         const sessions = z.array(gameSessionSchema).parse(result);
         const entities: GameSession[] = [];
         for (const session of sessions) {
-          const domainEntity = userMapper.toDomain(session);
+          const domainEntity = gameSessionMapper.toDomain(session);
           entities.push(domainEntity);
         }
         logService.debug(`Found ${entities?.length ?? 0} sessions`);
@@ -200,7 +200,7 @@ export const makeGameSessionRepository = ({
     );
   };
 
-  const findAllBy: GameSessionRepository["findAllBy"] = (args) => {
+  const getAllBy: GameSessionRepository["getAllBy"] = (args) => {
     return repositoryCall(
       logService,
       () => {
@@ -219,14 +219,14 @@ export const makeGameSessionRepository = ({
         const sessions = z.array(gameSessionSchema).parse(result);
         const entities: GameSession[] = [];
         for (const session of sessions) {
-          const domainEntity = userMapper.toDomain(session);
+          const domainEntity = gameSessionMapper.toDomain(session);
           entities.push(domainEntity);
         }
         return entities;
       },
-      `findAllBy()`
+      `getAllBy()`
     );
   };
 
-  return { findById, add, update, all, findAllBy };
+  return { getById, add, update, all, getAllBy };
 };

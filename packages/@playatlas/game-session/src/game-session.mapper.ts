@@ -11,7 +11,7 @@ import {
 } from "./domain/game-session.errors";
 import type { GameSessionModel } from "./infra/game-session.repository";
 
-export const userMapper = {
+export const gameSessionMapper = {
   toPersistence: (session: GameSession): GameSessionModel => {
     const record: GameSessionModel = {
       SessionId: session.getSessionId(),

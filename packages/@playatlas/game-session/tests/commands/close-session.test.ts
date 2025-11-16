@@ -31,11 +31,11 @@ let deps = {
     debug: vi.fn(),
   },
   repository: {
-    findById: vi.fn(),
+    getById: vi.fn(),
     add: vi.fn(),
     update: vi.fn(),
     all: vi.fn(),
-    findAllBy: vi.fn(),
+    getAllBy: vi.fn(),
   },
 } satisfies CloseGameSessionServiceDeps;
 
@@ -81,7 +81,7 @@ describe("Close Game Session Service", () => {
       requestDto,
       faker.lorem.words(3)
     );
-    deps.repository.findById.mockReturnValueOnce(undefined);
+    deps.repository.getById.mockReturnValueOnce(undefined);
     deps.repository.add.mockReturnValueOnce(true);
     // Act
     const result = service.execute(command);
@@ -109,7 +109,7 @@ describe("Close Game Session Service", () => {
       requestDto,
       inProgressSession.getGameName()
     );
-    deps.repository.findById.mockReturnValueOnce(inProgressSession);
+    deps.repository.getById.mockReturnValueOnce(inProgressSession);
     deps.repository.update.mockReturnValueOnce(true);
     // Act
     const result = service.execute(command);
@@ -140,7 +140,7 @@ describe("Close Game Session Service", () => {
         requestDto,
         inProgress.getGameName()
       );
-      deps.repository.findById.mockReturnValueOnce(inProgress);
+      deps.repository.getById.mockReturnValueOnce(inProgress);
       // Act & Assert
       expect(() =>
         closeGameSessionRequestDtoSchema.parse(requestDto)
@@ -168,7 +168,7 @@ describe("Close Game Session Service", () => {
       requestDto,
       closed.getGameName()
     );
-    deps.repository.findById.mockReturnValueOnce(closed);
+    deps.repository.getById.mockReturnValueOnce(closed);
     // Act & Assert
     expect(() =>
       closeGameSessionRequestDtoSchema.parse(requestDto)

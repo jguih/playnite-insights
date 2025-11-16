@@ -1,4 +1,4 @@
-import { gamePageSizes, gameSortBy, gameSortOrder } from "../constants/game";
+import { gamePageSizes, gameSortBy, gameSortOrder } from "./game.constants";
 
 export type GameSortBy = (typeof gameSortBy)[number];
 export type GameSortOrder = (typeof gameSortOrder)[number];

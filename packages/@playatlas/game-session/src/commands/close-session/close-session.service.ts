@@ -21,7 +21,7 @@ export const makeCloseGameSessionService = ({
     execute: (
       command: CloseGameSessionCommand
     ): CloseGameSessionServiceResult => {
-      const session = repository.findById(command.sessionId);
+      const session = repository.getById(command.sessionId);
       const serverUtcNow = Date.now();
 
       if (!session) {

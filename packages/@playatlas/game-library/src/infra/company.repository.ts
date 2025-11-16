@@ -1,16 +1,21 @@
-import {
-  companySchema,
-  type Company,
-} from "@playatlas/game-library/src/domain";
-import { repositoryCall } from "@playatlas/shared/app";
-import { type BaseRepositoryDeps } from "@playatlas/shared/core";
+import { BaseRepositoryDeps, repositoryCall } from "@playatlas/common/infra";
 import z from "zod";
-import type { CompanyRepository } from "../../domain/types/repository/company";
+import { companyMapper } from "../company.mapper";
+import { Company } from "../domain/company.entity";
+import type { CompanyRepository } from "./company.repository.port";
+
+export const companySchema = z.object({
+  Id: z.string(),
+  Name: z.string(),
+});
+
+export type CompanyModel = z.infer<typeof companySchema>;
 
 export const makeCompanyRepository = ({
   getDb,
   logService,
 }: BaseRepositoryDeps): CompanyRepository => {
+  const db = getDb();
   const TABLE_NAME = "company";
 
   const add = (company: Company): boolean => {
@@ -23,10 +28,10 @@ export const makeCompanyRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
+        const model = companyMapper.toPersistence(company);
         const stmt = db.prepare(query);
-        stmt.run(company.Id, company.Name);
-        logService.debug(`Created company (${company.Id}, ${company.Name})`);
+        stmt.run(model.Id, model.Name);
+        logService.debug(`Created company (${model.Id}, ${model.Name})`);
         return true;
       },
       `add()`
@@ -37,7 +42,6 @@ export const makeCompanyRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const query = `
           INSERT INTO ${TABLE_NAME}
             (Id, Name)
@@ -49,7 +53,10 @@ export const makeCompanyRepository = ({
         const stmt = db.prepare(query);
         db.exec("BEGIN TRANSACTION");
         try {
-          for (const company of companies) stmt.run(company.Id, company.Name);
+          for (const company of companies) {
+            const model = companyMapper.toPersistence(company);
+            stmt.run(model.Id, model.Name);
+          }
           db.exec("COMMIT");
         } catch (error) {
           db.exec("ROLLBACK");
@@ -60,7 +67,7 @@ export const makeCompanyRepository = ({
     );
   };
 
-  const exists = (company: Company): boolean => {
+  const exists: CompanyRepository["exists"] = (id): boolean => {
     const query = `
       SELECT EXISTS (
         SELECT 1 FROM company 
@@ -70,15 +77,14 @@ export const makeCompanyRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const stmt = db.prepare(query);
-        const result = stmt.get(company.Id);
+        const result = stmt.get(id);
         if (result) {
           return Object.values(result)[0] === 1;
         }
         return false;
       },
-      `exists(${company.Id}, ${company.Name})`
+      `exists(${id})`
     );
   };
 
@@ -92,17 +98,17 @@ export const makeCompanyRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
+        const model = companyMapper.toPersistence(company);
         const stmt = db.prepare(query);
-        stmt.run(company.Name, company.Id);
-        logService.debug(`Updated company (${company.Id}, ${company.Name})`);
+        stmt.run(model.Name, model.Id);
+        logService.debug(`Updated company (${model.Id}, ${model.Name})`);
         return true;
       },
-      `update(${company.Id}, ${company.Name})`
+      `update(${company.getId()}, ${company.getName()})`
     );
   };
 
-  const getById = (id: string): Company | undefined => {
+  const getById: CompanyRepository["getById"] = (id: string) => {
     const query = `
       SELECT *
       FROM company
@@ -111,19 +117,14 @@ export const makeCompanyRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const stmt = db.prepare(query);
         const result = stmt.get(id);
         const company = z.optional(companySchema).parse(result);
         logService.debug(`Found company: ${company?.Name}`);
-        return company;
+        return company ? companyMapper.toDomain(company) : null;
       },
       `getById(${id})`
     );
-  };
-
-  const hasChanges = (oldCompany: Company, newCompany: Company): boolean => {
-    return oldCompany.Id != newCompany.Id || oldCompany.Name != newCompany.Name;
   };
 
   const all: CompanyRepository["all"] = () => {
@@ -131,10 +132,14 @@ export const makeCompanyRepository = ({
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const stmt = db.prepare(query);
         const result = stmt.all();
-        const companies = z.optional(z.array(companySchema)).parse(result);
+        const companyModels =
+          z.optional(z.array(companySchema)).parse(result) ?? [];
+        const companies: Company[] = [];
+        for (const model of companyModels) {
+          companies.push(companyMapper.toDomain(model));
+        }
         logService.debug(`Found ${companies?.length ?? 0} companies`);
         return companies;
       },
@@ -148,7 +153,6 @@ export const makeCompanyRepository = ({
     update,
     exists,
     getById,
-    hasChanges,
     all,
   };
 };
