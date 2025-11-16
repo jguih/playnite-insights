@@ -4,23 +4,22 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    "./app": "./src/app/index.ts",
-    "./core": "./src/core/index.ts",
-    "./infra": "./src/infra/index.ts"
+    "./application": "./src/application/index.ts",
+    "./domain": "./src/core/index.ts",
+    "./infra": "./src/infra/index.ts",
+    "./testing": "./src/testing/index.ts"
   },
   "scripts": {
     "test:unit": "vitest run",
     "test:watch": "vitest --watch"
   },
   "devDependencies": {
-    "@types/node": "^24.0.14"
+    "@types/node": "^24.0.14",
+    "@faker-js/faker": "^9.9.0"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.9.0",
     "vitest": "^3.2.4",
-    "@playatlas/common": "workspace:*",
-    "@types/busboy": "^1.5.4",
-    "busboy": "^1.6.0",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "@playatlas/common": "workspace:*"
   }
 }

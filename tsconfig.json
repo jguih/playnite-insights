@@ -14,41 +14,41 @@
 		"noEmit": true,
 		"target": "esnext",
     "paths": {
-      "@playnite-insights/lib/*": [
-        "./packages/@playnite-insights/lib/*"
+      "@playnite-insights/lib": [
+        "./packages/@playnite-insights/lib"
       ],
-      "@playnite-insights/core/*": [
-        "./packages/@playnite-insights/core/*"
+      "@playnite-insights/core": [
+        "./packages/@playnite-insights/core"
       ],
-      "@playnite-insights/infra/*": [
-        "./packages/@playnite-insights/infra/*"
+      "@playnite-insights/infra": [
+        "./packages/@playnite-insights/infra"
       ],
-      "@playnite-insights/testing/*": [
-        "./packages/@playnite-insights/testing/*"
+      "@playnite-insights/testing": [
+        "./packages/@playnite-insights/testing"
       ],
-      "@playatlas/auth/*": [
-        "./packages/@playatlas/auth/*"
+      "@playatlas/auth": [
+        "./packages/@playatlas/auth"
       ],
-      "@playatlas/game-library/*": [
-        "./packages/@playatlas/game-library/*"
+      "@playatlas/game-library": [
+        "./packages/@playatlas/game-library"
       ],
-      "@playatlas/playnite-integration/*": [
-        "./packages/@playatlas/playnite-integration/*"
+      "@playatlas/playnite-integration": [
+        "./packages/@playatlas/playnite-integration"
       ],
       "@playatlas/common": [
         "./packages/@playatlas/common"
       ],
-      "@playatlas/sync/*": [
-        "./packages/@playatlas/sync/*"
+      "@playatlas/sync": [
+        "./packages/@playatlas/sync"
       ],
-      "@playatlas/system/*": [
-        "./packages/@playatlas/system/*"
+      "@playatlas/system": [
+        "./packages/@playatlas/system"
       ],
-      "@playatlas/game-note/*": [
-        "./packages/@playatlas/game-note/*"
+      "@playatlas/game-note": [
+        "./packages/@playatlas/game-note"
       ],
-      "@playatlas/game-session/*": [
-        "./packages/@playatlas/game-session/*"
+      "@playatlas/game-session": [
+        "./packages/@playatlas/game-session"
       ],
     }
   }

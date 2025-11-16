@@ -16,6 +16,7 @@
     "vitest": "^3.2.4",
     "@playatlas/common": "workspace:*",
     "@playatlas/system": "workspace:*",
-    "@playatlas/game-session": "workspace:*"
+    "@playatlas/game-session": "workspace:*",
+    "@playatlas/game-library": "workspace:*"
   }
 }
