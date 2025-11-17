@@ -2,12 +2,9 @@ import {
   repositoryCall,
   type BaseRepositoryDeps,
 } from "@playatlas/common/infra";
-import {
-  type GameFilters,
-  type GameManifestData,
-  type GameSorting,
-} from "@playatlas/game-library/src/domain";
 import z from "zod";
+import { GameFilters, GameSorting } from "../domain/game.types";
+import { GameManifestData } from "../domain/types/game-manifest-data";
 import { fullGameMapper, gameMapper } from "../game.mapper";
 import { GameRepository } from "./game.repository.port";
 

@@ -37,7 +37,7 @@ export const makeGameFactory = () => {
         faker.helpers.arrayElement(["PC", "Linux", "Xbox", "PS"]),
       ],
       hidden: props?.hidden ?? faker.datatype.boolean(),
-      completionStatusId: props?.completionStatusId ?? faker.string.uuid(),
+      completionStatusId: props?.completionStatusId ?? null,
     });
   };
 
@@ -58,12 +58,20 @@ export const makeGameFactory = () => {
       contentHash:
         props?.contentHash ?? faker.string.hexadecimal({ length: 32 }),
       hidden: props?.hidden ?? faker.datatype.boolean(),
-      completionStatusId: props?.completionStatusId ?? faker.string.uuid(),
+      completionStatusId: props?.completionStatusId ?? null,
     });
   };
 
-  return {
+  const buildGameList = (
+    n: number,
+    props: Partial<MakeGameProps> = {}
+  ): Game[] => {
+    return Array.from({ length: n }, () => buildGame(props));
+  };
+
+  return Object.freeze({
     buildFullGame,
     buildGame,
-  };
+    buildGameList,
+  });
 };
