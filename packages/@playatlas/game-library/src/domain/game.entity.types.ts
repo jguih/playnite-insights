@@ -1,3 +1,10 @@
+export type MakeGameRelationshipProps = {
+  developerIds?: string[] | null;
+  publisherIds?: string[] | null;
+  genreIds?: string[] | null;
+  platformIds?: string[] | null;
+};
+
 export type MakeGameProps = {
   id: string;
   name?: string | null;
@@ -14,11 +21,4 @@ export type MakeGameProps = {
   hidden?: boolean;
   completionStatusId?: string | null;
   contentHash: string;
-};
-
-export type MakeFullGameProps = MakeGameProps & {
-  developers: string[];
-  publishers: string[];
-  genres: string[];
-  platforms: string[];
-};
+} & MakeGameRelationshipProps;

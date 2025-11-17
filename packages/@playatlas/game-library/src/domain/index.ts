@@ -4,3 +4,5 @@ export * from "./game.constants";
 export * from "./game.entity";
 export type * from "./game.entity.types";
 export type * from "./game.types";
+export * from "./genre.entity";
+export * from "./platform.entity";

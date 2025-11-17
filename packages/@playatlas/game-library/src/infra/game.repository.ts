@@ -3,9 +3,10 @@ import {
   type BaseRepositoryDeps,
 } from "@playatlas/common/infra";
 import z from "zod";
+import { CompanyId, GameId, GenreId, PlatformId } from "../domain";
 import { GameFilters, GameSorting } from "../domain/game.types";
 import { GameManifestData } from "../domain/types/game-manifest-data";
-import { fullGameMapper, gameMapper } from "../game.mapper";
+import { gameMapper } from "../game.mapper";
 import { GameRepository } from "./game.repository.port";
 
 export const GROUPADD_SEPARATOR = ",";
@@ -30,21 +31,13 @@ export const gameSchema = z.object({
 
 export type GameModel = z.infer<typeof gameSchema>;
 
-export const fullGameSchema = gameSchema.extend({
-  Developers: z.string().nullable(),
-  Publishers: z.string().nullable(),
-  Genres: z.string().nullable(),
-  Platforms: z.string().nullable(),
-});
-
-export type FullGameModel = z.infer<typeof fullGameSchema>;
-
 type GameRepositoryDeps = BaseRepositoryDeps;
 
 export const makeGameRepository = (
   deps: GameRepositoryDeps
 ): GameRepository => {
   const { getDb, logService } = deps;
+  const db = getDb();
 
   const _getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
     const where: string[] = [];
@@ -96,11 +89,102 @@ export const makeGameRepository = (
     }
   };
 
+  const _updateRelations = (
+    gameId: GameId,
+    newIds: string[],
+    table: string,
+    column: string
+  ) => {
+    db.prepare(`DELETE FROM ${table} WHERE GameId = ?`).run(gameId);
+    if (newIds.length > 0) {
+      const stmt = db.prepare(
+        `INSERT INTO ${table} (GameId, ${column}) VALUES (?, ?)`
+      );
+      for (const id of newIds) {
+        stmt.run(gameId, id);
+      }
+    }
+  };
+
+  const _getGenresFor = (gameId: GameId): GenreId[] => {
+    return repositoryCall(
+      logService,
+      () => {
+        const query = `
+          SELECT GROUP_CONCAT(GenreId) as Genres
+          FROM playnite_game_genre
+          WHERE GameId = ?
+        `;
+        const result = db.prepare(query).get(gameId);
+        if (!result || !Array.isArray(result.Genres)) return [];
+        return result.Genres as GenreId[];
+      },
+      `_getGenresFor(${gameId})`
+    );
+  };
+
+  const _getDevelopersFor = (gameIds: GameId[]): Map<GameId, CompanyId[]> => {
+    return repositoryCall(
+      logService,
+      () => {
+        const placeholders = gameIds.map(() => "?").join(",");
+        const stmt = db.prepare(`
+          SELECT GameId, DeveloperId
+          FROM playnite_game_developer
+          WHERE GameId IN (${placeholders})
+        `);
+        const rows = stmt.all(...gameIds);
+        const map = new Map<GameId, CompanyId[]>();
+        for (const { GameId, DeveloperId } of rows) {
+          const gameId = GameId as GameId;
+          const developerId = DeveloperId as CompanyId;
+          if (!map.get(gameId)) map.set(gameId, []);
+          map.get(gameId)!.push(developerId);
+        }
+        return map;
+      },
+      `_getDevelopersFor(${gameIds.length} games)`
+    );
+  };
+
+  const _getPublishersFor = (gameId: GameId): CompanyId[] => {
+    return repositoryCall(
+      logService,
+      () => {
+        const query = `
+          SELECT GROUP_CONCAT(GenreId) as Publishers
+          FROM playnite_game_publisher
+          WHERE GameId = ?
+        `;
+        const result = db.prepare(query).get(gameId);
+        if (!result || !Array.isArray(result.Publishers)) return [];
+        return result.Publishers as string[];
+      },
+      `_getPublishersFor(${gameId})`
+    );
+  };
+
+  const _getPlatformsFor = (gameId: GameId): PlatformId[] => {
+    return repositoryCall(
+      logService,
+      () => {
+        const query = `
+          SELECT GROUP_CONCAT(GenreId) as Platforms
+          FROM playnite_game_platform
+          WHERE GameId = ?
+        `;
+        const result = db.prepare(query).get(gameId);
+        if (!result || !Array.isArray(result.Platforms)) return [];
+        return result.Platforms as string[];
+      },
+      `_getPlatformsFor(${gameId})`
+    );
+  };
+
   const getTotal: GameRepository["getTotal"] = (filters) => {
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         let query = `
           SELECT 
             COUNT(*) AS Total
@@ -119,7 +203,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const query = `SELECT * FROM playnite_game WHERE Id = (?)`;
         const stmt = db.prepare(query);
         const result = stmt.get(id);
@@ -135,7 +218,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const query = `
         SELECT EXISTS (
           SELECT 1 FROM playnite_game WHERE Id = (?)
@@ -156,64 +238,64 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
-        const query = `
-        INSERT INTO playnite_game (
-          Id, 
-          Name, 
-          Description, 
-          ReleaseDate, 
-          Playtime, 
-          LastActivity, 
-          Added, 
-          InstallDirectory, 
-          IsInstalled, 
-          BackgroundImage, 
-          CoverImage, 
-          Icon, 
-          ContentHash,
-          Hidden,
-          CompletionStatusId
-        ) VALUES (
-          ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
-        ) ON CONFLICT(Id) DO UPDATE SET
-          Name = excluded.Name,
-          Description = excluded.Description,
-          ReleaseDate = excluded.ReleaseDate,
-          Playtime = excluded.Playtime,
-          LastActivity = excluded.LastActivity,
-          Added = excluded.Added,
-          InstallDirectory = excluded.InstallDirectory,
-          IsInstalled = excluded.IsInstalled,
-          BackgroundImage = excluded.BackgroundImage,
-          CoverImage = excluded.CoverImage,
-          Icon = excluded.Icon,
-          ContentHash = excluded.ContentHash,
-          Hidden = excluded.Hidden,
-          CompletionStatusId = excluded.CompletionStatusId;
-        `;
-        const stmt = db.prepare(query);
+        const columns = [
+          "Id",
+          "Name",
+          "Description",
+          "ReleaseDate",
+          "Playtime",
+          "LastActivity",
+          "Added",
+          "InstallDirectory",
+          "IsInstalled",
+          "BackgroundImage",
+          "CoverImage",
+          "Icon",
+          "ContentHash",
+          "Hidden",
+          "CompletionStatusId",
+        ];
+        const placeholders = columns.map(() => "?").join(",");
+        const updateColumns = columns
+          .slice(1)
+          .map((c) => `${c} = excluded.${c}`)
+          .join(",");
+        const stmt = db.prepare(`
+          INSERT INTO playnite_game (${columns.join(",")}) 
+          VALUES (
+            ${placeholders}
+          ) ON CONFLICT(Id) DO UPDATE SET
+            ${updateColumns};
+          `);
         db.exec("BEGIN TRANSACTION");
         try {
           for (const domainGame of games) {
-            const game = gameMapper.toPersistence(domainGame);
+            const model = gameMapper.toPersistence(domainGame);
             stmt.run(
-              game.Id,
-              game.Name,
-              game.Description,
-              game.ReleaseDate,
-              game.Playtime,
-              game.LastActivity,
-              game.Added,
-              game.InstallDirectory,
-              +game.IsInstalled,
-              game.BackgroundImage,
-              game.CoverImage,
-              game.Icon,
-              game.ContentHash,
-              game.Hidden,
-              game.CompletionStatusId
+              model.Id,
+              model.Name,
+              model.Description,
+              model.ReleaseDate,
+              model.Playtime,
+              model.LastActivity,
+              model.Added,
+              model.InstallDirectory,
+              +model.IsInstalled,
+              model.BackgroundImage,
+              model.CoverImage,
+              model.Icon,
+              model.ContentHash,
+              model.Hidden,
+              model.CompletionStatusId
             );
+            if (domainGame.relationships.developers.isLoaded()) {
+              _updateRelations(
+                model.Id,
+                domainGame.relationships.developers.get(),
+                "playnite_game_developers",
+                "DeveloperId"
+              );
+            }
           }
           db.exec("COMMIT");
         } catch (error) {
@@ -229,7 +311,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const queries = {
           getCurrentGenres: `SELECT GenreId FROM playnite_game_genre WHERE GameId = ?`,
           removeGenre: `DELETE FROM playnite_game_genre WHERE GameId = ? AND GenreId = ?`,
@@ -276,7 +357,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const queries = {
           getCurrentDevelopers: `SELECT DeveloperId FROM playnite_game_developer WHERE GameId = ?`,
           removeDeveloper: `DELETE FROM playnite_game_developer WHERE GameId = ? AND DeveloperId = ?`,
@@ -323,7 +403,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const queries = {
           getCurrentPublishers: `SELECT PublisherId FROM playnite_game_publisher WHERE GameId = ?`,
           removePublisher: `DELETE FROM playnite_game_publisher WHERE GameId = ? AND PublisherId = ?`,
@@ -370,7 +449,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const queries = {
           getCurrentPlatforms: `SELECT PlatformId FROM playnite_game_platform WHERE GameId = ?`,
           removePlatform: `DELETE FROM playnite_game_platform WHERE GameId = ? AND PlatformId = ?`,
@@ -415,7 +493,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const query = `DELETE FROM playnite_game WHERE Id = (?)`;
         const stmt = db.prepare(query);
         const result = stmt.run(gameId);
@@ -430,7 +507,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const stmt = {
           unlinkSessions: db.prepare(
             `UPDATE game_session SET GameId = NULL WHERE GameId = ?`
@@ -457,7 +533,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         const query = `SELECT Id, ContentHash FROM playnite_game`;
         const stmt = db.prepare(query);
         const result = stmt.all();
@@ -484,7 +559,6 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
         let query = `SELECT SUM(Playtime) as totalPlaytimeSeconds FROM playnite_game `;
         const { where, params } = _getWhereClauseAndParamsFromFilters(filters);
         query += where;
@@ -499,41 +573,29 @@ export const makeGameRepository = (
     );
   };
 
-  const all: GameRepository["all"] = () => {
+  const all: GameRepository["all"] = (props) => {
     return repositoryCall(
       logService,
       () => {
-        const db = getDb();
-        const separator = ",";
         const query = `
-          SELECT 
-          pg.*, 
-          (
-            SELECT GROUP_CONCAT(GenreId)
-            FROM playnite_game_genre
-            WHERE GameId = pg.Id
-          ) AS Genres,
-          (
-            SELECT GROUP_CONCAT(PlatformId)
-            FROM playnite_game_platform
-            WHERE GameId = pg.Id
-          ) AS Platforms,
-          (
-            SELECT GROUP_CONCAT(DeveloperId)
-            FROM playnite_game_developer
-            WHERE GameId = pg.Id
-          ) AS Developers,
-          (
-            SELECT GROUP_CONCAT(PublisherId)
-            FROM playnite_game_publisher
-            WHERE GameId = pg.Id
-          ) AS Publishers
+          SELECT pg.*
           FROM playnite_game pg
-          ORDER BY pg.Id ASC;`;
+          ORDER BY pg.Id ASC;
+        `;
         const stmt = db.prepare(query);
-        const result = stmt.all();
-        const raw = z.array(fullGameSchema).parse(result);
-        const games = raw.map(fullGameMapper.toDomain);
+        const rows = stmt.all();
+        const models = z.array(gameSchema).parse(rows);
+
+        let developerIds: Map<GameId, CompanyId[]> | null = null;
+        if (props.loadDevelopers)
+          developerIds = _getDevelopersFor(models.map((m) => m.Id));
+
+        const games = models.map((g) => {
+          return gameMapper.toDomain(g, {
+            developerIds: developerIds?.get(g.Id) ?? null,
+          });
+        });
+
         logService.debug(`Found ${games?.length ?? 0} games`);
         return games;
       },
