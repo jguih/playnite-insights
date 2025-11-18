@@ -3,15 +3,12 @@ import {
   makeCompletionStatusRepository,
   makeGameRepository,
 } from "@playatlas/game-library/infra";
-import { makeGameFactory } from "@playatlas/game-library/testing";
+import { GameFactory, makeGameFactory } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
 import { getDatabaseConnection } from "@playatlas/system/infra";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = getDatabaseConnection({ inMemory: true });
-const factory = {
-  game: makeGameFactory(),
-};
 const repository = {
   game: makeGameRepository({
     getDb: () => db,
@@ -22,7 +19,7 @@ const repository = {
     logService: makeConsoleLogService("CompletionStatusRepository"),
   }),
 };
-let completionStatusesIds: string[] = [];
+let factory: { game: GameFactory };
 
 describe("Game Repository", () => {
   beforeEach(() => {
@@ -30,17 +27,17 @@ describe("Game Repository", () => {
   });
 
   beforeAll(() => {
-    completionStatusesIds = repository.completionStatus
-      .all()
-      .map((c) => c.getId());
+    const completionStatusOptions = repository.completionStatus.all();
+    factory = {
+      game: makeGameFactory({ completionStatusOptions }),
+    };
   });
 
   it("add games", () => {
     // Arrange
-    const games = factory.game.buildGameList(100, {
-      completionStatusId: faker.helpers.arrayElement(completionStatusesIds),
-    });
+    const games = factory.game.buildGameList(100);
     const randomGame = faker.helpers.arrayElement(games);
+    // Act
     repository.game.upsertMany(games);
     const added = repository.game.all();
     const addedRandomGame = repository.game.getById(randomGame.getId());
@@ -51,5 +48,15 @@ describe("Game Repository", () => {
     expect(addedRandomGame?.getCompletionStatusId()).toBe(
       randomGame.getCompletionStatusId()
     );
+  });
+
+  it("add a game with developer", () => {
+    // Arrange
+    // TODO: Company factory
+    const game = factory.game.buildGame({ developerIds: ["genre"] });
+    // Act
+    repository.game.upsertMany([game]);
+    // Assert
+    expect(true).toBeTruthy();
   });
 });

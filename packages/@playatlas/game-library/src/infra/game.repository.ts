@@ -199,7 +199,7 @@ export const makeGameRepository = (
     );
   };
 
-  const getById: GameRepository["getById"] = (id) => {
+  const getById: GameRepository["getById"] = (id, props = {}) => {
     return repositoryCall(
       logService,
       () => {
@@ -255,11 +255,14 @@ export const makeGameRepository = (
           "Hidden",
           "CompletionStatusId",
         ];
+
         const placeholders = columns.map(() => "?").join(",");
+
         const updateColumns = columns
           .slice(1)
           .map((c) => `${c} = excluded.${c}`)
           .join(",");
+
         const stmt = db.prepare(`
           INSERT INTO playnite_game (${columns.join(",")}) 
           VALUES (
@@ -267,10 +270,11 @@ export const makeGameRepository = (
           ) ON CONFLICT(Id) DO UPDATE SET
             ${updateColumns};
           `);
+
         db.exec("BEGIN TRANSACTION");
         try {
-          for (const domainGame of games) {
-            const model = gameMapper.toPersistence(domainGame);
+          for (const game of games) {
+            const model = gameMapper.toPersistence(game);
             stmt.run(
               model.Id,
               model.Name,
@@ -288,11 +292,11 @@ export const makeGameRepository = (
               model.Hidden,
               model.CompletionStatusId
             );
-            if (domainGame.relationships.developers.isLoaded()) {
+            if (game.relationships.developers.isLoaded()) {
               _updateRelations(
                 model.Id,
-                domainGame.relationships.developers.get(),
-                "playnite_game_developers",
+                game.relationships.developers.get(),
+                "playnite_game_developer",
                 "DeveloperId"
               );
             }
@@ -304,188 +308,6 @@ export const makeGameRepository = (
         }
       },
       `upsertMany(${games.length} game(s))`
-    );
-  };
-
-  const updateManyGenres: GameRepository["updateManyGenres"] = (genresMap) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const queries = {
-          getCurrentGenres: `SELECT GenreId FROM playnite_game_genre WHERE GameId = ?`,
-          removeGenre: `DELETE FROM playnite_game_genre WHERE GameId = ? AND GenreId = ?`,
-          addGenre: `INSERT INTO playnite_game_genre (GameId, GenreId) VALUES (?, ?)`,
-        };
-        const statements = {
-          getCurrentGenres: db.prepare(queries.getCurrentGenres),
-          removeGenre: db.prepare(queries.removeGenre),
-          addGenre: db.prepare(queries.addGenre),
-        };
-        db.exec("BEGIN TRANSACTION");
-        try {
-          for (const [gameId, _newGenreIds] of genresMap) {
-            const _currentGenreIdsResult =
-              statements.getCurrentGenres.all(gameId);
-            const _currentGenreIds = _currentGenreIdsResult.map(
-              (v) => v.GenreId as string
-            );
-            const currentGenreIdsSet = new Set(_currentGenreIds);
-            const newGenreIdsSet = new Set(_newGenreIds);
-            for (const newGenreId of newGenreIdsSet) {
-              if (currentGenreIdsSet.has(newGenreId)) continue;
-              statements.addGenre.run(gameId, newGenreId);
-            }
-            for (const currentGenreId of currentGenreIdsSet) {
-              if (!newGenreIdsSet.has(currentGenreId)) {
-                statements.removeGenre.run(gameId, currentGenreId);
-              }
-            }
-          }
-          db.exec("COMMIT");
-        } catch (error) {
-          db.exec("ROLLBACK");
-          throw error;
-        }
-      },
-      `updateManyGenres(${genresMap.size} game(s))`
-    );
-  };
-
-  const updateManyDevelopers: GameRepository["updateManyDevelopers"] = (
-    developersMap
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const queries = {
-          getCurrentDevelopers: `SELECT DeveloperId FROM playnite_game_developer WHERE GameId = ?`,
-          removeDeveloper: `DELETE FROM playnite_game_developer WHERE GameId = ? AND DeveloperId = ?`,
-          addDeveloper: `INSERT INTO playnite_game_developer (GameId, DeveloperId) VALUES (?, ?)`,
-        };
-        const statements = {
-          getCurrentDevelopers: db.prepare(queries.getCurrentDevelopers),
-          removeDeveloper: db.prepare(queries.removeDeveloper),
-          addDeveloper: db.prepare(queries.addDeveloper),
-        };
-        db.exec("BEGIN TRANSACTION");
-        try {
-          for (const [gameId, _newDeveloperIds] of developersMap) {
-            const _currentDeveloperIdsResult =
-              statements.getCurrentDevelopers.all(gameId);
-            const _currentDeveloperIds = _currentDeveloperIdsResult.map(
-              (v) => v.DeveloperId as string
-            );
-            const currentDeveloperIdsSet = new Set(_currentDeveloperIds);
-            const newDeveloperIdsSet = new Set(_newDeveloperIds);
-            for (const newDeveloperId of newDeveloperIdsSet) {
-              if (currentDeveloperIdsSet.has(newDeveloperId)) continue;
-              statements.addDeveloper.run(gameId, newDeveloperId);
-            }
-            for (const currentDeveloperId of currentDeveloperIdsSet) {
-              if (!newDeveloperIdsSet.has(currentDeveloperId)) {
-                statements.removeDeveloper.run(gameId, currentDeveloperId);
-              }
-            }
-          }
-          db.exec("COMMIT");
-        } catch (error) {
-          db.exec("ROLLBACK");
-          throw error;
-        }
-      },
-      `updateManyDevelopers(${developersMap.size} game(s))`
-    );
-  };
-
-  const updateManyPublishers: GameRepository["updateManyPublishers"] = (
-    publishersMap
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const queries = {
-          getCurrentPublishers: `SELECT PublisherId FROM playnite_game_publisher WHERE GameId = ?`,
-          removePublisher: `DELETE FROM playnite_game_publisher WHERE GameId = ? AND PublisherId = ?`,
-          addPublisher: `INSERT INTO playnite_game_publisher (GameId, PublisherId) VALUES (?, ?)`,
-        };
-        const statements = {
-          getCurrentPublishers: db.prepare(queries.getCurrentPublishers),
-          removePublisher: db.prepare(queries.removePublisher),
-          addPublisher: db.prepare(queries.addPublisher),
-        };
-        db.exec("BEGIN TRANSACTION");
-        try {
-          for (const [gameId, _newPublisherIds] of publishersMap) {
-            const _currentPublisherIdsResult =
-              statements.getCurrentPublishers.all(gameId);
-            const _currentPublisherIds = _currentPublisherIdsResult.map(
-              (v) => v.PublisherId as string
-            );
-            const currentPublisherIdsSet = new Set(_currentPublisherIds);
-            const newPublisherIdsSet = new Set(_newPublisherIds);
-            for (const newPublisherId of newPublisherIdsSet) {
-              if (currentPublisherIdsSet.has(newPublisherId)) continue;
-              statements.addPublisher.run(gameId, newPublisherId);
-            }
-            for (const currentPublisherId of currentPublisherIdsSet) {
-              if (!newPublisherIdsSet.has(currentPublisherId)) {
-                statements.removePublisher.run(gameId, currentPublisherId);
-              }
-            }
-          }
-          db.exec("COMMIT");
-        } catch (error) {
-          db.exec("ROLLBACK");
-          throw error;
-        }
-      },
-      `updateManyPublishers(${publishersMap.size} game(s))`
-    );
-  };
-
-  const updateManyPlatforms: GameRepository["updateManyPlatforms"] = (
-    platformsMap
-  ) => {
-    return repositoryCall(
-      logService,
-      () => {
-        const queries = {
-          getCurrentPlatforms: `SELECT PlatformId FROM playnite_game_platform WHERE GameId = ?`,
-          removePlatform: `DELETE FROM playnite_game_platform WHERE GameId = ? AND PlatformId = ?`,
-          addPlatform: `INSERT INTO playnite_game_platform (GameId, PlatformId) VALUES (?, ?)`,
-        };
-        const statements = {
-          getCurrentPlatforms: db.prepare(queries.getCurrentPlatforms),
-          removePlatform: db.prepare(queries.removePlatform),
-          addPlatform: db.prepare(queries.addPlatform),
-        };
-        db.exec("BEGIN TRANSACTION");
-        try {
-          for (const [gameId, _newPlatformIds] of platformsMap) {
-            const _currentPlatformIdsResult =
-              statements.getCurrentPlatforms.all(gameId);
-            const _currentPlatformIds = _currentPlatformIdsResult.map(
-              (v) => v.PlatformId as string
-            );
-            const currentPlatformIdsSet = new Set(_currentPlatformIds);
-            const newPlatformIdsSet = new Set(_newPlatformIds);
-            for (const newPlatformId of newPlatformIdsSet) {
-              if (currentPlatformIdsSet.has(newPlatformId)) continue;
-              statements.addPlatform.run(gameId, newPlatformId);
-            }
-            for (const currentPlatformId of currentPlatformIdsSet) {
-              if (!newPlatformIdsSet.has(currentPlatformId)) {
-                statements.removePlatform.run(gameId, currentPlatformId);
-              }
-            }
-          }
-          db.exec("COMMIT");
-        } catch (error) {
-          db.exec("ROLLBACK");
-          throw error;
-        }
-      },
-      `updateManyPlatforms(${platformsMap.size} game(s))`
     );
   };
 
@@ -573,7 +395,7 @@ export const makeGameRepository = (
     );
   };
 
-  const all: GameRepository["all"] = (props) => {
+  const all: GameRepository["all"] = (props = {}) => {
     return repositoryCall(
       logService,
       () => {
@@ -586,13 +408,15 @@ export const makeGameRepository = (
         const rows = stmt.all();
         const models = z.array(gameSchema).parse(rows);
 
-        let developerIds: Map<GameId, CompanyId[]> | null = null;
+        let developerIds: Map<GameId, CompanyId[]> = new Map();
         if (props.loadDevelopers)
           developerIds = _getDevelopersFor(models.map((m) => m.Id));
 
-        const games = models.map((g) => {
-          return gameMapper.toDomain(g, {
-            developerIds: developerIds?.get(g.Id) ?? null,
+        const games = models.map((game) => {
+          return gameMapper.toDomain(game, {
+            developerIds: props.loadDevelopers
+              ? developerIds.get(game.Id)
+              : null,
           });
         });
 
@@ -605,10 +429,6 @@ export const makeGameRepository = (
 
   return {
     upsertMany,
-    updateManyGenres,
-    updateManyDevelopers,
-    updateManyPublishers,
-    updateManyPlatforms,
     remove,
     removeMany,
     exists,
