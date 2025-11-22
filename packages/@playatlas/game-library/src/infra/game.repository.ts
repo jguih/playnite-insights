@@ -3,11 +3,20 @@ import {
   type BaseRepositoryDeps,
 } from "@playatlas/common/infra";
 import z from "zod";
-import { CompanyId, GameId, GenreId, PlatformId } from "../domain";
-import { GameFilters, GameSorting } from "../domain/game.types";
-import { GameManifestData } from "../domain/types/game-manifest-data";
+import type { CompanyId } from "../domain/company.entity";
+import type { GameId, GameRelationshipMap } from "../domain/game.entity";
+import type { GameFilters, GameSorting } from "../domain/game.types";
+import type { GenreId } from "../domain/genre.entity";
+import type { PlatformId } from "../domain/platform.entity";
+import type { GameManifestData } from "../domain/types/game-manifest-data";
 import { gameMapper } from "../game.mapper";
-import { GameRepository } from "./game.repository.port";
+import {
+  REL_META,
+  RELATIONSHIP_TABLE_NAME,
+  TABLE_NAME,
+} from "./game.repository.constants";
+import type { GameRepository } from "./game.repository.port";
+import type { GetRelationshipsForFn } from "./game.repository.types";
 
 export const GROUPADD_SEPARATOR = ",";
 
@@ -38,11 +47,6 @@ export const makeGameRepository = (
 ): GameRepository => {
   const { getDb, logService } = deps;
   const db = getDb();
-  const tableNames = {
-    playniteGame: "playnite_game",
-    playniteGameDeveloper: "playnite_game_developer",
-    playniteGamePublisher: "playnite_game_publisher",
-  } as const;
 
   const _getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
     const where: string[] = [];
@@ -94,10 +98,10 @@ export const makeGameRepository = (
     }
   };
 
-  const _updateRelations = (
+  const _updateRelationship = (
     gameId: GameId,
     newIds: CompanyId[] | GenreId[] | PlatformId[],
-    table: (typeof tableNames)[keyof typeof tableNames],
+    table: (typeof RELATIONSHIP_TABLE_NAME)[keyof typeof RELATIONSHIP_TABLE_NAME],
     column: string
   ) => {
     db.prepare(`DELETE FROM ${table} WHERE GameId = ?`).run(gameId);
@@ -111,85 +115,37 @@ export const makeGameRepository = (
     }
   };
 
-  const _getGenresFor = (gameId: GameId): GenreId[] => {
-    return repositoryCall(
-      logService,
-      () => {
-        const query = `
-          SELECT GROUP_CONCAT(GenreId) as Genres
-          FROM playnite_game_genre
-          WHERE GameId = ?
-        `;
-        const result = db.prepare(query).get(gameId);
-        if (!result || !Array.isArray(result.Genres)) return [];
-        return result.Genres as GenreId[];
-      },
-      `_getGenresFor(${gameId})`
-    );
-  };
+  const _getRelationshipsFor: GetRelationshipsForFn = ({
+    relationship,
+    gameIds,
+  }) => {
+    const { table, column } = REL_META[relationship];
+    const placeholders = gameIds.map(() => "?").join(",");
 
-  const _getDevelopersFor = (gameIds: GameId[]): Map<GameId, CompanyId[]> => {
     return repositoryCall(
       logService,
       () => {
-        const placeholders = gameIds.map(() => "?").join(",");
         const stmt = db.prepare(`
-          SELECT GameId, DeveloperId
-          FROM playnite_game_developer
+          SELECT GameId, ${column}
+          FROM ${table}
           WHERE GameId IN (${placeholders})
         `);
         const rows = stmt.all(...gameIds);
-        const map = new Map<GameId, CompanyId[]>();
-        for (const { GameId, DeveloperId } of rows) {
-          const gameId = GameId as GameId;
-          const developerId = DeveloperId as CompanyId;
+        const map = new Map<
+          GameId,
+          GameRelationshipMap[typeof relationship][]
+        >();
+        for (const props of rows) {
+          const gameId = props.GameId as GameId;
+          const entityId = props[
+            column
+          ] as GameRelationshipMap[typeof relationship];
           if (!map.get(gameId)) map.set(gameId, []);
-          map.get(gameId)!.push(developerId);
+          map.get(gameId)!.push(entityId);
         }
         return map;
       },
-      `_getDevelopersFor(${gameIds.length} games)`
-    );
-  };
-
-  const _getPublishersFor = (gameIds: GameId[]): Map<GameId, CompanyId[]> => {
-    return repositoryCall(
-      logService,
-      () => {
-        const placeholders = gameIds.map(() => "?").join(",");
-        const stmt = db.prepare(`
-          SELECT GameId, PublisherId
-          FROM playnite_game_publisher
-          WHERE GameId IN (${placeholders})
-        `);
-        const rows = stmt.all(...gameIds);
-        const map = new Map<GameId, CompanyId[]>();
-        for (const { GameId, PublisherId } of rows) {
-          const gameId = GameId as GameId;
-          const publisherId = PublisherId as CompanyId;
-          if (!map.get(gameId)) map.set(gameId, []);
-          map.get(gameId)!.push(publisherId);
-        }
-        return map;
-      },
-      `_getPublishersFor(${gameIds.length} games)`
-    );
-  };
-
-  const _getPlatformsFor = (gameId: GameId): PlatformId[] => {
-    return repositoryCall(
-      logService,
-      () => {
-        const query = `
-          SELECT GROUP_CONCAT(GenreId) as Platforms
-          FROM playnite_game_platform
-          WHERE GameId = ?
-        `;
-        const result = db.prepare(query).get(gameId);
-        if (!result || !Array.isArray(result.Platforms)) return [];
-        return result.Platforms as string[];
-      },
-      `_getPlatformsFor(${gameId})`
+      `_getRelationshipsFor()`
     );
   };
 
@@ -215,22 +171,51 @@ export const makeGameRepository = (
     return repositoryCall(
       logService,
       () => {
-        const query = `SELECT * FROM playnite_game WHERE Id = (?)`;
+        const query = `SELECT * FROM ${TABLE_NAME} WHERE Id = (?)`;
         const stmt = db.prepare(query);
         const result = stmt.get(id);
-        const game = z.optional(gameSchema).parse(result);
-        if (!game) return null;
+        const gameModel = z.optional(gameSchema).parse(result);
+        if (!gameModel) return null;
 
         let developerIds: CompanyId[] | null = null;
-        if (props.loadDevelopers)
-          developerIds = _getDevelopersFor([game.Id]).get(game.Id) ?? [];
+        if (props.load?.developers)
+          developerIds =
+            _getRelationshipsFor({
+              relationship: "developers",
+              gameIds: [gameModel.Id],
+            }).get(gameModel.Id) ?? [];
 
         let publisherIds: CompanyId[] | null = null;
-        if (props.loadPublishers)
-          publisherIds = _getPublishersFor([game.Id]).get(game.Id) ?? [];
+        if (props.load?.publishers)
+          publisherIds =
+            _getRelationshipsFor({
+              relationship: "publishers",
+              gameIds: [gameModel.Id],
+            }).get(gameModel.Id) ?? [];
 
-        logService.debug(`Found game ${game?.Name}`);
-        return gameMapper.toDomain(game, { developerIds, publisherIds });
+        let genreIds: GenreId[] | null = null;
+        if (props.load?.genres)
+          genreIds =
+            _getRelationshipsFor({
+              relationship: "genres",
+              gameIds: [gameModel.Id],
+            }).get(gameModel.Id) ?? [];
+
+        let platformIds: PlatformId[] | null = null;
+        if (props.load?.platforms)
+          platformIds =
+            _getRelationshipsFor({
+              relationship: "platforms",
+              gameIds: [gameModel.Id],
+            }).get(gameModel.Id) ?? [];
+
+        logService.debug(`Found game ${gameModel?.Name}`);
+        return gameMapper.toDomain(gameModel, {
+          developerIds,
+          publisherIds,
+          genreIds,
+          platformIds,
+        });
       },
       `getById(${id})`
     );
@@ -315,18 +300,18 @@ export const makeGameRepository = (
               model.CompletionStatusId
             );
             if (game.relationships.developers.isLoaded()) {
-              _updateRelations(
+              _updateRelationship(
                 model.Id,
                 game.relationships.developers.get(),
-                tableNames.playniteGameDeveloper,
+                RELATIONSHIP_TABLE_NAME.gameDeveloper,
                 "DeveloperId"
               );
             }
             if (game.relationships.publishers.isLoaded()) {
-              _updateRelations(
+              _updateRelationship(
                 model.Id,
                 game.relationships.publishers.get(),
-                tableNames.playniteGamePublisher,
+                RELATIONSHIP_TABLE_NAME.gamePublisher,
                 "PublisherId"
               );
             }
@@ -436,15 +421,18 @@ export const makeGameRepository = (
         `;
         const stmt = db.prepare(query);
         const rows = stmt.all();
-        const models = z.array(gameSchema).parse(rows);
+        const gameModels = z.array(gameSchema).parse(rows);
 
         let developerIds: Map<GameId, CompanyId[]> = new Map();
-        if (props.loadDevelopers)
-          developerIds = _getDevelopersFor(models.map((m) => m.Id));
+        if (props.load?.developers)
+          developerIds = _getRelationshipsFor({
+            relationship: "developers",
+            gameIds: gameModels.map((m) => m.Id),
+          });
 
-        const games = models.map((game) => {
+        const games = gameModels.map((game) => {
           return gameMapper.toDomain(game, {
-            developerIds: props.loadDevelopers
+            developerIds: props.load?.developers
               ? developerIds.get(game.Id)
               : null,
           });

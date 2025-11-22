@@ -1,12 +1,9 @@
-import { Game, GameId } from "../domain/game.entity";
+import { Game, GameId, GameRelationship } from "../domain/game.entity";
 import type { GameFilters } from "../domain/game.types";
 import type { GameManifestData } from "../domain/types/game-manifest-data";
 
 export type GameRepositoryEagerLoadProps = {
-  loadGenres?: boolean;
-  loadPlatforms?: boolean;
-  loadDevelopers?: boolean;
-  loadPublishers?: boolean;
+  load?: Partial<Record<GameRelationship, boolean>>;
 };
 
 export type GameRepository = {

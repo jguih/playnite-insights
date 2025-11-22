@@ -6,12 +6,18 @@ import { PlatformId } from "./platform.entity";
 
 export type GameId = string;
 
-export type GameRelationshipProps = Readonly<{
-  developers: Relationship<CompanyId>;
-  publishers: Relationship<CompanyId>;
-  genres: Relationship<GenreId>;
-  platforms: Relationship<PlatformId>;
-}>;
+export type GameRelationshipMap = {
+  developers: CompanyId;
+  publishers: CompanyId;
+  genres: GenreId;
+  platforms: PlatformId;
+};
+
+export type GameRelationship = keyof GameRelationshipMap;
+
+export type GameRelationshipProps = {
+  [K in GameRelationship]: Relationship<GameRelationshipMap[K]>;
+};
 
 export type Game = Readonly<{
   getId: () => GameId;

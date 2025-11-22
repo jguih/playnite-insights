@@ -1,8 +1,12 @@
+import { CompanyId } from "./company.entity";
+import { GenreId } from "./genre.entity";
+import { PlatformId } from "./platform.entity";
+
 export type MakeGameRelationshipProps = {
-  developerIds?: string[] | null;
-  publisherIds?: string[] | null;
-  genreIds?: string[] | null;
-  platformIds?: string[] | null;
+  developerIds?: CompanyId[] | null;
+  publisherIds?: CompanyId[] | null;
+  genreIds?: GenreId[] | null;
+  platformIds?: PlatformId[] | null;
 };
 
 export type MakeGameProps = {

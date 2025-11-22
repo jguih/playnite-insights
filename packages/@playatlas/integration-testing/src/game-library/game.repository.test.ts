@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { type Game } from "@playatlas/game-library/domain";
+import { GameRelationship, type Game } from "@playatlas/game-library/domain";
 import {
-  type GameRepositoryEagerLoadProps,
   makeCompanyRepository,
   makeCompletionStatusRepository,
   makeGameRepository,
@@ -28,31 +27,25 @@ const repository = {
 };
 let factory: { game: GameFactory };
 
-const assertRelationshipLoad = <K extends keyof Game["relationships"]>(
+const assertRelationshipLoad = (
   game: Game,
-  relationshipKey: K,
-  loadOptions: GameRepositoryEagerLoadProps
+  relationshipKey: GameRelationship
 ) => {
   repository.game.upsertMany([game]);
-
-  const loaded = repository.game.getById(game.getId(), loadOptions);
+  const loaded = repository.game.getById(game.getId(), {
+    load: { [relationshipKey]: true },
+  });
   const originalIds = game.relationships[relationshipKey].get();
   const loadedIds = loaded?.relationships[relationshipKey].get();
-
   expect(loaded).toBeTruthy();
   expect(loaded?.getId()).toBe(game.getId());
-
   expect(loaded?.relationships[relationshipKey].isLoaded()).toBeTruthy();
-
   // Expect other relationships to not be loaded
-  for (const key of Object.keys(
-    game.relationships
-  ) as (keyof Game["relationships"])[]) {
+  for (const key of Object.keys(game.relationships) as GameRelationship[]) {
     if (key !== relationshipKey) {
       expect(loaded?.relationships[key].isLoaded()).toBeFalsy();
     }
   }
-
   expect(loadedIds).toHaveLength(originalIds.length);
   expect(new Set(loadedIds)).toEqual(new Set(originalIds));
 };
@@ -84,12 +77,10 @@ describe("Game Repository", () => {
   });
 
   it("persists a game and eager load its developers when requested", () => {
-    const game = factory.game.buildGame();
-    assertRelationshipLoad(game, "developers", { loadDevelopers: true });
+    assertRelationshipLoad(factory.game.buildGame(), "developers");
   });
 
   it("persists a game and eager load its publishers when requested", () => {
-    const game = factory.game.buildGame();
-    assertRelationshipLoad(game, "publishers", { loadPublishers: true });
+    assertRelationshipLoad(factory.game.buildGame(), "publishers");
   });
 });
