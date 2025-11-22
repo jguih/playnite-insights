@@ -1,12 +1,13 @@
 import { faker } from "@faker-js/faker";
 import {
+  makeCompanyRepository,
   makeCompletionStatusRepository,
   makeGameRepository,
 } from "@playatlas/game-library/infra";
 import { GameFactory, makeGameFactory } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
 import { getDatabaseConnection } from "@playatlas/system/infra";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const db = getDatabaseConnection({ inMemory: true });
 const repository = {
@@ -18,18 +19,19 @@ const repository = {
     getDb: () => db,
     logService: makeConsoleLogService("CompletionStatusRepository"),
   }),
+  company: makeCompanyRepository({
+    getDb: () => db,
+    logService: makeConsoleLogService("CompanyRepository"),
+  }),
 };
 let factory: { game: GameFactory };
 
 describe("Game Repository", () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   beforeAll(() => {
     const completionStatusOptions = repository.completionStatus.all();
+    const companyOptions = repository.company.all().map((c) => c.getId());
     factory = {
-      game: makeGameFactory({ completionStatusOptions }),
+      game: makeGameFactory({ completionStatusOptions, companyOptions }),
     };
   });
 
@@ -52,11 +54,19 @@ describe("Game Repository", () => {
 
   it("add a game with developer", () => {
     // Arrange
-    // TODO: Company factory
-    const game = factory.game.buildGame({ developerIds: ["genre"] });
+    const game = factory.game.buildGame();
+    const gameDeveloperIds = game.relationships.developers.get();
     // Act
     repository.game.upsertMany([game]);
+    const addedGame = repository.game.getById(game.getId(), {
+      loadDevelopers: true,
+    });
+    const addedGameDeveloperIds = addedGame?.relationships.developers.get();
     // Assert
-    expect(true).toBeTruthy();
+    expect(addedGame).toBeTruthy();
+    expect(addedGame?.getId()).toBe(game.getId());
+    expect(addedGame?.relationships.developers.isLoaded()).toBeTruthy();
+    expect(addedGameDeveloperIds).toHaveLength(gameDeveloperIds.length);
+    expect(new Set(addedGameDeveloperIds)).toEqual(new Set(gameDeveloperIds));
   });
 });

@@ -1,10 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { MakeGameProps } from "../domain";
-import { CompletionStatus } from "../domain/completion-status.entity";
-import { Game, makeGame } from "../domain/game.entity";
+import { type CompanyId } from "../domain/company.entity";
+import { type CompletionStatus } from "../domain/completion-status.entity";
+import { type Game, makeGame } from "../domain/game.entity";
+import { type MakeGameProps } from "../domain/game.entity.types";
 
 export type GameFactoryDeps = {
   completionStatusOptions: CompletionStatus[];
+  companyOptions: CompanyId[];
 };
 
 export type GameFactory = {
@@ -14,10 +16,27 @@ export type GameFactory = {
 
 export const makeGameFactory = ({
   completionStatusOptions,
+  companyOptions,
 }: GameFactoryDeps): GameFactory => {
   const completionStatusIds = completionStatusOptions.map((c) => c.getId());
 
   const buildGame = (props: Partial<MakeGameProps> = {}): Game => {
+    const completionStatusId = props?.completionStatusId
+      ? props?.completionStatusId
+      : completionStatusIds.length > 0
+      ? faker.helpers.arrayElement(completionStatusIds)
+      : null;
+    const developerIds = props.developerIds
+      ? props.developerIds
+      : companyOptions.length > 0
+      ? faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
+      : null;
+    const publisherIds = props.publisherIds
+      ? props.publisherIds
+      : companyOptions.length > 0
+      ? faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
+      : null;
+
     return makeGame({
       id: props?.id ?? faker.string.uuid(),
       name: props?.name ?? faker.commerce.productName(),
@@ -34,12 +53,11 @@ export const makeGameFactory = ({
       contentHash:
         props?.contentHash ?? faker.string.hexadecimal({ length: 32 }),
       hidden: props?.hidden ?? faker.datatype.boolean(),
-      completionStatusId: props?.completionStatusId
-        ? props?.completionStatusId
-        : completionStatusIds.length > 0
-        ? faker.helpers.arrayElement(completionStatusIds)
-        : null,
-      developerIds: props.developerIds ?? null,
+      completionStatusId,
+      developerIds,
+      genreIds: props.genreIds ?? null,
+      platformIds: props.platformIds ?? null,
+      publisherIds,
     });
   };
 

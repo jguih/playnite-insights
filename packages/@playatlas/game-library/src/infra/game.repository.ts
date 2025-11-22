@@ -207,8 +207,14 @@ export const makeGameRepository = (
         const stmt = db.prepare(query);
         const result = stmt.get(id);
         const game = z.optional(gameSchema).parse(result);
+        if (!game) return null;
+
+        let developerIds: CompanyId[] | null = null;
+        if (props.loadDevelopers)
+          developerIds = _getDevelopersFor([game.Id]).get(game.Id) ?? null;
+
         logService.debug(`Found game ${game?.Name}`);
-        return game ? gameMapper.toDomain(game) : null;
+        return gameMapper.toDomain(game, { developerIds });
       },
       `getById(${id})`
     );

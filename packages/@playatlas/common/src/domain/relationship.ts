@@ -13,15 +13,15 @@ export const createRelationship = <R>(
   initialValue: R[] | null
 ): Relationship<R> => {
   let loaded = Array.isArray(initialValue);
-  let value: R[] | null = initialValue;
+  let value: Set<R> | null = initialValue ? new Set(initialValue) : null;
 
   return {
     get() {
       if (value === null) throw new InvalidStateError("Property not loaded");
-      return value;
+      return Array.from(value);
     },
     set(v) {
-      value = v;
+      value = new Set(v);
       loaded = true;
     },
     isLoaded() {

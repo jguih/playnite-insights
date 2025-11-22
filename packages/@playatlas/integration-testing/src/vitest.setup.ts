@@ -1,5 +1,11 @@
-import { makeCompletionStatusRepository } from "@playatlas/game-library/infra";
-import { makeCompletionStatusFactory } from "@playatlas/game-library/testing";
+import {
+  makeCompanyRepository,
+  makeCompletionStatusRepository,
+} from "@playatlas/game-library/infra";
+import {
+  makeCompanyFactory,
+  makeCompletionStatusFactory,
+} from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
 import { getSystemConfig } from "@playatlas/system/domain";
 import {
@@ -27,6 +33,13 @@ beforeAll(async () => {
   completionStatusRepo.upsertMany(
     completionStatusFactory.buildDefaultCompletionStatusList()
   );
+
+  const companyFactory = makeCompanyFactory();
+  const companyRepo = makeCompanyRepository({
+    getDb: () => db,
+    logService: makeConsoleLogService("CompanyRepository"),
+  });
+  companyRepo.upsertMany(companyFactory.buildCompanyList(50));
 });
 
 afterAll(() => {
