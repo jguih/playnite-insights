@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker";
+import { type Game } from "@playatlas/game-library/domain";
 import {
+  type GameRepositoryEagerLoadProps,
   makeCompanyRepository,
   makeCompletionStatusRepository,
   makeGameRepository,
@@ -26,6 +28,35 @@ const repository = {
 };
 let factory: { game: GameFactory };
 
+const assertRelationshipLoad = <K extends keyof Game["relationships"]>(
+  game: Game,
+  relationshipKey: K,
+  loadOptions: GameRepositoryEagerLoadProps
+) => {
+  repository.game.upsertMany([game]);
+
+  const loaded = repository.game.getById(game.getId(), loadOptions);
+  const originalIds = game.relationships[relationshipKey].get();
+  const loadedIds = loaded?.relationships[relationshipKey].get();
+
+  expect(loaded).toBeTruthy();
+  expect(loaded?.getId()).toBe(game.getId());
+
+  expect(loaded?.relationships[relationshipKey].isLoaded()).toBeTruthy();
+
+  // Expect other relationships to not be loaded
+  for (const key of Object.keys(
+    game.relationships
+  ) as (keyof Game["relationships"])[]) {
+    if (key !== relationshipKey) {
+      expect(loaded?.relationships[key].isLoaded()).toBeFalsy();
+    }
+  }
+
+  expect(loadedIds).toHaveLength(originalIds.length);
+  expect(new Set(loadedIds)).toEqual(new Set(originalIds));
+};
+
 describe("Game Repository", () => {
   beforeAll(() => {
     const completionStatusOptions = repository.completionStatus.all();
@@ -35,7 +66,7 @@ describe("Game Repository", () => {
     };
   });
 
-  it("add games", () => {
+  it("persists games", () => {
     // Arrange
     const games = factory.game.buildGameList(100);
     const randomGame = faker.helpers.arrayElement(games);
@@ -52,21 +83,13 @@ describe("Game Repository", () => {
     );
   });
 
-  it("add a game with developer", () => {
-    // Arrange
+  it("persists a game and eager load its developers when requested", () => {
     const game = factory.game.buildGame();
-    const gameDeveloperIds = game.relationships.developers.get();
-    // Act
-    repository.game.upsertMany([game]);
-    const addedGame = repository.game.getById(game.getId(), {
-      loadDevelopers: true,
-    });
-    const addedGameDeveloperIds = addedGame?.relationships.developers.get();
-    // Assert
-    expect(addedGame).toBeTruthy();
-    expect(addedGame?.getId()).toBe(game.getId());
-    expect(addedGame?.relationships.developers.isLoaded()).toBeTruthy();
-    expect(addedGameDeveloperIds).toHaveLength(gameDeveloperIds.length);
-    expect(new Set(addedGameDeveloperIds)).toEqual(new Set(gameDeveloperIds));
+    assertRelationshipLoad(game, "developers", { loadDevelopers: true });
+  });
+
+  it("persists a game and eager load its publishers when requested", () => {
+    const game = factory.game.buildGame();
+    assertRelationshipLoad(game, "publishers", { loadPublishers: true });
   });
 });
