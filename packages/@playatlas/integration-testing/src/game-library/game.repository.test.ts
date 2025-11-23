@@ -83,4 +83,8 @@ describe("Game Repository", () => {
   it("persists a game and eager load its publishers when requested", () => {
     assertRelationshipLoad(factory.game.buildGame(), "publishers");
   });
+
+  // it("persists a game and eager load its genres when requested", () => {
+  //   assertRelationshipLoad(factory.game.buildGame(), "genres");
+  // });
 });

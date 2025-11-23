@@ -10,3 +10,11 @@ export type GetRelationshipsForFn = {
     gameIds: GameId[];
   }): Map<GameId, GameRelationshipMap[R][]>;
 };
+
+export type UpdateRelationshipsForFn = {
+  <R extends GameRelationship>(props: {
+    relationship: R;
+    gameId: GameId;
+    newRelationshipIds: GameRelationshipMap[R][];
+  }): void;
+};

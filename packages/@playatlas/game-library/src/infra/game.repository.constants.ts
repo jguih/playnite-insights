@@ -9,21 +9,21 @@ export const RELATIONSHIP_TABLE_NAME = {
   gamePlatform: "playnite_game_platform",
 } as const;
 
-export const REL_META = {
+export const GAME_RELATIONSHIP_META = {
   developers: {
     table: RELATIONSHIP_TABLE_NAME.gameDeveloper,
-    column: "DeveloperId",
+    column: "DeveloperId" as const,
   },
   publishers: {
     table: RELATIONSHIP_TABLE_NAME.gamePublisher,
-    column: "PublisherId",
+    column: "PublisherId" as const,
   },
   genres: {
     table: RELATIONSHIP_TABLE_NAME.gameGenre,
-    column: "GenreId",
+    column: "GenreId" as const,
   },
   platforms: {
     table: RELATIONSHIP_TABLE_NAME.gamePlatform,
-    column: "PlatformId",
+    column: "PlatformId" as const,
   },
 } satisfies Record<GameRelationship, { table: string; column: string }>;
