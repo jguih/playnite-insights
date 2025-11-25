@@ -3,10 +3,12 @@ import { type CompanyId } from "../domain/company.entity";
 import { type CompletionStatus } from "../domain/completion-status.entity";
 import { type Game, makeGame } from "../domain/game.entity";
 import { type MakeGameProps } from "../domain/game.entity.types";
+import { GenreId } from "../domain/genre.entity";
 
 export type GameFactoryDeps = {
   completionStatusOptions: CompletionStatus[];
   companyOptions: CompanyId[];
+  genreOptions: GenreId[];
 };
 
 export type GameFactory = {
@@ -17,6 +19,7 @@ export type GameFactory = {
 export const makeGameFactory = ({
   completionStatusOptions,
   companyOptions,
+  genreOptions,
 }: GameFactoryDeps): GameFactory => {
   const completionStatusIds = completionStatusOptions.map((c) => c.getId());
 
@@ -35,6 +38,11 @@ export const makeGameFactory = ({
       ? props.publisherIds
       : companyOptions.length > 0
       ? faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
+      : null;
+    const genreIds = props.genreIds
+      ? props.genreIds
+      : genreOptions.length > 0
+      ? faker.helpers.arrayElements(genreOptions, { min: 1, max: 15 })
       : null;
 
     return makeGame({
@@ -55,7 +63,7 @@ export const makeGameFactory = ({
       hidden: props?.hidden ?? faker.datatype.boolean(),
       completionStatusId,
       developerIds,
-      genreIds: props.genreIds ?? null,
+      genreIds,
       platformIds: props.platformIds ?? null,
       publisherIds,
     });

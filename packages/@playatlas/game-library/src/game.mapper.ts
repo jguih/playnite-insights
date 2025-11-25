@@ -1,8 +1,16 @@
+import { EntityMapper } from "@playatlas/common/domain";
 import { MakeGameRelationshipProps } from "./domain";
 import { type Game, makeGame } from "./domain/game.entity";
 import { type GameModel } from "./infra";
 
-export const gameMapper = {
+export type GameMapper = EntityMapper<Game, GameModel> & {
+  toDomain: (
+    model: GameModel,
+    relationships: MakeGameRelationshipProps
+  ) => Game;
+};
+
+export const gameMapper: GameMapper = {
   toPersistence: (game: Game): GameModel => {
     const record: GameModel = {
       Id: game.getId(),

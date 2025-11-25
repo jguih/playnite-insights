@@ -116,7 +116,7 @@ export const makeGameRepository = (
           stmt.run(gameId, id);
         }
       }
-    });
+    }, `_updateRelationshipFor(${gameId}, ${relationship}, ${newRelationshipIds.length} relationship(s))`);
   };
 
   const _getRelationshipsFor: GetRelationshipsForFn = ({
@@ -142,7 +142,7 @@ export const makeGameRepository = (
         map.get(gameId)!.push(entityId);
       }
       return map;
-    });
+    }, `_getRelationshipsFor(${relationship}, ${gameIds.length} game(s))`);
   };
 
   const getTotal: GameRepository["getTotal"] = (filters) => {
@@ -280,20 +280,18 @@ export const makeGameRepository = (
             gameModel.Hidden,
             gameModel.CompletionStatusId
           );
-          if (game.relationships.developers.isLoaded()) {
+          if (game.relationships.developers.isLoaded())
             _updateRelationshipFor({
               relationship: "developers",
               gameId: gameModel.Id,
               newRelationshipIds: game.relationships.developers.get(),
             });
-          }
-          if (game.relationships.publishers.isLoaded()) {
+          if (game.relationships.publishers.isLoaded())
             _updateRelationshipFor({
               relationship: "publishers",
               gameId: gameModel.Id,
               newRelationshipIds: game.relationships.publishers.get(),
             });
-          }
           if (game.relationships.genres.isLoaded())
             _updateRelationshipFor({
               relationship: "genres",

@@ -4,6 +4,7 @@ import {
   makeCompanyRepository,
   makeCompletionStatusRepository,
   makeGameRepository,
+  makeGenreRepository,
 } from "@playatlas/game-library/infra";
 import { GameFactory, makeGameFactory } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
@@ -23,6 +24,10 @@ const repository = {
   company: makeCompanyRepository({
     getDb: () => db,
     logService: makeConsoleLogService("CompanyRepository"),
+  }),
+  genre: makeGenreRepository({
+    getDb: () => db,
+    logService: makeConsoleLogService("GenreRepository"),
   }),
 };
 let factory: { game: GameFactory };
@@ -54,8 +59,13 @@ describe("Game Repository", () => {
   beforeAll(() => {
     const completionStatusOptions = repository.completionStatus.all();
     const companyOptions = repository.company.all().map((c) => c.getId());
+    const genreOptions = repository.genre.all().map((g) => g.getId());
     factory = {
-      game: makeGameFactory({ completionStatusOptions, companyOptions }),
+      game: makeGameFactory({
+        completionStatusOptions,
+        companyOptions,
+        genreOptions,
+      }),
     };
   });
 
@@ -84,7 +94,7 @@ describe("Game Repository", () => {
     assertRelationshipLoad(factory.game.buildGame(), "publishers");
   });
 
-  // it("persists a game and eager load its genres when requested", () => {
-  //   assertRelationshipLoad(factory.game.buildGame(), "genres");
-  // });
+  it("persists a game and eager load its genres when requested", () => {
+    assertRelationshipLoad(factory.game.buildGame(), "genres");
+  });
 });

@@ -1,10 +1,12 @@
 import {
   makeCompanyRepository,
   makeCompletionStatusRepository,
+  makeGenreRepository,
 } from "@playatlas/game-library/infra";
 import {
   makeCompanyFactory,
   makeCompletionStatusFactory,
+  makeGenreFactory,
 } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
 import { getSystemConfig } from "@playatlas/system/domain";
@@ -40,6 +42,13 @@ beforeAll(async () => {
     logService: makeConsoleLogService("CompanyRepository"),
   });
   companyRepo.upsertMany(companyFactory.buildCompanyList(50));
+
+  const genreFactory = makeGenreFactory();
+  const genreRepo = makeGenreRepository({
+    getDb: () => db,
+    logService: makeConsoleLogService("GenreRepository"),
+  });
+  genreRepo.upsertMany(genreFactory.buildGenreList(200));
 });
 
 afterAll(() => {

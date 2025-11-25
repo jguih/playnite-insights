@@ -1,10 +1,14 @@
+import { EntityMapper } from "@playatlas/common/domain";
 import {
   CompletionStatus,
   makeCompletionStatus,
 } from "./domain/completion-status.entity";
 import { CompletionStatusModel } from "./infra/completion-status.repository";
 
-export const completionStatusMapper = {
+export const completionStatusMapper: EntityMapper<
+  CompletionStatus,
+  CompletionStatusModel
+> = {
   toPersistence: (
     completionStatus: CompletionStatus
   ): CompletionStatusModel => {
