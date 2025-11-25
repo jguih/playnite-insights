@@ -9,7 +9,6 @@ import {
 import { GameFactory, makeGameFactory } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
 import { getDatabaseConnection } from "@playatlas/system/infra";
-import { describe, expect, it } from "vitest";
 
 const db = getDatabaseConnection({ inMemory: true });
 const repository = {
