@@ -8,7 +8,6 @@ import type { GameId, GameRelationshipMap } from "../domain/game.entity";
 import type { GameFilters, GameSorting } from "../domain/game.types";
 import type { GenreId } from "../domain/genre.entity";
 import type { PlatformId } from "../domain/platform.entity";
-import type { GameManifestData } from "../domain/types/game-manifest-data";
 import { gameMapper } from "../game.mapper";
 import {
   GAME_RELATIONSHIP_META,
@@ -41,6 +40,15 @@ export const gameSchema = z.object({
 });
 
 export type GameModel = z.infer<typeof gameSchema>;
+
+export const gameManifestDataSchema = z.array(
+  z.object({
+    Id: z.string(),
+    ContentHash: z.string(),
+  })
+);
+
+export type GameManifestData = z.infer<typeof gameManifestDataSchema>;
 
 type GameRepositoryDeps = BaseRepositoryDeps;
 
@@ -106,17 +114,21 @@ export const makeGameRepository = (
     newRelationshipIds,
   }) => {
     const { table, column } = GAME_RELATIONSHIP_META[relationship];
-    return base.run(({ db }) => {
-      db.prepare(`DELETE FROM ${table} WHERE GameId = ?`).run(gameId);
-      if (newRelationshipIds.length > 0) {
-        const stmt = db.prepare(
-          `INSERT INTO ${table} (GameId, ${column}) VALUES (?, ?)`
-        );
-        for (const id of newRelationshipIds) {
-          stmt.run(gameId, id);
+    return base.run(
+      ({ db }) => {
+        db.prepare(`DELETE FROM ${table} WHERE GameId = ?`).run(gameId);
+        if (newRelationshipIds.length > 0) {
+          const stmt = db.prepare(
+            `INSERT INTO ${table} (GameId, ${column}) VALUES (?, ?)`
+          );
+          for (const id of newRelationshipIds) {
+            stmt.run(gameId, id);
+          }
         }
-      }
-    }, `_updateRelationshipFor(${gameId}, ${relationship}, ${newRelationshipIds.length} relationship(s))`);
+      },
+      `_updateRelationshipFor(${gameId}, ${relationship}, ${newRelationshipIds.length} relationship(s))`,
+      false
+    );
   };
 
   const _getRelationshipsFor: GetRelationshipsForFn = ({
@@ -125,24 +137,31 @@ export const makeGameRepository = (
   }) => {
     const { table, column } = GAME_RELATIONSHIP_META[relationship];
     const placeholders = gameIds.map(() => "?").join(",");
-    return base.run(({ db }) => {
-      const stmt = db.prepare(`
+    return base.run(
+      ({ db }) => {
+        const stmt = db.prepare(`
             SELECT GameId, ${column}
             FROM ${table}
             WHERE GameId IN (${placeholders})
           `);
-      const rows = stmt.all(...gameIds);
-      const map = new Map<GameId, GameRelationshipMap[typeof relationship][]>();
-      for (const props of rows) {
-        const gameId = props.GameId as GameId;
-        const entityId = props[
-          column
-        ] as GameRelationshipMap[typeof relationship];
-        if (!map.get(gameId)) map.set(gameId, []);
-        map.get(gameId)!.push(entityId);
-      }
-      return map;
-    }, `_getRelationshipsFor(${relationship}, ${gameIds.length} game(s))`);
+        const rows = stmt.all(...gameIds);
+        const map = new Map<
+          GameId,
+          GameRelationshipMap[typeof relationship][]
+        >();
+        for (const props of rows) {
+          const gameId = props.GameId as GameId;
+          const entityId = props[
+            column
+          ] as GameRelationshipMap[typeof relationship];
+          if (!map.get(gameId)) map.set(gameId, []);
+          map.get(gameId)!.push(entityId);
+        }
+        return map;
+      },
+      `_getRelationshipsFor(${relationship}, ${gameIds.length} game(s))`,
+      false
+    );
   };
 
   const getTotal: GameRepository["getTotal"] = (filters) => {
@@ -327,17 +346,12 @@ export const makeGameRepository = (
         ),
         removeGame: db.prepare(`DELETE FROM playnite_game WHERE Id = (?)`),
       };
-      db.exec("BEGIN TRANSACTION");
-      try {
+      base.runTransaction(() => {
         for (const gameId of gameIds) {
           stmt.unlinkSessions.run(gameId);
           stmt.removeGame.run(gameId);
         }
-        db.exec("COMMIT");
-      } catch (error) {
-        db.exec("ROLLBACK");
-        throw error;
-      }
+      });
     }, `remove(${gameIds.length} game(s))`);
   };
 
@@ -346,14 +360,7 @@ export const makeGameRepository = (
       const query = `SELECT Id, ContentHash FROM playnite_game`;
       const stmt = db.prepare(query);
       const result = stmt.all();
-      const data: GameManifestData = [];
-      for (const entry of result) {
-        const value = {
-          Id: entry.Id as string,
-          ContentHash: entry.ContentHash as string,
-        };
-        data.push(value);
-      }
+      const data: GameManifestData = gameManifestDataSchema.parse(result);
       logService.debug(
         `Fetched manifest game data, total games in library: ${data.length}`
       );

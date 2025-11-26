@@ -18,10 +18,9 @@ export const makeDatabaseConnection = ({
   inMemory,
 }: MakeDatabaseConnectionDeps): DatabaseSync => {
   const dbPath = inMemory ? ":memory:" : path;
-  db = new DatabaseSync(dbPath, {
+  return new DatabaseSync(dbPath, {
     enableForeignKeyConstraints: true,
   });
-  return db;
 };
 
 let db: DatabaseSync | null = null;

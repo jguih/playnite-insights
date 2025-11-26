@@ -1,35 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { GameRelationship, type Game } from "@playatlas/game-library/domain";
-import {
-  makeCompanyRepository,
-  makeCompletionStatusRepository,
-  makeGameRepository,
-  makeGenreRepository,
-} from "@playatlas/game-library/infra";
-import { GameFactory, makeGameFactory } from "@playatlas/game-library/testing";
-import { makeConsoleLogService } from "@playatlas/system/application";
-import { getDatabaseConnection } from "@playatlas/system/infra";
+import { getFactories, getRepositories } from "../vitest.setup";
 
-const db = getDatabaseConnection({ inMemory: true });
-const repository = {
-  game: makeGameRepository({
-    getDb: () => db,
-    logService: makeConsoleLogService("GameRepository"),
-  }),
-  completionStatus: makeCompletionStatusRepository({
-    getDb: () => db,
-    logService: makeConsoleLogService("CompletionStatusRepository"),
-  }),
-  company: makeCompanyRepository({
-    getDb: () => db,
-    logService: makeConsoleLogService("CompanyRepository"),
-  }),
-  genre: makeGenreRepository({
-    getDb: () => db,
-    logService: makeConsoleLogService("GenreRepository"),
-  }),
-};
-let factory: { game: GameFactory };
+let repository: ReturnType<typeof getRepositories>;
+let factory: ReturnType<typeof getFactories>;
 
 const assertRelationshipLoad = (
   game: Game,
@@ -55,22 +29,14 @@ const assertRelationshipLoad = (
 };
 
 describe("Game Repository", () => {
-  beforeAll(() => {
-    const completionStatusOptions = repository.completionStatus.all();
-    const companyOptions = repository.company.all().map((c) => c.getId());
-    const genreOptions = repository.genre.all().map((g) => g.getId());
-    factory = {
-      game: makeGameFactory({
-        completionStatusOptions,
-        companyOptions,
-        genreOptions,
-      }),
-    };
+  beforeEach(() => {
+    repository = getRepositories();
+    factory = getFactories();
   });
 
   it("persists games", () => {
     // Arrange
-    const games = factory.game.buildGameList(100);
+    const games = factory.getGame().buildGameList(100);
     const randomGame = faker.helpers.arrayElement(games);
     // Act
     repository.game.upsertMany(games);
@@ -86,14 +52,26 @@ describe("Game Repository", () => {
   });
 
   it("persists a game and eager load its developers when requested", () => {
-    assertRelationshipLoad(factory.game.buildGame(), "developers");
+    assertRelationshipLoad(factory.getGame().buildGame(), "developers");
   });
 
   it("persists a game and eager load its publishers when requested", () => {
-    assertRelationshipLoad(factory.game.buildGame(), "publishers");
+    assertRelationshipLoad(factory.getGame().buildGame(), "publishers");
   });
 
   it("persists a game and eager load its genres when requested", () => {
-    assertRelationshipLoad(factory.game.buildGame(), "genres");
+    assertRelationshipLoad(factory.getGame().buildGame(), "genres");
+  });
+
+  it("returns game manifest data", () => {
+    // Arrange
+    const games = factory.getGame().buildGameList(200);
+    repository.game.upsertMany(games);
+    // Act
+    const manifestData = repository.game.getManifestData();
+    const randomManifestGame = faker.helpers.arrayElement(manifestData);
+    // Assert
+    expect(manifestData.length).toBeGreaterThanOrEqual(games.length);
+    expect(games.map((g) => g.getId())).toContain(randomManifestGame.Id);
   });
 });

@@ -53,9 +53,10 @@ export const repositoryRun = <T>(props: {
   db: DatabaseSync;
   fn: (props: { db: DatabaseSync }) => T;
   logService: LogService;
+  shouldLog?: boolean;
   context?: string;
 }) => {
-  const { db, fn, logService, context } = props;
+  const { db, fn, logService, shouldLog, context } = props;
   const start = performance.now();
   try {
     const result = fn({ db });
@@ -63,8 +64,11 @@ export const repositoryRun = <T>(props: {
     const message = `Repository call ${
       context ? context : ""
     } took ${duration.toFixed(1)}ms`;
-    if (duration >= PERFORMANCE_WARN_THRESHOLD_MS) logService.warning(message);
-    else logService.debug(message);
+    if (shouldLog) {
+      if (duration >= PERFORMANCE_WARN_THRESHOLD_MS)
+        logService.warning(message);
+      else logService.debug(message);
+    }
     return result;
   } catch (error) {
     const duration = performance.now() - start;
@@ -82,11 +86,13 @@ export const makeRepositoryBase = ({
   getDb,
   logService,
 }: MakeRepositoryBaseDeps) => {
-  const db = getDb();
-
   return {
-    runTransaction: (fn: () => void) => repositoryTransaction({ db, fn }),
-    run: <T>(fn: (props: { db: DatabaseSync }) => T, context?: string) =>
-      repositoryRun({ logService, fn, context, db }),
+    runTransaction: (fn: () => void) =>
+      repositoryTransaction({ db: getDb(), fn }),
+    run: <T>(
+      fn: (props: { db: DatabaseSync }) => T,
+      context?: string,
+      shouldLog?: boolean
+    ) => repositoryRun({ logService, fn, context, shouldLog, db: getDb() }),
   };
 };

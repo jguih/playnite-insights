@@ -1,6 +1,6 @@
 import { Game, GameId, GameRelationship } from "../domain/game.entity";
 import type { GameFilters } from "../domain/game.types";
-import type { GameManifestData } from "../domain/types/game-manifest-data";
+import type { GameManifestData } from "./game.repository";
 
 export type GameRepositoryEagerLoadProps = {
   load?: Partial<Record<GameRelationship, boolean>>;
@@ -10,7 +10,7 @@ export type GameRepository = {
   remove: (gameId: string) => boolean;
   exists: (gameId: string) => boolean;
   getById: (id: string, props?: GameRepositoryEagerLoadProps) => Game | null;
-  getManifestData: () => GameManifestData | null;
+  getManifestData: () => GameManifestData;
   getTotal: (filters?: GameFilters) => number;
   getTotalPlaytimeSeconds: (filters?: GameFilters) => number;
   all: (props?: GameRepositoryEagerLoadProps) => Game[];

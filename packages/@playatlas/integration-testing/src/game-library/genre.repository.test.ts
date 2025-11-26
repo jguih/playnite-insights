@@ -1,12 +1,11 @@
 import { makeGenreRepository } from "@playatlas/game-library/infra";
 import { makeGenreFactory } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
-import { getDatabaseConnection } from "@playatlas/system/infra";
+import { getDb } from "../vitest.setup";
 
-const db = getDatabaseConnection({ inMemory: true });
 const genreFactory = makeGenreFactory();
 const genreRepo = makeGenreRepository({
-  getDb: () => db,
+  getDb,
   logService: makeConsoleLogService("GenreRepository"),
 });
 
