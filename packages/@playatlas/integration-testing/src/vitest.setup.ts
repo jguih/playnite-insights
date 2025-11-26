@@ -3,6 +3,7 @@ import {
   makeCompletionStatusRepository,
   makeGameRepository,
   makeGenreRepository,
+  makePlatformRepository,
 } from "@playatlas/game-library/infra";
 import {
   GameFactory,
@@ -10,6 +11,7 @@ import {
   makeCompletionStatusFactory,
   makeGameFactory,
   makeGenreFactory,
+  makePlatformFactory,
 } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
 import { getSystemConfig } from "@playatlas/system/domain";
@@ -51,6 +53,10 @@ const repository = {
     getDb,
     logService: makeConsoleLogService("GenreRepository"),
   }),
+  platform: makePlatformRepository({
+    getDb,
+    logService: makeConsoleLogService("PlatformRepository"),
+  }),
 };
 export const getRepositories = () => repository;
 
@@ -59,6 +65,7 @@ const makeFactories = () => {
   const _genre = makeGenreFactory();
   const _company = makeCompanyFactory();
   let _gameFactory: GameFactory | null = null;
+  const _platform = makePlatformFactory();
 
   return {
     getCompletionStatus: () => _completionStatus,
@@ -71,6 +78,7 @@ const makeFactories = () => {
     setGame: (newFactory: GameFactory) => {
       _gameFactory = newFactory;
     },
+    getPlatform: () => _platform,
   };
 };
 const factory = makeFactories();

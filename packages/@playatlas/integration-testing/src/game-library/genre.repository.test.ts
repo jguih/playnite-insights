@@ -1,21 +1,20 @@
-import { makeGenreRepository } from "@playatlas/game-library/infra";
-import { makeGenreFactory } from "@playatlas/game-library/testing";
-import { makeConsoleLogService } from "@playatlas/system/application";
-import { getDb } from "../vitest.setup";
+import { getFactories, getRepositories } from "../vitest.setup";
 
-const genreFactory = makeGenreFactory();
-const genreRepo = makeGenreRepository({
-  getDb,
-  logService: makeConsoleLogService("GenreRepository"),
-});
+let repository: ReturnType<typeof getRepositories>;
+let factory: ReturnType<typeof getFactories>;
 
 describe("Genre Repository", () => {
+  beforeEach(() => {
+    repository = getRepositories();
+    factory = getFactories();
+  });
+
   it("adds a new genre", () => {
     // Arrange
-    const genre = genreFactory.buildGenre();
+    const genre = factory.getGenre().buildGenre();
     // Act
-    genreRepo.add(genre);
-    const addedGenre = genreRepo.getById(genre.getId());
+    repository.genre.add(genre);
+    const addedGenre = repository.genre.getById(genre.getId());
     // Assert
     expect(addedGenre?.getId()).toBe(genre.getId());
     expect(addedGenre?.getName()).toBe(genre.getName());
@@ -24,20 +23,20 @@ describe("Genre Repository", () => {
   it("returns all genres", () => {
     // Arrange
     const newGenresCount = 200;
-    const newGenres = genreFactory.buildGenreList(newGenresCount);
+    const newGenres = factory.getGenre().buildGenreList(newGenresCount);
     // Act
-    genreRepo.upsertMany(newGenres);
-    const genres = genreRepo.all();
+    repository.genre.upsertMany(newGenres);
+    const genres = repository.genre.all();
     // Assert
     expect(genres.length).toBeGreaterThanOrEqual(newGenresCount);
   });
 
   it("checks if a genre exists", () => {
     // Arrange
-    const genre = genreFactory.buildGenre();
+    const genre = factory.getGenre().buildGenre();
     // Act
-    genreRepo.add(genre);
-    const exists = genreRepo.exists(genre.getId());
+    repository.genre.add(genre);
+    const exists = repository.genre.exists(genre.getId());
     // Assert
     expect(exists).toBe(true);
   });
