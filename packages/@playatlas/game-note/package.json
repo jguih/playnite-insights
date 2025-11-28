@@ -8,10 +8,6 @@
     "./core": "./src/core/index.ts",
     "./infra": "./src/infra/index.ts"
   },
-  "scripts": {
-    "test:unit": "vitest run",
-    "test:watch": "vitest --watch"
-  },
   "devDependencies": {
     "@types/node": "^24.0.14"
   },

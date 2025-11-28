@@ -32,14 +32,8 @@
       "@playatlas/game-library": [
         "./packages/@playatlas/game-library"
       ],
-      "@playatlas/playnite-integration": [
-        "./packages/@playatlas/playnite-integration"
-      ],
       "@playatlas/common": [
         "./packages/@playatlas/common"
-      ],
-      "@playatlas/sync": [
-        "./packages/@playatlas/sync"
       ],
       "@playatlas/system": [
         "./packages/@playatlas/system"

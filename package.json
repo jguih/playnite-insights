@@ -13,11 +13,9 @@
     "packages/@playatlas/game-library",
     "packages/@playatlas/game-note",
     "packages/@playatlas/game-session",
-    "packages/@playatlas/playnite-integration",
     "packages/@playatlas/common",
-    "packages/@playatlas/sync",
     "packages/@playatlas/system",
-    "packages/@playatlas/integration-testing"
+    "packages/integration-testing"
   ],
   "scripts": {
     "dev": "pnpm --filter playnite-insights run dev",
@@ -25,10 +23,9 @@
     "mkdocs": "docker compose up -d --build --force-recreate app-docs",
     "build": "pnpm --filter playnite-insights run build",
     "preview": "pnpm --filter playnite-insights run preview",
-    "stage:up": "docker compose up -d --build app-stage",
-    "test:e2e": "docker compose run --rm --build app-playwright",
     "test:unit": "pnpm -r run test:unit",
     "test:integration": "pnpm -r run test:integration",
+    "test": "pnpm test:unit && pnpm test:integration",
     "release-beta": "standard-version --prerelease beta",
     "release": "standard-version",
     "prepare": "husky"

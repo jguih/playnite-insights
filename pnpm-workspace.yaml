@@ -9,9 +9,7 @@ packages:
   - "packages/@playatlas/game-library"
   - "packages/@playatlas/game-note"
   - "packages/@playatlas/game-session"
-  - "packages/@playatlas/playnite-integration"
   - "packages/@playatlas/common"
-  - "packages/@playatlas/sync"
   - "packages/@playatlas/system"
-  - "packages/@playatlas/integration-testing"
+  - "packages/integration-testing"
 injectWorkspacePackages: true

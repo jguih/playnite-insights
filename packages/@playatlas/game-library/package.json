@@ -9,10 +9,6 @@
     "./infra": "./src/infra/index.ts",
     "./testing": "./src/testing/index.ts"
   },
-  "scripts": {
-    "test:unit": "vitest run",
-    "test:watch": "vitest --watch"
-  },
   "devDependencies": {
     "@types/node": "^24.0.14",
     "@faker-js/faker": "^9.9.0"

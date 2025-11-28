@@ -63,7 +63,7 @@ export const makeGameSession = (props: MakeGameSessionProps): GameSession => {
       _status = "stale";
     },
   });
-  return newSession;
+  return Object.freeze(newSession);
 };
 
 export const makeClosedGameSession = (
