@@ -7,3 +7,4 @@ export const logLevel = {
 } as const;
 
 export type LogLevel = keyof typeof logLevel;
+export type LogLevelNumber = (typeof logLevel)[keyof typeof logLevel];

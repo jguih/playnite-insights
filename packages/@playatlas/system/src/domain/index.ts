@@ -1,1 +1,1 @@
-export * from "./system-config.entity";
+export * from "./error";

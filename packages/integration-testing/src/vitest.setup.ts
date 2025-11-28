@@ -14,14 +14,17 @@ import {
   makePlatformFactory,
 } from "@playatlas/game-library/testing";
 import { makeConsoleLogService } from "@playatlas/system/application";
-import { getSystemConfig } from "@playatlas/system/domain";
 import {
+  getSystemConfig,
   initDatabase,
   makeDatabaseConnection,
+  makeEnvService,
   makeFileSystemService,
 } from "@playatlas/system/infra";
 
-const systemConfig = getSystemConfig();
+const systemConfig = getSystemConfig({
+  envService: makeEnvService({ fs: makeFileSystemService() }),
+});
 let db = makeDatabaseConnection({ inMemory: true });
 export const getDb = () => db;
 

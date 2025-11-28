@@ -44,6 +44,9 @@
       "@playatlas/game-session": [
         "./packages/@playatlas/game-session"
       ],
+      "@playatlas/bootstrap": [
+        "./packages/@playatlas/bootstrap"
+      ]
     }
   }
 }

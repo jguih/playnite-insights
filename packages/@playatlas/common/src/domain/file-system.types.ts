@@ -11,4 +11,5 @@ export type FileSystemService = {
   constants: typeof fsAsync.constants;
   mkdir: typeof fsAsync.mkdir;
   rename: typeof fsAsync.rename;
+  isDir: (path: string) => boolean;
 };

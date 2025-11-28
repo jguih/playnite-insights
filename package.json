@@ -15,6 +15,7 @@
     "packages/@playatlas/game-session",
     "packages/@playatlas/common",
     "packages/@playatlas/system",
+    "packages/@playatlas/bootstrap",
     "packages/integration-testing"
   ],
   "scripts": {

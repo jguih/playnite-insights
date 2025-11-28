@@ -1,4 +1,5 @@
 import { type FileSystemService } from "@playatlas/common/domain";
+import { existsSync, statSync } from "fs";
 import * as fsAsync from "fs/promises";
 
 export const makeFileSystemService = (): FileSystemService => {
@@ -13,8 +14,8 @@ export const makeFileSystemService = (): FileSystemService => {
     writeFile: fsAsync.writeFile,
     constants: fsAsync.constants,
     rename: fsAsync.rename,
+    isDir: (path) => {
+      return existsSync(path) && statSync(path).isDirectory();
+    },
   };
 };
-
-export const defaultFileSystemService: FileSystemService =
-  makeFileSystemService();

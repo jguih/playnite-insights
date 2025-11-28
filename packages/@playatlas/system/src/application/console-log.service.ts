@@ -1,7 +1,7 @@
 import type { LogService } from "@playatlas/common/domain";
 import { logLevel } from "@playatlas/common/domain";
 import { ZodError } from "zod/v4";
-import { getSystemConfig } from "../domain/system-config.entity";
+import { getSystemConfig } from "../infra/system-config";
 
 export const DEFAULT_SOURCE = "General";
 
