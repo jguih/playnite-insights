@@ -1,9 +1,10 @@
-import { isValidLogLevel, logLevel } from "@playatlas/common/domain";
+import { isValidLogLevel, logLevel } from "@playatlas/common/application";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { InvalidEnvironmentVariableValueError } from "../domain/error";
 import { EnvService } from "./environment.service.port";
 import { EnvServiceDeps } from "./environment.service.types";
+import { defaultFsService } from "./file-system.service";
 
 export const makeEnvService = ({ fs }: EnvServiceDeps): EnvService => {
   const __filename = fileURLToPath(import.meta.url);
@@ -50,3 +51,5 @@ export const makeEnvService = ({ fs }: EnvServiceDeps): EnvService => {
     getLogLevel: () => _log_level,
   };
 };
+
+export const defaultEnvService = makeEnvService({ fs: defaultFsService });

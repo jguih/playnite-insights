@@ -1,14 +1,17 @@
 import { makeOpenGameSessionService } from "@playatlas/game-session/commands/open-session";
 import { makeGameSessionRepository } from "@playatlas/game-session/infra";
 import { makeConsoleLogService } from "@playatlas/system/application";
-import { getSystemConfig } from "@playatlas/system/domain";
 import {
+  getSystemConfig,
   initDatabase,
   makeDatabaseConnection,
+  makeEnvService,
   makeFileSystemService,
 } from "@playatlas/system/infra";
 
-const systemConfig = getSystemConfig();
+const systemConfig = getSystemConfig({
+  envService: makeEnvService({ fs: makeFileSystemService() }),
+});
 const db = makeDatabaseConnection({ inMemory: true });
 const repository = makeGameSessionRepository({
   getDb: () => db,

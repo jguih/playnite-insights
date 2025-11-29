@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import type { LogService } from "../domain/log-service.types";
+import type { LogService } from "../application/log-service.port";
 
 export type BaseRepositoryDeps = {
   logService: LogService;

@@ -1,4 +1,7 @@
-import { createRelationship, Relationship } from "@playatlas/common/domain";
+import {
+  createRelationship,
+  type Relationship,
+} from "@playatlas/common/common";
 import { CompanyId } from "./company.entity";
 import { MakeGameProps } from "./game.entity.types";
 import { GenreId } from "./genre.entity";

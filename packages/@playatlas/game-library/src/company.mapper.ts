@@ -1,4 +1,4 @@
-import { EntityMapper } from "@playatlas/common/domain";
+import { type EntityMapper } from "@playatlas/common/application";
 import { Company, makeCompany } from "./domain/company.entity";
 import { CompanyModel } from "./infra/company.repository";
 

@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
-import type { LogService } from "../domain/log-service.types";
-import { MakeRepositoryBaseDeps } from "./types";
+import type { LogService } from "../application/log-service.port";
+import { MakeRepositoryBaseDeps } from "./repository.types";
 
 const PERFORMANCE_WARN_THRESHOLD_MS = 50;
 

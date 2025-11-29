@@ -1,5 +1,7 @@
-import { type FileSystemService } from "@playatlas/common/domain";
+import { type FileSystemService } from "@playatlas/common/application";
+import { makeConsoleLogService } from "@playatlas/system/application";
 import {
+  initDatabase,
   makeDatabaseConnection,
   makeEnvService,
   makeFileSystemService,
@@ -14,6 +16,10 @@ export type PlayAtlasApiInfra = Readonly<{
   getEnvService: () => EnvService;
   getSystemConfig: () => SystemConfig;
   getDb: () => DatabaseSync;
+  /**
+   * Initialize the database, creating the SQLite db file and running migrations
+   */
+  initDb: () => Promise<void>;
 }>;
 
 export const bootstrapInfra = () => {
@@ -27,6 +33,13 @@ export const bootstrapInfra = () => {
     getEnvService: () => _env_service,
     getSystemConfig: () => _systemConfig,
     getDb: () => _db,
+    initDb: async () =>
+      initDatabase({
+        db: _db,
+        fileSystemService: _fs_service,
+        logService: makeConsoleLogService("InitDatabase"),
+        migrationsDir: _systemConfig.getMigrationsDir(),
+      }),
   };
   return Object.freeze(infra);
 };

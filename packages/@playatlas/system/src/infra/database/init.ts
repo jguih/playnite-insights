@@ -1,4 +1,7 @@
-import type { FileSystemService, LogService } from "@playatlas/common/domain";
+import type {
+  FileSystemService,
+  LogService,
+} from "@playatlas/common/application";
 import { DatabaseSync } from "node:sqlite";
 import { basename, join } from "path";
 import { exit } from "process";

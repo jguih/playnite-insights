@@ -1,9 +1,8 @@
-import type { LogService } from "@playatlas/common/domain";
-import { logLevel } from "@playatlas/common/domain";
+import { logLevel, type LogService } from "@playatlas/common/application";
 import { ZodError } from "zod/v4";
 import { getSystemConfig } from "../infra/system-config";
 
-export const DEFAULT_SOURCE = "General";
+export const DEFAULT_SOURCE = "PlayAtlasServer";
 
 export const makeConsoleLogService = (
   source: string = DEFAULT_SOURCE

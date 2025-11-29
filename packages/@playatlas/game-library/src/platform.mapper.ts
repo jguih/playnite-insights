@@ -1,4 +1,4 @@
-import { EntityMapper } from "@playatlas/common/domain";
+import { type EntityMapper } from "@playatlas/common/application";
 import { makePlatform, Platform } from "./domain/platform.entity";
 import { PlatformModel } from "./infra/platform.repository";
 

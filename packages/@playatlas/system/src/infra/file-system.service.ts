@@ -1,4 +1,4 @@
-import { type FileSystemService } from "@playatlas/common/domain";
+import { type FileSystemService } from "@playatlas/common/application";
 import { existsSync, statSync } from "fs";
 import * as fsAsync from "fs/promises";
 
@@ -19,3 +19,5 @@ export const makeFileSystemService = (): FileSystemService => {
     },
   };
 };
+
+export const defaultFsService = makeFileSystemService();

@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     "./domain": "./src/domain/index.ts",
-    "./infra": "./src/infra/index.ts"
+    "./infra": "./src/infra/index.ts",
+    "./application": "./src/application/index.ts",
+    "./common": "./src/common/index.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.14"

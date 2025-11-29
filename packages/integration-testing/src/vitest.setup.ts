@@ -22,9 +22,9 @@ import {
   makeFileSystemService,
 } from "@playatlas/system/infra";
 
-const systemConfig = getSystemConfig({
-  envService: makeEnvService({ fs: makeFileSystemService() }),
-});
+const fs = makeFileSystemService();
+const envService = makeEnvService({ fs });
+const systemConfig = getSystemConfig({ envService });
 let db = makeDatabaseConnection({ inMemory: true });
 export const getDb = () => db;
 

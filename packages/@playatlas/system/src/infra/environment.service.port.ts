@@ -1,4 +1,4 @@
-import { LogLevelNumber } from "@playatlas/common/domain";
+import { type LogLevelNumber } from "@playatlas/common/application";
 
 export type EnvService = {
   getDataDir: () => string;

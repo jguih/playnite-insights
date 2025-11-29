@@ -306,6 +306,12 @@ importers:
       '@lucide/svelte':
         specifier: ^0.525.0
         version: 0.525.0(svelte@5.35.7)
+      '@playatlas/bootstrap':
+        specifier: workspace:*
+        version: link:../packages/@playatlas/bootstrap
+      '@playatlas/game-library':
+        specifier: workspace:*
+        version: link:../packages/@playatlas/game-library
       '@playnite-insights/core':
         specifier: workspace:*
         version: link:../packages/@playnite-insights/core

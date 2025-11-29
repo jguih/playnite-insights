@@ -1,4 +1,4 @@
-import { EntityMapper } from "@playatlas/common/domain";
+import { type EntityMapper } from "@playatlas/common/application";
 import { Genre, makeGenre } from "./domain/genre.entity";
 import { GenreModel } from "./infra/genre.repository";
 

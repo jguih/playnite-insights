@@ -1,6 +1,7 @@
-import { EntityMapper } from "@playatlas/common/domain";
+import { type EntityMapper } from "@playatlas/common/application";
 import { MakeGameRelationshipProps } from "./domain";
 import { type Game, makeGame } from "./domain/game.entity";
+import { GameResponseDto } from "./dtos/game.response";
 import { type GameModel } from "./infra";
 
 export type GameMapper = EntityMapper<Game, GameModel> & {
@@ -8,6 +9,33 @@ export type GameMapper = EntityMapper<Game, GameModel> & {
     model: GameModel,
     relationships: MakeGameRelationshipProps
   ) => Game;
+  toDto: (game: Game) => GameResponseDto;
+  toDtoList: (games: Game[]) => GameResponseDto[];
+};
+
+const _toDto = (game: Game): GameResponseDto => {
+  const dto: GameResponseDto = {
+    Id: game.getId(),
+    Name: game.getName(),
+    Description: game.getDescription(),
+    ReleaseDate: game.getReleaseDate()?.toISOString() ?? null,
+    Playtime: game.getPlaytime(),
+    LastActivity: game.getLastActivity()?.toISOString() ?? null,
+    Added: game.getAdded()?.toISOString() ?? null,
+    InstallDirectory: game.getInstallDirectory(),
+    IsInstalled: +game.isInstalled(),
+    BackgroundImage: game.getBackgroundImage(),
+    CoverImage: game.getCoverImage(),
+    Icon: game.getIcon(),
+    Hidden: +game.isHidden(),
+    CompletionStatusId: game.getCompletionStatusId(),
+    ContentHash: game.getContentHash(),
+    Developers: game.relationships.developers.get(),
+    Publishers: game.relationships.publishers.get(),
+    Genres: game.relationships.genres.get(),
+    Platforms: game.relationships.platforms.get(),
+  };
+  return dto;
 };
 
 export const gameMapper: GameMapper = {
@@ -57,5 +85,11 @@ export const gameMapper: GameMapper = {
       contentHash: game.ContentHash,
     });
     return entity;
+  },
+  toDto: _toDto,
+  toDtoList: (games: Game[]): GameResponseDto[] => {
+    const dtos: GameResponseDto[] = [];
+    for (const game of games) dtos.push(_toDto(game));
+    return dtos;
   },
 };
