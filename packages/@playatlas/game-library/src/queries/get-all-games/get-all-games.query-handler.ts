@@ -7,12 +7,24 @@ import {
 } from "./get-all-games.query.types";
 import { GetAllGamesQuery } from "./get-all-games.request.dto";
 
+export type GetAllGamesQueryHandler = QueryHandler<
+  GetAllGamesQuery,
+  GetAllGamesResult
+>;
+
 export const makeGetAllGamesQueryHandler = ({
   gameRepository,
-}: GetAllGamesQueryHandlerDeps): QueryHandler<GetAllGamesQuery, GetAllGamesResult> => {
+}: GetAllGamesQueryHandlerDeps): GetAllGamesQueryHandler => {
   return {
     execute: ({ ifNoneMatch }) => {
-      const games = gameRepository.all();
+      const games = gameRepository.all({
+        load: {
+          developers: true,
+          genres: true,
+          platforms: true,
+          publishers: true,
+        },
+      });
 
       if (!games || games.length === 0) {
         return { type: "ok", data: [], etag: '"empty"' };

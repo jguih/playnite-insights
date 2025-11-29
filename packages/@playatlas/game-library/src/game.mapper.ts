@@ -14,6 +14,18 @@ export type GameMapper = EntityMapper<Game, GameModel> & {
 };
 
 const _toDto = (game: Game): GameResponseDto => {
+  const Developers = game.relationships.developers.isLoaded()
+    ? game.relationships.developers.get()
+    : [];
+  const Publishers = game.relationships.publishers.isLoaded()
+    ? game.relationships.publishers.get()
+    : [];
+  const Genres = game.relationships.genres.isLoaded()
+    ? game.relationships.genres.get()
+    : [];
+  const Platforms = game.relationships.platforms.isLoaded()
+    ? game.relationships.platforms.get()
+    : [];
   const dto: GameResponseDto = {
     Id: game.getId(),
     Name: game.getName(),
@@ -30,10 +42,10 @@ const _toDto = (game: Game): GameResponseDto => {
     Hidden: +game.isHidden(),
     CompletionStatusId: game.getCompletionStatusId(),
     ContentHash: game.getContentHash(),
-    Developers: game.relationships.developers.get(),
-    Publishers: game.relationships.publishers.get(),
-    Genres: game.relationships.genres.get(),
-    Platforms: game.relationships.platforms.get(),
+    Developers,
+    Publishers,
+    Genres,
+    Platforms,
   };
   return dto;
 };
