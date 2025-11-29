@@ -10,11 +10,15 @@ const assertRelationshipLoad = (
   relationshipKey: GameRelationship
 ) => {
   repository.upsertMany([game]);
+
   const loaded = repository.getById(game.getId(), {
     load: { [relationshipKey]: true },
   });
-  const originalIds = game.relationships[relationshipKey].get();
+  const originalIds = game.relationships[relationshipKey].isLoaded()
+    ? game.relationships[relationshipKey].get()
+    : [];
   const loadedIds = loaded?.relationships[relationshipKey].get();
+
   expect(loaded).toBeTruthy();
   expect(loaded?.getId()).toBe(game.getId());
   expect(loaded?.relationships[relationshipKey].isLoaded()).toBeTruthy();
@@ -62,6 +66,10 @@ describe("Game Repository", () => {
     assertRelationshipLoad(factory.getGameFactory().buildGame(), "genres");
   });
 
+  it("persists a game and eager load its platforms when requested", () => {
+    assertRelationshipLoad(factory.getGameFactory().buildGame(), "platforms");
+  });
+
   it("returns game manifest data", () => {
     // Arrange
     const games = factory.getGameFactory().buildGameList(200);
@@ -72,5 +80,20 @@ describe("Game Repository", () => {
     // Assert
     expect(manifestData.length).toBeGreaterThanOrEqual(games.length);
     expect(games.map((g) => g.getId())).toContain(randomManifestGame.Id);
+  });
+
+  it("returns all games with loaded relationships", () => {
+    // Arrange
+    const games = factory.getGameFactory().buildGameList(400);
+    repository.upsertMany(games);
+    // Act
+    const allGames = repository.all({ load: true });
+    // Assert
+    expect(allGames.length).toBeGreaterThanOrEqual(games.length);
+    (
+      ["developers", "genres", "platforms", "publishers"] as GameRelationship[]
+    ).forEach((r) => {
+      expect(allGames.every((g) => g.relationships[r].isLoaded())).toBeTruthy();
+    });
   });
 });

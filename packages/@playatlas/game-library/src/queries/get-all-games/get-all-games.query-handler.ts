@@ -17,14 +17,7 @@ export const makeGetAllGamesQueryHandler = ({
 }: GetAllGamesQueryHandlerDeps): GetAllGamesQueryHandler => {
   return {
     execute: ({ ifNoneMatch }) => {
-      const games = gameRepository.all({
-        load: {
-          developers: true,
-          genres: true,
-          platforms: true,
-          publishers: true,
-        },
-      });
+      const games = gameRepository.all({ load: true });
 
       if (!games || games.length === 0) {
         return { type: "ok", data: [], etag: '"empty"' };

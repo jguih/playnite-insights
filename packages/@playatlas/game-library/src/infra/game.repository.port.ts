@@ -3,7 +3,7 @@ import type { GameFilters } from "../domain/game.types";
 import type { GameManifestData } from "./game.repository";
 
 export type GameRepositoryEagerLoadProps = {
-  load?: Partial<Record<GameRelationship, boolean>>;
+  load?: Partial<Record<GameRelationship, boolean>> | boolean;
 };
 
 export type GameRepository = {

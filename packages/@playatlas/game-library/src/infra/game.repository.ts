@@ -4,7 +4,11 @@ import {
 } from "@playatlas/common/infra";
 import z from "zod";
 import type { CompanyId } from "../domain/company.entity";
-import type { GameId, GameRelationshipMap } from "../domain/game.entity";
+import type {
+  GameId,
+  GameRelationship,
+  GameRelationshipMap,
+} from "../domain/game.entity";
 import type { GameFilters, GameSorting } from "../domain/game.types";
 import type { GenreId } from "../domain/genre.entity";
 import type { PlatformId } from "../domain/platform.entity";
@@ -13,7 +17,10 @@ import {
   GAME_RELATIONSHIP_META,
   TABLE_NAME,
 } from "./game.repository.constants";
-import type { GameRepository } from "./game.repository.port";
+import type {
+  GameRepository,
+  GameRepositoryEagerLoadProps,
+} from "./game.repository.port";
 import type {
   GetRelationshipsForFn,
   UpdateRelationshipsForFn,
@@ -164,6 +171,15 @@ export const makeGameRepository = (
     );
   };
 
+  const _shouldLoadRelationship = (
+    load: GameRepositoryEagerLoadProps["load"],
+    relationship: GameRelationship
+  ): boolean => {
+    if (typeof load === "boolean") return load;
+    else if (load?.[relationship] === true) return true;
+    else return false;
+  };
+
   const getTotal: GameRepository["getTotal"] = (filters) => {
     return base.run(({ db }) => {
       let query = `
@@ -187,7 +203,7 @@ export const makeGameRepository = (
       if (!gameModel) return null;
 
       let developerIds: CompanyId[] | null = null;
-      if (props.load?.developers)
+      if (_shouldLoadRelationship(props.load, "developers"))
         developerIds =
           _getRelationshipsFor({
             relationship: "developers",
@@ -195,7 +211,7 @@ export const makeGameRepository = (
           }).get(gameModel.Id) ?? [];
 
       let publisherIds: CompanyId[] | null = null;
-      if (props.load?.publishers)
+      if (_shouldLoadRelationship(props.load, "publishers"))
         publisherIds =
           _getRelationshipsFor({
             relationship: "publishers",
@@ -203,7 +219,7 @@ export const makeGameRepository = (
           }).get(gameModel.Id) ?? [];
 
       let genreIds: GenreId[] | null = null;
-      if (props.load?.genres)
+      if (_shouldLoadRelationship(props.load, "genres"))
         genreIds =
           _getRelationshipsFor({
             relationship: "genres",
@@ -211,7 +227,7 @@ export const makeGameRepository = (
           }).get(gameModel.Id) ?? [];
 
       let platformIds: PlatformId[] | null = null;
-      if (props.load?.platforms)
+      if (_shouldLoadRelationship(props.load, "platforms"))
         platformIds =
           _getRelationshipsFor({
             relationship: "platforms",
@@ -397,44 +413,56 @@ export const makeGameRepository = (
       const gameModelsIds = gameModels.map((m) => m.Id);
 
       let developerIdsMap: Map<GameId, CompanyId[]> = new Map();
-      if (props.load?.developers)
+      if (_shouldLoadRelationship(props.load, "developers"))
         developerIdsMap = _getRelationshipsFor({
           relationship: "developers",
           gameIds: gameModelsIds,
         });
 
       let publisherIdsMap: Map<GameId, CompanyId[]> = new Map();
-      if (props.load?.publishers)
+      if (_shouldLoadRelationship(props.load, "publishers"))
         publisherIdsMap = _getRelationshipsFor({
           relationship: "publishers",
           gameIds: gameModelsIds,
         });
 
       let genreIdsMap: Map<GameId, GenreId[]> = new Map();
-      if (props.load?.genres)
+      if (_shouldLoadRelationship(props.load, "genres"))
         genreIdsMap = _getRelationshipsFor({
           relationship: "genres",
           gameIds: gameModelsIds,
         });
 
       let platformIdsMap: Map<GameId, PlatformId[]> = new Map();
-      if (props.load?.platforms)
+      if (_shouldLoadRelationship(props.load, "platforms"))
         platformIdsMap = _getRelationshipsFor({
           relationship: "platforms",
           gameIds: gameModelsIds,
         });
 
       const games = gameModels.map((gameModel) => {
-        const developerIds: CompanyId[] | null = props.load?.developers
+        const developerIds: CompanyId[] | null = _shouldLoadRelationship(
+          props.load,
+          "developers"
+        )
           ? developerIdsMap.get(gameModel.Id) ?? []
           : null;
-        const publisherIds: CompanyId[] | null = props.load?.publishers
+        const publisherIds: CompanyId[] | null = _shouldLoadRelationship(
+          props.load,
+          "publishers"
+        )
           ? publisherIdsMap.get(gameModel.Id) ?? []
           : null;
-        const genreIds: GenreId[] | null = props.load?.genres
+        const genreIds: GenreId[] | null = _shouldLoadRelationship(
+          props.load,
+          "genres"
+        )
           ? genreIdsMap.get(gameModel.Id) ?? []
           : null;
-        const platformIds: PlatformId[] | null = props.load?.platforms
+        const platformIds: PlatformId[] | null = _shouldLoadRelationship(
+          props.load,
+          "platforms"
+        )
           ? platformIdsMap.get(gameModel.Id) ?? []
           : null;
         return gameMapper.toDomain(gameModel, {

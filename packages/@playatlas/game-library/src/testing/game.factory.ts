@@ -1,14 +1,16 @@
 import { faker } from "@faker-js/faker";
 import { type CompanyId } from "../domain/company.entity";
-import { CompletionStatusId } from "../domain/completion-status.entity";
+import { type CompletionStatusId } from "../domain/completion-status.entity";
 import { makeGame, type Game } from "../domain/game.entity";
 import { type MakeGameProps } from "../domain/game.entity.types";
-import { GenreId } from "../domain/genre.entity";
+import { type GenreId } from "../domain/genre.entity";
+import { type PlatformId } from "../domain/platform.entity";
 
 export type GameFactoryDeps = {
   completionStatusOptions: CompletionStatusId[];
   companyOptions: CompanyId[];
   genreOptions: GenreId[];
+  platformOptions: PlatformId[];
 };
 
 export type GameFactory = {
@@ -20,6 +22,7 @@ export const makeGameFactory = ({
   completionStatusOptions,
   companyOptions,
   genreOptions,
+  platformOptions,
 }: GameFactoryDeps): GameFactory => {
   const buildGame = (props: Partial<MakeGameProps> = {}): Game => {
     const completionStatusId = props?.completionStatusId
@@ -42,6 +45,11 @@ export const makeGameFactory = ({
       : genreOptions.length > 0
       ? faker.helpers.arrayElements(genreOptions, { min: 1, max: 15 })
       : null;
+    const platformIds = props.platformIds
+      ? props.platformIds
+      : platformOptions.length > 0
+      ? faker.helpers.arrayElements(platformOptions, { min: 1, max: 5 })
+      : null;
 
     return makeGame({
       id: props?.id ?? faker.string.uuid(),
@@ -62,7 +70,7 @@ export const makeGameFactory = ({
       completionStatusId,
       developerIds,
       genreIds,
-      platformIds: props.platformIds ?? null,
+      platformIds,
       publisherIds,
     });
   };
