@@ -15,6 +15,7 @@ export const makeEnvService = ({ fs }: EnvServiceDeps): EnvService => {
     dataDir: process.env.PLAYATLAS_DATA_DIR,
     migrationsDir: process.env.PLAYATLAS_MIGRATIONS_DIR,
     logLevel: process.env.PLAYATLAS_LOG_LEVEL,
+    useInMemoryDb: process.env.PLAYATLAS_USE_IN_MEMORY_DB,
   };
 
   const default_migrations_dir = join(
@@ -30,6 +31,7 @@ export const makeEnvService = ({ fs }: EnvServiceDeps): EnvService => {
   const _log_level = isValidLogLevel(log_level_as_number)
     ? log_level_as_number
     : logLevel.info;
+  const _use_in_memory_db = Boolean(env.useInMemoryDb);
 
   return {
     getDataDir: () => {
@@ -49,6 +51,7 @@ export const makeEnvService = ({ fs }: EnvServiceDeps): EnvService => {
       return _migrations_dir;
     },
     getLogLevel: () => _log_level,
+    getUseInMemoryDb: () => _use_in_memory_db,
   };
 };
 

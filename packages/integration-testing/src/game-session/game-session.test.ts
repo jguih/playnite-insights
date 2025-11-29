@@ -1,6 +1,6 @@
 import { makeOpenGameSessionService } from "@playatlas/game-session/commands/open-session";
 import { makeGameSessionRepository } from "@playatlas/game-session/infra";
-import { makeConsoleLogService } from "@playatlas/system/application";
+import { makeLogService } from "@playatlas/system/application";
 import {
   getSystemConfig,
   initDatabase,
@@ -15,12 +15,12 @@ const systemConfig = getSystemConfig({
 const db = makeDatabaseConnection({ inMemory: true });
 const repository = makeGameSessionRepository({
   getDb: () => db,
-  logService: makeConsoleLogService("GameSessionRepository"),
+  logService: makeLogService("GameSessionRepository"),
 });
 const session = {
   open: makeOpenGameSessionService({
     repository,
-    logService: makeConsoleLogService("OpenGameSessionService"),
+    logService: makeLogService("OpenGameSessionService"),
   }),
 };
 
@@ -33,7 +33,7 @@ describe("Game Session Service", () => {
     await initDatabase({
       db,
       fileSystemService: makeFileSystemService(),
-      logService: makeConsoleLogService("InitDatabase"),
+      logService: makeLogService("InitDatabase"),
       migrationsDir: systemConfig.getMigrationsDir(),
     });
   });

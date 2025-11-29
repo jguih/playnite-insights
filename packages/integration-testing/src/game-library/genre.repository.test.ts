@@ -1,20 +1,19 @@
-import { getFactories, getRepositories } from "../vitest.setup";
+import { type GenreRepository } from "@playatlas/game-library/infra";
+import { api, factory } from "../vitest.setup";
 
-let repository: ReturnType<typeof getRepositories>;
-let factory: ReturnType<typeof getFactories>;
+let repository: GenreRepository = api.gameLibrary.getGenreRepository();
 
 describe("Genre Repository", () => {
   beforeEach(() => {
-    repository = getRepositories();
-    factory = getFactories();
+    repository = api.gameLibrary.getGenreRepository();
   });
 
   it("adds a new genre", () => {
     // Arrange
-    const genre = factory.getGenre().buildGenre();
+    const genre = factory.getGenreFactory().buildGenre();
     // Act
-    repository.genre.add(genre);
-    const addedGenre = repository.genre.getById(genre.getId());
+    repository.add(genre);
+    const addedGenre = repository.getById(genre.getId());
     // Assert
     expect(addedGenre?.getId()).toBe(genre.getId());
     expect(addedGenre?.getName()).toBe(genre.getName());
@@ -23,20 +22,20 @@ describe("Genre Repository", () => {
   it("returns all genres", () => {
     // Arrange
     const newGenresCount = 200;
-    const newGenres = factory.getGenre().buildGenreList(newGenresCount);
+    const newGenres = factory.getGenreFactory().buildGenreList(newGenresCount);
     // Act
-    repository.genre.upsertMany(newGenres);
-    const genres = repository.genre.all();
+    repository.upsertMany(newGenres);
+    const genres = repository.all();
     // Assert
     expect(genres.length).toBeGreaterThanOrEqual(newGenresCount);
   });
 
   it("checks if a genre exists", () => {
     // Arrange
-    const genre = factory.getGenre().buildGenre();
+    const genre = factory.getGenreFactory().buildGenre();
     // Act
-    repository.genre.add(genre);
-    const exists = repository.genre.exists(genre.getId());
+    repository.add(genre);
+    const exists = repository.exists(genre.getId());
     // Assert
     expect(exists).toBe(true);
   });

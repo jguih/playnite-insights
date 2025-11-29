@@ -1,5 +1,7 @@
-import { type FileSystemService } from "@playatlas/common/application";
-import { makeConsoleLogService } from "@playatlas/system/application";
+import {
+  LogServiceFactory,
+  type FileSystemService,
+} from "@playatlas/common/application";
 import {
   initDatabase,
   makeDatabaseConnection,
@@ -16,28 +18,48 @@ export type PlayAtlasApiInfra = Readonly<{
   getEnvService: () => EnvService;
   getSystemConfig: () => SystemConfig;
   getDb: () => DatabaseSync;
+  setDb: (db: DatabaseSync) => void;
   /**
    * Initialize the database, creating the SQLite db file and running migrations
    */
   initDb: () => Promise<void>;
 }>;
 
-export const bootstrapInfra = () => {
+export type BootstrapInfraDeps = {
+  logServiceFactory: LogServiceFactory;
+};
+
+export const bootstrapInfra = ({ logServiceFactory }: BootstrapInfraDeps) => {
+  const logService = logServiceFactory.build("Infra");
   const _fs_service = makeFileSystemService();
   const _env_service = makeEnvService({ fs: _fs_service });
   const _systemConfig = makeSystemConfig({ envService: _env_service });
-  const _db = makeDatabaseConnection({ path: _systemConfig.getDbPath() });
+
+  if (_env_service.getUseInMemoryDb())
+    logService.warning("Using in memory database");
+
+  let _db = _env_service.getUseInMemoryDb()
+    ? makeDatabaseConnection({ inMemory: true })
+    : makeDatabaseConnection({ path: _systemConfig.getDbPath() });
+  const _init_db: PlayAtlasApiInfra["initDb"] = () =>
+    initDatabase({
+      db: _db,
+      fileSystemService: _fs_service,
+      logService: logServiceFactory.build("InitDatabase"),
+      migrationsDir: _systemConfig.getMigrationsDir(),
+    });
 
   const infra: PlayAtlasApiInfra = {
     getFsService: () => _fs_service,
     getEnvService: () => _env_service,
     getSystemConfig: () => _systemConfig,
     getDb: () => _db,
-    initDb: async () =>
+    setDb: (db) => (_db = db),
+    initDb: () =>
       initDatabase({
         db: _db,
         fileSystemService: _fs_service,
-        logService: makeConsoleLogService("InitDatabase"),
+        logService: logServiceFactory.build("InitDatabase"),
         migrationsDir: _systemConfig.getMigrationsDir(),
       }),
   };

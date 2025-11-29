@@ -4,4 +4,5 @@ export type EnvService = {
   getDataDir: () => string;
   getMigrationsDir: () => string;
   getLogLevel: () => LogLevelNumber;
+  getUseInMemoryDb: () => boolean;
 };

@@ -1,1 +1,2 @@
-export * from "./console-log.service";
+export * from "./log-service.factory";
+export * from "./log.service";

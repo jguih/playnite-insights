@@ -1,20 +1,19 @@
-import { getFactories, getRepositories } from "../vitest.setup";
+import { PlatformRepository } from "@playatlas/game-library/infra";
+import { api, factory } from "../vitest.setup";
 
-let repository: ReturnType<typeof getRepositories>;
-let factory: ReturnType<typeof getFactories>;
+let repository: PlatformRepository = api.gameLibrary.getPlatformRepository();
 
 describe("Platform Repository", () => {
   beforeEach(() => {
-    repository = getRepositories();
-    factory = getFactories();
+    repository = api.gameLibrary.getPlatformRepository();
   });
 
   it("adds a new platform", () => {
     // Arrange
-    const platform = factory.getPlatform().buildPlatform();
+    const platform = factory.getPlatformFactory().buildPlatform();
     // Act
-    repository.platform.add(platform);
-    const addedPlatform = repository.platform.getById(platform.getId());
+    repository.add(platform);
+    const addedPlatform = repository.getById(platform.getId());
     // Assert
     expect(addedPlatform).not.toBe(null);
     expect(addedPlatform?.getId()).toBe(platform.getId());
@@ -28,21 +27,21 @@ describe("Platform Repository", () => {
     // Arrange
     const newPlatformsCount = 200;
     const newPlatforms = factory
-      .getPlatform()
+      .getPlatformFactory()
       .buildPlatformList(newPlatformsCount);
     // Act
-    repository.platform.upsertMany(newPlatforms);
-    const platforms = repository.genre.all();
+    repository.upsertMany(newPlatforms);
+    const platforms = repository.all();
     // Assert
     expect(platforms.length).toBeGreaterThanOrEqual(newPlatformsCount);
   });
 
   it("checks if a platform exists", () => {
     // Arrange
-    const platform = factory.getPlatform().buildPlatform();
+    const platform = factory.getPlatformFactory().buildPlatform();
     // Act
-    repository.platform.add(platform);
-    const exists = repository.platform.exists(platform.getId());
+    repository.add(platform);
+    const exists = repository.exists(platform.getId());
     // Assert
     expect(exists).toBe(true);
   });

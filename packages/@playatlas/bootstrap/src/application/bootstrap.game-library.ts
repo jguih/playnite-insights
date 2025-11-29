@@ -1,9 +1,12 @@
+import { type LogServiceFactory } from "@playatlas/common/application";
 import {
   makeCompanyRepository,
+  makeCompletionStatusRepository,
   makeGameRepository,
   makeGenreRepository,
   makePlatformRepository,
   type CompanyRepository,
+  type CompletionStatusRepository,
   type GameRepository,
   type GenreRepository,
   type PlatformRepository,
@@ -12,7 +15,6 @@ import {
   makeGetAllGamesQueryHandler,
   type GetAllGamesQueryHandler,
 } from "@playatlas/game-library/queries";
-import { makeConsoleLogService } from "@playatlas/system/application";
 import { PlayAtlasApiInfra } from "./bootstrap.infra";
 
 export type PlayAtlasApiGameLibrary = Readonly<{
@@ -20,29 +22,40 @@ export type PlayAtlasApiGameLibrary = Readonly<{
   getGenreRepository: () => GenreRepository;
   getGameRepository: () => GameRepository;
   getPlatformRepository: () => PlatformRepository;
+  getCompletionStatusRepository: () => CompletionStatusRepository;
   queries: {
     getAllGamesHandler: () => GetAllGamesQueryHandler;
   };
 }>;
 
-export type BootstrapGameLibraryDeps = { getDb: PlayAtlasApiInfra["getDb"] };
+export type BootstrapGameLibraryDeps = {
+  getDb: PlayAtlasApiInfra["getDb"];
+  logServiceFactory: LogServiceFactory;
+};
 
-export const bootstrapGameLibrary = ({ getDb }: BootstrapGameLibraryDeps) => {
+export const bootstrapGameLibrary = ({
+  getDb,
+  logServiceFactory,
+}: BootstrapGameLibraryDeps) => {
   const _company_repository = makeCompanyRepository({
     getDb,
-    logService: makeConsoleLogService("CompanyRepository"),
+    logService: logServiceFactory.build("CompanyRepository"),
   });
   const _genre_repository = makeGenreRepository({
     getDb,
-    logService: makeConsoleLogService("GenreRepository"),
+    logService: logServiceFactory.build("GenreRepository"),
   });
   const _game_repository = makeGameRepository({
     getDb,
-    logService: makeConsoleLogService("GameRepository"),
+    logService: logServiceFactory.build("GameRepository"),
   });
   const _platform_repository = makePlatformRepository({
     getDb,
-    logService: makeConsoleLogService("PlatformRepository"),
+    logService: logServiceFactory.build("PlatformRepository"),
+  });
+  const _completion_status_repository = makeCompletionStatusRepository({
+    getDb,
+    logService: logServiceFactory.build("CompletionStatusRepository"),
   });
   const _query_handler_get_all_games = makeGetAllGamesQueryHandler({
     gameRepository: _game_repository,
@@ -53,6 +66,7 @@ export const bootstrapGameLibrary = ({ getDb }: BootstrapGameLibraryDeps) => {
     getGameRepository: () => _game_repository,
     getGenreRepository: () => _genre_repository,
     getPlatformRepository: () => _platform_repository,
+    getCompletionStatusRepository: () => _completion_status_repository,
     queries: {
       getAllGamesHandler: () => _query_handler_get_all_games,
     },

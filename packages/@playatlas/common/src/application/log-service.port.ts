@@ -5,3 +5,7 @@ export type LogService = {
   success: (message: string) => void;
   debug: (message: string) => void;
 };
+
+export type LogServiceFactory = {
+  build: (context?: string) => LogService;
+};

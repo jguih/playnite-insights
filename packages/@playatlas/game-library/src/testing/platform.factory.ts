@@ -1,9 +1,17 @@
 import { faker } from "@faker-js/faker";
-import { makePlatform } from "../domain/platform.entity";
+import { makePlatform, Platform } from "../domain/platform.entity";
 import { MakePlatformProps } from "../domain/platform.entity.types";
 
-export const makePlatformFactory = () => {
-  const buildPlatform = (props: Partial<MakePlatformProps> = {}) => {
+export type PlatformFactory = {
+  buildPlatform: (props?: Partial<MakePlatformProps>) => Platform;
+  buildPlatformList: (
+    n: number,
+    props?: Partial<MakePlatformProps>
+  ) => Platform[];
+};
+
+export const makePlatformFactory = (): PlatformFactory => {
+  const buildPlatform: PlatformFactory["buildPlatform"] = (props = {}) => {
     return makePlatform({
       id: props.id ?? faker.string.uuid(),
       name: props.name ?? faker.lorem.words({ min: 1, max: 4 }),
@@ -14,9 +22,9 @@ export const makePlatformFactory = () => {
     });
   };
 
-  const buildPlatformList = (
-    n: number,
-    props: Partial<MakePlatformProps> = {}
+  const buildPlatformList: PlatformFactory["buildPlatformList"] = (
+    n,
+    props = {}
   ) => {
     return Array.from({ length: n }, () => buildPlatform(props));
   };

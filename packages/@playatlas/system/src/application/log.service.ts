@@ -4,9 +4,7 @@ import { getSystemConfig } from "../infra/system-config";
 
 export const DEFAULT_SOURCE = "PlayAtlasServer";
 
-export const makeConsoleLogService = (
-  source: string = DEFAULT_SOURCE
-): LogService => {
+export const makeLogService = (source: string = DEFAULT_SOURCE): LogService => {
   const getDateTimeString = (): string => {
     const now = new Date();
     return now.toLocaleString();
@@ -66,4 +64,4 @@ export const makeConsoleLogService = (
   };
 };
 
-export const defaultLogger = makeConsoleLogService(DEFAULT_SOURCE);
+export const defaultLogger = makeLogService(DEFAULT_SOURCE);
