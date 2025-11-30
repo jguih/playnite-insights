@@ -16,7 +16,7 @@ export const makeGetAllGamesQueryHandler = ({
   gameRepository,
 }: GetAllGamesQueryHandlerDeps): GetAllGamesQueryHandler => {
   return {
-    execute: ({ ifNoneMatch }) => {
+    execute: ({ ifNoneMatch } = {}) => {
       const games = gameRepository.all({ load: true });
 
       if (!games || games.length === 0) {

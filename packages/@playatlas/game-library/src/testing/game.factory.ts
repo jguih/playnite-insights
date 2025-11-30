@@ -24,49 +24,57 @@ export const makeGameFactory = ({
   genreOptions,
   platformOptions,
 }: GameFactoryDeps): GameFactory => {
+  const propOrDefault = <T, V>(prop: T | undefined, value: V) => {
+    if (prop === undefined) return value;
+    return prop;
+  };
+
   const buildGame = (props: Partial<MakeGameProps> = {}): Game => {
-    const completionStatusId = props?.completionStatusId
-      ? props?.completionStatusId
-      : completionStatusOptions.length > 0
-      ? faker.helpers.arrayElement(completionStatusOptions)
-      : null;
-    const developerIds = props.developerIds
-      ? props.developerIds
-      : companyOptions.length > 0
-      ? faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
-      : null;
-    const publisherIds = props.publisherIds
-      ? props.publisherIds
-      : companyOptions.length > 0
-      ? faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
-      : null;
-    const genreIds = props.genreIds
-      ? props.genreIds
-      : genreOptions.length > 0
-      ? faker.helpers.arrayElements(genreOptions, { min: 1, max: 15 })
-      : null;
-    const platformIds = props.platformIds
-      ? props.platformIds
-      : platformOptions.length > 0
-      ? faker.helpers.arrayElements(platformOptions, { min: 1, max: 5 })
-      : null;
+    const completionStatusId = propOrDefault(
+      props.completionStatusId,
+      faker.helpers.arrayElement(completionStatusOptions)
+    );
+    const developerIds = propOrDefault(
+      props.developerIds,
+      faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
+    );
+    const publisherIds = propOrDefault(
+      props.publisherIds,
+      faker.helpers.arrayElements(companyOptions, { min: 1, max: 3 })
+    );
+    const genreIds = propOrDefault(
+      props.genreIds,
+      faker.helpers.arrayElements(genreOptions, { min: 1, max: 15 })
+    );
+    const platformIds = propOrDefault(
+      props.platformIds,
+      faker.helpers.arrayElements(platformOptions, { min: 1, max: 5 })
+    );
 
     return makeGame({
-      id: props?.id ?? faker.string.uuid(),
-      name: props?.name ?? faker.commerce.productName(),
-      description: props?.description ?? faker.lorem.sentence(),
-      releaseDate: props?.releaseDate ?? faker.date.past(),
-      playtime: props?.playtime ?? faker.number.int({ min: 0, max: 500 }),
-      lastActivity: props?.lastActivity ?? faker.date.recent(),
-      added: props?.added ?? faker.date.past(),
-      installDirectory: props?.installDirectory ?? faker.system.directoryPath(),
-      isInstalled: props.isInstalled ?? faker.datatype.boolean(),
-      backgroundImage: props?.backgroundImage ?? faker.image.url(),
-      coverImage: props?.coverImage ?? faker.image.url(),
-      icon: props?.icon ?? faker.image.url(),
-      contentHash:
-        props?.contentHash ?? faker.string.hexadecimal({ length: 32 }),
-      hidden: props?.hidden ?? faker.datatype.boolean(),
+      id: props.id ?? faker.string.uuid(),
+      name: propOrDefault(props.name, faker.commerce.productName()),
+      description: propOrDefault(props.description, faker.lorem.sentence()),
+      releaseDate: propOrDefault(props.releaseDate, faker.date.past()),
+      playtime: propOrDefault(
+        props.playtime,
+        faker.number.int({ min: 0, max: 500 })
+      ),
+      lastActivity: propOrDefault(props.lastActivity, faker.date.recent()),
+      added: propOrDefault(props.added, faker.date.past()),
+      installDirectory: propOrDefault(
+        props.installDirectory,
+        faker.system.directoryPath()
+      ),
+      isInstalled: propOrDefault(props.isInstalled, faker.datatype.boolean()),
+      backgroundImage: propOrDefault(props.backgroundImage, faker.image.url()),
+      coverImage: propOrDefault(props.coverImage, faker.image.url()),
+      icon: propOrDefault(props.icon, faker.image.url()),
+      contentHash: propOrDefault(
+        props.contentHash,
+        faker.string.hexadecimal({ length: 32 })
+      ),
+      hidden: propOrDefault(props.hidden, faker.datatype.boolean()),
       completionStatusId,
       developerIds,
       genreIds,

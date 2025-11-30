@@ -41,13 +41,6 @@ export const bootstrapInfra = ({ logServiceFactory }: BootstrapInfraDeps) => {
   let _db = _env_service.getUseInMemoryDb()
     ? makeDatabaseConnection({ inMemory: true })
     : makeDatabaseConnection({ path: _systemConfig.getDbPath() });
-  const _init_db: PlayAtlasApiInfra["initDb"] = () =>
-    initDatabase({
-      db: _db,
-      fileSystemService: _fs_service,
-      logService: logServiceFactory.build("InitDatabase"),
-      migrationsDir: _systemConfig.getMigrationsDir(),
-    });
 
   const infra: PlayAtlasApiInfra = {
     getFsService: () => _fs_service,

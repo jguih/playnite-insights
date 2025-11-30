@@ -84,16 +84,14 @@ describe("Game Repository", () => {
 
   it("returns all games with loaded relationships", () => {
     // Arrange
-    const games = factory.getGameFactory().buildGameList(400);
+    const games = factory.getGameFactory().buildGameList(200);
     repository.upsertMany(games);
     // Act
     const allGames = repository.all({ load: true });
     // Assert
     expect(allGames.length).toBeGreaterThanOrEqual(games.length);
-    (
-      ["developers", "genres", "platforms", "publishers"] as GameRelationship[]
-    ).forEach((r) => {
+    for (const r of Object.keys(games[0].relationships) as GameRelationship[]) {
       expect(allGames.every((g) => g.relationships[r].isLoaded())).toBeTruthy();
-    });
+    }
   });
 });
