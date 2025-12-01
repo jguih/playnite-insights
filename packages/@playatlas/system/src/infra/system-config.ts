@@ -1,6 +1,5 @@
 import { type LogLevelNumber } from "@playatlas/common/application";
 import { join } from "path";
-import { defaultEnvService } from "./environment.service";
 import { type MakeSystemConfigDeps } from "./system-config.port";
 
 export type SystemConfig = {
@@ -29,9 +28,7 @@ export const makeSystemConfig = ({
 
 let _config: SystemConfig | null = null;
 
-export const getSystemConfig = (
-  deps: MakeSystemConfigDeps = { envService: defaultEnvService }
-) => {
+export const getSystemConfig = (deps: MakeSystemConfigDeps) => {
   if (_config === null) {
     _config = makeSystemConfig(deps);
   }

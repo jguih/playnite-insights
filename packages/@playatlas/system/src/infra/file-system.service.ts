@@ -1,11 +1,12 @@
 import { type FileSystemService } from "@playatlas/common/application";
-import { existsSync, statSync } from "fs";
+import * as fs from "fs";
 import * as fsAsync from "fs/promises";
 
 export const makeFileSystemService = (): FileSystemService => {
   return {
     access: fsAsync.access,
     mkdir: fsAsync.mkdir,
+    mkdirSync: fs.mkdirSync,
     readdir: fsAsync.readdir,
     readfile: fsAsync.readFile,
     rm: fsAsync.rm,
@@ -15,7 +16,7 @@ export const makeFileSystemService = (): FileSystemService => {
     constants: fsAsync.constants,
     rename: fsAsync.rename,
     isDir: (path) => {
-      return existsSync(path) && statSync(path).isDirectory();
+      return fs.existsSync(path) && fs.statSync(path).isDirectory();
     },
   };
 };

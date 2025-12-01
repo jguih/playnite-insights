@@ -1,13 +1,29 @@
 import { makeLogServiceFactory } from "@playatlas/system/application";
+import { makeFileSystemService } from "@playatlas/system/infra";
+import { bootstrapConfig } from "./bootstrap.config";
 import { bootstrapGameLibrary } from "./bootstrap.game-library";
 import { bootstrapInfra } from "./bootstrap.infra";
-import { PlayAtlasApi } from "./bootstrap.service.types";
+import { BootstrapDeps, PlayAtlasApi } from "./bootstrap.service.types";
 
-export const bootstrap = async (): Promise<PlayAtlasApi> => {
-  const logServiceFactory = makeLogServiceFactory();
+export const bootstrap = async ({
+  env,
+}: BootstrapDeps): Promise<PlayAtlasApi> => {
+  const _fsService = makeFileSystemService();
+
+  const config = bootstrapConfig({
+    fsService: _fsService,
+    env,
+  });
+
+  const logServiceFactory = makeLogServiceFactory({
+    getCurrentLogLevel: () => config.getEnvService().getLogLevel(),
+  });
 
   const infra = bootstrapInfra({
     logServiceFactory,
+    fsService: _fsService,
+    envService: config.getEnvService(),
+    systemConfig: config.getSystemConfig(),
   });
   await infra.initDb();
 
@@ -16,5 +32,5 @@ export const bootstrap = async (): Promise<PlayAtlasApi> => {
     logServiceFactory,
   });
 
-  return { infra, gameLibrary };
+  return { config, infra, gameLibrary };
 };

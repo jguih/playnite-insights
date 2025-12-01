@@ -3,7 +3,15 @@ import { bootstrapTest } from "@playatlas/bootstrap/testing";
 import { makeGameFactory } from "@playatlas/game-library/testing";
 
 export const { api, factory, resetDbToMemory } = bootstrapTest({
-  api: await bootstrap(),
+  api: await bootstrap({
+    env: {
+      PLAYATLAS_DATA_DIR: process.env.PLAYATLAS_DATA_DIR,
+      PLAYATLAS_LOG_LEVEL: process.env.PLAYATLAS_LOG_LEVEL,
+      PLAYATLAS_MIGRATIONS_DIR: process.env.PLAYATLAS_MIGRATIONS_DIR,
+      PLAYATLAS_USE_IN_MEMORY_DB: process.env.PLAYATLAS_USE_IN_MEMORY_DB,
+      PLAYATLAS_WORK_DIR: process.env.PLAYATLAS_WORK_DIR,
+    },
+  }),
 });
 
 beforeEach(async () => {

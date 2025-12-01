@@ -5,9 +5,6 @@ import {
 import {
   initDatabase,
   makeDatabaseConnection,
-  makeEnvService,
-  makeFileSystemService,
-  makeSystemConfig,
   type EnvService,
   type SystemConfig,
 } from "@playatlas/system/infra";
@@ -15,8 +12,6 @@ import { DatabaseSync } from "node:sqlite";
 
 export type PlayAtlasApiInfra = Readonly<{
   getFsService: () => FileSystemService;
-  getEnvService: () => EnvService;
-  getSystemConfig: () => SystemConfig;
   getDb: () => DatabaseSync;
   setDb: (db: DatabaseSync) => void;
   /**
@@ -27,25 +22,29 @@ export type PlayAtlasApiInfra = Readonly<{
 
 export type BootstrapInfraDeps = {
   logServiceFactory: LogServiceFactory;
+  fsService: FileSystemService;
+  envService: EnvService;
+  systemConfig: SystemConfig;
 };
 
-export const bootstrapInfra = ({ logServiceFactory }: BootstrapInfraDeps) => {
+export const bootstrapInfra = ({
+  logServiceFactory,
+  fsService,
+  envService,
+  systemConfig,
+}: BootstrapInfraDeps) => {
   const logService = logServiceFactory.build("Infra");
-  const _fs_service = makeFileSystemService();
-  const _env_service = makeEnvService({ fs: _fs_service });
-  const _systemConfig = makeSystemConfig({ envService: _env_service });
+  const _fs_service = fsService;
 
-  if (_env_service.getUseInMemoryDb())
+  if (envService.getUseInMemoryDb())
     logService.warning("Using in memory database");
 
-  let _db = _env_service.getUseInMemoryDb()
+  let _db = envService.getUseInMemoryDb()
     ? makeDatabaseConnection({ inMemory: true })
-    : makeDatabaseConnection({ path: _systemConfig.getDbPath() });
+    : makeDatabaseConnection({ path: systemConfig.getDbPath() });
 
   const infra: PlayAtlasApiInfra = {
     getFsService: () => _fs_service,
-    getEnvService: () => _env_service,
-    getSystemConfig: () => _systemConfig,
     getDb: () => _db,
     setDb: (db) => (_db = db),
     initDb: () =>
@@ -53,7 +52,7 @@ export const bootstrapInfra = ({ logServiceFactory }: BootstrapInfraDeps) => {
         db: _db,
         fileSystemService: _fs_service,
         logService: logServiceFactory.build("InitDatabase"),
-        migrationsDir: _systemConfig.getMigrationsDir(),
+        migrationsDir: systemConfig.getMigrationsDir(),
       }),
   };
   return Object.freeze(infra);

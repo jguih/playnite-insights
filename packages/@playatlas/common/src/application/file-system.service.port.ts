@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as fsAsync from "fs/promises";
 
 export type FileSystemService = {
@@ -10,6 +11,7 @@ export type FileSystemService = {
   stat: typeof fsAsync.stat;
   constants: typeof fsAsync.constants;
   mkdir: typeof fsAsync.mkdir;
+  mkdirSync: typeof fs.mkdirSync;
   rename: typeof fsAsync.rename;
   isDir: (path: string) => boolean;
 };

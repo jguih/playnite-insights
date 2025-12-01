@@ -1,44 +1,22 @@
-import { NODE_ENV, PLAYATLAS_DATA_DIR, PLAYNITE_HOST_ADDRESS, TZ } from '$env/static/private';
+import * as env from '$env/static/private';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { makeServerServices, type ServerServices } from '$lib/server/setup-services';
-import { getDb, initDatabase } from '@playnite-insights/infra';
+import { bootstrap, type PlayAtlasApi } from '@playatlas/bootstrap/application';
 import { type Handle, type ServerInit } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
 
 let _services: ServerServices;
+let _api: PlayAtlasApi;
 
 export const init: ServerInit = async () => {
-	if (_services) return;
-
-	const __dirname = dirname(fileURLToPath(import.meta.url));
-	const MIGRATIONS_DIR =
-		NODE_ENV === 'production'
-			? '/app/infra/migrations'
-			: join(__dirname, '../../packages/@playnite-insights/infra/migrations');
-
-	console.log(MIGRATIONS_DIR);
-
-	const env = {
-		DATA_DIR: PLAYATLAS_DATA_DIR,
-		PLAYNITE_HOST_ADDRESS,
-		DB_FILE: join(PLAYATLAS_DATA_DIR, '/db'),
-		MIGRATIONS_DIR,
-	};
-
-	const db = getDb({ path: env.DB_FILE });
-	_services = makeServerServices({ getDb: () => db, env });
-
-	_services.logService.debug(`NODE_ENV: ${NODE_ENV || 'undefined'}`);
-	_services.logService.debug(`NODE_VERSION: ${process.env.NODE_VERSION || 'undefined'}`);
-	_services.logService.info(`LOG_LEVEL: ${_services.logService.CURRENT_LOG_LEVEL}`);
-	_services.logService.info(`TZ: ${TZ}`);
-	_services.logService.info(
-		`PLAYNITE_HOST_ADDRESS: ${_services.config.PLAYNITE_HOST_ADDRESS || 'undefined'}`,
-	);
-
-	await initDatabase({ db, ..._services, ...env });
+	_api = await bootstrap({ env });
+	_services = makeServerServices({
+		getDb: () => _api.infra.getDb(),
+		env: {
+			DATA_DIR: _api.config.getSystemConfig().getDataDir(),
+			PLAYNITE_HOST_ADDRESS: env.PLAYATLAS_PLAYNITE_HOST_ADDRESS,
+		},
+	});
 
 	await _services.libraryManifestService.write();
 
@@ -77,6 +55,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.services = _services;
+	event.locals.api = _api;
 
 	// Apply CORS header for API routes
 	if (event.url.pathname.startsWith('/api')) {

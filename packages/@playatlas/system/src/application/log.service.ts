@@ -1,19 +1,23 @@
-import { logLevel, type LogService } from "@playatlas/common/application";
+import {
+  logLevel,
+  LogLevelNumber,
+  type LogService,
+} from "@playatlas/common/application";
 import { ZodError } from "zod/v4";
-import { getSystemConfig } from "../infra/system-config";
 
 export const DEFAULT_SOURCE = "PlayAtlasServer";
 
-export const makeLogService = (source: string = DEFAULT_SOURCE): LogService => {
+export const makeLogService = (
+  source: string = DEFAULT_SOURCE,
+  getCurrentLogLevel: () => LogLevelNumber
+): LogService => {
   const getDateTimeString = (): string => {
     const now = new Date();
     return now.toLocaleString();
   };
-  const systemConfig = getSystemConfig();
-  const currentLogLevel = systemConfig.getLogLevel();
 
   const logError = (message: string, error?: unknown): void => {
-    if (currentLogLevel > logLevel.error) {
+    if (getCurrentLogLevel() > logLevel.error) {
       return;
     }
     console.error(`[${getDateTimeString()}] [ERROR] [${source}] ${message}`);
@@ -28,28 +32,28 @@ export const makeLogService = (source: string = DEFAULT_SOURCE): LogService => {
   };
 
   const logWarning = (message: string): void => {
-    if (currentLogLevel > logLevel.warning) {
+    if (getCurrentLogLevel() > logLevel.warning) {
       return;
     }
     console.warn(`[${getDateTimeString()}] [WARNING] [${source}] ${message}`);
   };
 
   const logDebug = (message: string): void => {
-    if (currentLogLevel > logLevel.debug) {
+    if (getCurrentLogLevel() > logLevel.debug) {
       return;
     }
     console.debug(`[${getDateTimeString()}] [DEBUG] [${source}] ${message}`);
   };
 
   const logSuccess = (message: string): void => {
-    if (currentLogLevel > logLevel.success) {
+    if (getCurrentLogLevel() > logLevel.success) {
       return;
     }
     console.log(`[${getDateTimeString()}] [SUCCESS] [${source}] ${message}`);
   };
 
   const logInfo = (message: string): void => {
-    if (currentLogLevel > logLevel.info) {
+    if (getCurrentLogLevel() > logLevel.info) {
       return;
     }
     console.info(`[${getDateTimeString()}] [INFO] [${source}] ${message}`);
@@ -63,5 +67,3 @@ export const makeLogService = (source: string = DEFAULT_SOURCE): LogService => {
     debug: logDebug,
   };
 };
-
-export const defaultLogger = makeLogService(DEFAULT_SOURCE);
