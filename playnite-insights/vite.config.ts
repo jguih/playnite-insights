@@ -22,7 +22,7 @@ export default defineConfig({
 			{
 				extends: './vite.config.ts',
 				test: {
-					name: 'server',
+					name: 'unit',
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}', 'src/**/*.svelte.{test,spec}.{js,ts}'],
 				},
