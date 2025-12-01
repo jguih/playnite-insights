@@ -12,12 +12,17 @@ env:
 
 jobs:
   build-and-push-image:
+    name: Build and Push Svelte App Docker Image
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
+      checks: write
+      pull-requests: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,6 +30,37 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: ^10.13.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.3
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit and integration tests
+        env:
+          PLAYATLAS_WORK_DIR: /tmp/playatlas
+          PLAYATLAS_MIGRATIONS_DIR: ${{ github.workspace }}/packages/@playatlas/system/src/infra/database/migrations
+          PLAYATLAS_LOG_LEVEL: 3
+          PLAYATLAS_USE_IN_MEMORY_DB: true
+        run: pnpm run test
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Svelte App Test Results
+          path: test-results/**/*.xml
+
+      - name: Report tests
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Svelte App Test Results
+          path: test-results/**/*.xml
+          reporter: jest-junit
 
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
