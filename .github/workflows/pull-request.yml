@@ -7,7 +7,8 @@ on:
       - beta
 
 jobs:
-  build-and-push-image:
+  validate-pull-request:
+    name: Validate Pull Request for Svelte App
     runs-on: ubuntu-latest
 
     permissions:
@@ -47,14 +48,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: "**/junit.xml"
+          path: |
+            **/junit.xml
+            !**/node_modules/**
 
       - name: Report tests
         if: always()
         uses: dorny/test-reporter@v1
         with:
           name: Svelte App Test Results
-          path: "**/junit.xml"
+          path: |
+            **/junit.xml
+            !**/node_modules/**
           reporter: jest-junit
 
       - name: Build Svelte App image
