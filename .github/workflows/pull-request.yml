@@ -45,6 +45,14 @@ jobs:
           name: test-results
           path: "**/junit.xml"
 
+      - name: Report tests
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Svelte App Test Results
+          path: "**/junit.xml"
+          reporter: jest-junit
+
       - name: Build Svelte App image
         run: |
           docker build \
