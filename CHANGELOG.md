@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-beta.2](///compare/v1.0.0-beta.1...v1.0.0-beta.2) (2025-12-01)
+
+
+### Features
+
+* playatlas package and data sync improvements e1981b7
+
 ## 1.0.0-beta.1 (2025-10-02)
 
 
