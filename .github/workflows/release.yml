@@ -43,7 +43,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
 
       - name: Build Docker image (latest)
-        if: "!contains(github.ref_name, '-beta')"
+        if: ${{ !contains(github.ref_name, '-beta') }}
         uses: docker/build-push-action@v6.18.0
         with:
           context: .

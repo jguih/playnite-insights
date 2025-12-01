@@ -1,4 +1,4 @@
-import * as env from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { makeServerServices, type ServerServices } from '$lib/server/setup-services';
 import { bootstrap, type PlayAtlasApi } from '@playatlas/bootstrap/application';

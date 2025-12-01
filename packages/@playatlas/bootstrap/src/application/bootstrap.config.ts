@@ -13,13 +13,13 @@ export type PlayAtlasApiConfig = Readonly<{
 
 export type BootstrapConfigDeps = EnvServiceDeps;
 
-export const bootstrapConfig = ({ fsService, env }: BootstrapConfigDeps) => {
-  const _env_service = makeEnvService({ fsService, env });
-  const _systemConfig = makeSystemConfig({ envService: _env_service });
+export const bootstrapConfig = ({ env }: BootstrapConfigDeps) => {
+  const _env_service = makeEnvService({ env });
+  const _system_config = makeSystemConfig({ envService: _env_service });
 
   const config: PlayAtlasApiConfig = {
     getEnvService: () => _env_service,
-    getSystemConfig: () => _systemConfig,
+    getSystemConfig: () => _system_config,
   };
   return Object.freeze(config);
 };

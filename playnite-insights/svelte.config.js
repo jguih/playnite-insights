@@ -11,6 +11,9 @@ const config = {
 		csrf: {
 			checkOrigin: false,
 		},
+		env:{
+			privatePrefix: "PLAYATLAS_"
+		}
 	},
 };
 

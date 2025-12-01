@@ -7,7 +7,7 @@ export default defineConfig({
     projects: [
       {
         test: {
-          name: "unit",
+          name: "integration",
           environment: "node",
           globals: true,
           include: ["**/*.{test,spec}.{js,ts}"],

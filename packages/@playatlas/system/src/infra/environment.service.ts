@@ -1,64 +1,29 @@
-import { isValidLogLevel, logLevel } from "@playatlas/common/application";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 import { InvalidEnvironmentVariableValueError } from "../domain/error";
 import { EnvService } from "./environment.service.port";
 import { EnvServiceDeps } from "./environment.service.types";
 
-export const makeEnvService = ({
-  fsService,
-  env,
-}: EnvServiceDeps): EnvService => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const moduleDir = join(__dirname, "..", "..");
+export const makeEnvService = ({ env }: EnvServiceDeps): EnvService => {
+  const _work_dir = env.PLAYATLAS_WORK_DIR;
+  if (!_work_dir || _work_dir === "")
+    throw new InvalidEnvironmentVariableValueError(
+      `Work directory environment variable is empty or undefined`,
+      { envName: "PLAYATLAS_WORK_DIR" }
+    );
 
-  const default_migrations_dir = join(
-    moduleDir,
-    "/src/infra/database/migrations"
-  );
-  const log_level_as_number = Number(env.PLAYATLAS_LOG_LEVEL);
-
-  const _data_dir = env.PLAYATLAS_DATA_DIR;
-  const _migrations_dir = env.PLAYATLAS_MIGRATIONS_DIR
-    ? env.PLAYATLAS_MIGRATIONS_DIR
-    : default_migrations_dir;
-  const _log_level = isValidLogLevel(log_level_as_number)
-    ? log_level_as_number
-    : logLevel.info;
-  const _use_in_memory_db = Boolean(env.PLAYATLAS_USE_IN_MEMORY_DB);
+  const _migrations_dir =
+    env.PLAYATLAS_MIGRATIONS_DIR && env.PLAYATLAS_MIGRATIONS_DIR !== ""
+      ? env.PLAYATLAS_MIGRATIONS_DIR
+      : null;
+  const _log_level = Number.isInteger(Number(env.PLAYATLAS_LOG_LEVEL))
+    ? Number(env.PLAYATLAS_LOG_LEVEL)
+    : null;
+  const _use_in_memory_db =
+    env.PLAYATLAS_USE_IN_MEMORY_DB === "true" ||
+    env.PLAYATLAS_USE_IN_MEMORY_DB === "1";
 
   return {
-    getDataDir: () => {
-      if (!_data_dir)
-        throw new InvalidEnvironmentVariableValueError(
-          "Data directory is missing",
-          { envName: "PLAYATLAS_DATA_DIR" }
-        );
-
-      try {
-        fsService.mkdirSync(_data_dir, { recursive: true, mode: "0755" });
-      } catch (error) {
-        throw new InvalidEnvironmentVariableValueError(
-          `Data directory was missing and could not be created`,
-          { envName: "PLAYATLAS_DATA_DIR", cause: error }
-        );
-      }
-
-      if (!fsService.isDir(_data_dir))
-        throw new InvalidEnvironmentVariableValueError("Invalid path", {
-          envName: "PLAYATLAS_DATA_DIR",
-        });
-      return _data_dir;
-    },
-    getMigrationsDir: () => {
-      if (!fsService.isDir(_migrations_dir))
-        throw new InvalidEnvironmentVariableValueError(
-          "Migrations directory is missing or is not a valid path",
-          { envName: "PLAYATLAS_MIGRATIONS_DIR" }
-        );
-      return _migrations_dir;
-    },
+    getWorkDir: () => _work_dir,
+    getMigrationsDir: () => _migrations_dir,
     getLogLevel: () => _log_level,
     getUseInMemoryDb: () => _use_in_memory_db,
   };

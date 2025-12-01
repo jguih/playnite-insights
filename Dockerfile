@@ -10,7 +10,7 @@ FROM base AS deps
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm test
+RUN pnpm test:unit
 
 FROM deps AS build
 RUN pnpm run -r build
@@ -23,6 +23,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 WORKDIR /app
+ENV PLAYATLAS_WORK_DIR=/app
 ENV PLAYATLAS_DATA_DIR=/app/data
 ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
@@ -39,15 +40,9 @@ USER node
 
 CMD [ "sleep", "infinity" ]
 
-FROM base AS vitest
-WORKDIR /app
-ENV NODE_ENV='testing'
-COPY --from=deps /usr/src/app ./
-ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "test:unit" ]
-
 FROM base AS prod
 WORKDIR /app
-ENV PLAYATLAS_DATA_DIR=/app/data
+ENV PLAYATLAS_WORK_DIR=/app
 ENV NODE_ENV='production'
 ENV BODY_SIZE_LIMIT=128M
 
@@ -58,29 +53,6 @@ COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-ins
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build /app/build
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json /app/package.json
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations /app/infra/migrations
-
-EXPOSE 3000
-
-USER playnite-insights
-
-ENTRYPOINT ["node", "build"]
-
-FROM build AS stage
-
-WORKDIR /app
-ENV WORK_DIR=/app
-ENV NODE_ENV='testing'
-ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='PlayAtlas (Stage)'
-
-RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-RUN mkdir -p ./data/files ./data/tmp
-RUN chown -R playnite-insights:playnite-insights ./data
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json ./package.json
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/static/placeholder ./data/files/placeholder
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 

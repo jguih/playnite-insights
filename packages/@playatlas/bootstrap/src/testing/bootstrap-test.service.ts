@@ -1,4 +1,3 @@
-import { makeDatabaseConnection } from "@playatlas/system/infra";
 import type { PlayAtlasApi } from "../application/bootstrap.service.types";
 import {
   bootstrapTestFactories,
@@ -24,7 +23,6 @@ export const bootstrapTest = ({ api }: BootstrapTestDeps): PlayAtlasTestApi => {
     factory,
     resetDbToMemory: async () => {
       api.infra.getDb().close();
-      api.infra.setDb(makeDatabaseConnection({ inMemory: true }));
       await api.infra.initDb();
     },
   };
