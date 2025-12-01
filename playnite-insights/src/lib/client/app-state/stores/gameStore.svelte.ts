@@ -3,11 +3,11 @@ import {
 	FetchClientStrategyError,
 	getAllGamesResponseSchema,
 	JsonStrategy,
-	parseHomePageSearchParams,
 	type FullGame,
 	type GetAllGamesResponse,
 	type HomePageFilterParams,
 	type HomePagePaginationParams,
+	type HomePageSearchParams,
 	type HomePageSortingParams,
 } from '@playnite-insights/lib/client';
 import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
@@ -75,8 +75,8 @@ export class GameStore extends ApiDataStore {
 		this.#cache = new Map();
 	};
 
-	#makeCacheKey = (searchParams: URLSearchParams): string => {
-		return JSON.stringify(Object.fromEntries(searchParams.entries()));
+	#makeCacheKey = (homePageParams: HomePageSearchParams): string => {
+		return JSON.stringify(homePageParams);
 	};
 
 	#applyFilters = (games: FullGame[], args: HomePageFilterParams): FullGame[] => {
@@ -204,8 +204,8 @@ export class GameStore extends ApiDataStore {
 		return this.#dataSignal.hasLoaded;
 	}
 
-	getfilteredGames = (searchParams: URLSearchParams): GameStoreCacheItem => {
-		const key = this.#makeCacheKey(searchParams);
+	getFilteredGames = (homePageParams: HomePageSearchParams): GameStoreCacheItem => {
+		const key = this.#makeCacheKey(homePageParams);
 
 		if (this.#cache.has(key)) {
 			return this.#cache.get(key)!;
@@ -222,7 +222,7 @@ export class GameStore extends ApiDataStore {
 			};
 		}
 
-		const args = parseHomePageSearchParams(searchParams);
+		const args = homePageParams;
 		let filtered = this.#applyFilters(games, args.filter);
 		const total = filtered.length;
 		const countFrom = (Number(args.pagination.page) - 1) * Number(args.pagination.pageSize);

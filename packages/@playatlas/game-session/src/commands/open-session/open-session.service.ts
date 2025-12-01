@@ -1,4 +1,4 @@
-import type { LogService } from "@playatlas/common/domain";
+import type { LogService } from "@playatlas/common/application";
 import { makeGameSession } from "../../domain/game-session.entity";
 import type { GameSessionRepository } from "../../infra/game-session.repository.port";
 import { OpenGameSessionCommand } from "./open-session.command";

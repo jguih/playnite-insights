@@ -1,4 +1,8 @@
-import { homePageSearchParamsKeys, type FullGame } from '@playnite-insights/lib/client';
+import {
+	homePageSearchParamsKeys,
+	parseHomePageSearchParams,
+	type FullGame,
+} from '@playnite-insights/lib/client';
 import { GameFactory, makeMocks, testUtils } from '@playnite-insights/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IApplicationSettingsStore } from './applicationSettingsStore.svelte';
@@ -37,7 +41,7 @@ describe('HomePageViewModel', () => {
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
 		// Act
-		const filteredGames = gameStore.getfilteredGames(searchParams).games;
+		const filteredGames = gameStore.getFilteredGames(parseHomePageSearchParams(searchParams)).games;
 		const filteredGamesIds = filteredGames?.map((g) => g.Id);
 		// Assert
 		expect(filteredGames).toBeTruthy();
@@ -54,7 +58,7 @@ describe('HomePageViewModel', () => {
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
 		// Act
-		const filteredGames = gameStore.getfilteredGames(searchParams).games;
+		const filteredGames = gameStore.getFilteredGames(parseHomePageSearchParams(searchParams)).games;
 		// Assert
 		expect(filteredGames).toBeTruthy();
 		expect(filteredGames).toHaveLength(gamesCount);
@@ -74,7 +78,9 @@ describe('HomePageViewModel', () => {
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
 			// Act
-			const filteredGames = gameStore.getfilteredGames(searchParams).games;
+			const filteredGames = gameStore.getFilteredGames(
+				parseHomePageSearchParams(searchParams),
+			).games;
 			const filteredGamesIds = filteredGames?.map((g) => g.Id);
 			// Assert
 			expect(filteredGames).toBeTruthy();
@@ -138,7 +144,9 @@ describe('HomePageViewModel', () => {
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
 			// Act
-			const filteredGames = gameStore.getfilteredGames(searchParams).games;
+			const filteredGames = gameStore.getFilteredGames(
+				parseHomePageSearchParams(searchParams),
+			).games;
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -203,7 +211,9 @@ describe('HomePageViewModel', () => {
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
 			// Act
-			const filteredGames = gameStore.getfilteredGames(searchParams).games;
+			const filteredGames = gameStore.getFilteredGames(
+				parseHomePageSearchParams(searchParams),
+			).games;
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -268,7 +278,9 @@ describe('HomePageViewModel', () => {
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
 			// Act
-			const filteredGames = gameStore.getfilteredGames(searchParams).games;
+			const filteredGames = gameStore.getFilteredGames(
+				parseHomePageSearchParams(searchParams),
+			).games;
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -331,7 +343,7 @@ describe('HomePageViewModel', () => {
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
 		// Act
-		const filteredGames = gameStore.getfilteredGames(searchParams).games;
+		const filteredGames = gameStore.getFilteredGames(parseHomePageSearchParams(searchParams)).games;
 		// Assert
 		expect(filteredGames).toHaveLength(expectedMatch);
 		expect(
@@ -355,7 +367,7 @@ describe('HomePageViewModel', () => {
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
 		// Act
-		const filteredGames = gameStore.getfilteredGames(searchParams).games;
+		const filteredGames = gameStore.getFilteredGames(parseHomePageSearchParams(searchParams)).games;
 		// Assert
 		expect(filteredGames).toHaveLength(games.length);
 	});
@@ -373,7 +385,9 @@ describe('HomePageViewModel', () => {
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
 		// Act
-		const paginatedGames = gameStore.getfilteredGames(searchParams).games;
+		const paginatedGames = gameStore.getFilteredGames(
+			parseHomePageSearchParams(searchParams),
+		).games;
 		const uniquePaginatedGames = new Set(paginatedGames?.map((g) => g.Id));
 		// Assert
 		expect(paginatedGames?.length).toBeLessThanOrEqual(25);
