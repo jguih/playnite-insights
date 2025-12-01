@@ -7,3 +7,4 @@ export * from "./instance-authentication";
 export * from "./instance-sessions";
 export * from "./platform";
 export * from "./playnite-library-metrics";
+export * from "./synchronization-id";

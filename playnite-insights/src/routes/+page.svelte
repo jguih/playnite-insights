@@ -2,14 +2,12 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
-	import LightAnchor from '$lib/client/components/anchors/LightAnchor.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home, { updateBottomNavHomeHref } from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
 	import BottomNav from '$lib/client/components/BottomNav.svelte';
 	import LightButton from '$lib/client/components/buttons/LightButton.svelte';
 	import SolidButton from '$lib/client/components/buttons/SolidButton.svelte';
-	import Select from '$lib/client/components/forms/Select.svelte';
 	import Header from '$lib/client/components/header/Header.svelte';
 	import FiltersButton from '$lib/client/components/home-page/FiltersButton.svelte';
 	import FiltersSidebar from '$lib/client/components/home-page/FiltersSidebar.svelte';
@@ -17,7 +15,6 @@
 	import Main from '$lib/client/components/Main.svelte';
 	import SearchBar from '$lib/client/components/SearchBar.svelte';
 	import { HomePageViewModel } from '$lib/client/viewmodel/homePageViewModel.svelte';
-	import { RecentActivityViewModel } from '$lib/client/viewmodel/recentActivityViewModel.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import {
@@ -25,6 +22,7 @@
 		gameSortOrder,
 		homePageSearchParamsFilterKeys,
 		homePageSearchParamsKeys,
+		parseHomePageSearchParams,
 		type HomePageSearchParamKeys,
 		type PlayniteGame,
 	} from '@playnite-insights/lib/client';
@@ -32,14 +30,13 @@
 
 	const locator = getLocatorContext();
 	let main: HTMLElement | undefined = $state();
-	const recentActivityVm = new RecentActivityViewModel({
-		gameStore: locator.gameStore,
-		gameSessionStore: locator.gameSessionStore,
-		dateTimeHandler: locator.dateTimeHandler,
+	const homePageSearchParams = $derived.by(() => {
+		const params = new URLSearchParams(page.url.searchParams);
+		return parseHomePageSearchParams(params);
 	});
 	const vm = new HomePageViewModel({
-		getPageSearchParams: () => new URLSearchParams(page.url.searchParams),
 		gameStore: locator.gameStore,
+		getPageParams: () => homePageSearchParams,
 	});
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
@@ -127,9 +124,10 @@
 	});
 </script>
 
-{#snippet gameCard(game: PlayniteGame)}
+{#snippet gameCard(game: PlayniteGame, imageSrc: string)}
 	<li
 		class={[
+			'contain-size contain-layout contain-paint contain-style',
 			'm-0 aspect-[1/1.6] p-0 shadow outline-0',
 			'border-background-1 border-4 border-solid',
 			'hover:border-primary-light-hover-fg',
@@ -139,7 +137,10 @@
 	>
 		<a href={`/game/?id=${game.Id}`}>
 			<img
-				src={vm.getImageURL(game.CoverImage)}
+				src={imageSrc}
+				width="300"
+				height="480"
+				decoding="async"
 				alt={`${game.Name} cover image`}
 				loading="lazy"
 				class="h-7/8 w-full object-cover"
@@ -170,14 +171,14 @@
 	{setSearchParam}
 	{appendSearchParam}
 	{removeSearchParam}
-	installedParam={vm.pageParams.filter.installed}
-	notInstalledParam={vm.pageParams.filter.notInstalled}
-	sortByParam={vm.pageParams.sorting.sortBy}
-	sortOrderParam={vm.pageParams.sorting.sortOrder}
-	developersParam={vm.pageParams.filter.developers}
-	publishersParam={vm.pageParams.filter.publishers}
-	platformsParam={vm.pageParams.filter.platforms}
-	genresParam={vm.pageParams.filter.genres}
+	installedParam={vm.pageParamsSignal.filter.installed}
+	notInstalledParam={vm.pageParamsSignal.filter.notInstalled}
+	sortByParam={vm.pageParamsSignal.sorting.sortBy}
+	sortOrderParam={vm.pageParamsSignal.sorting.sortOrder}
+	developersParam={vm.pageParamsSignal.filter.developers}
+	publishersParam={vm.pageParamsSignal.filter.publishers}
+	platformsParam={vm.pageParamsSignal.filter.platforms}
+	genresParam={vm.pageParamsSignal.filter.genres}
 	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
@@ -205,7 +206,7 @@
 		</a>
 		<div class="flex grow flex-row items-center gap-2">
 			<SearchBar
-				value={vm.pageParams.filter.query}
+				value={vm.pageParamsSignal.filter.query}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
 			<FiltersButton
@@ -215,7 +216,7 @@
 		</div>
 	</Header>
 	<Main bind:main>
-		<h1 class="text-lg">{m.home_title()}</h1>
+		<!-- <h1 class="text-lg">{m.home_title()}</h1>
 		<div class="mb-2">
 			{#if vm.isLoading}
 				<div class="mt-1 h-4 w-48 animate-pulse bg-neutral-300/60"></div>
@@ -248,18 +249,28 @@
 					<option value={option}>{option}</option>
 				{/each}
 			</Select>
-		</label>
+		</label> -->
 
 		{#if vm.isLoading}
-			<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
-				{#each new Array(Number(vm.pageParams.pagination.pageSize)).fill(null) as _}
+			<ul
+				class="mb-6 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3
+           md:grid-cols-4
+           lg:grid-cols-6
+           xl:grid-cols-8"
+			>
+				{#each new Array(Number(vm.pageParamsSignal.pagination.pageSize)).fill(null) as _}
 					{@render gameCardSkeleton()}
 				{/each}
 			</ul>
 		{:else if vm.gamesCacheItem.total > 0}
-			<ul class="mb-6 grid list-none grid-cols-2 gap-2 p-0">
+			<ul
+				class="mb-6 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3
+           md:grid-cols-4
+           lg:grid-cols-6
+           xl:grid-cols-8"
+			>
 				{#each vm.gamesCacheItem.games as game (game.Id)}
-					{@render gameCard(game)}
+					{@render gameCard(game, vm.getImageURL(game.CoverImage))}
 				{/each}
 			</ul>
 		{:else}
@@ -268,17 +279,17 @@
 
 		<nav class="mt-4 flex flex-row justify-center gap-2">
 			<LightButton
-				disabled={Number(vm.pageParams.pagination.page) <= 1}
-				onclick={() => handleOnPageChange(Number(vm.pageParams.pagination.page) - 1)}
+				disabled={Number(vm.pageParamsSignal.pagination.page) <= 1}
+				onclick={() => handleOnPageChange(Number(vm.pageParamsSignal.pagination.page) - 1)}
 				class={['px-2 py-1']}
 				aria-label="previous page"
 			>
 				<ChevronLeft />
 			</LightButton>
-			{#each vm.getPaginationSequence(Number(vm.pageParams.pagination.page), vm.gamesCacheItem.totalPages) as page (page)}
+			{#each vm.paginationSequenceSignal as page, i (`${page}-${i}`)}
 				{#if page === null}
 					<span class="px-2">…</span>
-				{:else if page === Number(vm.pageParams.pagination.page)}
+				{:else if page === Number(vm.pageParamsSignal.pagination.page)}
 					<SolidButton
 						selected
 						class={['px-2 py-1']}
@@ -295,15 +306,15 @@
 				{/if}
 			{/each}
 			<LightButton
-				onclick={() => handleOnPageChange(Number(vm.pageParams.pagination.page) + 1)}
-				disabled={Number(vm.pageParams.pagination.page) >= vm.gamesCacheItem.totalPages}
+				onclick={() => handleOnPageChange(Number(vm.pageParamsSignal.pagination.page) + 1)}
+				disabled={Number(vm.pageParamsSignal.pagination.page) >= vm.gamesCacheItem.totalPages}
 				class={['px-2 py-1']}
 				aria-label="next page"
 			>
 				<ChevronRight />
 			</LightButton>
 		</nav>
-		{#if recentActivityVm.inProgressGame}
+		<!-- {#if recentActivityVm.inProgressGame}
 			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-20 w-full p-2">
 				<LightAnchor
 					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
@@ -323,7 +334,7 @@
 				</LightAnchor>
 			</div>
 			<div class="pb-20"></div>
-		{/if}
+		{/if} -->
 	</Main>
 
 	<BottomNav>

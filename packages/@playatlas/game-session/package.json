@@ -1,0 +1,25 @@
+{
+  "name": "@playatlas/game-session",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    "./commands/close-session": "./src/commands/close-session/index.ts",
+    "./commands/open-session": "./src/commands/open-session/index.ts",
+    "./domain": "./src/domain/index.ts",
+    "./infra": "./src/infra/index.ts"
+  },
+  "scripts": {
+    "test:unit": "vitest run",
+    "test:watch": "vitest --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.14"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "vitest": "^3.2.4",
+    "@playatlas/common": "workspace:*",
+    "zod": "^3.25.76"
+  }
+}

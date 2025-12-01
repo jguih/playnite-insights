@@ -26,7 +26,7 @@
 		props.class,
 	]}
 	bind:this={button}
-	disabled={isLoading}
+	disabled={props.disabled || isLoading}
 >
 	{#if isLoading}
 		<Loading size="sm" />

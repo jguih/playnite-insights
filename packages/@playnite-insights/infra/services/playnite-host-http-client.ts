@@ -1,21 +1,15 @@
 import { type SignatureService } from "@playnite-insights/core";
 import { FetchClient, type IFetchClient } from "@playnite-insights/lib/client";
-import * as config from "../config/config";
-import { defaultSignatureService } from "./signature";
 
 export type PlayniteHostClientDeps = {
   signatureService: SignatureService;
-  PLAYNITE_HOST_ADDRESS?: string;
+  PLAYNITE_HOST_ADDRESS: string;
 };
 
 export const makePlayniteHostClient = (
-  deps: Partial<PlayniteHostClientDeps>
+  deps: PlayniteHostClientDeps
 ): { httpPostAsync: IFetchClient["httpPostAsync"] } => {
-  const { PLAYNITE_HOST_ADDRESS, signatureService }: PlayniteHostClientDeps = {
-    signatureService: defaultSignatureService,
-    PLAYNITE_HOST_ADDRESS: config.PLAYNITE_HOST_ADDRESS,
-    ...deps,
-  };
+  const { PLAYNITE_HOST_ADDRESS, signatureService } = deps;
 
   const client = new FetchClient({ url: PLAYNITE_HOST_ADDRESS ?? "" });
 

@@ -16,6 +16,166 @@ importers:
         specifier: ^9.5.0
         version: 9.5.0
 
+  packages/@playatlas/auth:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../common
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/bootstrap:
+    dependencies:
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../common
+      '@playatlas/game-library':
+        specifier: workspace:*
+        version: link:../game-library
+      '@playatlas/game-session':
+        specifier: workspace:*
+        version: link:../game-session
+      '@playatlas/system':
+        specifier: workspace:*
+        version: link:../system
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/common:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/game-library:
+    dependencies:
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../common
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/game-note:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../common
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/game-session:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../common
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
+  packages/@playatlas/system:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../common
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
   packages/@playnite-insights/core:
     dependencies:
       '@faker-js/faker':
@@ -24,6 +184,9 @@ importers:
       '@playnite-insights/lib':
         specifier: workspace:*
         version: link:../lib
+      '@playnite-insights/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -48,10 +211,13 @@ importers:
         version: 9.9.0
       '@playnite-insights/core':
         specifier: workspace:*
-        version: file:packages/@playnite-insights/core(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+        version: link:../core
       '@playnite-insights/lib':
         specifier: workspace:*
-        version: file:packages/@playnite-insights/lib
+        version: link:../lib
+      '@playnite-insights/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@types/busboy':
         specifier: ^1.5.4
         version: 1.5.4
@@ -61,6 +227,9 @@ importers:
       sharp:
         specifier: ^0.34.3
         version: 0.34.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -87,6 +256,9 @@ importers:
       '@faker-js/faker':
         specifier: ^9.9.0
         version: 9.9.0
+      '@playnite-insights/core':
+        specifier: workspace:*
+        version: link:../core
       '@playnite-insights/lib':
         specifier: workspace:*
         version: link:../lib
@@ -101,6 +273,34 @@ importers:
         specifier: ^24.0.14
         version: 24.0.14
 
+  packages/integration-testing:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.9.0
+        version: 9.9.0
+      '@playatlas/bootstrap':
+        specifier: workspace:*
+        version: link:../@playatlas/bootstrap
+      '@playatlas/common':
+        specifier: workspace:*
+        version: link:../@playatlas/common
+      '@playatlas/game-library':
+        specifier: workspace:*
+        version: link:../@playatlas/game-library
+      '@playatlas/game-session':
+        specifier: workspace:*
+        version: link:../@playatlas/game-session
+      '@playatlas/system':
+        specifier: workspace:*
+        version: link:../@playatlas/system
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.14
+        version: 24.0.14
+
   playnite-insights:
     dependencies:
       '@inlang/paraglide-js':
@@ -109,15 +309,21 @@ importers:
       '@lucide/svelte':
         specifier: ^0.525.0
         version: 0.525.0(svelte@5.35.7)
+      '@playatlas/bootstrap':
+        specifier: workspace:*
+        version: file:packages/@playatlas/bootstrap(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@playatlas/game-library':
+        specifier: workspace:*
+        version: file:packages/@playatlas/game-library(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@playnite-insights/core':
         specifier: workspace:*
-        version: link:../packages/@playnite-insights/core
+        version: file:packages/@playnite-insights/core(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@playnite-insights/infra':
         specifier: workspace:*
-        version: link:../packages/@playnite-insights/infra
+        version: file:packages/@playnite-insights/infra(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@playnite-insights/lib':
         specifier: workspace:*
-        version: link:../packages/@playnite-insights/lib
+        version: file:packages/@playnite-insights/lib
       echarts:
         specifier: ^5.6.0
         version: 5.6.0
@@ -139,7 +345,7 @@ importers:
         version: 9.9.0
       '@playnite-insights/testing':
         specifier: workspace:*
-        version: link:../packages/@playnite-insights/testing
+        version: file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@sveltejs/adapter-node':
         specifier: ^5.2.12
         version: 5.2.13(@sveltejs/kit@2.23.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.35.7)(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)))(svelte@5.35.7)(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)))
@@ -657,11 +863,33 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+  '@playatlas/bootstrap@file:packages/@playatlas/bootstrap':
+    resolution: {directory: packages/@playatlas/bootstrap, type: directory}
+
+  '@playatlas/common@file:packages/@playatlas/common':
+    resolution: {directory: packages/@playatlas/common, type: directory}
+
+  '@playatlas/game-library@file:packages/@playatlas/game-library':
+    resolution: {directory: packages/@playatlas/game-library, type: directory}
+
+  '@playatlas/game-session@file:packages/@playatlas/game-session':
+    resolution: {directory: packages/@playatlas/game-session, type: directory}
+
+  '@playatlas/system@file:packages/@playatlas/system':
+    resolution: {directory: packages/@playatlas/system, type: directory}
+
   '@playnite-insights/core@file:packages/@playnite-insights/core':
     resolution: {directory: packages/@playnite-insights/core, type: directory}
 
+  '@playnite-insights/infra@file:packages/@playnite-insights/infra':
+    resolution: {directory: packages/@playnite-insights/infra, type: directory}
+    engines: {node: ^24.3.0, pnpm: ^10.13.0}
+
   '@playnite-insights/lib@file:packages/@playnite-insights/lib':
     resolution: {directory: packages/@playnite-insights/lib, type: directory}
+
+  '@playnite-insights/testing@file:packages/@playnite-insights/testing':
+    resolution: {directory: packages/@playnite-insights/testing, type: directory}
 
   '@playwright/test@1.54.1':
     resolution: {integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==}
@@ -3160,12 +3388,184 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
+  '@playatlas/bootstrap@file:packages/@playatlas/bootstrap(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@playatlas/common': file:packages/@playatlas/common(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@playatlas/game-library': file:packages/@playatlas/game-library(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@playatlas/game-session': file:packages/@playatlas/game-session(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@playatlas/system': file:packages/@playatlas/system(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
+  '@playatlas/common@file:packages/@playatlas/common(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@faker-js/faker': 9.9.0
+      '@types/busboy': 1.5.4
+      busboy: 1.6.0
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
+  '@playatlas/game-library@file:packages/@playatlas/game-library(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@playatlas/common': file:packages/@playatlas/common(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
+  '@playatlas/game-session@file:packages/@playatlas/game-session(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@faker-js/faker': 9.9.0
+      '@playatlas/common': file:packages/@playatlas/common(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
+  '@playatlas/system@file:packages/@playatlas/system(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@faker-js/faker': 9.9.0
+      '@playatlas/common': file:packages/@playatlas/common(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@types/busboy': 1.5.4
+      busboy: 1.6.0
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
   '@playnite-insights/core@file:packages/@playnite-insights/core(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
     dependencies:
       '@faker-js/faker': 9.9.0
       '@playnite-insights/lib': file:packages/@playnite-insights/lib
+      '@playnite-insights/testing': file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       '@types/busboy': 1.5.4
       busboy: 1.6.0
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
+
+  '@playnite-insights/infra@file:packages/@playnite-insights/infra(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@faker-js/faker': 9.9.0
+      '@playnite-insights/core': file:packages/@playnite-insights/core(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@playnite-insights/lib': file:packages/@playnite-insights/lib
+      '@playnite-insights/testing': file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@types/busboy': 1.5.4
+      busboy: 1.6.0
+      sharp: 0.34.3
       vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       zod: 3.25.76
     transitivePeerDependencies:
@@ -3192,6 +3592,34 @@ snapshots:
   '@playnite-insights/lib@file:packages/@playnite-insights/lib':
     dependencies:
       zod: 3.25.76
+
+  '@playnite-insights/testing@file:packages/@playnite-insights/testing(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)':
+    dependencies:
+      '@faker-js/faker': 9.9.0
+      '@playnite-insights/core': file:packages/@playnite-insights/core(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      '@playnite-insights/lib': file:packages/@playnite-insights/lib
+      vitest: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@types/debug'
+      - '@types/node'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jiti
+      - jsdom
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - yaml
 
   '@playwright/test@1.54.1':
     dependencies:

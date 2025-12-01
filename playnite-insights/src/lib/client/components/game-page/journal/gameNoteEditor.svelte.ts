@@ -16,12 +16,14 @@ export class GameNoteEditor {
 	#noteRepository: GameNoteEditorDeps['gameNoteRepository'];
 	#gameNoteFactory: GameNoteEditorDeps['gameNoteFactory'];
 	#isOpen: boolean;
+	#isDirty: boolean;
 
 	constructor({ gameNoteFactory: factory, gameNoteRepository }: GameNoteEditorDeps) {
 		this.#noteRepository = gameNoteRepository;
 		this.#gameNoteFactory = factory;
 
 		this.#isOpen = $derived(Object.hasOwn(page.state, 'noteEditor'));
+		this.#isDirty = false;
 		this.#currentNote = $state(
 			factory.create({
 				Title: null,
@@ -34,9 +36,11 @@ export class GameNoteEditor {
 	}
 
 	saveAsync = async () => {
+		if (!this.#isDirty) return;
 		const note = { ...this.#currentNote };
 		try {
 			await this.#noteRepository.putAsync({ note });
+			this.#isDirty = false;
 		} catch (err) {
 			if (err instanceof IndexedDBNotInitializedError) {
 				toast.error({ message: m.error_db_not_ready(), category: 'local-database' });
@@ -93,5 +97,9 @@ export class GameNoteEditor {
 
 	set currentNote(note: GameNote) {
 		this.#currentNote = note;
+	}
+
+	set isDirty(val: boolean) {
+		this.#isDirty = val;
 	}
 }

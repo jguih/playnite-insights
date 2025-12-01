@@ -1,7 +1,7 @@
 import { type Image } from "@playnite-insights/lib/client";
 import type { ImageRepository, UploadService } from "../types";
-import type { FileSystemService } from "../types/file-system.types";
-import type { LogService } from "../types/log.types";
+import type { FileSystemService } from "../types/file-system-service";
+import type { LogService } from "../types/log-service";
 
 export type MediaFilesServiceDeps = {
   fileSystemService: FileSystemService;

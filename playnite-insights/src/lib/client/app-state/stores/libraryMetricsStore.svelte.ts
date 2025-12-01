@@ -24,14 +24,12 @@ export class LibraryMetricsStore extends ApiDataStore {
 	loadLibraryMetrics = async () => {
 		try {
 			this.#dataSignal.isLoading = true;
-			return await this.withHttpClient(async ({ client }) => {
-				const result = await client.httpGetAsync({
-					endpoint: '/api/library/metrics',
-					strategy: new JsonStrategy(getPlayniteLibraryMetricsResponseSchema),
-				});
-				this.#dataSignal.data = result;
-				return result;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/library/metrics',
+				strategy: new JsonStrategy(getPlayniteLibraryMetricsResponseSchema),
 			});
+			this.#dataSignal.data = result;
+			return result;
 		} catch (err) {
 			handleClientErrors(err, `[loadLibraryMetrics] failed to fetch /api/library/metrics`);
 			return null;

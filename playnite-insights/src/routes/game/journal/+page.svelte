@@ -96,6 +96,7 @@
 	};
 
 	const handleOnNoteChange = async () => {
+		noteEditor.isDirty = true;
 		if (noteChangeTimeout) clearTimeout(noteChangeTimeout);
 		noteChangeTimeout = setTimeout(async () => {
 			await noteEditor.saveAsync();

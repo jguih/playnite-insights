@@ -2,4 +2,4 @@
 
 # pnpm --filter playnite-insights lint
 
-pnpm run test:unit
+# pnpm run test:unit

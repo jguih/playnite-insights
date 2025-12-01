@@ -58,7 +58,7 @@ export class FetchClient implements IFetchClient {
     } catch (error) {
       if (error instanceof FetchClientStrategyError) throw error;
       throw new FetchClientStrategyError({
-        statusCode: response?.status ?? 503,
+        statusCode: response?.status ?? 0,
         message: (error as Error).message ?? "",
         data: { cause: error },
       });
@@ -97,7 +97,7 @@ export class FetchClient implements IFetchClient {
     } catch (error) {
       if (error instanceof FetchClientStrategyError) throw error;
       throw new FetchClientStrategyError({
-        statusCode: response?.status ?? 503,
+        statusCode: response?.status ?? 0,
         message: (error as Error).message ?? "",
         data: { cause: error },
       });
@@ -136,7 +136,7 @@ export class FetchClient implements IFetchClient {
     } catch (error) {
       if (error instanceof FetchClientStrategyError) throw error;
       throw new FetchClientStrategyError({
-        statusCode: response?.status ?? 503,
+        statusCode: response?.status ?? 0,
         message: (error as Error).message ?? "",
         data: { cause: error },
       });
@@ -175,7 +175,7 @@ export class FetchClient implements IFetchClient {
     } catch (error) {
       if (error instanceof FetchClientStrategyError) throw error;
       throw new FetchClientStrategyError({
-        statusCode: response?.status ?? 503,
+        statusCode: response?.status ?? 0,
         message: (error as Error).message ?? "",
         data: { cause: error },
       });

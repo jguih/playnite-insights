@@ -5,4 +5,12 @@ packages:
   - "packages/@playnite-insights/infra"
   - "packages/@playnite-insights/core"
   - "packages/@playnite-insights/testing"
+  - "packages/@playatlas/auth"
+  - "packages/@playatlas/game-library"
+  - "packages/@playatlas/game-note"
+  - "packages/@playatlas/game-session"
+  - "packages/@playatlas/common"
+  - "packages/@playatlas/system"
+  - "packages/@playatlas/bootstrap"
+  - "packages/integration-testing"
 injectWorkspacePackages: true

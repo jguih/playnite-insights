@@ -26,16 +26,14 @@ export class ServerTimeStore extends ApiDataStore {
 	loadServerTime = async () => {
 		if (!this.#serverHeartbeat.isAlive) return null;
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#dataSignal.isLoading = true;
-				const result = await client.httpGetAsync({
-					endpoint: '/api/time/now',
-					strategy: new JsonStrategy(getServerUtcNowResponseSchema),
-				});
-				this.#dataSignal.utcNow = result ? new Date(result.utcNow).getTime() : null;
-				this.#dataSignal.syncPoint = performance.now();
-				return result;
+			this.#dataSignal.isLoading = true;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/time/now',
+				strategy: new JsonStrategy(getServerUtcNowResponseSchema),
 			});
+			this.#dataSignal.utcNow = result ? new Date(result.utcNow).getTime() : null;
+			this.#dataSignal.syncPoint = performance.now();
+			return result;
 		} catch (err) {
 			handleClientErrors(err, `[loadServerTime] failed to fetch /api/time/now`);
 			return null;

@@ -45,13 +45,15 @@ export const isValidGamePageSize = (
   );
 };
 
-export const parseHomePageSearchParams = (
-  params: URLSearchParams
-): {
+export type HomePageSearchParams = {
   pagination: HomePagePaginationParams;
   filter: HomePageFilterParams;
   sorting: HomePageSortingParams;
-} => {
+}
+
+export const parseHomePageSearchParams = (
+  params: URLSearchParams
+): HomePageSearchParams => {
   // Pagination
   const _pageSize = params.get(homePageSearchParamsKeys.pageSize);
   const pageSize: GamePageSize = isValidGamePageSize(_pageSize)

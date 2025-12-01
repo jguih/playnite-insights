@@ -1,30 +1,32 @@
 import { m } from '$lib/paraglide/messages';
 import {
 	gamePageSizes,
-	parseHomePageSearchParams,
 	type GameSortBy,
 	type GameSortOrder,
+	type HomePageSearchParams,
 } from '@playnite-insights/lib/client';
 import type { GameStore, GameStoreCacheItem } from '../app-state/stores/gameStore.svelte';
 import { getPlayniteGameImageUrl } from '../utils/playnite-game';
 
-export type HomePageViewModelProps = {
-	getPageSearchParams: () => URLSearchParams;
+export type HomePageViewModelDeps = {
 	gameStore: GameStore;
+	getPageParams: () => HomePageSearchParams;
 };
 
 export class HomePageViewModel {
-	#gameStore: HomePageViewModelProps['gameStore'];
+	#gameStore: HomePageViewModelDeps['gameStore'];
+	#getPageParams: HomePageViewModelDeps['getPageParams'];
 	#filtersCount: number;
 	#gamesCacheItem: GameStoreCacheItem;
-	#pageParams: ReturnType<typeof parseHomePageSearchParams>;
+	#paginationSequenceSignal: (number | null)[];
 
-	constructor({ getPageSearchParams, gameStore }: HomePageViewModelProps) {
+	constructor({ gameStore, getPageParams }: HomePageViewModelDeps) {
 		this.#gameStore = gameStore;
+		this.#getPageParams = getPageParams;
 
 		this.#filtersCount = $derived.by(() => {
 			let counter = 0;
-			for (const filter of Object.values(this.pageParams.filter)) {
+			for (const filter of Object.values(this.#getPageParams().filter)) {
 				if (filter === null) continue;
 				if (typeof filter === 'string' || typeof filter === 'number') {
 					counter++;
@@ -45,13 +47,16 @@ export class HomePageViewModel {
 		this.#gamesCacheItem = $derived.by(() => {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const _ = gameStore.gameList;
-			const searchParams = getPageSearchParams();
-			return gameStore.getfilteredGames(searchParams);
+			const pageParams = getPageParams();
+			return gameStore.getFilteredGames(pageParams);
 		});
 
-		this.#pageParams = $derived.by(() => {
-			const params = getPageSearchParams();
-			return parseHomePageSearchParams(params);
+		this.#paginationSequenceSignal = $derived.by(() => {
+			const pageParams = getPageParams();
+			return this.getPaginationSequence(
+				Number(pageParams.pagination.page),
+				this.#gamesCacheItem.totalPages,
+			);
 		});
 	}
 
@@ -81,28 +86,8 @@ export class HomePageViewModel {
 		}
 	};
 
-	get gamesCacheItem() {
-		return this.#gamesCacheItem;
-	}
-
-	get pageSizes() {
-		return gamePageSizes;
-	}
-
-	get isLoading() {
-		return !this.#gameStore.hasLoaded;
-	}
-
-	get pageParams() {
-		return this.#pageParams;
-	}
-
-	get filtersCount() {
-		return this.#filtersCount;
-	}
-
 	getPaginationSequence = (currentPage: number, totalPages: number) => {
-		const delta = 2; // how many pages to show around current
+		const delta = 1; // how many pages to show around current
 		const range: (number | null)[] = [];
 
 		for (let i = 1; i <= totalPages; i++) {
@@ -119,4 +104,28 @@ export class HomePageViewModel {
 
 		return range;
 	};
+
+	get gamesCacheItem() {
+		return this.#gamesCacheItem;
+	}
+
+	get pageSizes() {
+		return gamePageSizes;
+	}
+
+	get isLoading() {
+		return !this.#gameStore.hasLoaded;
+	}
+
+	get pageParamsSignal() {
+		return this.#getPageParams();
+	}
+
+	get filtersCount() {
+		return this.#filtersCount;
+	}
+
+	get paginationSequenceSignal() {
+		return this.#paginationSequenceSignal;
+	}
 }

@@ -1,0 +1,22 @@
+{
+  "name": "@playatlas/system",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    "./application": "./src/application/index.ts",
+    "./domain": "./src/domain/index.ts",
+    "./infra": "./src/infra/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.14"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "vitest": "^3.2.4",
+    "@playatlas/common": "workspace:*",
+    "@types/busboy": "^1.5.4",
+    "busboy": "^1.6.0",
+    "zod": "^3.25.76"
+  }
+}

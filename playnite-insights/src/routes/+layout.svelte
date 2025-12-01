@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		ClientServiceLocator,
 		setLocatorContext,
 	} from '$lib/client/app-state/serviceLocator.svelte';
+	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Loading from '$lib/client/components/Loading.svelte';
 	import Toast from '$lib/client/components/Toast.svelte';
 	import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
+	import { AppClientError } from '@playnite-insights/lib/client';
 	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 
-	let { children, data }: LayoutProps = $props();
-	let appName = $derived(data.appName);
+	let { children }: LayoutProps = $props();
 	let appProcessingInterval: ReturnType<typeof setInterval> | null = $state(null);
 	let loading = $state<Set<string>>(new Set('all'));
 	const locator = new ClientServiceLocator();
@@ -36,11 +36,18 @@
 	const initInstance = async () => {
 		try {
 			addLoading('instanceRegistered');
-			var registered = await locator.instanceManager.isRegistered();
+			const registered = await locator.instanceManager.isRegistered();
 			if (!registered) {
 				await goto('/auth/register', { replaceState: true });
 			}
-		} catch {
+		} catch (error) {
+			if (error instanceof AppClientError) {
+				if (error.code === 'server_error')
+					toast.error({
+						category: 'app',
+						message: 'Failed to check instance registration, please check application logs.',
+					});
+			}
 		} finally {
 			removeLoading('instanceRegistered');
 		}
@@ -48,22 +55,37 @@
 			addLoading('applicationSettings');
 			await locator.applicationSettingsStore.loadSettings();
 		} catch {
+			// Logs only
 		} finally {
 			removeLoading('applicationSettings');
 		}
 		try {
-			addLoading('processQueue');
-			await locator.syncQueue.processQueueAsync();
-		} catch {
+			addLoading('ensureSyncId');
+			await locator.syncService.ensureValidLocalSyncId({
+				onFinishReconcile: () => {
+					toast.info({ category: 'app', message: `Reconciled data with server.` });
+				},
+			});
+		} catch (error) {
+			if (error instanceof AppClientError) {
+				if (error.code === 'invalid_syncid')
+					toast.warning({
+						category: 'app',
+						message: `Invalid SyncId detected, reconciling local dataset with server...`,
+					});
+				if (error.code === 'reconciliation_failed')
+					toast.error({
+						category: 'app',
+						message: `Failed to reconcile data with server, please check application logs.`,
+					});
+			}
 		} finally {
-			removeLoading('processQueue');
+			removeLoading('ensureSyncId');
 		}
 		loading = new Set();
 	};
 
-	if (browser) {
-		initInstance();
-	}
+	initInstance();
 
 	const appProcessingHandler = () => {
 		try {
@@ -90,10 +112,12 @@
 		locator.eventSourceManager.setupGlobalListeners();
 		locator.serviceWorkerManager.setupGlobalListeners();
 		locator.serviceWorkerManager.watchServiceWorkerUpdates();
+		locator.gameNoteStore.loadNotesFromServerAsync();
 
 		if (!page.url.pathname.startsWith('/auth')) {
 			locator.eventSourceManager.connect().then(() => {
 				locator.loadStoresData();
+				locator.syncQueue.processQueueAsync();
 			});
 		}
 
@@ -107,18 +131,6 @@
 		};
 	});
 </script>
-
-<svelte:head>
-	<title>{appName}</title>
-	<meta
-		name="application-name"
-		content={appName}
-	/>
-	<meta
-		name="apple-mobile-web-app-title"
-		content={appName}
-	/>
-</svelte:head>
 
 <Toast />
 {#if loading.size > 0}

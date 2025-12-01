@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { beforeNavigate } from '$app/navigation';
 	import { getLocatorContext } from '$lib/client/app-state/serviceLocator.svelte';
-	import { toast } from '$lib/client/app-state/toast.svelte';
 	import Dashboard from '$lib/client/components/bottom-nav/Dashboard.svelte';
 	import Home from '$lib/client/components/bottom-nav/Home.svelte';
 	import Settings from '$lib/client/components/bottom-nav/Settings.svelte';
@@ -29,7 +28,13 @@
 
 	let currentLocale = $state(getLocale());
 	const locator = getLocatorContext();
-	const { extensionRegistrationStore, eventSourceManager, applicationSettingsStore } = locator;
+	const {
+		extensionRegistrationStore,
+		eventSourceManager,
+		applicationSettingsStore,
+		syncQueue,
+		syncService,
+	} = locator;
 	let serverConnectionStatusText = $derived(eventSourceManager.serverConnectionStatusText);
 	let serverConnectionStatus = $derived(eventSourceManager.serverConnectionStatus);
 	let registrations = $derived(extensionRegistrationStore.listSignal);
@@ -90,18 +95,6 @@
 		if (isValidLocale(value)) setLocale(value);
 	};
 
-	const handleOnDataSync = async () => {
-		const syncResult = await locator.syncQueue.processQueueAsync();
-		const loadResult = syncResult
-			? await locator.gameNoteStore.loadNotesFromServerAsync(true)
-			: false;
-		if (!syncResult || !loadResult) {
-			toast.error({ category: 'app', message: m.toast_data_sync_failed() });
-			return;
-		}
-		toast.success({ category: 'app', message: m.toast_data_sync_succeeded() });
-	};
-
 	const handleSSENewRegistration = (newRegistration: ExtensionRegistration) => {
 		let newRegistrations: ExtensionRegistration[] = [newRegistration];
 		const index = registrations?.findIndex((r) => r.Id === newRegistration.Id) ?? -1;
@@ -131,7 +124,7 @@
 {#snippet registrationInfo(label: string, value: string | number)}
 	<div class="flex flex-row justify-between gap-4">
 		<p class="text-nowrap text-sm">{label}</p>
-		<p class="break-all text-sm opacity-80">{value}</p>
+		<p class="overflow-x-auto text-nowrap text-sm opacity-80">{value}</p>
 	</div>
 	<Divider class={['border-background-3']} />
 {/snippet}
@@ -276,19 +269,28 @@
 			</label>
 		</ConfigSection>
 		<ConfigSection title={m.settings_sync_section_title()}>
-			<p class="text-sm">
-				{m.settings_sync_section_summary_paragraph1()}
-			</p>
-			<p class="mb-4 mt-2 text-sm">
-				{m.settings_sync_section_summary_paragraph2()}
-			</p>
-			<SolidButton
-				class={['w-full']}
-				onclick={handleOnDataSync}
-				disabled={!locator.serverHeartbeat.isAlive}
-			>
-				{m.settings_sync_section_label_sync()}
-			</SolidButton>
+			<div class="mb-4 mt-4 flex flex-col">
+				<div class="flex flex-row justify-between gap-4">
+					<p class="text-nowrap">Status</p>
+					{#if syncQueue.queueStatus === 'OK'}
+						<p class="text-success-light-fg break-all">
+							{syncQueue.queueStatusText}
+						</p>
+					{:else if syncQueue.queueStatus === 'NOT_OK'}
+						<p class="text-warning-light-fg break-all">
+							{syncQueue.queueStatusText}
+						</p>
+					{/if}
+				</div>
+				<Divider />
+				<div class="flex flex-row justify-between gap-4">
+					<p class="text-nowrap">SyncId</p>
+					<p class="overflow-x-auto text-nowrap text-sm opacity-80">
+						{syncService.syncIdSignal}
+					</p>
+				</div>
+				<Divider />
+			</div>
 		</ConfigSection>
 		<ConfigSection title={m.settings_interface_section_title()}>
 			<label

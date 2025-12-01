@@ -2,8 +2,8 @@ import type {
   ExtensionRegistration,
   RegisterExtensionCommand,
 } from "@playnite-insights/lib/client";
-import type { ExtensionRegistrationRepository } from "../types/extension-registration.types";
-import type { LogService } from "../types/log.types";
+import type { ExtensionRegistrationRepository } from "../types/extension-registration-repository";
+import type { LogService } from "../types/log-service";
 
 export type ExtensionRegistrationServiceDeps = {
   extensionRegistrationRepository: ExtensionRegistrationRepository;

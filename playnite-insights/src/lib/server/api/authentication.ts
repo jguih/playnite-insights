@@ -1,18 +1,22 @@
-import { services } from '$lib';
 import { validAuthenticationHeaders } from '@playnite-insights/lib/client';
 import { json } from '@sveltejs/kit';
+import type { ServerServices } from '../setup-services';
 import { handleApiError } from './handle-error';
 import { computeBase64HashAsync } from './hash';
+
+export const getRequestDescription = (request: Request, url: URL) =>
+	`${request.method} ${url.pathname}`;
 
 export const withExtensionAuth = async (
 	request: Request,
 	url: URL,
+	services: ServerServices,
 	strategy: 'text' | 'none',
 	cb: (rawBody?: string) => Response | Promise<Response>,
 ) => {
-	const requestDescription = `${request.method} ${url.pathname}`;
+	const requestDescription = getRequestDescription(request, url);
 	try {
-		const isAuthorized = services.authentication.verifyExtensionAuthorization({
+		const isAuthorized = services.authService.verifyExtensionAuth({
 			headers: {
 				'X-ExtensionId': request.headers.get(validAuthenticationHeaders['X-ExtensionId']),
 				'X-Signature': request.headers.get(validAuthenticationHeaders['X-Signature']),
@@ -34,8 +38,8 @@ export const withExtensionAuth = async (
 				const contentHash = request.headers.get(validAuthenticationHeaders['X-ContentHash'])!;
 				const computedHash = await computeBase64HashAsync(rawBody);
 				if (contentHash !== computedHash) {
-					services.log.warning(
-						`${requestDescription}: Request rejected bacause calculated content hash does not match received one`,
+					services.logService.warning(
+						`${requestDescription}: Request rejected because calculated content hash does not match received one`,
 					);
 					return json({ error: 'Unauthorized' }, { status: 403 });
 				}
@@ -46,21 +50,22 @@ export const withExtensionAuth = async (
 				break;
 			}
 		}
-		return cb(rawBody);
+		return await cb(rawBody);
 	} catch (error) {
-		return handleApiError(error, requestDescription);
+		return handleApiError(error, services.logService, requestDescription);
 	}
 };
 
 export const withInstanceAuth = async (
 	request: Request,
 	url: URL,
+	services: ServerServices,
 	cb: (isAuthorized: boolean) => Response | Promise<Response>,
 	passThroughAuth?: boolean,
 ) => {
-	const requestDescription = `${request.method} ${url.pathname}`;
+	const requestDescription = getRequestDescription(request, url);
 	try {
-		const verify = services.authentication.verifyInstanceAuthorization({
+		const verify = services.authService.verifyInstanceAuth({
 			headers: { Authorization: request.headers.get('Authorization') },
 			request: { method: request.method },
 			url: { pathname: url.pathname, searchParams: new URLSearchParams(url.searchParams) },
@@ -68,8 +73,9 @@ export const withInstanceAuth = async (
 		if (!passThroughAuth && !verify.isAuthorized) {
 			return json({ error: { code: verify.code } }, { status: 403 });
 		}
-		return cb(verify.isAuthorized);
+		const result = await cb(verify.isAuthorized);
+		return result;
 	} catch (error) {
-		return handleApiError(error, requestDescription);
+		return handleApiError(error, services.logService, requestDescription);
 	}
 };

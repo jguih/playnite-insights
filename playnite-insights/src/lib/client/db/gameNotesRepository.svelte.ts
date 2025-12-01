@@ -10,14 +10,14 @@ import { runRequest, runTransaction } from './indexeddb';
 import { IndexedDBRepository, type IndexedDBRepositoryDeps } from './repository.svelte';
 import { SyncQueueRepository } from './syncQueueRepository.svelte';
 
-export type GameNotesRepositoryDeps = {
+export type GameNoteRepositoryDeps = {
 	syncQueueFactory: SyncQueueFactory;
 	dateTimeHandler: IDateTimeHandler;
 } & IndexedDBRepositoryDeps;
 
 export class GameNoteRepository extends IndexedDBRepository implements IGameNotesRepository {
-	#syncQueueFactory: GameNotesRepositoryDeps['syncQueueFactory'];
-	#dateTimeHandler: GameNotesRepositoryDeps['dateTimeHandler'];
+	#syncQueueFactory: GameNoteRepositoryDeps['syncQueueFactory'];
+	#dateTimeHandler: GameNoteRepositoryDeps['dateTimeHandler'];
 
 	static STORE_NAME = 'gameNotes' as const;
 
@@ -31,7 +31,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 		byGameId: this.INDEX.byGameId,
 	} as const;
 
-	constructor({ indexedDbSignal, syncQueueFactory, dateTimeHandler }: GameNotesRepositoryDeps) {
+	constructor({ indexedDbSignal, syncQueueFactory, dateTimeHandler }: GameNoteRepositoryDeps) {
 		super({ indexedDbSignal });
 		this.#syncQueueFactory = syncQueueFactory;
 		this.#dateTimeHandler = dateTimeHandler;
@@ -180,6 +180,7 @@ export class GameNoteRepository extends IndexedDBRepository implements IGameNote
 
 	upsertOrDeleteManyAsync: IGameNotesRepository['upsertOrDeleteManyAsync'] = async (notes, ops) => {
 		const shouldOverride = ops?.override === true;
+		if (notes.length === 0) return;
 		return await this.withDb(async (db) => {
 			await runTransaction(db, [GameNoteRepository.STORE_NAME], 'readwrite', async ({ tx }) => {
 				const store = tx.objectStore(GameNoteRepository.STORE_NAME);

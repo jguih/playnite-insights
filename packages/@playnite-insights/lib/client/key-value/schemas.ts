@@ -17,4 +17,8 @@ export const keyValueSchema = z.discriminatedUnion("Key", [
     Key: z.literal("application-settings"),
     Value: applicationSettingsSchema,
   }),
+  z.object({
+    Key: z.literal("sync-id"),
+    Value: z.string(),
+  }),
 ]);

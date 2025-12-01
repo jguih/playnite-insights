@@ -49,6 +49,8 @@
   "dependencies": {
     "@inlang/paraglide-js": "^2.0.0",
     "@lucide/svelte": "^0.525.0",
+    "@playatlas/bootstrap": "workspace:*",
+    "@playatlas/game-library": "workspace:*",
     "@playnite-insights/core": "workspace:*",
     "@playnite-insights/infra": "workspace:*",
     "@playnite-insights/lib": "workspace:*",

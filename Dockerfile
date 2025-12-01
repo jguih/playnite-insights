@@ -23,33 +23,28 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 WORKDIR /app
+ENV PLAYATLAS_WORK_DIR=/app
 ENV PLAYATLAS_DATA_DIR=/app/data
 ENV NODE_ENV='development'
 ENV BODY_SIZE_LIMIT=128M
-ENV PLAYATLAS_INSTANCE_NAME='PlayAtlas (Dev)'
 
 RUN apt update && apt install sqlite3 -y 
-
 RUN mkdir -p /app/data/files /app/data/tmp
-COPY ./playnite-insights/static/placeholder /app/data/files/placeholder
-COPY ./packages/@playnite-insights/infra/migrations /app/infra/migrations
+RUN chown -R node:node /app/data
+COPY --chown=node:node ./playnite-insights/static/placeholder /app/data/files/placeholder
+COPY --chown=node:node ./packages/@playnite-insights/infra/migrations /app/infra/migrations
 
 EXPOSE 3000
 
-CMD [ "sleep", "infinity" ]
+USER node
 
-FROM base AS vitest
-WORKDIR /app
-ENV NODE_ENV='testing'
-COPY --from=deps /usr/src/app ./
-ENTRYPOINT [ "pnpm", "--filter", "playnite-insights", "test:unit" ]
+CMD [ "sleep", "infinity" ]
 
 FROM base AS prod
 WORKDIR /app
-ENV PLAYATLAS_DATA_DIR=/app/data
+ENV PLAYATLAS_WORK_DIR=/app
 ENV NODE_ENV='production'
 ENV BODY_SIZE_LIMIT=128M
-ENV PLAYATLAS_INSTANCE_NAME='PlayAtlas'
 
 RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
 RUN mkdir -p /app/data/files /app/data/tmp
@@ -58,29 +53,6 @@ COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-ins
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build /app/build
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json /app/package.json
 COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations /app/infra/migrations
-
-EXPOSE 3000
-
-USER playnite-insights
-
-ENTRYPOINT ["node", "build"]
-
-FROM build AS stage
-
-WORKDIR /app
-ENV WORK_DIR=/app
-ENV NODE_ENV='testing'
-ENV BODY_SIZE_LIMIT=128M
-ENV APP_NAME='PlayAtlas (Stage)'
-
-RUN addgroup -S playnite-insights && adduser -S -G playnite-insights playnite-insights
-RUN mkdir -p ./data/files ./data/tmp
-RUN chown -R playnite-insights:playnite-insights ./data
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/node_modules ./node_modules
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/build ./build
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/package.json ./package.json
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/playnite-insights/static/placeholder ./data/files/placeholder
-COPY --from=build --chown=playnite-insights:playnite-insights /prod/infra/migrations ./infra/migrations
 
 EXPOSE 3000
 
@@ -105,3 +77,26 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 FROM playwright-deps AS playwright
 WORKDIR /usr/src/app
 ENTRYPOINT ["pnpm", "--filter", "playwright", "exec", "playwright", "test"]
+
+FROM python:3.14 AS mkdocs-build
+
+WORKDIR /app
+
+RUN pip install mkdocs-material
+
+COPY ./docs /app
+RUN mkdocs build -d ./dist
+
+FROM busybox:1.36 AS mkdocs-runtime
+
+WORKDIR /app
+
+RUN adduser -D mkdocs
+
+COPY --chown=mkdocs:mkdocs --from=mkdocs-build /app/dist /app
+
+EXPOSE 3001
+
+USER mkdocs
+
+ENTRYPOINT ["busybox", "httpd", "-f", "-v", "-p", "3001"]

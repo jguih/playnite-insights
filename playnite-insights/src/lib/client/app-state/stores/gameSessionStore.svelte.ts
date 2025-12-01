@@ -1,5 +1,6 @@
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
+	FetchClientStrategyError,
 	getRecentSessionsResponseSchema,
 	JsonStrategy,
 	type GetRecentSessionsResponse,
@@ -23,16 +24,15 @@ export class GameSessionStore extends ApiDataStore {
 
 	loadRecentSessions = async () => {
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				this.#recentSessionsSignal.isLoading = true;
-				const result = await client.httpGetAsync({
-					endpoint: '/api/session/recent',
-					strategy: new JsonStrategy(getRecentSessionsResponseSchema),
-				});
-				this.#recentSessionsSignal.list = result;
-				return result;
+			this.#recentSessionsSignal.isLoading = true;
+			const result = await this.httpClient.httpGetAsync({
+				endpoint: '/api/session/recent',
+				strategy: new JsonStrategy(getRecentSessionsResponseSchema),
 			});
+			this.#recentSessionsSignal.list = result;
+			return result;
 		} catch (err) {
+			if (err instanceof FetchClientStrategyError && err.statusCode === 204) return null;
 			handleClientErrors(err, `[loadRecentGameSessions] failed to fetch /api/session/recent`);
 			return null;
 		} finally {

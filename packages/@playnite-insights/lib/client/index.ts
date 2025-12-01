@@ -2,6 +2,7 @@ export * from "./api";
 export * from "./authentication";
 export * from "./company";
 export * from "./completion-status";
+export * from "./error";
 export * from "./extension-registration";
 export * from "./fetch-client";
 export * from "./game-notes";
@@ -16,5 +17,5 @@ export * from "./platform";
 export * from "./playnite-game";
 export * from "./playnite-library-metrics";
 export * from "./sync-queue";
+export * from "./synchronization-id";
 export * from "./types";
-

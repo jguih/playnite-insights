@@ -1,16 +1,15 @@
-import { services } from '$lib';
 import { handleApiError } from '$lib/server/api/handle-error';
 import { registerInstanceCommandSchema } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ request, url }) => {
+export const POST: RequestHandler = async ({ request, url, locals: { services } }) => {
 	try {
 		const jsonBody = await request.json();
 		const command = registerInstanceCommandSchema.parse(jsonBody);
-		await services.authentication.registerInstanceAsync(command.password);
-		services.log.success(`Instance registered`);
+		await services.authService.registerInstanceAsync(command.password);
+		services.logService.success(`Instance registered`);
 		return json({ status: 'OK' });
 	} catch (error) {
-		return handleApiError(error, `${request.method} ${url.pathname}`);
+		return handleApiError(error, services.logService, `${request.method} ${url.pathname}`);
 	}
 };

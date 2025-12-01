@@ -1,14 +1,21 @@
 {
-  "extends": [
-    "./playnite-insights/tsconfig.json"
-  ],
   "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "moduleResolution": "bundler",
+    "preserveSymlinks": false,
+    "module": "esnext",
+		"noEmit": true,
+		"target": "esnext",
     "paths": {
       "@playnite-insights/lib": [
         "./packages/@playnite-insights/lib"
-      ],
-      "@playnite-insights/lib/*": [
-        "./packages/@playnite-insights/lib/*"
       ],
       "@playnite-insights/core": [
         "./packages/@playnite-insights/core"
@@ -18,6 +25,27 @@
       ],
       "@playnite-insights/testing": [
         "./packages/@playnite-insights/testing"
+      ],
+      "@playatlas/auth": [
+        "./packages/@playatlas/auth"
+      ],
+      "@playatlas/game-library": [
+        "./packages/@playatlas/game-library"
+      ],
+      "@playatlas/common": [
+        "./packages/@playatlas/common"
+      ],
+      "@playatlas/system": [
+        "./packages/@playatlas/system"
+      ],
+      "@playatlas/game-note": [
+        "./packages/@playatlas/game-note"
+      ],
+      "@playatlas/game-session": [
+        "./packages/@playatlas/game-session"
+      ],
+      "@playatlas/bootstrap": [
+        "./packages/@playatlas/bootstrap"
       ]
     }
   }

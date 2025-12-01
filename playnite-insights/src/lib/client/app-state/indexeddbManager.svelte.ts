@@ -1,4 +1,3 @@
-import { browser } from '$app/environment';
 import { INDEXEDDB_CURRENT_VERSION, INDEXEDDB_NAME, openIndexedDbAsync } from '../db/indexeddb';
 
 export type IndexedDbManagerDeps = {
@@ -7,24 +6,26 @@ export type IndexedDbManagerDeps = {
 
 export type IndexedDbSignal = { db: IDBDatabase | null; dbReady: Promise<void> | null };
 
-export class IndexedDbManager {
+export interface IIndexedDbManager {
+	dbSignal: IndexedDbSignal;
+}
+
+export class IndexedDbManager implements IIndexedDbManager {
 	#dbSignal: IndexedDbSignal;
 
-	constructor({ onOpen }: IndexedDbManagerDeps) {
+	constructor({ onOpen }: IndexedDbManagerDeps = {}) {
 		this.#dbSignal = $state({
 			db: null,
 			dbReady: Promise.resolve(),
 		});
 
-		if (browser) {
-			this.#dbSignal.dbReady = openIndexedDbAsync({
-				dbName: INDEXEDDB_NAME,
-				version: INDEXEDDB_CURRENT_VERSION,
-			}).then((db) => {
-				this.#dbSignal.db = db;
-				onOpen?.(db);
-			});
-		}
+		this.#dbSignal.dbReady = openIndexedDbAsync({
+			dbName: INDEXEDDB_NAME,
+			version: INDEXEDDB_CURRENT_VERSION,
+		}).then((db) => {
+			this.#dbSignal.db = db;
+			onOpen?.(db);
+		});
 	}
 
 	get dbSignal() {

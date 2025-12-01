@@ -1,0 +1,13 @@
+site_name: PlayAtlas Docs
+use_directory_urls: true
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Overview:
+      - Quick Start: overview/quick-start.md
+  - Features:
+      - Syncing Across Devices: features/cross-device-sync.md
+  - Administration:
+      - Reverse Proxy: administration/reverse-proxy.md
+      - Authentication: administration/authentication.md

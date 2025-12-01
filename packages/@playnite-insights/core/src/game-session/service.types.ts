@@ -4,8 +4,8 @@ import {
   type OpenSessionCommand,
 } from "@playnite-insights/lib/client";
 import type { PlayniteGameRepository } from "../types";
-import type { GameSessionRepository } from "../types/game-session.types";
-import type { LogService } from "../types/log.types";
+import type { GameSessionRepository } from "../types/game-session-repository";
+import type { LogService } from "../types/log-service";
 
 export type GameSessionService = {
   open: (command: OpenSessionCommand) => boolean;

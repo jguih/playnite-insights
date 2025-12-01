@@ -35,9 +35,6 @@
 
 ## 🛠️ In Progress
 
-- Screenshot gallery improvements:
-  - Delete images
-  - Restore images from trash
 - Syncronization safety with Sync Id:
   - Client and server keeps the same sync id. Client send it on every sync request.
   - As long as client's sync id = server's sync id, the client is the source of truth and will overwrite server's data on every sync (last write wins).
@@ -45,12 +42,19 @@
 
 ## 📌 To Do
 
+- Fix pagination bug
+- Screenshot gallery improvements:
+  - Delete images
+  - Restore images from trash
 - Display game trailer in game page
 - Display related owned games in game page
 - Settings page:
   - Global filter to hide hidden games
   - Option to automatically redirect to current active game journal when a session is in progress
 - Authentication system for ShareX integration endpoint /api/assets/upload/screenshot
+- Dashboard page improvements:
+  - Show last 10 sessions in recent activity table, instead of just from the one from last 24hrs
+  - Show a card of in progress game or last played one
 
 ## 💡 Ideas
 

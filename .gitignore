@@ -28,3 +28,5 @@ playnite-insights/src/lib/paraglide
 
 .vscode
 .pnpm-store
+
+**/docker-compose.override.yaml

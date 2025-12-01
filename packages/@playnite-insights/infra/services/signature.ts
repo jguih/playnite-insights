@@ -5,26 +5,23 @@ import {
 } from "@playnite-insights/core";
 import { createVerify, sign as cryptoSign, generateKeyPairSync } from "crypto";
 import { join } from "path";
-import * as config from "../config/config";
 import { defaultFileSystemService } from "./file-system";
 import { defaultLogger } from "./log";
 
 export type SignatureServiceDeps = {
-  fileSystemService: FileSystemService;
-  logService: LogService;
+  fileSystemService?: FileSystemService;
+  logService?: LogService;
   SECURITY_DIR: string;
 };
 
 export const makeSignatureService = (
-  deps: Partial<SignatureServiceDeps> = {}
+  deps: SignatureServiceDeps
 ): SignatureService => {
-  const { fileSystemService, SECURITY_DIR, logService }: SignatureServiceDeps =
-    {
-      fileSystemService: defaultFileSystemService,
-      logService: defaultLogger,
-      SECURITY_DIR: config.SECURITY_DIR,
-      ...deps,
-    };
+  const { fileSystemService, SECURITY_DIR, logService } = {
+    fileSystemService: defaultFileSystemService,
+    logService: defaultLogger,
+    ...deps,
+  };
   const keysDir = join(SECURITY_DIR, "/keys");
   const publicKeyPath = join(keysDir, "public-key.der");
   const privateKeyPath = join(keysDir, "private-key.der");
@@ -86,5 +83,3 @@ export const makeSignatureService = (
 
   return { generateKeyPairAsync, signAsync, verifyExtensionSignature };
 };
-
-export const defaultSignatureService: SignatureService = makeSignatureService();

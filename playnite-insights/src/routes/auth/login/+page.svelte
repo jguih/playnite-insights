@@ -28,16 +28,19 @@
 			strategy: new JsonStrategy(loginInstanceResponseSchema),
 			body: command,
 		});
-		return response.sessionId;
+		return response;
 	};
 
 	const handleOnSubmit: FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
 		isLoading = true;
 		loginInstance()
-			.then(async (sessionId) => {
+			.then(async ({ sessionId, syncId }) => {
 				await locator.keyValueRepository.putAsync({
 					keyvalue: { Key: 'session-id', Value: sessionId },
+				});
+				await locator.keyValueRepository.putAsync({
+					keyvalue: { Key: 'sync-id', Value: syncId },
 				});
 				await locator.eventSourceManager.connect();
 				await locator.loadStoresData();

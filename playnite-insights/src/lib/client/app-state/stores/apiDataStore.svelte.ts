@@ -1,7 +1,7 @@
-import { HttpClientNotSetError, type IFetchClient } from '@playnite-insights/lib/client';
+import { type IFetchClient } from '@playnite-insights/lib/client';
 
 export type ApiDataStoreDeps = {
-	httpClient: IFetchClient | null;
+	httpClient: IFetchClient;
 };
 
 export class ApiDataStore {
@@ -10,12 +10,4 @@ export class ApiDataStore {
 	constructor({ httpClient }: ApiDataStoreDeps) {
 		this.httpClient = httpClient;
 	}
-
-	protected withHttpClient = <T>(
-		cb: (props: { client: IFetchClient }) => Promise<T>,
-	): Promise<T> => {
-		const client = this.httpClient;
-		if (!client) throw new HttpClientNotSetError();
-		return cb({ client });
-	};
 }

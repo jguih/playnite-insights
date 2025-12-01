@@ -2,29 +2,26 @@ import {
   ExtensionRegistration,
   ValidAuthenticationHeader,
 } from "@playnite-insights/lib/client";
+import { makeMocks } from "@playnite-insights/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeMocks } from "../../tests/mocks";
-import { makeAuthenticationService } from "./service";
-import type {
-  AuthenticationService,
-  AuthenticationServiceDeps,
-} from "./service.types";
+import { makeAuthService } from "./service";
+import type { AuthService, AuthServiceDeps } from "./service.types";
 
 const createDeps = () => {
   return {
     ...makeMocks(),
-  } satisfies AuthenticationServiceDeps;
+  } satisfies AuthServiceDeps;
 };
 
 let deps: ReturnType<typeof createDeps>;
-let service: AuthenticationService;
+let service: AuthService;
 let now: number = Date.now();
 
 describe("Authentication service", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     deps = createDeps();
-    service = makeAuthenticationService(deps);
+    service = makeAuthService(deps);
     now = Date.now();
   });
 
@@ -96,7 +93,7 @@ describe("Authentication service", () => {
       );
       deps.signatureService.verifyExtensionSignature.mockReturnValueOnce(true);
       // Act
-      const isAuthorized = service.verifyExtensionAuthorization({
+      const isAuthorized = service.verifyExtensionAuth({
         headers,
         request: { method: "GET" },
         url: { pathname: "/api/test" },
@@ -139,7 +136,7 @@ describe("Authentication service", () => {
     );
     deps.signatureService.verifyExtensionSignature.mockReturnValueOnce(true);
     // Act
-    const isAuthorized = service.verifyExtensionAuthorization({
+    const isAuthorized = service.verifyExtensionAuth({
       headers,
       request: { method: "GET" },
       url: { pathname: "/api/test" },
@@ -181,7 +178,7 @@ describe("Authentication service", () => {
     );
     deps.signatureService.verifyExtensionSignature.mockReturnValueOnce(true);
     // Act
-    const isAuthorized = service.verifyExtensionAuthorization({
+    const isAuthorized = service.verifyExtensionAuth({
       headers,
       request: { method: "POST" },
       url: { pathname: "/api/test" },

@@ -1,6 +1,6 @@
 import type { GameNoteRepository } from '$lib/client/db/gameNotesRepository.svelte';
 import type { ServerHeartbeat } from '$lib/client/event-source-manager/serverHeartbeat.svelte';
-import type { DateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
+import type { IDateTimeHandler } from '$lib/client/utils/dateTimeHandler.svelte';
 import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
 import {
 	FetchClientStrategyError,
@@ -12,7 +12,7 @@ import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
 export type GameNoteStoreDeps = ApiDataStoreDeps & {
 	serverHeartbeat: ServerHeartbeat;
 	gameNoteRepository: GameNoteRepository;
-	dateTimeHandler: DateTimeHandler;
+	dateTimeHandler: IDateTimeHandler;
 };
 
 export class GameNoteStore extends ApiDataStore {
@@ -52,16 +52,14 @@ export class GameNoteStore extends ApiDataStore {
 		if (!this.#serverHeartbeat.isAlive) return { notes: null, success: true };
 		if (override) this.#clearLastServerSync();
 		try {
-			return await this.withHttpClient(async ({ client }) => {
-				const lastSync = this.#getLastServerSync();
-				const notes = await client.httpGetAsync({
-					endpoint: `/api/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
-					strategy: new JsonStrategy(getAllGameNotesResponseSchema),
-				});
-				this.#setLastServerSync();
-				await this.#gameNoteRepository.upsertOrDeleteManyAsync(notes, { override });
-				return { notes, success: true };
+			const lastSync = this.#getLastServerSync();
+			const notes = await this.httpClient.httpGetAsync({
+				endpoint: `/api/sync/note${lastSync ? `?lastSync=${lastSync}` : ''}`,
+				strategy: new JsonStrategy(getAllGameNotesResponseSchema),
 			});
+			this.#setLastServerSync();
+			await this.#gameNoteRepository.upsertOrDeleteManyAsync(notes, { override });
+			return { notes, success: true };
 		} catch (err) {
 			if (
 				err instanceof FetchClientStrategyError &&
@@ -70,7 +68,7 @@ export class GameNoteStore extends ApiDataStore {
 				this.#setLastServerSync();
 				return { notes: null, success: true };
 			}
-			handleClientErrors(err, `[loadNotesFromServerAsync] failed to fetch /api/note`);
+			handleClientErrors(err, `[loadNotesFromServerAsync] failed to fetch /api/sync/note`);
 			return { notes: null, success: false };
 		}
 	};
