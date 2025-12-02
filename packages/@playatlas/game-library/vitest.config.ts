@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     reporters: [
       "default",
-      ["junit", { outputFile: "../../../test-results/game-library-junit.xml" }],
+      ["junit", { outputFile: "../../../test-results/game-library.xml" }],
     ],
     projects: [
       {

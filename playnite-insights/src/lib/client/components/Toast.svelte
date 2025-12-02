@@ -4,7 +4,7 @@
 </script>
 
 <div
-	class="fixed left-0 right-0 top-[calc(var(--header-height)+2*var(--spacing))] z-40 mx-auto flex w-64 flex-col gap-1 shadow"
+	class="fixed top-[calc(var(--header-height)+2*var(--spacing))] right-0 left-0 z-40 mx-auto flex w-64 flex-col gap-1 shadow"
 >
 	{#each getToasts() as toast, i (toast.key)}
 		<button

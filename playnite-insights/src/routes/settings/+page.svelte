@@ -123,8 +123,8 @@
 
 {#snippet registrationInfo(label: string, value: string | number)}
 	<div class="flex flex-row justify-between gap-4">
-		<p class="text-nowrap text-sm">{label}</p>
-		<p class="overflow-x-auto text-nowrap text-sm opacity-80">{value}</p>
+		<p class="text-sm text-nowrap">{label}</p>
+		<p class="overflow-x-auto text-sm text-nowrap opacity-80">{value}</p>
 	</div>
 	<Divider class={['border-background-3']} />
 {/snippet}
@@ -203,12 +203,12 @@
 	<Main class={['flex flex-col gap-4']}>
 		<div class="flex w-full justify-end">
 			{#if serverConnectionStatus === true}
-				<p class="text-success-light-fg wrap-normal block text-sm">
+				<p class="text-success-light-fg block text-sm wrap-normal">
 					{serverConnectionStatusText}
 					<CheckCircle class={['size-sm inline-block']} />
 				</p>
 			{:else}
-				<p class="text-warning-light-fg wrap-normal block text-sm">
+				<p class="text-warning-light-fg block text-sm wrap-normal">
 					{serverConnectionStatusText}
 					<AlertCircle class={['size-sm inline-block']} />
 				</p>
@@ -224,7 +224,7 @@
 			<h2 class="text-lg">
 				{m.settings_playatlas_exporter_section_registration_subsection_title()}
 			</h2>
-			<Divider class={['border-1 mb-4']} />
+			<Divider class={['mb-4 border-1']} />
 			<p class="mb-4 text-sm">
 				{@html m.settings_playatlas_exporter_section_registration_subsection_summary({
 					begin_strong: '<strong>',
@@ -269,7 +269,7 @@
 			</label>
 		</ConfigSection>
 		<ConfigSection title={m.settings_sync_section_title()}>
-			<div class="mb-4 mt-4 flex flex-col">
+			<div class="mt-4 mb-4 flex flex-col">
 				<div class="flex flex-row justify-between gap-4">
 					<p class="text-nowrap">Status</p>
 					{#if syncQueue.queueStatus === 'OK'}
@@ -285,7 +285,7 @@
 				<Divider />
 				<div class="flex flex-row justify-between gap-4">
 					<p class="text-nowrap">SyncId</p>
-					<p class="overflow-x-auto text-nowrap text-sm opacity-80">
+					<p class="overflow-x-auto text-sm text-nowrap opacity-80">
 						{syncService.syncIdSignal}
 					</p>
 				</div>

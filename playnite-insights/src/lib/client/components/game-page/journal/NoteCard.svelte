@@ -21,7 +21,7 @@
 
 <BaseButton
 	class={[
-		'flex-col! items-start! p-0! w-full',
+		'w-full flex-col! items-start! p-0!',
 		'hover:outline-primary-hover-bg hover:outline-2',
 		'active:bg-primary-light-active-bg',
 	]}

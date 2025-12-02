@@ -34,7 +34,7 @@
 		</h1>
 		<LightButton
 			onclick={() => history.back()}
-			class={['absolute bottom-2 left-4 top-2']}
+			class={['absolute top-2 bottom-2 left-4']}
 		>
 			<ArrowLeft class={['size-md']} />
 		</LightButton>
@@ -59,7 +59,7 @@
 						{m.game_label_journal()}
 					</SolidAnchor>
 				</div>
-				<div class="mb-4 mt-4 flex flex-col">
+				<div class="mt-4 mb-4 flex flex-col">
 					{@render infoSection(m.game_info_release_date(), vm.getReleaseDate())}
 					{@render infoSection(m.game_info_added(), vm.getAdded())}
 					{@render infoSection(m.game_info_playtime(), vm.getPlaytime())}

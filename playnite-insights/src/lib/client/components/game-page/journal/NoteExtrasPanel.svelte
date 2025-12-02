@@ -50,7 +50,7 @@
 					<LightButton
 						justify="start"
 						size="md"
-						class={['gap-3! w-full']}
+						class={['w-full gap-3!']}
 						onclick={(e) => imageInput?.click()}
 						disabled={props.isOptionDisabled?.uploadImage ?? false}
 					>
@@ -62,7 +62,7 @@
 					<LightButton
 						justify="start"
 						size="md"
-						class={['gap-3! w-full']}
+						class={['w-full gap-3!']}
 						onclick={props.onTakeScreenshotFromPlaynite}
 						disabled={props.isOptionDisabled?.takeScreenshotFromPlayniteHost ?? false}
 					>
@@ -74,7 +74,7 @@
 					<LightButton
 						justify="start"
 						size="md"
-						class={['gap-3! w-full']}
+						class={['w-full gap-3!']}
 						onclick={props.onAddAvailableScreenshot}
 						disabled={props.isOptionDisabled?.addAvailableScreenshot ?? false}
 					>

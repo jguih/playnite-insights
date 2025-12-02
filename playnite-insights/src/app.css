@@ -49,7 +49,7 @@
 	--color-primary-light-active-fg: var(--pl-color-primary-700);
 	--color-primary-light-disabled-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-disabled-fg: var(--color-neutral-400);
-  /* Neutral variant */
+	/* Neutral variant */
 	--color-neutral-bg: var(--color-neutral-700);
 	--color-neutral-fg: var(--color-foreground);
 	--color-neutral-hover-bg: var(--color-neutral-600);
@@ -73,26 +73,26 @@
 	/* Success light variant */
 	--color-success-light-bg: transparent;
 	--color-success-light-fg: var(--color-green-500);
-  /* Warning variant */
-  --color-warning-bg: var(--color-yellow-700);
+	/* Warning variant */
+	--color-warning-bg: var(--color-yellow-700);
 	--color-warning-fg: var(--color-foreground);
 	/* Warning light variant */
 	--color-warning-light-bg: transparent;
 	--color-warning-light-fg: var(--color-yellow-600);
-  /* Error variant */
-  --color-error-bg: var(--color-red-700);
+	/* Error variant */
+	--color-error-bg: var(--color-red-700);
 	--color-error-fg: var(--color-foreground);
-  --color-error-hover-bg: var(--color-red-600);
+	--color-error-hover-bg: var(--color-red-600);
 	--color-error-hover-fg: var(--color-red-100);
 	--color-error-active-bg: var(--color-red-800);
 	--color-error-active-fg: var(--color-foreground);
 	--color-error-disabled-bg: var(--color-neutral-800);
 	--color-error-disabled-fg: var(--color-neutral-400);
-  /* Error light variant */
-  --color-error-light-bg: transparent;
+	/* Error light variant */
+	--color-error-light-bg: transparent;
 	--color-error-light-fg: var(--color-red-600);
-  /* Info variant */
-  --color-info-bg: var(--pl-color-primary-800);
+	/* Info variant */
+	--color-info-bg: var(--pl-color-primary-800);
 	--color-info-fg: var(--color-foreground);
 	/* END: Dark Theme */
 }
@@ -122,7 +122,7 @@
 	--color-primary-light-active-fg: var(--pl-color-primary-700);
 	--color-primary-light-disabled-bg: rgba(255, 255, 255, 0.02);
 	--color-primary-light-disabled-fg: var(--color-neutral-400);
-  /* Neutral variant */
+	/* Neutral variant */
 	--color-neutral-bg: var(--color-neutral-700);
 	--color-neutral-fg: var(--color-foreground);
 	--color-neutral-hover-bg: var(--color-neutral-600);
@@ -146,26 +146,26 @@
 	/* Success light variant */
 	--color-success-light-bg: transparent;
 	--color-success-light-fg: var(--color-green-500);
-  /* Warning variant */
-  --color-warning-bg: var(--color-yellow-700);
+	/* Warning variant */
+	--color-warning-bg: var(--color-yellow-700);
 	--color-warning-fg: var(--color-foreground);
 	/* Warning light variant */
 	--color-warning-light-bg: transparent;
 	--color-warning-light-fg: var(--color-yellow-600);
-  /* Error variant */
-  --color-error-bg: var(--color-red-700);
+	/* Error variant */
+	--color-error-bg: var(--color-red-700);
 	--color-error-fg: var(--color-foreground);
-  --color-error-hover-bg: var(--color-red-600);
+	--color-error-hover-bg: var(--color-red-600);
 	--color-error-hover-fg: var(--color-red-100);
 	--color-error-active-bg: var(--color-red-800);
 	--color-error-active-fg: var(--color-foreground);
 	--color-error-disabled-bg: var(--color-neutral-800);
 	--color-error-disabled-fg: var(--color-neutral-400);
-  /* Error light variant */
-  --color-error-light-bg: transparent;
+	/* Error light variant */
+	--color-error-light-bg: transparent;
 	--color-error-light-fg: var(--color-red-600);
-  /* Info variant */
-  --color-info-bg: var(--pl-color-primary-800);
+	/* Info variant */
+	--color-info-bg: var(--pl-color-primary-800);
 	--color-info-fg: var(--color-foreground);
 	/* END: Dark Theme */
 }
@@ -175,17 +175,17 @@ body {
 }
 
 .size-sm {
-  @apply size-4
+	@apply size-4;
 }
 
 .size-md {
-  @apply size-5
+	@apply size-5;
 }
 
 .size-lg {
-  @apply size-6
+	@apply size-6;
 }
 
 .shadow {
-  @apply shadow-xl/15
+	@apply shadow-xl/15;
 }

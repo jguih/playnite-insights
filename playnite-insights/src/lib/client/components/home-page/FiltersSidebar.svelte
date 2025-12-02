@@ -169,7 +169,7 @@
 					</Select>
 				</label>
 			</div>
-			<Divider class={['border-1 my-2']} />
+			<Divider class={['my-2 border-1']} />
 			<LightButton
 				color="primary"
 				selected
@@ -206,7 +206,7 @@
 					{m.label_filter_not_installed()}
 				</label>
 			</fieldset>
-			<Divider class={['border-1 my-2']} />
+			<Divider class={['my-2 border-1']} />
 			<FilterDropdown
 				label={m.label_filter_genres()}
 				counter={genresParam.length}

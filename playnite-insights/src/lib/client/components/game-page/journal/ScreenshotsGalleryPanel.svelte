@@ -45,7 +45,7 @@
 					{#each screenshotStore.screenshotList as screenshot (screenshot.Id)}
 						<li>
 							<LightButton
-								class={['p-0! w-full']}
+								class={['w-full p-0!']}
 								onclick={() => props.onSelectImage(screenshot.Path)}
 							>
 								<img

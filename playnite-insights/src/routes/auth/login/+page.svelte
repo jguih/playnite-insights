@@ -83,7 +83,7 @@
 			/>
 		</label>
 		<SolidButton
-			class={['ml-auto mt-4 block']}
+			class={['mt-4 ml-auto block']}
 			size="lg"
 			type="submit"
 			{isLoading}

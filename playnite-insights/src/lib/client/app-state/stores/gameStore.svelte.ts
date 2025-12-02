@@ -1,44 +1,28 @@
-import { handleClientErrors } from '$lib/client/utils/handleClientErrors.svelte';
+import type {
+	HomePageFilterParams,
+	HomePagePaginationParams,
+	HomePageSortingParams,
+} from '$lib/client/page/home/searchParams.types';
+import type { HomePageSearchParams } from '$lib/client/page/home/searchParams.utils';
+import type { GameResponseDto } from '@playatlas/game-library/dtos';
 import {
 	FetchClientStrategyError,
 	getAllGamesResponseSchema,
 	JsonStrategy,
-	type FullGame,
-	type GetAllGamesResponse,
-	type HomePageFilterParams,
-	type HomePagePaginationParams,
-	type HomePageSearchParams,
-	type HomePageSortingParams,
+	type ApplicationSettings,
 } from '@playnite-insights/lib/client';
-import { ApiDataStore, type ApiDataStoreDeps } from './apiDataStore.svelte';
-import type {
-	IApplicationSettingsStore,
-	SettingsChangeListener,
-} from './applicationSettingsStore.svelte';
-
-export type GameStoreDeps = ApiDataStoreDeps & {
-	applicationSettingsStore: IApplicationSettingsStore;
-};
-
-export type GameListSignal = {
-	raw: GetAllGamesResponse | null;
-	visibleOnly: GetAllGamesResponse | null;
-	isLoading: boolean;
-	hasLoaded: boolean;
-};
-
-export type GameStoreCacheItem = {
-	games: FullGame[];
-	total: number;
-	countFrom: number;
-	countTo: number;
-	totalPages: number;
-};
+import { ApiDataStore } from './apiDataStore.svelte';
+import type { IApplicationSettingsStore } from './applicationSettingsStore.svelte';
+import type { GameListSignal, GameStoreCacheItem, GameStoreDeps } from './gameStore.types';
 
 export class GameStore extends ApiDataStore {
 	#dataSignal: GameListSignal;
-	#cache: Map<string, GameStoreCacheItem>;
+	#filteredCache: Map<string, GameResponseDto[]>;
+	#sortedCache: Map<string, GameResponseDto[]>;
+	#paginatedCache: Map<string, GameResponseDto[]>;
+	#currentCacheItemSignal: GameStoreCacheItem | null;
 	#applicationSettingsStore: IApplicationSettingsStore;
+	#getHomePageSearchParams: () => HomePageSearchParams | null;
 
 	constructor({ httpClient, applicationSettingsStore }: GameStoreDeps) {
 		super({ httpClient });
@@ -49,38 +33,65 @@ export class GameStore extends ApiDataStore {
 			isLoading: false,
 			hasLoaded: false,
 		});
-		this.#cache = new Map();
+		this.#filteredCache = new Map();
+		this.#sortedCache = new Map();
+		this.#paginatedCache = new Map();
+		this.#getHomePageSearchParams = () => null;
 
-		this.#applicationSettingsStore.addListener(this.#handleOnSettingsChange);
+		this.#currentCacheItemSignal = $derived.by(() => {
+			const appSettings = this.#applicationSettingsStore.settingsSignal;
+			const games = this.#dataSignal.raw;
+			const homePageParams = this.#getHomePageSearchParams();
+			return this.#buildCacheItem(games, homePageParams, appSettings);
+		});
 	}
 
-	#handleOnSettingsChange: SettingsChangeListener = async () => {
-		if (!this.#dataSignal.raw) return;
-		this.#loadVisibleOnly(this.#dataSignal.raw);
-		this.#invalidateMemoryCache();
-	};
-
-	#loadVisibleOnly = (games: GetAllGamesResponse) => {
-		const settings = this.#applicationSettingsStore.settingsSignal;
-		if (settings.desconsiderHiddenGames) {
-			const visibleGames = [...games].filter((g) => !g.Hidden);
-			this.#dataSignal.visibleOnly = visibleGames;
-			return;
-		} else {
-			this.#dataSignal.visibleOnly = this.#dataSignal.raw;
+	#buildCacheItem = (
+		_games: GameResponseDto[] | null,
+		homePageSearchParams: HomePageSearchParams | null,
+		appSettings: ApplicationSettings,
+	): GameStoreCacheItem => {
+		if (!_games || !homePageSearchParams) {
+			return {
+				games: [],
+				countFrom: 0,
+				countTo: 0,
+				total: 0,
+				totalPages: 0,
+			};
 		}
+
+		const games = [..._games];
+		const filtered = this.#getFilteredGames(games, homePageSearchParams.filter, appSettings);
+		const total = filtered.length;
+		const sorted = this.#getSortedGames(
+			filtered,
+			homePageSearchParams.filter,
+			homePageSearchParams.sorting,
+		);
+		const paginated = this.#getPaginatedGames(sorted, homePageSearchParams.pagination);
+
+		const { page, pageSize } = homePageSearchParams.pagination;
+		const countFrom = (page - 1) * pageSize;
+		const countTo = Math.min(countFrom + pageSize, total);
+		const totalPages = Math.ceil(total / pageSize);
+
+		const cacheItem: GameStoreCacheItem = {
+			games: paginated,
+			countFrom,
+			countTo,
+			total,
+			totalPages,
+		};
+		return cacheItem;
 	};
 
-	#invalidateMemoryCache = () => {
-		this.#cache = new Map();
-	};
-
-	#makeCacheKey = (homePageParams: HomePageSearchParams): string => {
-		return JSON.stringify(homePageParams);
-	};
-
-	#applyFilters = (games: FullGame[], args: HomePageFilterParams): FullGame[] => {
-		let filtered = [...games];
+	#applyFilters = (
+		games: GameResponseDto[],
+		args: HomePageFilterParams,
+		appSettings: ApplicationSettings,
+	): GameResponseDto[] => {
+		let filtered = games;
 		const query = args.query;
 		const installed = args.installed;
 		const notInstalled = args.notInstalled;
@@ -88,6 +99,11 @@ export class GameStore extends ApiDataStore {
 		const publishers = args.publishers;
 		const platforms = args.platforms;
 		const genres = args.genres;
+		const visibleOnly = appSettings.desconsiderHiddenGames;
+
+		if (visibleOnly) {
+			filtered = games.filter((g) => !g.Hidden);
+		}
 		if (query !== null) {
 			filtered = games.filter((g) => g.Name?.toLowerCase().includes(query.toLowerCase()));
 		}
@@ -132,7 +148,23 @@ export class GameStore extends ApiDataStore {
 		return filtered;
 	};
 
-	#applySorting = (games: FullGame[], args: HomePageSortingParams): FullGame[] => {
+	#getFilteredGames = (
+		games: GameResponseDto[],
+		filterParams: HomePageFilterParams,
+		appSettings: ApplicationSettings,
+	) => {
+		const key = JSON.stringify({ filterParams, appSettings });
+
+		if (this.#filteredCache.has(key)) {
+			return this.#filteredCache.get(key)!;
+		}
+
+		const result = this.#applyFilters(games, filterParams, appSettings);
+		this.#filteredCache.set(key, result);
+		return result;
+	};
+
+	#applySorting = (games: GameResponseDto[], args: HomePageSortingParams): GameResponseDto[] => {
 		const gameList = [...games];
 		const sortBy = args.sortBy;
 		const sortOrder = args.sortOrder;
@@ -163,12 +195,41 @@ export class GameStore extends ApiDataStore {
 		return sorted;
 	};
 
-	#applyPagination = (games: FullGame[], args: HomePagePaginationParams): FullGame[] => {
+	#getSortedGames = (
+		filtered: GameResponseDto[],
+		filterParams: HomePageFilterParams,
+		sortingParams: HomePageSortingParams,
+	) => {
+		const key = JSON.stringify({ filter: filterParams, sorting: sortingParams });
+
+		if (this.#sortedCache.has(key)) {
+			return this.#sortedCache.get(key)!;
+		}
+
+		const result = this.#applySorting(filtered, sortingParams);
+		this.#sortedCache.set(key, result);
+		return result;
+	};
+
+	#applyPagination = (
+		games: GameResponseDto[],
+		args: HomePagePaginationParams,
+	): GameResponseDto[] => {
 		const paginated = [...games];
 		const pageSize = Number(args.pageSize);
 		const offset = (Number(args.page) - 1) * Number(args.pageSize);
 		const end = Math.min(offset + pageSize, games.length);
 		return paginated.slice(offset, end);
+	};
+
+	#getPaginatedGames = (sorted: GameResponseDto[], paginationParams: HomePagePaginationParams) => {
+		const key = JSON.stringify(paginationParams);
+
+		if (this.#paginatedCache.has(key)) return this.#paginatedCache.get(key)!;
+
+		const result = this.#applyPagination(sorted, paginationParams);
+		this.#paginatedCache.set(key, result);
+		return result;
 	};
 
 	loadGames = async () => {
@@ -179,21 +240,23 @@ export class GameStore extends ApiDataStore {
 				strategy: new JsonStrategy(getAllGamesResponseSchema),
 			});
 			this.#dataSignal.raw = result;
-			this.#loadVisibleOnly(result);
 			return result;
 		} catch (err) {
-			if (err instanceof FetchClientStrategyError && err.statusCode === 204) return null;
-			handleClientErrors(err, `[loadGames] failed to fetch /api/game`);
-			return null;
+			if (err instanceof FetchClientStrategyError && err.statusCode === 204)
+				this.#dataSignal.raw = [];
+			return [];
 		} finally {
 			this.#dataSignal.isLoading = false;
 			this.#dataSignal.hasLoaded = true;
-			this.#invalidateMemoryCache();
 		}
 	};
 
-	get gameList(): FullGame[] | null {
-		return this.#dataSignal.visibleOnly;
+	set getHomePageSearchParams(fn: () => HomePageSearchParams) {
+		this.#getHomePageSearchParams = fn;
+	}
+
+	get gamesSignal(): GameStoreCacheItem | null {
+		return this.#currentCacheItemSignal;
 	}
 
 	get isLoading() {
@@ -203,41 +266,4 @@ export class GameStore extends ApiDataStore {
 	get hasLoaded() {
 		return this.#dataSignal.hasLoaded;
 	}
-
-	getFilteredGames = (homePageParams: HomePageSearchParams): GameStoreCacheItem => {
-		const key = this.#makeCacheKey(homePageParams);
-
-		if (this.#cache.has(key)) {
-			return this.#cache.get(key)!;
-		}
-
-		const games = this.#dataSignal.visibleOnly ? [...this.#dataSignal.visibleOnly] : null;
-		if (games === null) {
-			return {
-				games: [],
-				countFrom: 0,
-				countTo: 0,
-				total: 0,
-				totalPages: 0,
-			};
-		}
-
-		const args = homePageParams;
-		let filtered = this.#applyFilters(games, args.filter);
-		const total = filtered.length;
-		const countFrom = (Number(args.pagination.page) - 1) * Number(args.pagination.pageSize);
-		const countTo = Math.min(Number(args.pagination.pageSize) + countFrom, total);
-		const totalPages = Math.ceil(total / Number(args.pagination.pageSize));
-		filtered = this.#applySorting(filtered, args.sorting);
-		filtered = this.#applyPagination(filtered, args.pagination);
-		const cacheItem = {
-			games: filtered,
-			countFrom,
-			countTo,
-			total,
-			totalPages,
-		};
-		this.#cache.set(key, cacheItem);
-		return cacheItem;
-	};
 }

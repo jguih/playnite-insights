@@ -1,12 +1,8 @@
+import type { GameStore } from '$lib/client/app-state/stores/gameStore.svelte';
+import { getPlayniteGameImageUrl } from '$lib/client/utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
-import {
-	gamePageSizes,
-	type GameSortBy,
-	type GameSortOrder,
-	type HomePageSearchParams,
-} from '@playnite-insights/lib/client';
-import type { GameStore, GameStoreCacheItem } from '../app-state/stores/gameStore.svelte';
-import { getPlayniteGameImageUrl } from '../utils/playnite-game';
+import { gamePageSizes, type GameSortBy, type GameSortOrder } from '@playatlas/game-library/domain';
+import type { HomePageSearchParams } from './searchParams.utils';
 
 export type HomePageViewModelDeps = {
 	gameStore: GameStore;
@@ -15,18 +11,15 @@ export type HomePageViewModelDeps = {
 
 export class HomePageViewModel {
 	#gameStore: HomePageViewModelDeps['gameStore'];
-	#getPageParams: HomePageViewModelDeps['getPageParams'];
 	#filtersCount: number;
-	#gamesCacheItem: GameStoreCacheItem;
 	#paginationSequenceSignal: (number | null)[];
 
 	constructor({ gameStore, getPageParams }: HomePageViewModelDeps) {
 		this.#gameStore = gameStore;
-		this.#getPageParams = getPageParams;
 
 		this.#filtersCount = $derived.by(() => {
 			let counter = 0;
-			for (const filter of Object.values(this.#getPageParams().filter)) {
+			for (const filter of Object.values(getPageParams().filter)) {
 				if (filter === null) continue;
 				if (typeof filter === 'string' || typeof filter === 'number') {
 					counter++;
@@ -44,18 +37,11 @@ export class HomePageViewModel {
 			return counter;
 		});
 
-		this.#gamesCacheItem = $derived.by(() => {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const _ = gameStore.gameList;
-			const pageParams = getPageParams();
-			return gameStore.getFilteredGames(pageParams);
-		});
-
 		this.#paginationSequenceSignal = $derived.by(() => {
 			const pageParams = getPageParams();
 			return this.getPaginationSequence(
 				Number(pageParams.pagination.page),
-				this.#gamesCacheItem.totalPages,
+				this.#gameStore.gamesSignal?.totalPages ?? 1,
 			);
 		});
 	}
@@ -105,8 +91,8 @@ export class HomePageViewModel {
 		return range;
 	};
 
-	get gamesCacheItem() {
-		return this.#gamesCacheItem;
+	get gamesSignal() {
+		return this.#gameStore.gamesSignal;
 	}
 
 	get pageSizes() {
@@ -115,10 +101,6 @@ export class HomePageViewModel {
 
 	get isLoading() {
 		return !this.#gameStore.hasLoaded;
-	}
-
-	get pageParamsSignal() {
-		return this.#getPageParams();
 	}
 
 	get filtersCount() {

@@ -4,9 +4,9 @@
 >
 	let bottomNavHomeHref = $state<string>('/');
 
-	export const updateBottomNavHomeHref = (newHref:string) => {
+	export const updateBottomNavHomeHref = (newHref: string) => {
 		bottomNavHomeHref = newHref;
-	}
+	};
 </script>
 
 <script lang="ts">

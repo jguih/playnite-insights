@@ -14,30 +14,34 @@
 	import BaseAppLayout from '$lib/client/components/layout/BaseAppLayout.svelte';
 	import Main from '$lib/client/components/Main.svelte';
 	import SearchBar from '$lib/client/components/SearchBar.svelte';
-	import { HomePageViewModel } from '$lib/client/viewmodel/homePageViewModel.svelte';
-	import { m } from '$lib/paraglide/messages.js';
-	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+	import { HomePageViewModel } from '$lib/client/page/home/homePageViewModel.svelte';
 	import {
-		gameSortBy,
-		gameSortOrder,
 		homePageSearchParamsFilterKeys,
 		homePageSearchParamsKeys,
-		parseHomePageSearchParams,
-		type HomePageSearchParamKeys,
-		type PlayniteGame,
-	} from '@playnite-insights/lib/client';
+	} from '$lib/client/page/home/searchParams.constants';
+	import type { HomePageSearchParamKeys } from '$lib/client/page/home/searchParams.types';
+	import { parseHomePageSearchParams } from '$lib/client/page/home/searchParams.utils';
+	import { m } from '$lib/paraglide/messages.js';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+	import { gameSortBy, gameSortOrder } from '@playatlas/game-library/domain';
+	import { type GameResponseDto } from '@playatlas/game-library/dtos';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 
 	const locator = getLocatorContext();
-	let main: HTMLElement | undefined = $state();
+	const { gameStore } = locator;
+
 	const homePageSearchParams = $derived.by(() => {
 		const params = new URLSearchParams(page.url.searchParams);
 		return parseHomePageSearchParams(params);
 	});
+	gameStore.getHomePageSearchParams = () => homePageSearchParams;
+
 	const vm = new HomePageViewModel({
-		gameStore: locator.gameStore,
+		gameStore,
 		getPageParams: () => homePageSearchParams,
 	});
+
+	let main: HTMLElement | undefined = $state();
 
 	const handleOnPageSizeChange: HTMLSelectAttributes['onchange'] = (event) => {
 		const value = event.currentTarget.value;
@@ -124,10 +128,10 @@
 	});
 </script>
 
-{#snippet gameCard(game: PlayniteGame, imageSrc: string)}
+{#snippet gameCard(game: GameResponseDto, imageSrc: string)}
 	<li
 		class={[
-			'contain-size contain-layout contain-paint contain-style',
+			'contain-layout contain-paint contain-size contain-style',
 			'm-0 aspect-[1/1.6] p-0 shadow outline-0',
 			'border-background-1 border-4 border-solid',
 			'hover:border-primary-light-hover-fg',
@@ -146,7 +150,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -158,9 +162,9 @@
 	<li
 		class={['m-0 aspect-[1/1.6] p-0 shadow outline-0', 'border-background-1 border-4 border-solid']}
 	>
-		<div class="h-7/8 bg-background-3 w-full animate-pulse"></div>
+		<div class="bg-background-3 h-7/8 w-full animate-pulse"></div>
 		<div
-			class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
+			class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
 		>
 			<div class="bg-background-3 h-4 w-3/4 animate-pulse rounded"></div>
 		</div>
@@ -171,14 +175,14 @@
 	{setSearchParam}
 	{appendSearchParam}
 	{removeSearchParam}
-	installedParam={vm.pageParamsSignal.filter.installed}
-	notInstalledParam={vm.pageParamsSignal.filter.notInstalled}
-	sortByParam={vm.pageParamsSignal.sorting.sortBy}
-	sortOrderParam={vm.pageParamsSignal.sorting.sortOrder}
-	developersParam={vm.pageParamsSignal.filter.developers}
-	publishersParam={vm.pageParamsSignal.filter.publishers}
-	platformsParam={vm.pageParamsSignal.filter.platforms}
-	genresParam={vm.pageParamsSignal.filter.genres}
+	installedParam={homePageSearchParams.filter.installed}
+	notInstalledParam={homePageSearchParams.filter.notInstalled}
+	sortByParam={homePageSearchParams.sorting.sortBy}
+	sortOrderParam={homePageSearchParams.sorting.sortOrder}
+	developersParam={homePageSearchParams.filter.developers}
+	publishersParam={homePageSearchParams.filter.publishers}
+	platformsParam={homePageSearchParams.filter.platforms}
+	genresParam={homePageSearchParams.filter.genres}
 	onClearAllFilters={removeAllFilterParams}
 >
 	{#snippet renderSortOrderOptions()}
@@ -206,7 +210,7 @@
 		</a>
 		<div class="flex grow flex-row items-center gap-2">
 			<SearchBar
-				value={vm.pageParamsSignal.filter.query}
+				value={homePageSearchParams.filter.query}
 				onChange={(v) => setSearchParam(homePageSearchParamsKeys.query, v)}
 			/>
 			<FiltersButton
@@ -258,18 +262,18 @@
            lg:grid-cols-6
            xl:grid-cols-8"
 			>
-				{#each new Array(Number(vm.pageParamsSignal.pagination.pageSize)).fill(null) as _}
+				{#each new Array(Number(homePageSearchParams.pagination.pageSize)).fill(null) as _}
 					{@render gameCardSkeleton()}
 				{/each}
 			</ul>
-		{:else if vm.gamesCacheItem.total > 0}
+		{:else if vm.gamesSignal && vm.gamesSignal.total > 0}
 			<ul
 				class="mb-6 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3
            md:grid-cols-4
            lg:grid-cols-6
            xl:grid-cols-8"
 			>
-				{#each vm.gamesCacheItem.games as game (game.Id)}
+				{#each vm.gamesSignal.games as game (game.Id)}
 					{@render gameCard(game, vm.getImageURL(game.CoverImage))}
 				{/each}
 			</ul>
@@ -279,8 +283,8 @@
 
 		<nav class="mt-4 flex flex-row justify-center gap-2">
 			<LightButton
-				disabled={Number(vm.pageParamsSignal.pagination.page) <= 1}
-				onclick={() => handleOnPageChange(Number(vm.pageParamsSignal.pagination.page) - 1)}
+				disabled={homePageSearchParams.pagination.page <= 1}
+				onclick={() => handleOnPageChange(homePageSearchParams.pagination.page - 1)}
 				class={['px-2 py-1']}
 				aria-label="previous page"
 			>
@@ -289,7 +293,7 @@
 			{#each vm.paginationSequenceSignal as page, i (`${page}-${i}`)}
 				{#if page === null}
 					<span class="px-2">…</span>
-				{:else if page === Number(vm.pageParamsSignal.pagination.page)}
+				{:else if page === homePageSearchParams.pagination.page}
 					<SolidButton
 						selected
 						class={['px-2 py-1']}
@@ -306,8 +310,9 @@
 				{/if}
 			{/each}
 			<LightButton
-				onclick={() => handleOnPageChange(Number(vm.pageParamsSignal.pagination.page) + 1)}
-				disabled={Number(vm.pageParamsSignal.pagination.page) >= vm.gamesCacheItem.totalPages}
+				onclick={() => handleOnPageChange(homePageSearchParams.pagination.page + 1)}
+				disabled={!vm.gamesSignal ||
+					homePageSearchParams.pagination.page >= vm.gamesSignal.totalPages}
 				class={['px-2 py-1']}
 				aria-label="next page"
 			>

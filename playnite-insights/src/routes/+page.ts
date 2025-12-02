@@ -1,9 +1,5 @@
-import {
-	gamePageSizes,
-	gameSortBy,
-	gameSortOrder,
-	homePageSearchParamsKeys as paramKeys,
-} from '@playnite-insights/lib/client';
+import { homePageSearchParamsKeys as paramKeys } from '$lib/client/page/home/searchParams.constants';
+import { gamePageSizes, gameSortBy, gameSortOrder } from '@playatlas/game-library/domain';
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
@@ -15,7 +11,7 @@ export const load: PageLoad = ({ url }) => {
 		changed = true;
 	}
 	if (!params.has(paramKeys.pageSize)) {
-		params.set(paramKeys.pageSize, gamePageSizes[gamePageSizes.length - 1]);
+		params.set(paramKeys.pageSize, String(gamePageSizes[gamePageSizes.length - 1]));
 		changed = true;
 	}
 	if (!params.has(paramKeys.sortOrder)) {

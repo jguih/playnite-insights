@@ -39,12 +39,12 @@
 	<Main class="flex flex-col gap-6">
 		<div>
 			<h1 class="text-2xl">{m.dash_recent_activity()}</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			<DailyActivityTable />
 		</div>
 		<div>
 			<h1 class="text-2xl">Overview</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			{@render infoSection(m.dash_games_in_library(), vm.libraryMetrics.totalGamesInLibrary)}
 			{@render infoSection(m.dash_intalled(), vm.libraryMetrics.isInstalled)}
 			{@render infoSection(m.dash_not_installed(), vm.libraryMetrics.notInstalled)}
@@ -87,7 +87,7 @@
 		</div>
 		<div>
 			<h1 class="text-2xl">Top 10</h1>
-			<Divider class="border-1 mb-4" />
+			<Divider class="mb-4 border-1" />
 			{#if vm.libraryMetrics.topMostPlayedGames.length > 0}
 				<ul class="mb-6 grid list-none grid-cols-1 gap-4 p-0">
 					{#each vm.libraryMetrics.topMostPlayedGames as game (game.Id)}
