@@ -30,12 +30,12 @@ export class GameStore extends ApiDataStore {
 		let filtered = games;
 		const {
 			query,
-			developers,
-			genres,
-			installed,
-			notInstalled,
-			platforms,
-			publishers,
+			developerIds: developers,
+			genreIds: genres,
+			platformIds: platforms,
+			publisherIds: publishers,
+			isInstalled: installed,
+			isNotInstalled: notInstalled,
 			visibleOnly,
 		} = params;
 

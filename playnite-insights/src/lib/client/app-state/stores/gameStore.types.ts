@@ -21,12 +21,12 @@ export type GameStoreCacheItem = {
 
 export type GameStoreFiltersParams = Partial<{
 	query: string | null;
-	installed: boolean;
-	notInstalled: boolean;
-	developers: string[];
-	publishers: string[];
-	genres: string[];
-	platforms: string[];
+	isInstalled: boolean;
+	isNotInstalled: boolean;
+	developerIds: string[];
+	publisherIds: string[];
+	genreIds: string[];
+	platformIds: string[];
 	visibleOnly: boolean;
 }>;
 

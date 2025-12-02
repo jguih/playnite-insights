@@ -113,12 +113,12 @@ export class HomePageViewModel {
 		appSettings: ApplicationSettings,
 	): GameStoreFiltersParams => {
 		return {
-			developers: homePageFilters.developers,
-			genres: homePageFilters.genres,
-			installed: homePageFilters.installed,
-			notInstalled: homePageFilters.notInstalled,
-			platforms: homePageFilters.platforms,
-			publishers: homePageFilters.publishers,
+			developerIds: homePageFilters.developers,
+			genreIds: homePageFilters.genres,
+			isInstalled: homePageFilters.installed,
+			isNotInstalled: homePageFilters.notInstalled,
+			platformIds: homePageFilters.platforms,
+			publisherIds: homePageFilters.publishers,
 			query: homePageFilters.query,
 			visibleOnly: appSettings.desconsiderHiddenGames,
 		};

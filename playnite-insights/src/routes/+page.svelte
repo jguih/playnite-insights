@@ -131,7 +131,7 @@
 {#snippet gameCard(game: GameResponseDto, imageSrc: string)}
 	<li
 		class={[
-			'contain-size contain-layout contain-paint contain-style',
+			'contain-layout contain-paint contain-size contain-style',
 			'm-0 aspect-[1/1.6] p-0 shadow outline-0',
 			'border-background-1 border-4 border-solid',
 			'hover:border-primary-light-hover-fg',
@@ -150,7 +150,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -164,7 +164,7 @@
 	>
 		<div class="bg-background-3 h-7/8 w-full animate-pulse"></div>
 		<div
-			class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
+			class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
 		>
 			<div class="bg-background-3 h-4 w-3/4 animate-pulse rounded"></div>
 		</div>

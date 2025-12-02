@@ -69,8 +69,8 @@ describe('HomePageViewModel', () => {
 			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
 			const filteredGames = gameStore.applyFilters(storeGames, {
-				installed: isInstalled,
-				notInstalled: !isInstalled,
+				isInstalled: isInstalled,
+				isNotInstalled: !isInstalled,
 			});
 			const filteredGamesIds = filteredGames?.map((g) => g.Id);
 			// Assert
@@ -137,7 +137,7 @@ describe('HomePageViewModel', () => {
 			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
 			const filteredGames = gameStore.applyFilters(storeGames, {
-				developers: filterDeveloperIds,
+				developerIds: filterDeveloperIds,
 			});
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
@@ -205,7 +205,7 @@ describe('HomePageViewModel', () => {
 			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
 			const filteredGames = gameStore.applyFilters(storeGames, {
-				publishers: filterPublisherIds,
+				publisherIds: filterPublisherIds,
 			});
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
@@ -272,7 +272,7 @@ describe('HomePageViewModel', () => {
 			await gameStore.loadGames();
 			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
-			const filteredGames = gameStore.applyFilters(storeGames, { platforms: filterPlatformIds });
+			const filteredGames = gameStore.applyFilters(storeGames, { platformIds: filterPlatformIds });
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -333,7 +333,7 @@ describe('HomePageViewModel', () => {
 		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
 		const filteredGames = gameStore.applyFilters(storeGames, {
-			genres: filterGenreIds,
+			genreIds: filterGenreIds,
 		});
 		// Assert
 		expect(filteredGames).toHaveLength(expectedMatch);
@@ -356,8 +356,8 @@ describe('HomePageViewModel', () => {
 		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
 		const filteredGames = gameStore.applyFilters(storeGames, {
-			installed: true,
-			notInstalled: true,
+			isInstalled: true,
+			isNotInstalled: true,
 		});
 		// Assert
 		expect(filteredGames).toHaveLength(games.length);
