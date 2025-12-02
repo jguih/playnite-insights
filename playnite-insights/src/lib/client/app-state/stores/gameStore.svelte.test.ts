@@ -1,30 +1,17 @@
-import { homePageSearchParamsKeys } from '$lib/client/page/home/searchParams.constants';
-import { parseHomePageSearchParams } from '$lib/client/page/home/searchParams.utils';
 import type { GameResponseDto } from '@playatlas/game-library/dtos';
-import { GameFactory, makeMocks, testUtils } from '@playnite-insights/testing';
+import { makeMocks, testUtils } from '@playnite-insights/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { IApplicationSettingsStore } from './applicationSettingsStore.svelte';
+import { factory } from '../../../../vitest.unit-testing.setup';
 import { GameStore } from './gameStore.svelte';
 
 const mocks = makeMocks();
-const factory = new GameFactory();
 const fetchClient = mocks.fetchClient;
-const applicationSettingsStore: IApplicationSettingsStore = {
-	addListener: vi.fn(),
-	loadSettings: vi.fn(),
-	saveSettings: vi.fn(),
-	settingsSignal: { desconsiderHiddenGames: false },
-};
-let gameStore = new GameStore({ httpClient: fetchClient, applicationSettingsStore });
-
-let searchParams: URLSearchParams;
+let gameStore = new GameStore({ httpClient: fetchClient });
 
 describe('HomePageViewModel', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-		gameStore = new GameStore({ httpClient: fetchClient, applicationSettingsStore });
-		searchParams = new URLSearchParams();
-		gameStore.getHomePageSearchParams = () => parseHomePageSearchParams(searchParams);
+		gameStore = new GameStore({ httpClient: fetchClient });
 	});
 
 	it.each([
@@ -35,16 +22,16 @@ describe('HomePageViewModel', () => {
 		{ name: 'The Witcher 3', query: 'wItChEr 3' },
 	])('filters by query: $query', async ({ name, query }) => {
 		// Arrange
-		searchParams.set(homePageSearchParamsKeys.query, query);
-		const game: GameResponseDto = factory.getGame({ Name: name });
+		const game: GameResponseDto = factory.getGameFactory().buildGameDto({ name });
 		const games: GameResponseDto[] = factory
-			.getGames(20)
-			.map((g) => ({ ...g, Name: 'Other Game' }));
+			.getGameFactory()
+			.buildGameDtoList(20, { name: 'Other Game' });
 		games.push(game);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
+		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
-		const filteredGames = gameStore.gamesSignal?.games;
+		const filteredGames = gameStore.applyFilters(storeGames, { query });
 		const filteredGamesIds = filteredGames?.map((g) => g.Id);
 		// Assert
 		expect(filteredGames).toBeTruthy();
@@ -56,30 +43,35 @@ describe('HomePageViewModel', () => {
 	it('when filtering by query, returns all games if query is null', async () => {
 		// Arrange
 		const gamesCount = 20;
-		const games: GameResponseDto[] = factory.getGames(gamesCount);
+		const games: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(gamesCount);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
+		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
-		const filteredGames = gameStore.gamesSignal?.games;
+		const filteredGames = gameStore.applyFilters(storeGames, { query: null });
 		// Assert
 		expect(filteredGames).toBeTruthy();
 		expect(filteredGames).toHaveLength(gamesCount);
 	});
 
-	it.each([{ installed: true }, { installed: false }])(
+	it.each([{ isInstalled: true }, { isInstalled: false }])(
 		'filters by installation status: $installed',
-		async ({ installed }) => {
+		async ({ isInstalled }) => {
 			// Arrange
-			searchParams.set(homePageSearchParamsKeys.installed, String(+installed));
-			searchParams.set(homePageSearchParamsKeys.notInstalled, String(+!installed));
 			const gamesCount = 20;
-			const gameUnderTest: GameResponseDto = factory.getGame({ IsInstalled: +installed });
-			const games: GameResponseDto[] = factory.getGames(gamesCount, { IsInstalled: +!installed });
+			const gameUnderTest: GameResponseDto = factory.getGameFactory().buildGameDto({ isInstalled });
+			const games: GameResponseDto[] = factory
+				.getGameFactory()
+				.buildGameDtoList(gamesCount, { isInstalled: !isInstalled });
 			games.push(gameUnderTest);
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
+			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
-			const filteredGames = gameStore.gamesSignal?.games;
+			const filteredGames = gameStore.applyFilters(storeGames, {
+				installed: isInstalled,
+				notInstalled: !isInstalled,
+			});
 			const filteredGamesIds = filteredGames?.map((g) => g.Id);
 			// Assert
 			expect(filteredGames).toBeTruthy();
@@ -124,25 +116,29 @@ describe('HomePageViewModel', () => {
 		'filters by developers: $title',
 		async ({ gameDeveloperIds, filterDeveloperIds, expectedMatch }) => {
 			// Arrange
-			for (const developerId of filterDeveloperIds) {
-				searchParams.append(homePageSearchParamsKeys.developer, developerId);
-			}
 			const gamesUnderTest: GameResponseDto[] =
 				gameDeveloperIds.length === 1
-					? factory.getGames(5, { Developers: [gameDeveloperIds[0]] })
+					? factory.getGameFactory().buildGameDtoList(5, { developerIds: [gameDeveloperIds[0]] })
 					: [
-							...factory.getGames(2, { Developers: [gameDeveloperIds[0]] }),
-							...factory.getGames(2, { Developers: [gameDeveloperIds[1]] }),
-							factory.getGame({ Developers: gameDeveloperIds }),
+							...factory
+								.getGameFactory()
+								.buildGameDtoList(2, { developerIds: [gameDeveloperIds[0]] }),
+							...factory
+								.getGameFactory()
+								.buildGameDtoList(2, { developerIds: [gameDeveloperIds[1]] }),
+							factory.getGameFactory().buildGameDto({ developerIds: gameDeveloperIds }),
 						];
-			const otherGames: GameResponseDto[] = factory.getGames(20, {
-				Developers: ['dev1', 'dev2', 'dev3', 'dev4'],
+			const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+				developerIds: ['dev1', 'dev2', 'dev3', 'dev4'],
 			});
 			const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
+			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
-			const filteredGames = gameStore.gamesSignal?.games;
+			const filteredGames = gameStore.applyFilters(storeGames, {
+				developers: filterDeveloperIds,
+			});
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -188,25 +184,29 @@ describe('HomePageViewModel', () => {
 		'filters by publishers: $title',
 		async ({ gamePublisherIds, filterPublisherIds, expectedMatch }) => {
 			// Arrange
-			for (const publisherId of filterPublisherIds) {
-				searchParams.append(homePageSearchParamsKeys.publisher, publisherId);
-			}
 			const gamesUnderTest: GameResponseDto[] =
 				gamePublisherIds.length === 1
-					? factory.getGames(5, { Publishers: [gamePublisherIds[0]] })
+					? factory.getGameFactory().buildGameDtoList(5, { publisherIds: [gamePublisherIds[0]] })
 					: [
-							...factory.getGames(2, { Publishers: [gamePublisherIds[0]] }),
-							...factory.getGames(2, { Publishers: [gamePublisherIds[1]] }),
-							factory.getGame({ Publishers: gamePublisherIds }),
+							...factory
+								.getGameFactory()
+								.buildGameDtoList(2, { publisherIds: [gamePublisherIds[0]] }),
+							...factory
+								.getGameFactory()
+								.buildGameDtoList(2, { publisherIds: [gamePublisherIds[1]] }),
+							factory.getGameFactory().buildGameDto({ publisherIds: gamePublisherIds }),
 						];
-			const otherGames: GameResponseDto[] = factory.getGames(20, {
-				Publishers: ['pub1', 'pub2', 'pub3'],
+			const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+				publisherIds: ['pub1', 'pub2', 'pub3'],
 			});
 			const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
+			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
-			const filteredGames = gameStore.gamesSignal?.games;
+			const filteredGames = gameStore.applyFilters(storeGames, {
+				publishers: filterPublisherIds,
+			});
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -252,25 +252,27 @@ describe('HomePageViewModel', () => {
 		'filters by platforms: $title',
 		async ({ gamePlatformIds, filterPlatformIds, expectedMatch }) => {
 			// Arrange
-			for (const platformId of filterPlatformIds) {
-				searchParams.append(homePageSearchParamsKeys.platform, platformId);
-			}
 			const gamesUnderTest: GameResponseDto[] =
 				gamePlatformIds.length === 1
-					? factory.getGames(5, { Platforms: [gamePlatformIds[0]] })
+					? factory.getGameFactory().buildGameDtoList(5, { platformIds: [gamePlatformIds[0]] })
 					: [
-							...factory.getGames(2, { Platforms: [gamePlatformIds[0]] }),
-							...factory.getGames(2, { Platforms: [gamePlatformIds[1]] }),
-							factory.getGame({ Platforms: gamePlatformIds }),
+							...factory
+								.getGameFactory()
+								.buildGameDtoList(2, { platformIds: [gamePlatformIds[0]] }),
+							...factory
+								.getGameFactory()
+								.buildGameDtoList(2, { platformIds: [gamePlatformIds[1]] }),
+							factory.getGameFactory().buildGameDto({ platformIds: gamePlatformIds }),
 						];
-			const otherGames: GameResponseDto[] = factory.getGames(20, {
-				Platforms: ['plat1', 'plat2', 'plat3'],
+			const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+				platformIds: ['plat1', 'plat2', 'plat3'],
 			});
 			const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
+			const storeGames = gameStore.dataSignal.raw ?? [];
 			// Act
-			const filteredGames = gameStore.gamesSignal?.games;
+			const filteredGames = gameStore.applyFilters(storeGames, { platforms: filterPlatformIds });
 			// Assert
 			expect(filteredGames).toHaveLength(expectedMatch);
 			expect(
@@ -314,25 +316,25 @@ describe('HomePageViewModel', () => {
 		},
 	])('filters by genres: $title', async ({ gameGenreIds, filterGenreIds, expectedMatch }) => {
 		// Arrange
-		for (const genreId of filterGenreIds) {
-			searchParams.append(homePageSearchParamsKeys.genre, genreId);
-		}
 		const gamesUnderTest: GameResponseDto[] =
 			gameGenreIds.length === 1
-				? factory.getGames(5, { Genres: [gameGenreIds[0]] })
+				? factory.getGameFactory().buildGameDtoList(5, { genreIds: [gameGenreIds[0]] })
 				: [
-						...factory.getGames(2, { Genres: [gameGenreIds[0]] }),
-						...factory.getGames(2, { Genres: [gameGenreIds[1]] }),
-						factory.getGame({ Genres: gameGenreIds }),
+						...factory.getGameFactory().buildGameDtoList(2, { genreIds: [gameGenreIds[0]] }),
+						...factory.getGameFactory().buildGameDtoList(2, { genreIds: [gameGenreIds[1]] }),
+						factory.getGameFactory().buildGameDto({ genreIds: gameGenreIds }),
 					];
-		const otherGames: GameResponseDto[] = factory.getGames(20, {
-			Genres: ['genre1', 'genre2', 'genre3'],
+		const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+			genreIds: ['genre1', 'genre2', 'genre3'],
 		});
 		const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
+		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
-		const filteredGames = gameStore.gamesSignal?.games;
+		const filteredGames = gameStore.applyFilters(storeGames, {
+			genres: filterGenreIds,
+		});
 		// Assert
 		expect(filteredGames).toHaveLength(expectedMatch);
 		expect(
@@ -343,36 +345,34 @@ describe('HomePageViewModel', () => {
 
 	it('returns all games if filtering by installed and not installed', async () => {
 		// Arrange
-		searchParams.set(homePageSearchParamsKeys.installed, '1');
-		searchParams.set(homePageSearchParamsKeys.notInstalled, '1');
-		searchParams.set(homePageSearchParamsKeys.pageSize, '100');
 		const gamesUnderTest: GameResponseDto[] = [
-			...factory.getGames(5, { IsInstalled: 1 }),
-			...factory.getGames(5, { IsInstalled: 0 }),
+			...factory.getGameFactory().buildGameDtoList(5, { isInstalled: true }),
+			...factory.getGameFactory().buildGameDtoList(5, { isInstalled: false }),
 		];
-		const otherGames: GameResponseDto[] = factory.getGames(20);
+		const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20);
 		const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
+		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
-		const filteredGames = gameStore.gamesSignal?.games;
+		const filteredGames = gameStore.applyFilters(storeGames, {
+			installed: true,
+			notInstalled: true,
+		});
 		// Assert
 		expect(filteredGames).toHaveLength(games.length);
 	});
 
 	it('paginates game list', async () => {
 		// Arrange
-		searchParams.set(homePageSearchParamsKeys.installed, '1');
-		searchParams.set(homePageSearchParamsKeys.notInstalled, '1');
-		searchParams.set(homePageSearchParamsKeys.pageSize, '25');
-		searchParams.set(homePageSearchParamsKeys.page, '1');
-		const gamesUnderTest: GameResponseDto[] = factory.getGames(30);
+		const gamesUnderTest: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(30);
 		const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest]);
 		const gameIds = games.map((g) => g.Id);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
+		const storeGames = gameStore.dataSignal.raw ?? [];
 		// Act
-		const paginatedGames = gameStore.gamesSignal?.games;
+		const paginatedGames = gameStore.applyPagination(storeGames, { page: 1, pageSize: 25 });
 		const uniquePaginatedGames = new Set(paginatedGames?.map((g) => g.Id));
 		// Assert
 		expect(paginatedGames?.length).toBeLessThanOrEqual(25);

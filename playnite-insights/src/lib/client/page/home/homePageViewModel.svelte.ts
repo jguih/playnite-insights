@@ -1,11 +1,21 @@
+import type { ApplicationSettingsStore } from '$lib/client/app-state/stores/applicationSettingsStore.svelte';
 import type { GameStore } from '$lib/client/app-state/stores/gameStore.svelte';
+import type {
+	GameStoreFiltersParams,
+	GameStorePaginationParams,
+	GameStoreSortingParams,
+} from '$lib/client/app-state/stores/gameStore.types';
 import { getPlayniteGameImageUrl } from '$lib/client/utils/playnite-game';
 import { m } from '$lib/paraglide/messages';
 import { gamePageSizes, type GameSortBy, type GameSortOrder } from '@playatlas/game-library/domain';
+import type { GameResponseDto } from '@playatlas/game-library/dtos';
+import type { ApplicationSettings } from '@playnite-insights/lib/client';
+import type { HomePageFilterParams, HomePageGameCacheItem } from './searchParams.types';
 import type { HomePageSearchParams } from './searchParams.utils';
 
 export type HomePageViewModelDeps = {
 	gameStore: GameStore;
+	applicationSettingsStore: ApplicationSettingsStore;
 	getPageParams: () => HomePageSearchParams;
 };
 
@@ -13,9 +23,23 @@ export class HomePageViewModel {
 	#gameStore: HomePageViewModelDeps['gameStore'];
 	#filtersCount: number;
 	#paginationSequenceSignal: (number | null)[];
+	#filteredCache: Map<string, GameResponseDto[]>;
+	#sortedCache: Map<string, GameResponseDto[]>;
+	#paginatedCache: Map<string, GameResponseDto[]>;
+	#currentCacheItemSignal: HomePageGameCacheItem;
 
-	constructor({ gameStore, getPageParams }: HomePageViewModelDeps) {
+	constructor({ gameStore, getPageParams, applicationSettingsStore }: HomePageViewModelDeps) {
 		this.#gameStore = gameStore;
+		this.#filteredCache = new Map();
+		this.#sortedCache = new Map();
+		this.#paginatedCache = new Map();
+
+		this.#currentCacheItemSignal = $derived.by(() => {
+			const games = gameStore.dataSignal.raw;
+			const homePageParams = getPageParams();
+			const appSettings = applicationSettingsStore.settingsSignal;
+			return this.#buildCacheItem(games, homePageParams, appSettings);
+		});
 
 		this.#filtersCount = $derived.by(() => {
 			let counter = 0;
@@ -41,10 +65,109 @@ export class HomePageViewModel {
 			const pageParams = getPageParams();
 			return this.getPaginationSequence(
 				Number(pageParams.pagination.page),
-				this.#gameStore.gamesSignal?.totalPages ?? 1,
+				this.#currentCacheItemSignal.totalPages,
 			);
 		});
 	}
+
+	#getFilteredGames = (games: GameResponseDto[], filterParams: GameStoreFiltersParams) => {
+		const key = JSON.stringify({ filterParams });
+
+		if (this.#filteredCache.has(key)) {
+			return this.#filteredCache.get(key)!;
+		}
+
+		const result = this.#gameStore.applyFilters(games, filterParams);
+		this.#filteredCache.set(key, result);
+		return result;
+	};
+
+	#getSortedGames = (
+		filtered: GameResponseDto[],
+		filterParams: GameStoreFiltersParams,
+		sortingParams: GameStoreSortingParams,
+	) => {
+		const key = JSON.stringify({ filter: filterParams, sorting: sortingParams });
+
+		if (this.#sortedCache.has(key)) {
+			return this.#sortedCache.get(key)!;
+		}
+
+		const result = this.#gameStore.applySorting(filtered, sortingParams);
+		this.#sortedCache.set(key, result);
+		return result;
+	};
+
+	#getPaginatedGames = (sorted: GameResponseDto[], paginationParams: GameStorePaginationParams) => {
+		const key = JSON.stringify(paginationParams);
+
+		if (this.#paginatedCache.has(key)) return this.#paginatedCache.get(key)!;
+
+		const result = this.#gameStore.applyPagination(sorted, paginationParams);
+		this.#paginatedCache.set(key, result);
+		return result;
+	};
+
+	#getGameStoreFilterParams = (
+		homePageFilters: HomePageFilterParams,
+		appSettings: ApplicationSettings,
+	): GameStoreFiltersParams => {
+		return {
+			developers: homePageFilters.developers,
+			genres: homePageFilters.genres,
+			installed: homePageFilters.installed,
+			notInstalled: homePageFilters.notInstalled,
+			platforms: homePageFilters.platforms,
+			publishers: homePageFilters.publishers,
+			query: homePageFilters.query,
+			visibleOnly: appSettings.desconsiderHiddenGames,
+		};
+	};
+
+	#buildCacheItem = (
+		_games: GameResponseDto[] | null,
+		homePageSearchParams: HomePageSearchParams,
+		appSettings: ApplicationSettings,
+	): HomePageGameCacheItem => {
+		if (!_games) {
+			return {
+				games: [],
+				countFrom: 0,
+				countTo: 0,
+				total: 0,
+				totalPages: 0,
+			};
+		}
+
+		const games = [..._games];
+		const { filter, pagination, sorting } = homePageSearchParams;
+		const { page, pageSize } = pagination;
+
+		const filterParams = this.#getGameStoreFilterParams(filter, appSettings);
+		const filtered = this.#getFilteredGames(games, filterParams);
+		const total = filtered.length;
+		const sorted = this.#getSortedGames(filtered, filterParams, {
+			sortBy: sorting.sortBy,
+			sortOrder: sorting.sortOrder,
+		});
+		const paginated = this.#getPaginatedGames(sorted, {
+			page,
+			pageSize,
+		});
+
+		const countFrom = (page - 1) * pageSize;
+		const countTo = Math.min(countFrom + pageSize, total);
+		const totalPages = Math.ceil(total / pageSize);
+
+		const cacheItem: HomePageGameCacheItem = {
+			games: paginated,
+			countFrom,
+			countTo,
+			total,
+			totalPages,
+		};
+		return cacheItem;
+	};
 
 	getImageURL = (imagePath?: string | null): string => getPlayniteGameImageUrl(imagePath);
 
@@ -91,8 +214,8 @@ export class HomePageViewModel {
 		return range;
 	};
 
-	get gamesSignal() {
-		return this.#gameStore.gamesSignal;
+	get gamesSignal(): HomePageGameCacheItem {
+		return this.#currentCacheItemSignal;
 	}
 
 	get pageSizes() {

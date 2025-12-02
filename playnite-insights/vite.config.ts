@@ -17,7 +17,9 @@ export default defineConfig({
 	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {
 		expect: { requireAssertions: true },
+		globals: true,
 		reporters: ['default', ['junit', { outputFile: '../test-results/svelte-app.xml' }]],
+		setupFiles: ['./src/vitest.unit-testing.setup.ts'],
 		projects: [
 			{
 				extends: './vite.config.ts',

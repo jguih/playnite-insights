@@ -28,17 +28,17 @@
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 
 	const locator = getLocatorContext();
-	const { gameStore } = locator;
+	const { gameStore, applicationSettingsStore } = locator;
 
 	const homePageSearchParams = $derived.by(() => {
 		const params = new URLSearchParams(page.url.searchParams);
 		return parseHomePageSearchParams(params);
 	});
-	gameStore.getHomePageSearchParams = () => homePageSearchParams;
 
 	const vm = new HomePageViewModel({
-		gameStore,
 		getPageParams: () => homePageSearchParams,
+		gameStore,
+		applicationSettingsStore,
 	});
 
 	let main: HTMLElement | undefined = $state();
@@ -131,7 +131,7 @@
 {#snippet gameCard(game: GameResponseDto, imageSrc: string)}
 	<li
 		class={[
-			'contain-layout contain-paint contain-size contain-style',
+			'contain-size contain-layout contain-paint contain-style',
 			'm-0 aspect-[1/1.6] p-0 shadow outline-0',
 			'border-background-1 border-4 border-solid',
 			'hover:border-primary-light-hover-fg',
@@ -150,7 +150,7 @@
 				class="h-7/8 w-full object-cover"
 			/>
 			<div
-				class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+				class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
 			>
 				<p class="mt-1 truncate text-center text-sm text-white">{game.Name}</p>
 			</div>
@@ -164,7 +164,7 @@
 	>
 		<div class="bg-background-3 h-7/8 w-full animate-pulse"></div>
 		<div
-			class="bg-background-1 bottom-0 flex h-1/8 w-full flex-row items-center justify-center p-1"
+			class="bg-background-1 h-1/8 bottom-0 flex w-full flex-row items-center justify-center p-1"
 		>
 			<div class="bg-background-3 h-4 w-3/4 animate-pulse rounded"></div>
 		</div>
@@ -319,27 +319,6 @@
 				<ChevronRight />
 			</LightButton>
 		</nav>
-		<!-- {#if recentActivityVm.inProgressGame}
-			<div class="fixed bottom-[var(--bottom-nav-height)] left-0 z-20 w-full p-2">
-				<LightAnchor
-					class={['bg-background-1! flex w-full items-center justify-start gap-4 p-2 shadow']}
-					href={`/game/journal?id=${recentActivityVm.inProgressGame.Id}`}
-				>
-					<img
-						src={vm.getImageURL(recentActivityVm.inProgressGame.CoverImage)}
-						alt={`${recentActivityVm.inProgressGame.Name} cover image`}
-						loading="lazy"
-						class="h-13 max-w-13 truncate object-cover"
-					/>
-					<div class="leading-5">
-						<p class="text-md">{m.label_ongoing_session()}</p>
-						<p class="text-md font-semibold">{recentActivityVm.inProgressGame.Name}</p>
-					</div>
-					<ChevronRight class="size-lg ml-auto" />
-				</LightAnchor>
-			</div>
-			<div class="pb-20"></div>
-		{/if} -->
 	</Main>
 
 	<BottomNav>

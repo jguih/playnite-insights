@@ -24,7 +24,7 @@ export class GamePageViewModel {
 		this.#game = $derived.by(() => {
 			const gameId = this.#getGameId();
 			if (!gameId) return null;
-			const gameList = this.#gameStore.gamesSignal?.games ?? [];
+			const gameList = this.#gameStore.dataSignal?.raw ?? [];
 			return gameList?.find((g) => g.Id === gameId) ?? null;
 		});
 	}

@@ -1,4 +1,5 @@
 import type { GamePageSize, GameSortBy, GameSortOrder } from '@playatlas/game-library/domain';
+import type { GameResponseDto } from '@playatlas/game-library/dtos';
 import type { homePageSearchParamsKeys } from './searchParams.constants';
 
 export type HomePageSearchParamKeys =
@@ -22,4 +23,12 @@ export type HomePageSortingParams = {
 export type HomePagePaginationParams = {
 	pageSize: GamePageSize;
 	page: number;
+};
+
+export type HomePageGameCacheItem = {
+	games: GameResponseDto[];
+	total: number;
+	countFrom: number;
+	countTo: number;
+	totalPages: number;
 };

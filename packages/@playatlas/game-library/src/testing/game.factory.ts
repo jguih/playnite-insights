@@ -5,6 +5,8 @@ import { makeGame, type Game } from "../domain/game.entity";
 import { type MakeGameProps } from "../domain/game.entity.types";
 import { type GenreId } from "../domain/genre.entity";
 import { type PlatformId } from "../domain/platform.entity";
+import { GameResponseDto } from "../dtos";
+import { gameMapper } from "../game.mapper";
 
 export type GameFactoryDeps = {
   completionStatusOptions: CompletionStatusId[];
@@ -16,6 +18,11 @@ export type GameFactoryDeps = {
 export type GameFactory = {
   buildGame: (props?: Partial<MakeGameProps>) => Game;
   buildGameList: (n: number, props?: Partial<MakeGameProps>) => Game[];
+  buildGameDto: (props?: Partial<MakeGameProps>) => GameResponseDto;
+  buildGameDtoList: (
+    n: number,
+    props?: Partial<MakeGameProps>
+  ) => GameResponseDto[];
 };
 
 export const makeGameFactory = ({
@@ -90,8 +97,18 @@ export const makeGameFactory = ({
     return Array.from({ length: n }, () => buildGame(props));
   };
 
+  const buildGameDto: GameFactory["buildGameDto"] = (props) => {
+    return gameMapper.toDto(buildGame(props));
+  };
+
+  const buildGameDtoList: GameFactory["buildGameDtoList"] = (n, props) => {
+    return Array.from({ length: n }, () => gameMapper.toDto(buildGame(props)));
+  };
+
   return Object.freeze({
     buildGame,
     buildGameList,
+    buildGameDto,
+    buildGameDtoList
   });
 };
