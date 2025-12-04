@@ -10,9 +10,7 @@ export type ExtensionRegistrationRepository = {
   getByExtensionId: (
     extensionId: ExtensionRegistrationExtensionId
   ) => ExtensionRegistration | null;
-  getByRegistrationId: (
-    registrationId: ExtensionRegistrationId
-  ) => ExtensionRegistration | null;
+  getById: (id: ExtensionRegistrationId) => ExtensionRegistration | null;
   remove: (id: ExtensionRegistrationId) => void;
   all: () => ExtensionRegistration[];
 };

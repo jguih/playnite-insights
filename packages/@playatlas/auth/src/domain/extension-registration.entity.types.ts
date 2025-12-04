@@ -11,6 +11,6 @@ export type MakeExtensionRegistrationProps = {
   os: string | null;
   extensionVersion: string | null;
   status: ExtensionRegistrationStatus;
-  createdAt: Date;
-  lastUpdatedAt: Date;
+  createdAt?: Date;
+  lastUpdatedAt?: Date;
 };

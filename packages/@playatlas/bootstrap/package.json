@@ -18,6 +18,7 @@
     "@playatlas/common": "workspace:*",
     "@playatlas/system": "workspace:*",
     "@playatlas/game-session": "workspace:*",
-    "@playatlas/game-library": "workspace:*"
+    "@playatlas/game-library": "workspace:*",
+    "@playatlas/auth": "workspace:*"
   }
 }

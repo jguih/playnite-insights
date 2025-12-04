@@ -5,10 +5,18 @@ import {
 } from "./domain/extension-registration.entity";
 import type { ExtensionRegistrationModel } from "./infra/extension-registration.repository";
 
-export const extensionRegistrationMapper: EntityMapper<
-  ExtensionRegistration,
-  ExtensionRegistrationModel
-> = {
+export type ExtensionRegistrationMapper = Omit<
+  EntityMapper<ExtensionRegistration, ExtensionRegistrationModel>,
+  "toPersistence"
+> & {
+  toPersistence: (
+    entity: ExtensionRegistration,
+    createdAt: Date,
+    lastUpdatedAt: Date
+  ) => ExtensionRegistrationModel;
+};
+
+export const extensionRegistrationMapper: ExtensionRegistrationMapper = {
   toDomain: (model) => {
     const entity = makeExtensionRegistration({
       id: model.Id,
@@ -23,7 +31,7 @@ export const extensionRegistrationMapper: EntityMapper<
     });
     return entity;
   },
-  toPersistence: (entity) => {
+  toPersistence: (entity, createdAt, lastUpdatedAt) => {
     const model: ExtensionRegistrationModel = {
       Id: entity.getId(),
       ExtensionId: entity.getExtensionId(),
@@ -32,8 +40,8 @@ export const extensionRegistrationMapper: EntityMapper<
       Os: entity.getOs(),
       PublicKey: entity.getPublicKey(),
       Status: entity.getStatus(),
-      CreatedAt: entity.getCreatedAt().toISOString(),
-      LastUpdatedAt: entity.getLastUpdatedAt().toISOString(),
+      CreatedAt: createdAt.toISOString(),
+      LastUpdatedAt: lastUpdatedAt.toISOString(),
     };
     return model;
   },

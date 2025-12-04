@@ -1,4 +1,5 @@
 import { makeLogServiceFactory } from "@playatlas/system/application";
+import { bootstrapAuth } from "./bootstrap.auth";
 import { bootstrapConfig } from "./bootstrap.config";
 import { bootstrapGameLibrary } from "./bootstrap.game-library";
 import { bootstrapInfra } from "./bootstrap.infra";
@@ -21,10 +22,10 @@ export const bootstrap = async ({
   await infra.initEnvironment();
   await infra.initDb();
 
-  const gameLibrary = bootstrapGameLibrary({
-    getDb: infra.getDb,
-    logServiceFactory,
-  });
+  const baseDeps = { getDb: infra.getDb, logServiceFactory };
 
-  return { config, infra, gameLibrary };
+  const gameLibrary = bootstrapGameLibrary({ ...baseDeps });
+  const auth = bootstrapAuth({ ...baseDeps });
+
+  return { config, infra, gameLibrary, auth };
 };
