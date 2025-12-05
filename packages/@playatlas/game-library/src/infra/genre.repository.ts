@@ -18,7 +18,18 @@ export const makeGenreRepository = ({
   getDb,
   logService,
 }: BaseRepositoryDeps): GenreRepository => {
-  const base = makeRepositoryBase({ getDb, logService });
+  const TABLE_NAME = "genre";
+  const base = makeRepositoryBase({
+    getDb,
+    logService,
+    config: {
+      tableName: TABLE_NAME,
+      idColumn: "Id",
+      insertColumns: ["Id", "Name"],
+      updateColumns: [], //TODO
+      toPersistence: genreMapper.toPersistence,
+    },
+  });
 
   const add: GenreRepository["add"] = (genre) => {
     return base.run(({ db }) => {

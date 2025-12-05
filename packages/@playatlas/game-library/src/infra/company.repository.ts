@@ -4,7 +4,7 @@ import {
 } from "@playatlas/common/infra";
 import z from "zod";
 import { companyMapper } from "../company.mapper";
-import { Company } from "../domain/company.entity";
+import { Company, CompanyId } from "../domain/company.entity";
 import type { CompanyRepository } from "./company.repository.port";
 
 export const companySchema = z.object({
@@ -19,9 +19,19 @@ export const makeCompanyRepository = ({
   logService,
 }: BaseRepositoryDeps): CompanyRepository => {
   const TABLE_NAME = "company";
-  const base = makeRepositoryBase({ getDb, logService });
+  const base = makeRepositoryBase<CompanyId, Company, CompanyModel>({
+    getDb,
+    logService,
+    config: {
+      tableName: TABLE_NAME,
+      idColumn: "Id",
+      insertColumns: ["Id", "Name"],
+      updateColumns: [],
+      toPersistence: companyMapper.toPersistence,
+    },
+  });
 
-  const add = (company: Company): boolean => {
+  const add: CompanyRepository["add"] = (company) => {
     const query = `
       INSERT INTO ${TABLE_NAME}
         (Id, Name)

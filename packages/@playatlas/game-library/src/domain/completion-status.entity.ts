@@ -1,12 +1,13 @@
+import { BaseEntity } from "@playatlas/common/domain";
 import { MakeCompletionStatusProps } from "./completion-status.entity.types";
 
 export type CompletionStatusId = string;
 type CompletionStatusName = string;
 
-export type CompletionStatus = Readonly<{
-  getId: () => CompletionStatusId;
-  getName: () => CompletionStatusName;
-}>;
+export type CompletionStatus = BaseEntity<CompletionStatusId> &
+  Readonly<{
+    getName: () => CompletionStatusName;
+  }>;
 
 export const makeCompletionStatus = (
   props: MakeCompletionStatusProps
@@ -14,8 +15,10 @@ export const makeCompletionStatus = (
   const _id: CompletionStatusId = props.id;
   const _name: CompletionStatusName = props.name;
 
-  return Object.freeze({
+  const completionStatus: CompletionStatus = {
     getId: () => _id,
     getName: () => _name,
-  });
+    validate: () => {},
+  };
+  return Object.freeze(completionStatus);
 };

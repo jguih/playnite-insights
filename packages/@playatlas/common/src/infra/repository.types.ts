@@ -6,13 +6,8 @@ export type BaseRepositoryDeps = {
   getDb: () => DatabaseSync;
 };
 
-export type MakeRepositoryBaseDeps = {
-  logService: LogService;
-  getDb: () => DatabaseSync;
-};
-
 export type BaseEntityRepository<EntityId, Entity> = {
-  add: (entity: Entity) => void;
+  add: (entity: Entity | Entity[]) => void;
   update: (entity: Entity) => void;
   getById: (id: EntityId) => Entity | null;
   remove: (id: EntityId) => void;

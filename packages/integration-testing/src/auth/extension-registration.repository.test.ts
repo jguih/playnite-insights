@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { type ExtensionRegistration } from "@playatlas/auth/domain";
+import {
+  extensionRegistrationStatus,
+  type ExtensionRegistration,
+} from "@playatlas/auth/domain";
 import { api, factory } from "../vitest.setup";
 
 const repository = api.auth.getExtensionRegistrationRepository();
@@ -76,5 +79,23 @@ describe("Extension Registration Repository", () => {
     expect(allRegistrations).toHaveLength(registrations.length);
     expect(randomAddedRegistration).not.toBeFalsy();
     compareRegistrations(randomRegistration, randomAddedRegistration!);
+  });
+
+  it("updates a registration", () => {
+    // Arrange
+    const registration = factory.getExtensionRegistrationFactory().build();
+    repository.add(registration);
+    // Act
+    const beforeUpdateRegistration = repository.getById(registration.getId());
+    registration.approve();
+    repository.update(registration);
+    const afterUpdateRegistration = repository.getById(registration.getId());
+    // Assert
+    expect(beforeUpdateRegistration?.getStatus()).toBe(
+      extensionRegistrationStatus.pending
+    );
+    expect(afterUpdateRegistration?.getStatus()).toBe(
+      extensionRegistrationStatus.trusted
+    );
   });
 });

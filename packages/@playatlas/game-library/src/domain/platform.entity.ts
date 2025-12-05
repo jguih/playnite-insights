@@ -1,15 +1,17 @@
+import { BaseEntity } from "@playatlas/common/domain";
 import { MakePlatformProps } from "./platform.entity.types";
 
 export type PlatformId = string;
 
-export type Platform = Readonly<{
-  getId: () => PlatformId;
-  getName: () => string;
-  getSpecificationId: () => string;
-  getIcon: () => string | null;
-  getCover: () => string | null;
-  getBackground: () => string | null;
-}>;
+export type Platform = BaseEntity<PlatformId> &
+  Readonly<{
+    getId: () => PlatformId;
+    getName: () => string;
+    getSpecificationId: () => string;
+    getIcon: () => string | null;
+    getCover: () => string | null;
+    getBackground: () => string | null;
+  }>;
 
 export const makePlatform = (props: MakePlatformProps): Platform => {
   const _id = props.id;
@@ -26,6 +28,7 @@ export const makePlatform = (props: MakePlatformProps): Platform => {
     getIcon: () => _icon,
     getCover: () => _cover,
     getBackground: () => _background,
+    validate: () => {},
   };
 
   return Object.freeze(platform);

@@ -23,7 +23,24 @@ export const makePlatformRepository = ({
   logService,
 }: BaseRepositoryDeps): PlatformRepository => {
   const TABLE_NAME = "platform";
-  const base = makeRepositoryBase({ getDb, logService });
+  const base = makeRepositoryBase({
+    getDb,
+    logService,
+    config: {
+      tableName: TABLE_NAME,
+      idColumn: "Id",
+      insertColumns: [
+        "Id",
+        "Name",
+        "SpecificationId",
+        "Icon",
+        "Cover",
+        "Background",
+      ],
+      updateColumns: [], // TODO
+      toPersistence: platformMapper.toPersistence,
+    },
+  });
 
   const add: PlatformRepository["add"] = (platform) => {
     return base.run(({ db }) => {

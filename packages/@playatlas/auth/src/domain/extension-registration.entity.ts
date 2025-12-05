@@ -1,13 +1,11 @@
 import { validation } from "@playatlas/common/application";
-import {
-  BaseEntity,
-  InvalidStateError,
-  makeBaseEntity,
-} from "@playatlas/common/domain";
+import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
 import { extensionRegistrationStatus } from "./extension-registration.constants";
 import {
+  BuildExtensionRegistrationProps,
   MakeExtensionRegistrationProps,
   makeExtensionRegistrationPropsSchema,
+  RehydrateExtensionRegistrationProps,
 } from "./extension-registration.entity.props";
 
 export type ExtensionRegistrationStatus =
@@ -17,16 +15,21 @@ export type ExtensionRegistrationExtensionId = string;
 
 export type ExtensionRegistration = BaseEntity<ExtensionRegistrationId> &
   Readonly<{
+    getId: () => ExtensionRegistrationId;
+    setId: (value: ExtensionRegistrationId) => void;
     getExtensionId: () => ExtensionRegistrationExtensionId;
     getPublicKey: () => string;
     getHostname: () => string | null;
     getOs: () => string | null;
     getExtensionVersion: () => string | null;
     getStatus: () => ExtensionRegistrationStatus;
+    getCreatedAt: () => Date;
+    getLastUpdatedAt: () => Date;
+    approve: () => void;
   }>;
 
-export const makeExtensionRegistration = (
-  props: MakeExtensionRegistrationProps
+const buildExtensionRegistration = (
+  props: BuildExtensionRegistrationProps
 ): ExtensionRegistration => {
   const result = makeExtensionRegistrationPropsSchema.safeParse(props);
   if (!result.success)
@@ -34,13 +37,16 @@ export const makeExtensionRegistration = (
       `Invalid props passed to entity factory: ${result.error.message}`
     );
 
-  const base = makeBaseEntity<ExtensionRegistrationId>(props);
+  const now = new Date();
+  let _id: ExtensionRegistrationId | null = props.id ?? null;
   const _extension_id = props.extensionId;
   const _public_key = props.publicKey;
   const _hostname = props.hostname;
   const _os = props.os;
   const _extensionVersion = props.extensionVersion;
-  const _status = props.status;
+  let _status: ExtensionRegistrationStatus = props.status ?? "pending";
+  const _createdAt: Date = props.createdAt ?? now;
+  let _lastUpdatedAt: Date = props.lastUpdatedAt ?? now;
 
   const NO_EMPTY_STRING_FIELDS = [
     { name: "Extension Id", extract: () => _extension_id },
@@ -54,8 +60,6 @@ export const makeExtensionRegistration = (
   ] as const;
 
   const _validate = Object.freeze(() => {
-    base.validate();
-
     if (!(_status in extensionRegistrationStatus))
       throw new InvalidStateError(`Invalid status: ${_status}`);
 
@@ -72,17 +76,51 @@ export const makeExtensionRegistration = (
         );
   });
 
+  const _touch = () => {
+    _lastUpdatedAt = new Date();
+  };
+
   _validate();
 
   const extensionRegistration: ExtensionRegistration = {
-    ...base,
+    getId: () => {
+      if (!_id)
+        throw new InvalidStateError(
+          "Id is null until the entity is persisted!"
+        );
+      return _id;
+    },
+    setId: (value) => {
+      if (_id) throw new InvalidStateError("Id is already set");
+      _id = value;
+    },
     getExtensionId: () => _extension_id,
     getPublicKey: () => _public_key,
     getHostname: () => _hostname,
     getOs: () => _os,
     getExtensionVersion: () => _extensionVersion,
     getStatus: () => _status,
+    getCreatedAt: () => _createdAt,
+    getLastUpdatedAt: () => _lastUpdatedAt,
     validate: _validate,
+    approve: () => {
+      if (_status !== "pending")
+        throw new InvalidStateError("Cannot approve non-pending registration");
+      _status = "trusted";
+      _touch();
+    },
   };
   return Object.freeze(extensionRegistration);
+};
+
+export const makeExtensionRegistration = (
+  props: MakeExtensionRegistrationProps
+) => {
+  return buildExtensionRegistration({ ...props, status: "pending" });
+};
+
+export const rehydrateExtensionRegistration = (
+  props: RehydrateExtensionRegistrationProps
+) => {
+  return buildExtensionRegistration(props);
 };

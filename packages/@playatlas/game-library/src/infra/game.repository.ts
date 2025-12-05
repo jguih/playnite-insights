@@ -63,7 +63,33 @@ export const makeGameRepository = (
   deps: GameRepositoryDeps
 ): GameRepository => {
   const { getDb, logService } = deps;
-  const base = makeRepositoryBase({ getDb, logService });
+  const base = makeRepositoryBase({
+    getDb,
+    logService,
+    config: {
+      tableName: TABLE_NAME,
+      idColumn: "Id",
+      insertColumns: [
+        "Id",
+        "Name",
+        "Description",
+        "ReleaseDate",
+        "Playtime",
+        "LastActivity",
+        "Added",
+        "InstallDirectory",
+        "IsInstalled",
+        "BackgroundImage",
+        "CoverImage",
+        "Icon",
+        "Hidden",
+        "CompletionStatusId",
+        "ContentHash",
+      ],
+      updateColumns: [], // TODO
+      toPersistence: gameMapper.toPersistence,
+    },
+  });
 
   const _getWhereClauseAndParamsFromFilters = (filters?: GameFilters) => {
     const where: string[] = [];

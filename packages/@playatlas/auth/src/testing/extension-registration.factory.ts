@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { type TestEntityFactory } from "@playatlas/common/testing";
-import { extensionRegistrationStatus } from "../domain/extension-registration.constants";
 import {
   ExtensionRegistration,
   makeExtensionRegistration,
@@ -30,10 +29,6 @@ export const makeExtensionRegistrationFactory =
         hostname: propOrDefault(props.hostname, faker.internet.domainName()),
         os: propOrDefault(props.os, faker.hacker.noun()),
         publicKey: propOrDefault(props.publicKey, faker.internet.password()),
-        status: propOrDefault(
-          props.status,
-          faker.helpers.arrayElement(Object.values(extensionRegistrationStatus))
-        ),
       });
     };
 

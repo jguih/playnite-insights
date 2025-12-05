@@ -19,7 +19,17 @@ export const makeCompletionStatusRepository = ({
   logService,
 }: BaseRepositoryDeps): CompletionStatusRepository => {
   const TABLE_NAME = `completion_status`;
-  const base = makeRepositoryBase({ getDb, logService });
+  const base = makeRepositoryBase({
+    getDb,
+    logService,
+    config: {
+      tableName: TABLE_NAME,
+      idColumn: "Id",
+      insertColumns: ["Id", "Name"], // TODO
+      updateColumns: [], // TODO
+      toPersistence: completionStatusMapper.toPersistence,
+    },
+  });
 
   const add: CompletionStatusRepository["add"] = (completionStatus) => {
     return base.run(({ db }) => {

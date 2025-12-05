@@ -5,12 +5,15 @@ import {
 } from "@playatlas/common/infra";
 import z from "zod";
 import { extensionRegistrationStatus } from "../domain/extension-registration.constants";
-import { ExtensionRegistration } from "../domain/extension-registration.entity";
+import {
+  ExtensionRegistration,
+  ExtensionRegistrationId,
+} from "../domain/extension-registration.entity";
 import { extensionRegistrationMapper } from "../extension-registration.mapper";
 import { ExtensionRegistrationRepository } from "./extension-registration.repository.port";
 
 export const extensionRegistrationSchema = z.object({
-  Id: z.number(),
+  Id: z.number(), // AUTO-INCREMENT
   ExtensionId: z.string(),
   PublicKey: z.string(),
   Hostname: z.string().nullable(),
@@ -27,104 +30,47 @@ export const extensionRegistrationInsertSchema =
 export type ExtensionRegistrationModel = z.infer<
   typeof extensionRegistrationSchema
 >;
-export type ExtensionRegistrationModelInsert = z.infer<
-  typeof extensionRegistrationInsertSchema
->;
 
 export const makeExtensionRegistrationRepository = ({
   getDb,
   logService,
 }: BaseRepositoryDeps): ExtensionRegistrationRepository => {
-  const base = makeRepositoryBase({ getDb, logService });
   const TABLE_NAME = `extension_registration`;
+  const COLUMNS: (keyof ExtensionRegistrationModel)[] = [
+    "Id",
+    "ExtensionId",
+    "PublicKey",
+    "Hostname",
+    "Os",
+    "ExtensionVersion",
+    "Status",
+    "CreatedAt",
+    "LastUpdatedAt",
+  ];
+  const base = makeRepositoryBase<
+    ExtensionRegistrationId,
+    ExtensionRegistration,
+    ExtensionRegistrationModel
+  >({
+    getDb,
+    logService,
+    config: {
+      tableName: TABLE_NAME,
+      idColumn: "Id",
+      insertColumns: COLUMNS.slice(1),
+      updateColumns: COLUMNS.filter((c) => c !== "Id" && c !== "CreatedAt"),
+      toPersistence: extensionRegistrationMapper.toPersistence,
+    },
+  });
 
-  const add: ExtensionRegistrationRepository["add"] = (registration) => {
-    registration.validate();
-    const query = `
-      INSERT INTO ${TABLE_NAME} (
-        ExtensionId,
-        PublicKey,
-        Hostname,
-        Os,
-        ExtensionVersion,
-        Status,
-        CreatedAt,
-        LastUpdatedAt
-      ) VALUES
-        (?,?,?,?,?,?,?,?)
-    `;
-    return base.run(({ db }) => {
-      const now = new Date();
-      const registrationModel = extensionRegistrationMapper.toPersistence({
-        entity: registration,
-        createdAt: now,
-        lastUpdatedAt: now,
-      });
-
-      extensionRegistrationInsertSchema.parse(registrationModel);
-
-      const stmt = db.prepare(query);
-      const result = stmt.run(
-        registrationModel.ExtensionId,
-        registrationModel.PublicKey,
-        registrationModel.Hostname,
-        registrationModel.Os,
-        registrationModel.ExtensionVersion,
-        registrationModel.Status,
-        registrationModel.CreatedAt,
-        registrationModel.LastUpdatedAt
-      );
-
-      registration.applyPersistenceMetadata({
-        id: result.lastInsertRowid as number,
-        createdAt: now,
-        lastUpdatedAt: now,
-      });
-    }, `add(${registration.getExtensionId()}, ${registration.getHostname()})`);
+  const add: ExtensionRegistrationRepository["add"] = (entity) => {
+    const results = base.add({ entity });
+    for (const [entity, model] of results)
+      entity.setId(model.lastInsertRowid as ExtensionRegistrationId);
   };
 
-  const update: ExtensionRegistrationRepository["update"] = (registration) => {
-    registration.validate();
-    const query = `
-      UPDATE ${TABLE_NAME}
-      SET
-        ExtensionId = ?,
-        PublicKey = ?,
-        Hostname = ?,
-        Os = ?,
-        ExtensionVersion = ?,
-        Status = ?,
-        LastUpdatedAt = ?
-      WHERE Id = ?
-    `;
-    return base.run(({ db }) => {
-      const now = new Date();
-      const registrationModel = extensionRegistrationMapper.toPersistence({
-        entity: registration,
-        createdAt: registration.getCreatedAt(),
-        lastUpdatedAt: now,
-      });
-
-      extensionRegistrationInsertSchema.parse(registrationModel);
-
-      const stmt = db.prepare(query);
-      stmt.run(
-        registrationModel.ExtensionId,
-        registrationModel.PublicKey,
-        registrationModel.Hostname,
-        registrationModel.Os,
-        registrationModel.ExtensionVersion,
-        registrationModel.Status,
-        registrationModel.LastUpdatedAt,
-        registration.getId()
-      );
-
-      registration.applyPersistenceMetadata({
-        id: registration.getId(),
-        createdAt: registration.getCreatedAt(),
-        lastUpdatedAt: now,
-      });
-    }, `update(${registration.getId()}, ${registration.getExtensionId()})`);
+  const update: ExtensionRegistrationRepository["update"] = (entity) => {
+    base.update({ entity });
   };
 
   const getByExtensionId: ExtensionRegistrationRepository["getByExtensionId"] =

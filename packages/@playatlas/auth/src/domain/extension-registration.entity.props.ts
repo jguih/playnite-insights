@@ -1,18 +1,39 @@
 import z from "zod";
-import { baseEntityPropsSchema } from "../../../common/src/domain/base-entity.props";
 import { extensionRegistrationStatus } from "./extension-registration.constants";
 
-export const makeExtensionRegistrationPropsSchema =
-  baseEntityPropsSchema.extend({
-    id: z.number().optional(),
-    extensionId: z.string(),
-    publicKey: z.string(),
-    hostname: z.string().nullable(),
-    os: z.string().nullable(),
-    extensionVersion: z.string().nullable(),
-    status: z.nativeEnum(extensionRegistrationStatus),
-  });
+const extensionRegistrationExtraProps = z.object({
+  id: z.number(),
+  status: z.nativeEnum(extensionRegistrationStatus),
+  createdAt: z.date(),
+  lastUpdatedAt: z.date(),
+});
+
+export const makeExtensionRegistrationPropsSchema = z.object({
+  extensionId: z.string(),
+  publicKey: z.string(),
+  hostname: z.string().nullable(),
+  os: z.string().nullable(),
+  extensionVersion: z.string().nullable(),
+});
+
+export const buildExtensionRegistrationPropsSchema =
+  makeExtensionRegistrationPropsSchema.extend(
+    extensionRegistrationExtraProps.partial().shape
+  );
+
+export const rehydrateExtensionRegistrationPropsSchema =
+  makeExtensionRegistrationPropsSchema.extend(
+    extensionRegistrationExtraProps.shape
+  );
+
+export type BuildExtensionRegistrationProps = z.infer<
+  typeof buildExtensionRegistrationPropsSchema
+>;
 
 export type MakeExtensionRegistrationProps = z.infer<
   typeof makeExtensionRegistrationPropsSchema
+>;
+
+export type RehydrateExtensionRegistrationProps = z.infer<
+  typeof rehydrateExtensionRegistrationPropsSchema
 >;
