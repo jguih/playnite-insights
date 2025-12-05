@@ -3,17 +3,20 @@ import {
   makeExtensionRegistration,
   type ExtensionRegistration,
 } from "./domain/extension-registration.entity";
-import type { ExtensionRegistrationModel } from "./infra/extension-registration.repository";
+import type {
+  ExtensionRegistrationModel,
+  ExtensionRegistrationModelInsert,
+} from "./infra/extension-registration.repository";
 
 export type ExtensionRegistrationMapper = Omit<
   EntityMapper<ExtensionRegistration, ExtensionRegistrationModel>,
   "toPersistence"
 > & {
-  toPersistence: (
-    entity: ExtensionRegistration,
-    createdAt: Date,
-    lastUpdatedAt: Date
-  ) => ExtensionRegistrationModel;
+  toPersistence: (props: {
+    entity: ExtensionRegistration;
+    createdAt: Date;
+    lastUpdatedAt: Date;
+  }) => ExtensionRegistrationModelInsert;
 };
 
 export const extensionRegistrationMapper: ExtensionRegistrationMapper = {
@@ -31,9 +34,8 @@ export const extensionRegistrationMapper: ExtensionRegistrationMapper = {
     });
     return entity;
   },
-  toPersistence: (entity, createdAt, lastUpdatedAt) => {
-    const model: ExtensionRegistrationModel = {
-      Id: entity.getId(),
+  toPersistence: ({ entity, createdAt, lastUpdatedAt }) => {
+    const model: ExtensionRegistrationModelInsert = {
       ExtensionId: entity.getExtensionId(),
       ExtensionVersion: entity.getExtensionVersion(),
       Hostname: entity.getHostname(),

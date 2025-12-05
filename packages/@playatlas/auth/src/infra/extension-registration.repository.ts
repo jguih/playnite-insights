@@ -21,8 +21,14 @@ export const extensionRegistrationSchema = z.object({
   LastUpdatedAt: ISODateSchema,
 });
 
+export const extensionRegistrationInsertSchema =
+  extensionRegistrationSchema.omit({ Id: true });
+
 export type ExtensionRegistrationModel = z.infer<
   typeof extensionRegistrationSchema
+>;
+export type ExtensionRegistrationModelInsert = z.infer<
+  typeof extensionRegistrationInsertSchema
 >;
 
 export const makeExtensionRegistrationRepository = ({
@@ -32,7 +38,8 @@ export const makeExtensionRegistrationRepository = ({
   const base = makeRepositoryBase({ getDb, logService });
   const TABLE_NAME = `extension_registration`;
 
-  const add: ExtensionRegistrationRepository["add"] = (newRegistration) => {
+  const add: ExtensionRegistrationRepository["add"] = (registration) => {
+    registration.validate();
     const query = `
       INSERT INTO ${TABLE_NAME} (
         ExtensionId,
@@ -48,13 +55,13 @@ export const makeExtensionRegistrationRepository = ({
     `;
     return base.run(({ db }) => {
       const now = new Date();
-      const registrationModel = extensionRegistrationMapper.toPersistence(
-        newRegistration,
-        now,
-        now
-      );
+      const registrationModel = extensionRegistrationMapper.toPersistence({
+        entity: registration,
+        createdAt: now,
+        lastUpdatedAt: now,
+      });
 
-      extensionRegistrationSchema.parse(registrationModel);
+      extensionRegistrationInsertSchema.parse(registrationModel);
 
       const stmt = db.prepare(query);
       const result = stmt.run(
@@ -68,13 +75,16 @@ export const makeExtensionRegistrationRepository = ({
         registrationModel.LastUpdatedAt
       );
 
-      newRegistration.setId(result.lastInsertRowid as number);
-      newRegistration.setCreatedAt(now);
-      newRegistration.setLastUpdatedAt(now);
-    }, `add(${newRegistration.getExtensionId()}, ${newRegistration.getHostname()})`);
+      registration.applyPersistenceMetadata({
+        id: result.lastInsertRowid as number,
+        createdAt: now,
+        lastUpdatedAt: now,
+      });
+    }, `add(${registration.getExtensionId()}, ${registration.getHostname()})`);
   };
 
   const update: ExtensionRegistrationRepository["update"] = (registration) => {
+    registration.validate();
     const query = `
       UPDATE ${TABLE_NAME}
       SET
@@ -89,13 +99,13 @@ export const makeExtensionRegistrationRepository = ({
     `;
     return base.run(({ db }) => {
       const now = new Date();
-      const registrationModel = extensionRegistrationMapper.toPersistence(
-        registration,
-        registration.getCreatedAt(),
-        now
-      );
+      const registrationModel = extensionRegistrationMapper.toPersistence({
+        entity: registration,
+        createdAt: registration.getCreatedAt(),
+        lastUpdatedAt: now,
+      });
 
-      extensionRegistrationSchema.parse(registrationModel);
+      extensionRegistrationInsertSchema.parse(registrationModel);
 
       const stmt = db.prepare(query);
       stmt.run(
@@ -106,10 +116,14 @@ export const makeExtensionRegistrationRepository = ({
         registrationModel.ExtensionVersion,
         registrationModel.Status,
         registrationModel.LastUpdatedAt,
-        registrationModel.Id
+        registration.getId()
       );
 
-      registration.setLastUpdatedAt(now);
+      registration.applyPersistenceMetadata({
+        id: registration.getId(),
+        createdAt: registration.getCreatedAt(),
+        lastUpdatedAt: now,
+      });
     }, `update(${registration.getId()}, ${registration.getExtensionId()})`);
   };
 

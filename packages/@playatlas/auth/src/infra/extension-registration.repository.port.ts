@@ -1,16 +1,15 @@
+import { BaseEntityRepository } from "@playatlas/common/infra";
 import type {
   ExtensionRegistration,
   ExtensionRegistrationExtensionId,
   ExtensionRegistrationId,
 } from "../domain/extension-registration.entity";
 
-export type ExtensionRegistrationRepository = {
-  add: (registration: ExtensionRegistration) => void;
-  update: (registration: ExtensionRegistration) => void;
+export type ExtensionRegistrationRepository = BaseEntityRepository<
+  ExtensionRegistrationId,
+  ExtensionRegistration
+> & {
   getByExtensionId: (
     extensionId: ExtensionRegistrationExtensionId
   ) => ExtensionRegistration | null;
-  getById: (id: ExtensionRegistrationId) => ExtensionRegistration | null;
-  remove: (id: ExtensionRegistrationId) => void;
-  all: () => ExtensionRegistration[];
 };

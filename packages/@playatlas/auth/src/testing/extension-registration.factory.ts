@@ -5,7 +5,7 @@ import {
   ExtensionRegistration,
   makeExtensionRegistration,
 } from "../domain/extension-registration.entity";
-import { MakeExtensionRegistrationProps } from "../domain/extension-registration.entity.types";
+import { MakeExtensionRegistrationProps } from "../domain/extension-registration.entity.props";
 
 export type ExtensionRegistrationFactory = TestEntityFactory<
   MakeExtensionRegistrationProps,
@@ -21,7 +21,7 @@ export const makeExtensionRegistrationFactory =
 
     const build: ExtensionRegistrationFactory["build"] = (props = {}) => {
       return makeExtensionRegistration({
-        id: propOrDefault(props.id, faker.number.int()),
+        id: props.id,
         extensionId: propOrDefault(props.extensionId, faker.string.uuid()),
         extensionVersion: propOrDefault(
           props.extensionVersion,

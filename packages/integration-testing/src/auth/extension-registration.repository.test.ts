@@ -19,7 +19,7 @@ const compareRegistrations = (
 };
 
 describe("Extension Registration Repository", () => {
-  it("adds a new registration a get it by its id", () => {
+  it("adds a new registration and get it by its id", () => {
     // Arrange
     const registration = factory.getExtensionRegistrationFactory().build();
     // Act
@@ -28,10 +28,12 @@ describe("Extension Registration Repository", () => {
     // Assert
     expect(addedRegistration).not.toBeFalsy();
     compareRegistrations(addedRegistration!, registration);
-    expect(() => addedRegistration?.getCreatedAt()).not.toThrowError();
-    expect(() => addedRegistration?.getLastUpdatedAt()).not.toThrowError();
-    expect(() => registration?.getCreatedAt()).not.toThrowError();
-    expect(() => registration?.getLastUpdatedAt()).not.toThrowError();
+    expect(() => addedRegistration!.getId()).not.toThrowError();
+    expect(() => addedRegistration!.getCreatedAt()).not.toThrowError();
+    expect(() => addedRegistration!.getLastUpdatedAt()).not.toThrowError();
+    expect(() => registration.getId()).not.toThrowError();
+    expect(() => registration!.getCreatedAt()).not.toThrowError();
+    expect(() => registration!.getLastUpdatedAt()).not.toThrowError();
   });
 
   it("gets a registration by the extension id", () => {
