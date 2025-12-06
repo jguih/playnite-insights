@@ -92,15 +92,7 @@ export const makeExtensionRegistrationRepository = ({
     }, `getByRegistrationId(${id})`);
   };
 
-  const remove: ExtensionRegistrationRepository["remove"] = (id) => {
-    return base.run(({ db }) => {
-      const query = `DELETE FROM ${TABLE_NAME} WHERE Id = ?;`;
-      const stmt = db.prepare(query);
-      stmt.run(id);
-      logService.debug(`Deleted extension registration (${id})`);
-    }, `remove(${id})`);
-  };
-
+  const remove: ExtensionRegistrationRepository["remove"] = base.remove;
   const all: ExtensionRegistrationRepository["all"] = base.all;
 
   return {

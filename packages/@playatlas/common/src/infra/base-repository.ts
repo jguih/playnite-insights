@@ -1,56 +1,10 @@
-import { DatabaseSync, SQLInputValue } from "node:sqlite";
+import { SQLInputValue } from "node:sqlite";
 import z from "zod";
-import type { LogService } from "../application/log-service.port";
 import { BaseEntity, BaseEntityId } from "../domain/base-entity";
 import { BaseRepositoryPort } from "./base-repository.port";
 import { MakeBaseRepositoryDeps } from "./base-repository.types";
 
 const PERFORMANCE_WARN_THRESHOLD_MS = 50;
-
-const baseRunTransaction = (props: { db: DatabaseSync; fn: () => void }) => {
-  const { db, fn } = props;
-  db.exec("BEGIN TRANSACTION");
-  try {
-    fn();
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
-};
-
-const baseRun = <T>(props: {
-  db: DatabaseSync;
-  fn: (props: { db: DatabaseSync }) => T;
-  logService: LogService;
-  shouldLog?: boolean;
-  context?: string;
-}) => {
-  const { db, fn, logService, shouldLog, context } = props;
-  const start = performance.now();
-  try {
-    const result = fn({ db });
-    const duration = performance.now() - start;
-    const message = `Repository call ${
-      context ? context : ""
-    } took ${duration.toFixed(1)}ms`;
-    if (shouldLog) {
-      if (duration >= PERFORMANCE_WARN_THRESHOLD_MS)
-        logService.warning(message);
-      else logService.debug(message);
-    }
-    return result;
-  } catch (error) {
-    const duration = performance.now() - start;
-    logService.error(
-      `Repository call ${
-        context ? context : ""
-      } failed after ${duration.toFixed(1)}ms`,
-      error
-    );
-    throw error;
-  }
-};
 
 export const makeBaseRepository = <
   TEntityId extends BaseEntityId,
@@ -61,6 +15,7 @@ export const makeBaseRepository = <
   logService,
   config,
 }: MakeBaseRepositoryDeps<TEntity, TPersistence>): BaseRepositoryPort<
+  TEntityId,
   TEntity,
   TPersistence
 > => {
@@ -89,25 +44,58 @@ export const makeBaseRepository = <
     FROM ${tableName} 
     ORDER BY ${String(idColumn)} DESC;
   `;
+  const removeSql = `
+    DELETE FROM ${tableName} WHERE ${String(idColumn)} = ?;
+  `;
 
-  const run: BaseRepositoryPort<TEntity, TPersistence>["run"] = (
+  const run: BaseRepositoryPort<TEntityId, TEntity, TPersistence>["run"] = (
     fn,
     context,
     shouldLog
   ) => {
     const db = getDb();
-    return baseRun({ logService, fn, context, shouldLog, db });
+    const start = performance.now();
+    try {
+      const result = fn({ db });
+      const duration = performance.now() - start;
+      const message = `Repository call ${
+        context ? context : ""
+      } took ${duration.toFixed(1)}ms`;
+      if (shouldLog) {
+        if (duration >= PERFORMANCE_WARN_THRESHOLD_MS)
+          logService.warning(message);
+        else logService.debug(message);
+      }
+      return result;
+    } catch (error) {
+      const duration = performance.now() - start;
+      logService.error(
+        `Repository call ${
+          context ? context : ""
+        } failed after ${duration.toFixed(1)}ms`,
+        error
+      );
+      throw error;
+    }
   };
 
   const runTransaction: BaseRepositoryPort<
+    TEntityId,
     TEntity,
     TPersistence
   >["runTransaction"] = (fn) => {
     const db = getDb();
-    return baseRunTransaction({ db, fn });
+    db.exec("BEGIN TRANSACTION");
+    try {
+      fn();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
   };
 
-  const add: BaseRepositoryPort<TEntity, TPersistence>["add"] = (
+  const add: BaseRepositoryPort<TEntityId, TEntity, TPersistence>["add"] = (
     entity,
     options = {}
   ) => {
@@ -135,10 +123,11 @@ export const makeBaseRepository = <
     }, `add(${entities.length} entity(s))`);
   };
 
-  const update: BaseRepositoryPort<TEntity, TPersistence>["update"] = (
-    entity,
-    options = {}
-  ) => {
+  const update: BaseRepositoryPort<
+    TEntityId,
+    TEntity,
+    TPersistence
+  >["update"] = (entity, options = {}) => {
     return run(({ db }) => {
       entity.validate();
       const stmt = db.prepare(updateSql);
@@ -149,7 +138,11 @@ export const makeBaseRepository = <
     }, `update(${entity.getId()})`);
   };
 
-  const all: BaseRepositoryPort<TEntity, TPersistence>["all"] = () => {
+  const all: BaseRepositoryPort<
+    TEntityId,
+    TEntity,
+    TPersistence
+  >["all"] = () => {
     return run(({ db }) => {
       const stmt = db.prepare(getAllSql);
       const result = stmt.all();
@@ -161,11 +154,23 @@ export const makeBaseRepository = <
     }, `all()`);
   };
 
+  const remove: BaseRepositoryPort<
+    TEntityId,
+    TEntity,
+    TPersistence
+  >["remove"] = (id) => {
+    return run(({ db }) => {
+      const stmt = db.prepare(removeSql);
+      stmt.run(id);
+    }, `remove(${String(id)})`);
+  };
+
   return {
-    runTransaction,
     run,
+    runTransaction,
     add,
     update,
     all,
+    remove,
   };
 };
