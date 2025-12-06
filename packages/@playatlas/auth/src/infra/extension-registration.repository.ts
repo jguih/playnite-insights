@@ -67,7 +67,9 @@ export const makeExtensionRegistrationRepository = ({
       entity.setId(lastInsertRowid as ExtensionRegistrationId);
   };
 
-  const update: ExtensionRegistrationRepository["update"] = base.update;
+  const update: ExtensionRegistrationRepository["update"] = (entity) => {
+    base.update(entity);
+  };
 
   const getByExtensionId: ExtensionRegistrationRepository["getByExtensionId"] =
     (extensionId) => {
@@ -82,18 +84,16 @@ export const makeExtensionRegistrationRepository = ({
     };
 
   const getById: ExtensionRegistrationRepository["getById"] = (id) => {
-    const query = `SELECT * FROM ${TABLE_NAME} WHERE Id = ?`;
-    return base.run(({ db }) => {
-      const stmt = db.prepare(query);
-      const result = stmt.get(id);
-      if (!result) return null;
-      const extensionRegistration = extensionRegistrationSchema.parse(result);
-      return extensionRegistrationMapper.toDomain(extensionRegistration);
-    }, `getByRegistrationId(${id})`);
+    return base.getById(id);
   };
 
-  const remove: ExtensionRegistrationRepository["remove"] = base.remove;
-  const all: ExtensionRegistrationRepository["all"] = base.all;
+  const remove: ExtensionRegistrationRepository["remove"] = (id) => {
+    base.remove(id);
+  };
+
+  const all: ExtensionRegistrationRepository["all"] = () => {
+    return base.all();
+  };
 
   return {
     add,

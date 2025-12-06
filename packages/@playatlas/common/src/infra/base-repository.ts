@@ -47,6 +47,9 @@ export const makeBaseRepository = <
   const removeSql = `
     DELETE FROM ${tableName} WHERE ${String(idColumn)} = ?;
   `;
+  const getByIdSql = `
+    SELECT * FROM ${tableName} WHERE ${String(idColumn)} = ?;
+  `;
 
   const run: BaseRepositoryPort<TEntityId, TEntity, TPersistence>["run"] = (
     fn,
@@ -165,6 +168,20 @@ export const makeBaseRepository = <
     }, `remove(${String(id)})`);
   };
 
+  const getById: BaseRepositoryPort<
+    TEntityId,
+    TEntity,
+    TPersistence
+  >["getById"] = (id) => {
+    return run(({ db }) => {
+      const stmt = db.prepare(getByIdSql);
+      const result = stmt.get(id);
+      if (!result) return null;
+      const extensionRegistration = modelSchema.parse(result);
+      return mapper.toDomain(extensionRegistration);
+    }, `getByRegistrationId(${id})`);
+  };
+
   return {
     run,
     runTransaction,
@@ -172,5 +189,6 @@ export const makeBaseRepository = <
     update,
     all,
     remove,
+    getById,
   };
 };

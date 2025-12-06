@@ -15,6 +15,7 @@ export type BaseRepositoryPort<TEntityId, TEntity, TPersistence> = {
   ) => TPersistence;
   all: () => TEntity[];
   remove: (id: TEntityId) => void;
+  getById: (id: TEntityId) => TEntity | null;
   run: <T>(
     fn: (props: { db: DatabaseSync }) => T,
     context?: string,
