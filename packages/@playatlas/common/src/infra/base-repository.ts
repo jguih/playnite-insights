@@ -1,8 +1,9 @@
 import { DatabaseSync, SQLInputValue } from "node:sqlite";
+import z from "zod";
 import type { LogService } from "../application/log-service.port";
 import { BaseEntity, BaseEntityId } from "../domain/base-entity";
 import { BaseRepositoryPort } from "./base-repository.port";
-import { MakeRepositoryBaseDeps } from "./base-repository.types";
+import { MakeBaseRepositoryDeps } from "./base-repository.types";
 
 const PERFORMANCE_WARN_THRESHOLD_MS = 50;
 
@@ -51,7 +52,7 @@ const baseRun = <T>(props: {
   }
 };
 
-export const makeRepositoryBase = <
+export const makeBaseRepository = <
   TEntityId extends BaseEntityId,
   TEntity extends BaseEntity<TEntityId>,
   TPersistence
@@ -59,12 +60,18 @@ export const makeRepositoryBase = <
   getDb,
   logService,
   config,
-}: MakeRepositoryBaseDeps<TEntity, TPersistence>): BaseRepositoryPort<
+}: MakeBaseRepositoryDeps<TEntity, TPersistence>): BaseRepositoryPort<
   TEntity,
   TPersistence
 > => {
-  const { tableName, idColumn, insertColumns, updateColumns, toPersistence } =
-    config;
+  const {
+    tableName,
+    idColumn,
+    insertColumns,
+    updateColumns,
+    mapper,
+    modelSchema,
+  } = config;
 
   const insertSql = `
     INSERT INTO ${tableName}
@@ -72,11 +79,15 @@ export const makeRepositoryBase = <
     VALUES
       (${insertColumns.map(() => "?").join(", ")});
   `;
-
   const updateSql = `
     UPDATE ${tableName}
     SET ${updateColumns.map((s) => `${String(s)} = ?`).join(", ")}
-    WHERE ${String(idColumn)} = ?
+    WHERE ${String(idColumn)} = ?;
+  `;
+  const getAllSql = `
+    SELECT * 
+    FROM ${tableName} 
+    ORDER BY ${String(idColumn)} DESC;
   `;
 
   const run: BaseRepositoryPort<TEntity, TPersistence>["run"] = (
@@ -96,41 +107,58 @@ export const makeRepositoryBase = <
     return baseRunTransaction({ db, fn });
   };
 
-  const add: BaseRepositoryPort<TEntity, TPersistence>["add"] = ({
+  const add: BaseRepositoryPort<TEntity, TPersistence>["add"] = (
     entity,
-    toPersistence: toPersistenceOverride,
-  }) => {
+    options = {}
+  ) => {
     const entities = Array.isArray(entity) ? entity : [entity];
 
     return run(({ db }) => {
       const stmt = db.prepare(insertSql);
       const results: Array<
-        [TEntity, TPersistence & { lastInsertRowid: number | bigint }]
+        [TEntity, TPersistence, { lastInsertRowid: number | bigint }]
       > = [];
 
       for (const entity of entities) {
-        entity.validate();
-        const model = (toPersistenceOverride ?? toPersistence)(entity);
-        const params = insertColumns.map((col) => model[col]);
-        const { lastInsertRowid } = stmt.run(...(params as SQLInputValue[]));
-        results.push([entity, { ...model, lastInsertRowid }]);
+        try {
+          entity.validate();
+          const model = (options.toPersistence ?? mapper.toPersistence)(entity);
+          const params = insertColumns.map((col) => model[col]);
+          const { lastInsertRowid } = stmt.run(...(params as SQLInputValue[]));
+          results.push([entity, model, { lastInsertRowid }]);
+        } catch (error) {
+          logService.error(`Failed to persist entity`, error);
+          continue;
+        }
       }
       return results;
-    }, "add()");
+    }, `add(${entities.length} entity(s))`);
   };
 
-  const update: BaseRepositoryPort<TEntity, TPersistence>["update"] = ({
+  const update: BaseRepositoryPort<TEntity, TPersistence>["update"] = (
     entity,
-    toPersistence: toPersistenceOverride,
-  }) => {
+    options = {}
+  ) => {
     return run(({ db }) => {
       entity.validate();
       const stmt = db.prepare(updateSql);
-      const model = (toPersistenceOverride ?? toPersistence)(entity);
+      const model = (options.toPersistence ?? mapper.toPersistence)(entity);
       const params = updateColumns.map((col) => model[col]);
       stmt.run(...(params as SQLInputValue[]), entity.getId());
       return model;
-    });
+    }, `update(${entity.getId()})`);
+  };
+
+  const all: BaseRepositoryPort<TEntity, TPersistence>["all"] = () => {
+    return run(({ db }) => {
+      const stmt = db.prepare(getAllSql);
+      const result = stmt.all();
+      const models = z.array(modelSchema).parse(result);
+      const entities: TEntity[] = [];
+      for (const model of models) entities.push(mapper.toDomain(model));
+      logService.debug(`Found ${entities.length} entities`);
+      return entities;
+    }, `all()`);
   };
 
   return {
@@ -138,5 +166,6 @@ export const makeRepositoryBase = <
     run,
     add,
     update,
+    all,
   };
 };

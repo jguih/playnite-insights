@@ -1,16 +1,23 @@
 import type { DatabaseSync } from "node:sqlite";
+import { ZodSchema } from "zod";
+import { EntityMapper } from "../application";
 import type { LogService } from "../application/log-service.port";
 
-export type RepositoryConfig<TEntity, TPersistence> = {
+export type BaseRepositoryConfig<TEntity, TPersistence> = {
   tableName: string;
   idColumn: keyof TPersistence;
   insertColumns: (keyof TPersistence)[];
   updateColumns: (keyof TPersistence)[];
-  toPersistence: (entity: TEntity) => TPersistence;
+  modelSchema: ZodSchema<TPersistence>;
+  mapper: EntityMapper<TEntity, TPersistence>;
 };
 
-export type MakeRepositoryBaseDeps<TEntity, TPersistence> = {
+export type BaseRepositoryDeps = {
   logService: LogService;
   getDb: () => DatabaseSync;
-  config: RepositoryConfig<TEntity, TPersistence>;
 };
+
+export type MakeBaseRepositoryDeps<TEntity, TPersistence> =
+  BaseRepositoryDeps & {
+    config: BaseRepositoryConfig<TEntity, TPersistence>;
+  };

@@ -1,6 +1,6 @@
 import {
   type BaseRepositoryDeps,
-  makeRepositoryBase,
+  makeBaseRepository,
 } from "@playatlas/common/infra";
 import z from "zod";
 import { completionStatusMapper } from "../completion-status.mapper";
@@ -19,15 +19,16 @@ export const makeCompletionStatusRepository = ({
   logService,
 }: BaseRepositoryDeps): CompletionStatusRepository => {
   const TABLE_NAME = `completion_status`;
-  const base = makeRepositoryBase({
+  const base = makeBaseRepository({
     getDb,
     logService,
     config: {
       tableName: TABLE_NAME,
       idColumn: "Id",
-      insertColumns: ["Id", "Name"], // TODO
-      updateColumns: [], // TODO
-      toPersistence: completionStatusMapper.toPersistence,
+      insertColumns: ["Id", "Name"],
+      updateColumns: ["Id", "Name"],
+      mapper: completionStatusMapper,
+      modelSchema: completionStatusSchema,
     },
   });
 

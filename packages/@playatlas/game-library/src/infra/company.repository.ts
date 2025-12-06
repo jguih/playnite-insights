@@ -1,6 +1,6 @@
 import {
   BaseRepositoryDeps,
-  makeRepositoryBase,
+  makeBaseRepository,
 } from "@playatlas/common/infra";
 import z from "zod";
 import { companyMapper } from "../company.mapper";
@@ -19,7 +19,7 @@ export const makeCompanyRepository = ({
   logService,
 }: BaseRepositoryDeps): CompanyRepository => {
   const TABLE_NAME = "company";
-  const base = makeRepositoryBase<CompanyId, Company, CompanyModel>({
+  const base = makeBaseRepository<CompanyId, Company, CompanyModel>({
     getDb,
     logService,
     config: {
@@ -27,7 +27,8 @@ export const makeCompanyRepository = ({
       idColumn: "Id",
       insertColumns: ["Id", "Name"],
       updateColumns: [],
-      toPersistence: companyMapper.toPersistence,
+      mapper: companyMapper,
+      modelSchema: companySchema,
     },
   });
 

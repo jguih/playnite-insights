@@ -1,14 +1,19 @@
 import { DatabaseSync } from "node:sqlite";
 
+type ToPersistenceFnOverride<TEntity, TPersistence> = {
+  toPersistence?: (entity: TEntity) => TPersistence;
+};
+
 export type BaseRepositoryPort<TEntity, TPersistence> = {
-  add: (props: {
-    entity: TEntity | TEntity[];
-    toPersistence?: (entity: TEntity) => TPersistence;
-  }) => Array<[TEntity, TPersistence & { lastInsertRowid: number | bigint }]>;
-  update: (props: {
-    entity: TEntity;
-    toPersistence?: (entity: TEntity) => TPersistence;
-  }) => TPersistence;
+  add: (
+    entity: TEntity | TEntity[],
+    options?: ToPersistenceFnOverride<TEntity, TPersistence>
+  ) => Array<[TEntity, TPersistence, { lastInsertRowid: number | bigint }]>;
+  update: (
+    entity: TEntity,
+    options?: ToPersistenceFnOverride<TEntity, TPersistence>
+  ) => TPersistence;
+  all: () => TEntity[];
   run: <T>(
     fn: (props: { db: DatabaseSync }) => T,
     context?: string,

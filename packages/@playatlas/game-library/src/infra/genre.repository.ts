@@ -1,6 +1,6 @@
 import {
   BaseRepositoryDeps,
-  makeRepositoryBase,
+  makeBaseRepository,
 } from "@playatlas/common/infra";
 import z from "zod";
 import { Genre } from "../domain";
@@ -19,15 +19,16 @@ export const makeGenreRepository = ({
   logService,
 }: BaseRepositoryDeps): GenreRepository => {
   const TABLE_NAME = "genre";
-  const base = makeRepositoryBase({
+  const base = makeBaseRepository({
     getDb,
     logService,
     config: {
       tableName: TABLE_NAME,
       idColumn: "Id",
       insertColumns: ["Id", "Name"],
-      updateColumns: [], //TODO
-      toPersistence: genreMapper.toPersistence,
+      updateColumns: ["Id", "Name"], //TODO
+      mapper: genreMapper,
+      modelSchema: genreSchema,
     },
   });
 

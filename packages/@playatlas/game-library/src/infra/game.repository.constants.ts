@@ -1,6 +1,25 @@
 import { GameRelationship } from "../domain/game.entity";
+import { GameModel } from "./game.repository";
 
 export const TABLE_NAME = "playnite_game" as const;
+
+export const COLUMNS: (keyof GameModel)[] = [
+  "Id",
+  "Name",
+  "Description",
+  "ReleaseDate",
+  "Playtime",
+  "LastActivity",
+  "Added",
+  "InstallDirectory",
+  "IsInstalled",
+  "BackgroundImage",
+  "CoverImage",
+  "Icon",
+  "Hidden",
+  "CompletionStatusId",
+  "ContentHash",
+];
 
 export const RELATIONSHIP_TABLE_NAME = {
   gameDeveloper: "playnite_game_developer",

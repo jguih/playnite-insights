@@ -1,7 +1,7 @@
 import { ISODateSchema } from "@playatlas/common/common";
 import {
   BaseRepositoryDeps,
-  makeRepositoryBase,
+  makeBaseRepository,
 } from "@playatlas/common/infra";
 import z from "zod";
 import { extensionRegistrationStatus } from "../domain/extension-registration.constants";
@@ -24,9 +24,6 @@ export const extensionRegistrationSchema = z.object({
   LastUpdatedAt: ISODateSchema,
 });
 
-export const extensionRegistrationInsertSchema =
-  extensionRegistrationSchema.omit({ Id: true });
-
 export type ExtensionRegistrationModel = z.infer<
   typeof extensionRegistrationSchema
 >;
@@ -47,7 +44,7 @@ export const makeExtensionRegistrationRepository = ({
     "CreatedAt",
     "LastUpdatedAt",
   ];
-  const base = makeRepositoryBase<
+  const base = makeBaseRepository<
     ExtensionRegistrationId,
     ExtensionRegistration,
     ExtensionRegistrationModel
@@ -59,19 +56,18 @@ export const makeExtensionRegistrationRepository = ({
       idColumn: "Id",
       insertColumns: COLUMNS.slice(1),
       updateColumns: COLUMNS.filter((c) => c !== "Id" && c !== "CreatedAt"),
-      toPersistence: extensionRegistrationMapper.toPersistence,
+      mapper: extensionRegistrationMapper,
+      modelSchema: extensionRegistrationSchema,
     },
   });
 
   const add: ExtensionRegistrationRepository["add"] = (entity) => {
-    const results = base.add({ entity });
-    for (const [entity, model] of results)
-      entity.setId(model.lastInsertRowid as ExtensionRegistrationId);
+    const results = base.add(entity);
+    for (const [entity, model, { lastInsertRowid }] of results)
+      entity.setId(lastInsertRowid as ExtensionRegistrationId);
   };
 
-  const update: ExtensionRegistrationRepository["update"] = (entity) => {
-    base.update({ entity });
-  };
+  const update: ExtensionRegistrationRepository["update"] = base.update;
 
   const getByExtensionId: ExtensionRegistrationRepository["getByExtensionId"] =
     (extensionId) => {
@@ -105,23 +101,7 @@ export const makeExtensionRegistrationRepository = ({
     }, `remove(${id})`);
   };
 
-  const all: ExtensionRegistrationRepository["all"] = () => {
-    return base.run(({ db }) => {
-      const query = `SELECT * FROM ${TABLE_NAME} ORDER BY Id DESC`;
-      const stmt = db.prepare(query);
-      const result = stmt.all();
-      const registrationModels = z
-        .array(extensionRegistrationSchema)
-        .parse(result);
-
-      const registrations: ExtensionRegistration[] = [];
-      for (const model of registrationModels)
-        registrations.push(extensionRegistrationMapper.toDomain(model));
-
-      logService.debug(`Found ${registrations?.length ?? 0} registrations`);
-      return registrations;
-    }, `all()`);
-  };
+  const all: ExtensionRegistrationRepository["all"] = base.all;
 
   return {
     add,

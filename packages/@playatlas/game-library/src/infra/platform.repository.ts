@@ -1,6 +1,6 @@
 import {
   BaseRepositoryDeps,
-  makeRepositoryBase,
+  makeBaseRepository,
 } from "@playatlas/common/infra";
 import z from "zod";
 import { Platform } from "../domain";
@@ -23,7 +23,7 @@ export const makePlatformRepository = ({
   logService,
 }: BaseRepositoryDeps): PlatformRepository => {
   const TABLE_NAME = "platform";
-  const base = makeRepositoryBase({
+  const base = makeBaseRepository({
     getDb,
     logService,
     config: {
@@ -37,8 +37,9 @@ export const makePlatformRepository = ({
         "Cover",
         "Background",
       ],
-      updateColumns: [], // TODO
-      toPersistence: platformMapper.toPersistence,
+      updateColumns: ["Name", "SpecificationId", "Icon", "Cover", "Background"], // TODO
+      mapper: platformMapper,
+      modelSchema: platformSchema,
     },
   });
 

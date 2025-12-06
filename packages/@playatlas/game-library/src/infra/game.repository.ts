@@ -1,5 +1,5 @@
 import {
-  makeRepositoryBase,
+  makeBaseRepository,
   type BaseRepositoryDeps,
 } from "@playatlas/common/infra";
 import z from "zod";
@@ -14,6 +14,7 @@ import type { GenreId } from "../domain/genre.entity";
 import type { PlatformId } from "../domain/platform.entity";
 import { gameMapper } from "../game.mapper";
 import {
+  COLUMNS,
   GAME_RELATIONSHIP_META,
   TABLE_NAME,
 } from "./game.repository.constants";
@@ -63,31 +64,16 @@ export const makeGameRepository = (
   deps: GameRepositoryDeps
 ): GameRepository => {
   const { getDb, logService } = deps;
-  const base = makeRepositoryBase({
+  const base = makeBaseRepository({
     getDb,
     logService,
     config: {
       tableName: TABLE_NAME,
       idColumn: "Id",
-      insertColumns: [
-        "Id",
-        "Name",
-        "Description",
-        "ReleaseDate",
-        "Playtime",
-        "LastActivity",
-        "Added",
-        "InstallDirectory",
-        "IsInstalled",
-        "BackgroundImage",
-        "CoverImage",
-        "Icon",
-        "Hidden",
-        "CompletionStatusId",
-        "ContentHash",
-      ],
-      updateColumns: [], // TODO
-      toPersistence: gameMapper.toPersistence,
+      insertColumns: COLUMNS,
+      updateColumns: COLUMNS, // TODO
+      mapper: gameMapper,
+      modelSchema: gameSchema,
     },
   });
 
