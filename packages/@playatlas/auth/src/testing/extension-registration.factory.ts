@@ -20,7 +20,6 @@ export const makeExtensionRegistrationFactory =
 
     const build: ExtensionRegistrationFactory["build"] = (props = {}) => {
       return makeExtensionRegistration({
-        id: props.id,
         extensionId: propOrDefault(props.extensionId, faker.string.uuid()),
         extensionVersion: propOrDefault(
           props.extensionVersion,

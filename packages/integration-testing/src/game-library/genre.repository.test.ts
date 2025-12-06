@@ -24,7 +24,7 @@ describe("Genre Repository", () => {
     const newGenresCount = 200;
     const newGenres = factory.getGenreFactory().buildGenreList(newGenresCount);
     // Act
-    repository.upsertMany(newGenres);
+    repository.upsert(newGenres);
     const genres = repository.all();
     // Assert
     expect(genres.length).toBeGreaterThanOrEqual(newGenresCount);

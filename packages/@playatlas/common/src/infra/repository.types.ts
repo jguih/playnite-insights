@@ -4,4 +4,6 @@ export type BaseEntityRepository<EntityId, Entity> = {
   getById: (id: EntityId) => Entity | null;
   remove: (id: EntityId) => void;
   all: () => Entity[];
+  exists: (id: EntityId) => boolean;
+  upsert: (entity: Entity | Entity[]) => void;
 };

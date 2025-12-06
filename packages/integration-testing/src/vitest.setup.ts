@@ -23,12 +23,10 @@ beforeEach(async () => {
   const genreList = factory.getGenreFactory().buildGenreList(200);
   const platformList = factory.getPlatformFactory().buildPlatformList(30);
 
-  api.gameLibrary
-    .getCompletionStatusRepository()
-    .upsertMany(completionStatusList);
-  api.gameLibrary.getCompanyRepository().upsertMany(companyList);
-  api.gameLibrary.getGenreRepository().upsertMany(genreList);
-  api.gameLibrary.getPlatformRepository().upsertMany(platformList);
+  api.gameLibrary.getCompletionStatusRepository().upsert(completionStatusList);
+  api.gameLibrary.getCompanyRepository().upsert(companyList);
+  api.gameLibrary.getGenreRepository().upsert(genreList);
+  api.gameLibrary.getPlatformRepository().upsert(platformList);
 
   const completionStatusOptions = completionStatusList.map((c) => c.getId());
   const companyOptions = companyList.map((c) => c.getId());

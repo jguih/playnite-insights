@@ -34,6 +34,16 @@ export const makeBaseRepository = <
     VALUES
       (${insertColumns.map(() => "?").join(", ")});
   `;
+  const upsertSql = `
+    INSERT INTO ${tableName}
+      (${insertColumns.join(", ")})
+    VALUES
+      (${insertColumns.map(() => "?").join(", ")})
+    ON CONFLICT DO UPDATE SET
+      ${insertColumns
+        .map((c) => `${String(c)} = excluded.${String(c)}`)
+        .join(", ")};
+  `;
   const updateSql = `
     UPDATE ${tableName}
     SET ${updateColumns.map((s) => `${String(s)} = ?`).join(", ")}
@@ -49,6 +59,12 @@ export const makeBaseRepository = <
   `;
   const getByIdSql = `
     SELECT * FROM ${tableName} WHERE ${String(idColumn)} = ?;
+  `;
+  const existsSql = `
+    SELECT EXISTS (
+      SELECT 1 FROM ${tableName} 
+      WHERE ${String(idColumn)} = (?)
+    );
   `;
 
   const run: BaseRepositoryPort<TEntityId, TEntity, TPersistence>["run"] = (
@@ -182,13 +198,66 @@ export const makeBaseRepository = <
     }, `getByRegistrationId(${id})`);
   };
 
+  const upsert: BaseRepositoryPort<
+    TEntityId,
+    TEntity,
+    TPersistence
+  >["upsert"] = (entity, options = {}) => {
+    const entities = Array.isArray(entity) ? entity : [entity];
+
+    return run(({ db }) => {
+      const stmt = db.prepare(upsertSql);
+      const results: Array<
+        [TEntity, TPersistence, { lastInsertRowid: number | bigint }]
+      > = [];
+
+      for (const entity of entities) {
+        try {
+          runTransaction(() => {
+            entity.validate();
+            const model = (options.toPersistence ?? mapper.toPersistence)(
+              entity
+            );
+            const params = insertColumns.map((col) => model[col]);
+            const { lastInsertRowid } = stmt.run(
+              ...(params as SQLInputValue[])
+            );
+            results.push([entity, model, { lastInsertRowid }]);
+          });
+        } catch (error) {
+          logService.error(`Failed to upsert entity`, error);
+          continue;
+        }
+      }
+
+      return results;
+    }, `upsert()`);
+  };
+
+  const exists: BaseRepositoryPort<
+    TEntityId,
+    TEntity,
+    TPersistence
+  >["exists"] = (id) => {
+    return run(({ db }) => {
+      const stmt = db.prepare(existsSql);
+      const result = stmt.get(id);
+      if (result) {
+        return Object.values(result)[0] === 1;
+      }
+      return false;
+    });
+  };
+
   return {
     run,
     runTransaction,
     add,
+    upsert,
     update,
     all,
     remove,
     getById,
+    exists,
   };
 };

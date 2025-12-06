@@ -63,7 +63,7 @@ export const makeExtensionRegistrationRepository = ({
 
   const add: ExtensionRegistrationRepository["add"] = (entity) => {
     const results = base.add(entity);
-    for (const [entity, model, { lastInsertRowid }] of results)
+    for (const [entity, _, { lastInsertRowid }] of results)
       entity.setId(lastInsertRowid as ExtensionRegistrationId);
   };
 

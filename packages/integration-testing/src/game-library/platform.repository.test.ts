@@ -30,7 +30,7 @@ describe("Platform Repository", () => {
       .getPlatformFactory()
       .buildPlatformList(newPlatformsCount);
     // Act
-    repository.upsertMany(newPlatforms);
+    repository.upsert(newPlatforms);
     const platforms = repository.all();
     // Assert
     expect(platforms.length).toBeGreaterThanOrEqual(newPlatformsCount);

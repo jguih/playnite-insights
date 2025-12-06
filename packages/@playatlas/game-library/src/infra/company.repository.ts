@@ -19,130 +19,41 @@ export const makeCompanyRepository = ({
   logService,
 }: BaseRepositoryDeps): CompanyRepository => {
   const TABLE_NAME = "company";
+  const COLUMNS: (keyof CompanyModel)[] = ["Id", "Name"];
   const base = makeBaseRepository<CompanyId, Company, CompanyModel>({
     getDb,
     logService,
     config: {
       tableName: TABLE_NAME,
       idColumn: "Id",
-      insertColumns: ["Id", "Name"],
-      updateColumns: [],
+      insertColumns: COLUMNS,
+      updateColumns: COLUMNS.filter((c) => c !== "Id"),
       mapper: companyMapper,
       modelSchema: companySchema,
     },
   });
 
-  const add: CompanyRepository["add"] = (company) => {
-    const query = `
-      INSERT INTO ${TABLE_NAME}
-        (Id, Name)
-      VALUES
-        (?, ?);
-      `;
-    return base.run(({ db }) => {
-      const model = companyMapper.toPersistence(company);
-      const stmt = db.prepare(query);
-      stmt.run(model.Id, model.Name);
-      logService.debug(`Created company (${model.Id}, ${model.Name})`);
-      return true;
-    }, `add()`);
-  };
+  const add: CompanyRepository["add"] = (company) => base.add(company);
 
-  const upsertMany: CompanyRepository["upsertMany"] = (companies) => {
-    return base.run(({ db }) => {
-      const query = `
-          INSERT INTO ${TABLE_NAME}
-            (Id, Name)
-          VALUES
-            (?, ?)
-          ON CONFLICT DO UPDATE SET
-            Name = excluded.Name;
-          `;
-      const stmt = db.prepare(query);
-      db.exec("BEGIN TRANSACTION");
-      try {
-        for (const company of companies) {
-          const model = companyMapper.toPersistence(company);
-          stmt.run(model.Id, model.Name);
-        }
-        db.exec("COMMIT");
-      } catch (error) {
-        db.exec("ROLLBACK");
-        throw error;
-      }
-    }, `upsertMany(${companies.length} companies)`);
-  };
+  const upsert: CompanyRepository["upsert"] = (company) => base.upsert(company);
 
-  const exists: CompanyRepository["exists"] = (id): boolean => {
-    const query = `
-      SELECT EXISTS (
-        SELECT 1 FROM company 
-        WHERE Id = (?)
-      );
-    `;
-    return base.run(({ db }) => {
-      const stmt = db.prepare(query);
-      const result = stmt.get(id);
-      if (result) {
-        return Object.values(result)[0] === 1;
-      }
-      return false;
-    }, `exists(${id})`);
-  };
+  const exists: CompanyRepository["exists"] = (id) => base.exists(id);
 
-  const update = (company: Company): boolean => {
-    const query = `
-      UPDATE company
-      SET
-        Name = ?
-      WHERE Id = ?;
-    `;
-    return base.run(({ db }) => {
-      const model = companyMapper.toPersistence(company);
-      const stmt = db.prepare(query);
-      stmt.run(model.Name, model.Id);
-      logService.debug(`Updated company (${model.Id}, ${model.Name})`);
-      return true;
-    }, `update(${company.getId()}, ${company.getName()})`);
-  };
+  const update: CompanyRepository["update"] = (company) => base.update(company);
 
-  const getById: CompanyRepository["getById"] = (id: string) => {
-    const query = `
-      SELECT *
-      FROM company
-      WHERE Id = ?;
-    `;
-    return base.run(({ db }) => {
-      const stmt = db.prepare(query);
-      const result = stmt.get(id);
-      const company = z.optional(companySchema).parse(result);
-      logService.debug(`Found company: ${company?.Name}`);
-      return company ? companyMapper.toDomain(company) : null;
-    }, `getById(${id})`);
-  };
+  const getById: CompanyRepository["getById"] = (id) => base.getById(id);
 
-  const all: CompanyRepository["all"] = () => {
-    const query = `SELECT * FROM company ORDER BY Name ASC`;
-    return base.run(({ db }) => {
-      const stmt = db.prepare(query);
-      const result = stmt.all();
-      const companyModels =
-        z.optional(z.array(companySchema)).parse(result) ?? [];
-      const companies: Company[] = [];
-      for (const model of companyModels) {
-        companies.push(companyMapper.toDomain(model));
-      }
-      logService.debug(`Found ${companies?.length ?? 0} companies`);
-      return companies;
-    }, `all()`);
-  };
+  const all: CompanyRepository["all"] = () => base.all();
+
+  const remove: CompanyRepository["remove"] = (id) => base.remove(id);
 
   return {
     add,
-    upsertMany,
+    upsert,
     update,
     exists,
     getById,
     all,
+    remove,
   };
 };
