@@ -6,7 +6,6 @@ export type GenreName = string;
 
 export type Genre = BaseEntity<GenreId> &
   Readonly<{
-    getId: () => GenreId;
     getName: () => GenreName;
   }>;
 

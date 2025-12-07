@@ -43,29 +43,22 @@ export const makePlatformRepository = ({
     },
   });
 
-  const add: PlatformRepository["add"] = (platform) => base.add(platform);
+  const add: PlatformRepository["add"] = (platform) => {
+    base._add(platform);
+  };
 
-  const upsert: PlatformRepository["upsert"] = (platform) =>
-    base.upsert(platform);
+  const upsert: PlatformRepository["upsert"] = (platform) => {
+    base._upsert(platform);
+  };
 
-  const exists: PlatformRepository["exists"] = (id) => base.exists(id);
-
-  const update: PlatformRepository["update"] = (platform) =>
-    base.update(platform);
-
-  const getById: PlatformRepository["getById"] = (id) => base.getById(id);
-
-  const all: PlatformRepository["all"] = () => base.all();
-
-  const remove: PlatformRepository["remove"] = (id) => base.remove(id);
+  const update: PlatformRepository["update"] = (platform) => {
+    base._update(platform);
+  };
 
   return {
+    ...base.public,
     add,
     upsert,
     update,
-    exists,
-    getById,
-    all,
-    remove,
   };
 };

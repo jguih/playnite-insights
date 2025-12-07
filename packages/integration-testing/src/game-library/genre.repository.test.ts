@@ -10,7 +10,7 @@ describe("Genre Repository", () => {
 
   it("adds a new genre", () => {
     // Arrange
-    const genre = factory.getGenreFactory().buildGenre();
+    const genre = factory.getGenreFactory().build();
     // Act
     repository.add(genre);
     const addedGenre = repository.getById(genre.getId());
@@ -22,7 +22,7 @@ describe("Genre Repository", () => {
   it("returns all genres", () => {
     // Arrange
     const newGenresCount = 200;
-    const newGenres = factory.getGenreFactory().buildGenreList(newGenresCount);
+    const newGenres = factory.getGenreFactory().buildList(newGenresCount);
     // Act
     repository.upsert(newGenres);
     const genres = repository.all();
@@ -32,7 +32,7 @@ describe("Genre Repository", () => {
 
   it("checks if a genre exists", () => {
     // Arrange
-    const genre = factory.getGenreFactory().buildGenre();
+    const genre = factory.getGenreFactory().build();
     // Act
     repository.add(genre);
     const exists = repository.exists(genre.getId());

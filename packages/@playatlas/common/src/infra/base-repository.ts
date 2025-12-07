@@ -114,7 +114,7 @@ export const makeBaseRepository = <
     }
   };
 
-  const add: BaseRepositoryPort<TEntityId, TEntity, TPersistence>["add"] = (
+  const _add: BaseRepositoryPort<TEntityId, TEntity, TPersistence>["_add"] = (
     entity,
     options = {}
   ) => {
@@ -142,11 +142,11 @@ export const makeBaseRepository = <
     }, `add(${entities.length} entity(s))`);
   };
 
-  const update: BaseRepositoryPort<
+  const _update: BaseRepositoryPort<
     TEntityId,
     TEntity,
     TPersistence
-  >["update"] = (entity, options = {}) => {
+  >["_update"] = (entity, options = {}) => {
     return run(({ db }) => {
       entity.validate();
       const stmt = db.prepare(updateSql);
@@ -161,7 +161,7 @@ export const makeBaseRepository = <
     TEntityId,
     TEntity,
     TPersistence
-  >["all"] = () => {
+  >["public"]["all"] = () => {
     return run(({ db }) => {
       const stmt = db.prepare(getAllSql);
       const result = stmt.all();
@@ -177,7 +177,7 @@ export const makeBaseRepository = <
     TEntityId,
     TEntity,
     TPersistence
-  >["remove"] = (id) => {
+  >["public"]["remove"] = (id) => {
     return run(({ db }) => {
       const stmt = db.prepare(removeSql);
       stmt.run(id);
@@ -188,7 +188,7 @@ export const makeBaseRepository = <
     TEntityId,
     TEntity,
     TPersistence
-  >["getById"] = (id) => {
+  >["public"]["getById"] = (id) => {
     return run(({ db }) => {
       const stmt = db.prepare(getByIdSql);
       const result = stmt.get(id);
@@ -198,11 +198,11 @@ export const makeBaseRepository = <
     }, `getByRegistrationId(${id})`);
   };
 
-  const upsert: BaseRepositoryPort<
+  const _upsert: BaseRepositoryPort<
     TEntityId,
     TEntity,
     TPersistence
-  >["upsert"] = (entity, options = {}) => {
+  >["_upsert"] = (entity, options = {}) => {
     const entities = Array.isArray(entity) ? entity : [entity];
 
     return run(({ db }) => {
@@ -238,7 +238,7 @@ export const makeBaseRepository = <
     TEntityId,
     TEntity,
     TPersistence
-  >["exists"] = (id) => {
+  >["public"]["exists"] = (id) => {
     return run(({ db }) => {
       const stmt = db.prepare(existsSql);
       const result = stmt.get(id);
@@ -252,12 +252,14 @@ export const makeBaseRepository = <
   return {
     run,
     runTransaction,
-    add,
-    upsert,
-    update,
-    all,
-    remove,
-    getById,
-    exists,
+    public: {
+      all,
+      remove,
+      getById,
+      exists,
+    },
+    _add,
+    _upsert,
+    _update,
   };
 };

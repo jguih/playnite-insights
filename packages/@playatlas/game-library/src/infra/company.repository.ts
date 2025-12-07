@@ -33,27 +33,22 @@ export const makeCompanyRepository = ({
     },
   });
 
-  const add: CompanyRepository["add"] = (company) => base.add(company);
+  const add: CompanyRepository["add"] = (company) => {
+    base._add(company);
+  };
 
-  const upsert: CompanyRepository["upsert"] = (company) => base.upsert(company);
+  const upsert: CompanyRepository["upsert"] = (company) => {
+    base._upsert(company);
+  };
 
-  const exists: CompanyRepository["exists"] = (id) => base.exists(id);
-
-  const update: CompanyRepository["update"] = (company) => base.update(company);
-
-  const getById: CompanyRepository["getById"] = (id) => base.getById(id);
-
-  const all: CompanyRepository["all"] = () => base.all();
-
-  const remove: CompanyRepository["remove"] = (id) => base.remove(id);
+  const update: CompanyRepository["update"] = (company) => {
+    base._update(company);
+  };
 
   return {
+    ...base.public,
     add,
     upsert,
     update,
-    exists,
-    getById,
-    all,
-    remove,
   };
 };

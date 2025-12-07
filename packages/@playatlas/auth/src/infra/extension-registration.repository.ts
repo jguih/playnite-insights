@@ -62,13 +62,17 @@ export const makeExtensionRegistrationRepository = ({
   });
 
   const add: ExtensionRegistrationRepository["add"] = (entity) => {
-    const results = base.add(entity);
+    const results = base._add(entity);
     for (const [entity, _, { lastInsertRowid }] of results)
       entity.setId(lastInsertRowid as ExtensionRegistrationId);
   };
 
   const update: ExtensionRegistrationRepository["update"] = (entity) => {
-    base.update(entity);
+    base._update(entity);
+  };
+
+  const upsert: ExtensionRegistrationRepository["upsert"] = (entity) => {
+    base._upsert(entity);
   };
 
   const getByExtensionId: ExtensionRegistrationRepository["getByExtensionId"] =
@@ -83,24 +87,11 @@ export const makeExtensionRegistrationRepository = ({
       }, `getByExtensionId(${extensionId})`);
     };
 
-  const getById: ExtensionRegistrationRepository["getById"] = (id) => {
-    return base.getById(id);
-  };
-
-  const remove: ExtensionRegistrationRepository["remove"] = (id) => {
-    base.remove(id);
-  };
-
-  const all: ExtensionRegistrationRepository["all"] = () => {
-    return base.all();
-  };
-
   return {
+    ...base.public,
+    getByExtensionId,
     add,
     update,
-    getByExtensionId,
-    getById,
-    remove,
-    all,
+    upsert,
   };
 };

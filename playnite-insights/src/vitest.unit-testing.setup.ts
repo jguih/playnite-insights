@@ -7,9 +7,9 @@ beforeEach(async () => {
 	const completionStatusList = factory
 		.getCompletionStatusFactory()
 		.buildDefaultCompletionStatusList();
-	const companyList = factory.getCompanyFactory().buildCompanyList(200);
-	const genreList = factory.getGenreFactory().buildGenreList(200);
-	const platformList = factory.getPlatformFactory().buildPlatformList(30);
+	const companyList = factory.getCompanyFactory().buildList(200);
+	const genreList = factory.getGenreFactory().buildList(200);
+	const platformList = factory.getPlatformFactory().buildList(30);
 
 	const completionStatusOptions = completionStatusList.map((c) => c.getId());
 	const companyOptions = companyList.map((c) => c.getId());

@@ -32,31 +32,22 @@ export const makeCompletionStatusRepository = ({
     },
   });
 
-  const add: CompletionStatusRepository["add"] = (completionStatus) =>
-    base.add(completionStatus);
+  const add: CompletionStatusRepository["add"] = (completionStatus) => {
+    base._add(completionStatus);
+  };
 
-  const upsert: CompletionStatusRepository["upsert"] = (completionStatus) =>
-    base.upsert(completionStatus);
+  const upsert: CompletionStatusRepository["upsert"] = (completionStatus) => {
+    base._upsert(completionStatus);
+  };
 
-  const update: CompletionStatusRepository["update"] = (completionStatus) =>
-    base.update(completionStatus);
-
-  const getById: CompletionStatusRepository["getById"] = (id) =>
-    base.getById(id);
-
-  const all: CompletionStatusRepository["all"] = () => base.all();
-
-  const exists: CompletionStatusRepository["exists"] = (id) => base.exists(id);
-
-  const remove: CompletionStatusRepository["remove"] = (id) => base.remove(id);
+  const update: CompletionStatusRepository["update"] = (completionStatus) => {
+    base._update(completionStatus);
+  };
 
   return {
+    ...base.public,
     add,
     upsert,
     update,
-    getById,
-    all,
-    exists,
-    remove,
   };
 };

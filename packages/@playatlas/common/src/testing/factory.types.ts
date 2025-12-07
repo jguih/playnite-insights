@@ -1,4 +1,4 @@
-export type TestEntityFactory<P, E> = {
-  build: (props?: Partial<P>) => E;
-  buildList: (n: number, props?: Partial<P>) => E[];
+export type TestEntityFactory<TMakeEntityProps, TEntity> = {
+  build: (props?: Partial<TMakeEntityProps>) => TEntity;
+  buildList: (n: number, props?: Partial<TMakeEntityProps>) => TEntity[];
 };

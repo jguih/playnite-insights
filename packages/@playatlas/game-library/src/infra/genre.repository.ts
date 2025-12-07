@@ -32,27 +32,22 @@ export const makeGenreRepository = ({
     },
   });
 
-  const add: GenreRepository["add"] = (genre) => base.add(genre);
+  const add: GenreRepository["add"] = (genre) => {
+    base._add(genre);
+  };
 
-  const upsert: GenreRepository["upsert"] = (genre) => base.upsert(genre);
+  const upsert: GenreRepository["upsert"] = (genre) => {
+    base._upsert(genre);
+  };
 
-  const exists: GenreRepository["exists"] = (id) => base.exists(id);
-
-  const update: GenreRepository["update"] = (genre) => base.update(genre);
-
-  const getById: GenreRepository["getById"] = (id) => base.getById(id);
-
-  const all: GenreRepository["all"] = () => base.all();
-
-  const remove: GenreRepository["remove"] = (id) => base.remove(id);
+  const update: GenreRepository["update"] = (genre) => {
+    base._update(genre);
+  };
 
   return {
+    ...base.public,
     add,
-    exists,
     update,
-    getById,
-    all,
     upsert,
-    remove,
   };
 };

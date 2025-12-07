@@ -10,7 +10,7 @@ describe("Platform Repository", () => {
 
   it("adds a new platform", () => {
     // Arrange
-    const platform = factory.getPlatformFactory().buildPlatform();
+    const platform = factory.getPlatformFactory().build();
     // Act
     repository.add(platform);
     const addedPlatform = repository.getById(platform.getId());
@@ -28,7 +28,7 @@ describe("Platform Repository", () => {
     const newPlatformsCount = 200;
     const newPlatforms = factory
       .getPlatformFactory()
-      .buildPlatformList(newPlatformsCount);
+      .buildList(newPlatformsCount);
     // Act
     repository.upsert(newPlatforms);
     const platforms = repository.all();
@@ -38,7 +38,7 @@ describe("Platform Repository", () => {
 
   it("checks if a platform exists", () => {
     // Arrange
-    const platform = factory.getPlatformFactory().buildPlatform();
+    const platform = factory.getPlatformFactory().build();
     // Act
     repository.add(platform);
     const exists = repository.exists(platform.getId());

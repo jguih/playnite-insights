@@ -1,17 +1,12 @@
 import { faker } from "@faker-js/faker";
+import { TestEntityFactory } from "@playatlas/common/testing";
 import { makePlatform, Platform } from "../domain/platform.entity";
 import { MakePlatformProps } from "../domain/platform.entity.types";
 
-export type PlatformFactory = {
-  buildPlatform: (props?: Partial<MakePlatformProps>) => Platform;
-  buildPlatformList: (
-    n: number,
-    props?: Partial<MakePlatformProps>
-  ) => Platform[];
-};
+export type PlatformFactory = TestEntityFactory<MakePlatformProps, Platform>;
 
 export const makePlatformFactory = (): PlatformFactory => {
-  const buildPlatform: PlatformFactory["buildPlatform"] = (props = {}) => {
+  const build: PlatformFactory["build"] = (props = {}) => {
     return makePlatform({
       id: props.id ?? faker.string.uuid(),
       name: props.name ?? faker.lorem.words({ min: 1, max: 4 }),
@@ -22,12 +17,9 @@ export const makePlatformFactory = (): PlatformFactory => {
     });
   };
 
-  const buildPlatformList: PlatformFactory["buildPlatformList"] = (
-    n,
-    props = {}
-  ) => {
-    return Array.from({ length: n }, () => buildPlatform(props));
+  const buildList: PlatformFactory["buildList"] = (n, props = {}) => {
+    return Array.from({ length: n }, () => build(props));
   };
 
-  return { buildPlatform, buildPlatformList };
+  return { build, buildList };
 };
