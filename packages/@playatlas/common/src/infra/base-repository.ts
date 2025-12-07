@@ -178,9 +178,10 @@ export const makeBaseRepository = <
     TEntity,
     TPersistence
   >["public"]["remove"] = (id) => {
+    const ids = Array.isArray(id) ? id : [id];
     return run(({ db }) => {
       const stmt = db.prepare(removeSql);
-      stmt.run(id);
+      for (const id of ids) stmt.run(id);
     }, `remove(${String(id)})`);
   };
 

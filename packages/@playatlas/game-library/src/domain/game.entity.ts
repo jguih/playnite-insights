@@ -1,8 +1,9 @@
+import { validation } from "@playatlas/common/application";
 import {
   createRelationship,
   type Relationship,
 } from "@playatlas/common/common";
-import { BaseEntity } from "@playatlas/common/domain";
+import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
 import { CompanyId } from "./company.entity";
 import { MakeGameProps } from "./game.entity.types";
 import { GenreId } from "./genre.entity";
@@ -81,7 +82,12 @@ export const makeGame = (props: MakeGameProps): Game => {
       platforms: createRelationship(props.platformIds ?? null),
       publishers: createRelationship(props.publisherIds ?? null),
     },
-    validate: () => {},
+    validate: () => {
+      if (_playtime < 0)
+        throw new InvalidStateError("Playtime must not be negative");
+      if (validation.isEmptyString(_contentHash))
+        throw new InvalidStateError("ContentHash must not be an empty string");
+    },
   };
   return Object.freeze(game);
 };

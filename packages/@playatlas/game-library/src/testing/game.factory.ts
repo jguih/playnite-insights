@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { TestEntityFactory } from "@playatlas/common/testing";
 import { type CompanyId } from "../domain/company.entity";
 import { type CompletionStatusId } from "../domain/completion-status.entity";
 import { makeGame, type Game } from "../domain/game.entity";
@@ -15,11 +16,9 @@ export type GameFactoryDeps = {
   platformOptions: PlatformId[];
 };
 
-export type GameFactory = {
-  buildGame: (props?: Partial<MakeGameProps>) => Game;
-  buildGameList: (n: number, props?: Partial<MakeGameProps>) => Game[];
-  buildGameDto: (props?: Partial<MakeGameProps>) => GameResponseDto;
-  buildGameDtoList: (
+export type GameFactory = TestEntityFactory<MakeGameProps, Game> & {
+  buildDto: (props?: Partial<MakeGameProps>) => GameResponseDto;
+  buildDtoList: (
     n: number,
     props?: Partial<MakeGameProps>
   ) => GameResponseDto[];
@@ -36,7 +35,7 @@ export const makeGameFactory = ({
     return prop;
   };
 
-  const buildGame = (props: Partial<MakeGameProps> = {}): Game => {
+  const build = (props: Partial<MakeGameProps> = {}): Game => {
     const completionStatusId = propOrDefault(
       props.completionStatusId,
       faker.helpers.arrayElement(completionStatusOptions)
@@ -90,25 +89,22 @@ export const makeGameFactory = ({
     });
   };
 
-  const buildGameList = (
-    n: number,
-    props: Partial<MakeGameProps> = {}
-  ): Game[] => {
-    return Array.from({ length: n }, () => buildGame(props));
+  const buildList = (n: number, props: Partial<MakeGameProps> = {}): Game[] => {
+    return Array.from({ length: n }, () => build(props));
   };
 
-  const buildGameDto: GameFactory["buildGameDto"] = (props) => {
-    return gameMapper.toDto(buildGame(props));
+  const buildDto: GameFactory["buildDto"] = (props) => {
+    return gameMapper.toDto(build(props));
   };
 
-  const buildGameDtoList: GameFactory["buildGameDtoList"] = (n, props) => {
-    return Array.from({ length: n }, () => gameMapper.toDto(buildGame(props)));
+  const buildDtoList: GameFactory["buildDtoList"] = (n, props) => {
+    return Array.from({ length: n }, () => gameMapper.toDto(build(props)));
   };
 
   return Object.freeze({
-    buildGame,
-    buildGameList,
-    buildGameDto,
-    buildGameDtoList
+    build,
+    buildList,
+    buildDto,
+    buildDtoList,
   });
 };

@@ -135,15 +135,17 @@ export const makeGameRepository = (
     const { table, column } = GAME_RELATIONSHIP_META[relationship];
     return base.run(
       ({ db }) => {
-        db.prepare(`DELETE FROM ${table} WHERE GameId = ?`).run(gameId);
-        if (newRelationshipIds.length > 0) {
-          const stmt = db.prepare(
-            `INSERT INTO ${table} (GameId, ${column}) VALUES (?, ?)`
-          );
-          for (const id of newRelationshipIds) {
-            stmt.run(gameId, id);
+        base.runTransaction(() => {
+          db.prepare(`DELETE FROM ${table} WHERE GameId = ?`).run(gameId);
+          if (newRelationshipIds.length > 0) {
+            const stmt = db.prepare(
+              `INSERT INTO ${table} (GameId, ${column}) VALUES (?, ?)`
+            );
+            for (const id of newRelationshipIds) {
+              stmt.run(gameId, id);
+            }
           }
-        }
+        });
       },
       `_updateRelationshipFor(${gameId}, ${relationship}, ${newRelationshipIds.length} relationship(s))`,
       false
@@ -197,7 +199,7 @@ export const makeGameRepository = (
       let query = `
           SELECT 
             COUNT(*) AS Total
-          FROM playnite_game pg
+          FROM ${TABLE_NAME} pg
         `;
       const { where, params } = _getWhereClauseAndParamsFromFilters(filters);
       query += where;
@@ -256,131 +258,35 @@ export const makeGameRepository = (
     }, `getById(${id})`);
   };
 
-  const exists: GameRepository["exists"] = (gameId) => {
-    return base.run(({ db }) => {
-      const query = `
-        SELECT EXISTS (
-          SELECT 1 FROM playnite_game WHERE Id = (?)
-        );
-        `;
-      const stmt = db.prepare(query);
-      const result = stmt.get(gameId) as object;
-      if (result) {
-        return Object.values(result)[0] === 1;
-      }
-      return false;
-    }, `exists(${gameId})`);
-  };
+  const upsert: GameRepository["upsert"] = (games) => {
+    const result = base._upsert(games);
 
-  const upsertMany: GameRepository["upsertMany"] = (games) => {
-    return base.run(({ db }) => {
-      const columns = [
-        "Id",
-        "Name",
-        "Description",
-        "ReleaseDate",
-        "Playtime",
-        "LastActivity",
-        "Added",
-        "InstallDirectory",
-        "IsInstalled",
-        "BackgroundImage",
-        "CoverImage",
-        "Icon",
-        "ContentHash",
-        "Hidden",
-        "CompletionStatusId",
-      ];
-
-      const placeholders = columns.map(() => "?").join(",");
-
-      const updateColumns = columns
-        .slice(1)
-        .map((c) => `${c} = excluded.${c}`)
-        .join(",");
-
-      const stmt = db.prepare(`
-          INSERT INTO playnite_game (${columns.join(",")}) 
-          VALUES (
-            ${placeholders}
-          ) ON CONFLICT(Id) DO UPDATE SET
-            ${updateColumns};
-          `);
-
-      for (const game of games) {
-        base.runTransaction(() => {
-          const gameModel = gameMapper.toPersistence(game);
-          stmt.run(
-            gameModel.Id,
-            gameModel.Name,
-            gameModel.Description,
-            gameModel.ReleaseDate,
-            gameModel.Playtime,
-            gameModel.LastActivity,
-            gameModel.Added,
-            gameModel.InstallDirectory,
-            +gameModel.IsInstalled,
-            gameModel.BackgroundImage,
-            gameModel.CoverImage,
-            gameModel.Icon,
-            gameModel.ContentHash,
-            gameModel.Hidden,
-            gameModel.CompletionStatusId
-          );
-          if (game.relationships.developers.isLoaded())
-            _updateRelationshipFor({
-              relationship: "developers",
-              gameId: gameModel.Id,
-              newRelationshipIds: game.relationships.developers.get(),
-            });
-          if (game.relationships.publishers.isLoaded())
-            _updateRelationshipFor({
-              relationship: "publishers",
-              gameId: gameModel.Id,
-              newRelationshipIds: game.relationships.publishers.get(),
-            });
-          if (game.relationships.genres.isLoaded())
-            _updateRelationshipFor({
-              relationship: "genres",
-              gameId: gameModel.Id,
-              newRelationshipIds: game.relationships.genres.get(),
-            });
-          if (game.relationships.platforms.isLoaded())
-            _updateRelationshipFor({
-              relationship: "platforms",
-              gameId: gameModel.Id,
-              newRelationshipIds: game.relationships.platforms.get(),
-            });
+    for (const [game, model, _] of result) {
+      if (game.relationships.developers.isLoaded())
+        _updateRelationshipFor({
+          relationship: "developers",
+          gameId: model.Id,
+          newRelationshipIds: game.relationships.developers.get(),
         });
-      }
-    }, `upsertMany(${games.length} game(s))`);
-  };
-
-  const remove: GameRepository["remove"] = (gameId) => {
-    return base.run(({ db }) => {
-      const query = `DELETE FROM playnite_game WHERE Id = (?)`;
-      const stmt = db.prepare(query);
-      const result = stmt.run(gameId);
-      logService.debug(`Game with id ${gameId} deleted`);
-      return result.changes == 1; // Number of rows affected
-    }, `remove(${gameId})`);
-  };
-
-  const removeMany: GameRepository["removeMany"] = (gameIds) => {
-    return base.run(({ db }) => {
-      const stmt = {
-        unlinkSessions: db.prepare(
-          `UPDATE game_session SET GameId = NULL WHERE GameId = ?`
-        ),
-        removeGame: db.prepare(`DELETE FROM playnite_game WHERE Id = (?)`),
-      };
-      base.runTransaction(() => {
-        for (const gameId of gameIds) {
-          stmt.unlinkSessions.run(gameId);
-          stmt.removeGame.run(gameId);
-        }
-      });
-    }, `remove(${gameIds.length} game(s))`);
+      if (game.relationships.publishers.isLoaded())
+        _updateRelationshipFor({
+          relationship: "publishers",
+          gameId: model.Id,
+          newRelationshipIds: game.relationships.publishers.get(),
+        });
+      if (game.relationships.genres.isLoaded())
+        _updateRelationshipFor({
+          relationship: "genres",
+          gameId: model.Id,
+          newRelationshipIds: game.relationships.genres.get(),
+        });
+      if (game.relationships.platforms.isLoaded())
+        _updateRelationshipFor({
+          relationship: "platforms",
+          gameId: model.Id,
+          newRelationshipIds: game.relationships.platforms.get(),
+        });
+    }
   };
 
   const getManifestData: GameRepository["getManifestData"] = () => {
@@ -491,10 +397,8 @@ export const makeGameRepository = (
   };
 
   return {
-    upsertMany,
-    remove,
-    removeMany,
-    exists,
+    ...base.public,
+    upsert,
     getById,
     getTotalPlaytimeSeconds,
     getManifestData,

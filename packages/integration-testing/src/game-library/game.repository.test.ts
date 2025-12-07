@@ -9,7 +9,7 @@ const assertRelationshipLoad = (
   game: Game,
   relationshipKey: GameRelationship
 ) => {
-  repository.upsertMany([game]);
+  repository.upsert([game]);
 
   const loaded = repository.getById(game.getId(), {
     load: { [relationshipKey]: true },
@@ -39,10 +39,10 @@ describe("Game Repository", () => {
 
   it("persists games", () => {
     // Arrange
-    const games = factory.getGameFactory().buildGameList(100);
+    const games = factory.getGameFactory().buildList(100);
     const randomGame = faker.helpers.arrayElement(games);
     // Act
-    repository.upsertMany(games);
+    repository.upsert(games);
     const added = repository.all();
     const addedRandomGame = repository.getById(randomGame.getId());
     // Assert
@@ -55,25 +55,25 @@ describe("Game Repository", () => {
   });
 
   it("persists a game and eager load its developers when requested", () => {
-    assertRelationshipLoad(factory.getGameFactory().buildGame(), "developers");
+    assertRelationshipLoad(factory.getGameFactory().build(), "developers");
   });
 
   it("persists a game and eager load its publishers when requested", () => {
-    assertRelationshipLoad(factory.getGameFactory().buildGame(), "publishers");
+    assertRelationshipLoad(factory.getGameFactory().build(), "publishers");
   });
 
   it("persists a game and eager load its genres when requested", () => {
-    assertRelationshipLoad(factory.getGameFactory().buildGame(), "genres");
+    assertRelationshipLoad(factory.getGameFactory().build(), "genres");
   });
 
   it("persists a game and eager load its platforms when requested", () => {
-    assertRelationshipLoad(factory.getGameFactory().buildGame(), "platforms");
+    assertRelationshipLoad(factory.getGameFactory().build(), "platforms");
   });
 
   it("returns game manifest data", () => {
     // Arrange
-    const games = factory.getGameFactory().buildGameList(200);
-    repository.upsertMany(games);
+    const games = factory.getGameFactory().buildList(200);
+    repository.upsert(games);
     // Act
     const manifestData = repository.getManifestData();
     const randomManifestGame = faker.helpers.arrayElement(manifestData);
@@ -84,8 +84,8 @@ describe("Game Repository", () => {
 
   it("returns all games with loaded relationships", () => {
     // Arrange
-    const games = factory.getGameFactory().buildGameList(200);
-    repository.upsertMany(games);
+    const games = factory.getGameFactory().buildList(200);
+    repository.upsert(games);
     // Act
     const allGames = repository.all({ load: true });
     // Assert

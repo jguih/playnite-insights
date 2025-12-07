@@ -18,10 +18,10 @@ describe("Get All Games Query", () => {
   it("returns all games with large list", () => {
     // Arrange
     const listLength = 2000;
-    const games = factory.getGameFactory().buildGameList(listLength);
+    const games = factory.getGameFactory().buildList(listLength);
     const gameIds = games.map((g) => g.getId());
     const oneGame = faker.helpers.arrayElement(games);
-    api.gameLibrary.getGameRepository().upsertMany(games);
+    api.gameLibrary.getGameRepository().upsert(games);
     // Act
     const result = queryHandler.execute();
     // Assert
@@ -70,13 +70,13 @@ describe("Get All Games Query", () => {
 
   it("returns empty array when no relationship", () => {
     // Arrange
-    const game = factory.getGameFactory().buildGame({
+    const game = factory.getGameFactory().build({
       genreIds: null,
       platformIds: null,
       developerIds: null,
       publisherIds: null,
     });
-    api.gameLibrary.getGameRepository().upsertMany([game]);
+    api.gameLibrary.getGameRepository().upsert([game]);
     // Act
     const result = queryHandler.execute();
     // Assert
@@ -92,7 +92,7 @@ describe("Get All Games Query", () => {
 
   it("shows null values as null and not empty string", () => {
     // Arrange
-    const game = factory.getGameFactory().buildGame({
+    const game = factory.getGameFactory().build({
       name: null,
       description: null,
       releaseDate: null,
@@ -104,7 +104,7 @@ describe("Get All Games Query", () => {
       icon: null,
       completionStatusId: null,
     });
-    api.gameLibrary.getGameRepository().upsertMany([game]);
+    api.gameLibrary.getGameRepository().upsert([game]);
     // Act
     const result = queryHandler.execute();
     // Assert
@@ -126,8 +126,8 @@ describe("Get All Games Query", () => {
 
   it("returns 'not_modified' when provided a valid etag", () => {
     // Arrange
-    const games = factory.getGameFactory().buildGameList(200);
-    api.gameLibrary.getGameRepository().upsertMany(games);
+    const games = factory.getGameFactory().buildList(200);
+    api.gameLibrary.getGameRepository().upsert(games);
     // Act
     const result = queryHandler.execute();
     if (result.type !== "ok") throw new Error("Invalid result type");

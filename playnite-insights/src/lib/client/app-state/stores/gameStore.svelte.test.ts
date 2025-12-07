@@ -22,10 +22,10 @@ describe('HomePageViewModel', () => {
 		{ name: 'The Witcher 3', query: 'wItChEr 3' },
 	])('filters by query: $query', async ({ name, query }) => {
 		// Arrange
-		const game: GameResponseDto = factory.getGameFactory().buildGameDto({ name });
+		const game: GameResponseDto = factory.getGameFactory().buildDto({ name });
 		const games: GameResponseDto[] = factory
 			.getGameFactory()
-			.buildGameDtoList(20, { name: 'Other Game' });
+			.buildDtoList(20, { name: 'Other Game' });
 		games.push(game);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
@@ -43,7 +43,7 @@ describe('HomePageViewModel', () => {
 	it('when filtering by query, returns all games if query is null', async () => {
 		// Arrange
 		const gamesCount = 20;
-		const games: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(gamesCount);
+		const games: GameResponseDto[] = factory.getGameFactory().buildDtoList(gamesCount);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
 		const storeGames = gameStore.dataSignal.raw ?? [];
@@ -59,10 +59,10 @@ describe('HomePageViewModel', () => {
 		async ({ isInstalled }) => {
 			// Arrange
 			const gamesCount = 20;
-			const gameUnderTest: GameResponseDto = factory.getGameFactory().buildGameDto({ isInstalled });
+			const gameUnderTest: GameResponseDto = factory.getGameFactory().buildDto({ isInstalled });
 			const games: GameResponseDto[] = factory
 				.getGameFactory()
-				.buildGameDtoList(gamesCount, { isInstalled: !isInstalled });
+				.buildDtoList(gamesCount, { isInstalled: !isInstalled });
 			games.push(gameUnderTest);
 			fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 			await gameStore.loadGames();
@@ -118,17 +118,13 @@ describe('HomePageViewModel', () => {
 			// Arrange
 			const gamesUnderTest: GameResponseDto[] =
 				gameDeveloperIds.length === 1
-					? factory.getGameFactory().buildGameDtoList(5, { developerIds: [gameDeveloperIds[0]] })
+					? factory.getGameFactory().buildDtoList(5, { developerIds: [gameDeveloperIds[0]] })
 					: [
-							...factory
-								.getGameFactory()
-								.buildGameDtoList(2, { developerIds: [gameDeveloperIds[0]] }),
-							...factory
-								.getGameFactory()
-								.buildGameDtoList(2, { developerIds: [gameDeveloperIds[1]] }),
-							factory.getGameFactory().buildGameDto({ developerIds: gameDeveloperIds }),
+							...factory.getGameFactory().buildDtoList(2, { developerIds: [gameDeveloperIds[0]] }),
+							...factory.getGameFactory().buildDtoList(2, { developerIds: [gameDeveloperIds[1]] }),
+							factory.getGameFactory().buildDto({ developerIds: gameDeveloperIds }),
 						];
-			const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+			const otherGames: GameResponseDto[] = factory.getGameFactory().buildDtoList(20, {
 				developerIds: ['dev1', 'dev2', 'dev3', 'dev4'],
 			});
 			const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
@@ -186,17 +182,13 @@ describe('HomePageViewModel', () => {
 			// Arrange
 			const gamesUnderTest: GameResponseDto[] =
 				gamePublisherIds.length === 1
-					? factory.getGameFactory().buildGameDtoList(5, { publisherIds: [gamePublisherIds[0]] })
+					? factory.getGameFactory().buildDtoList(5, { publisherIds: [gamePublisherIds[0]] })
 					: [
-							...factory
-								.getGameFactory()
-								.buildGameDtoList(2, { publisherIds: [gamePublisherIds[0]] }),
-							...factory
-								.getGameFactory()
-								.buildGameDtoList(2, { publisherIds: [gamePublisherIds[1]] }),
-							factory.getGameFactory().buildGameDto({ publisherIds: gamePublisherIds }),
+							...factory.getGameFactory().buildDtoList(2, { publisherIds: [gamePublisherIds[0]] }),
+							...factory.getGameFactory().buildDtoList(2, { publisherIds: [gamePublisherIds[1]] }),
+							factory.getGameFactory().buildDto({ publisherIds: gamePublisherIds }),
 						];
-			const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+			const otherGames: GameResponseDto[] = factory.getGameFactory().buildDtoList(20, {
 				publisherIds: ['pub1', 'pub2', 'pub3'],
 			});
 			const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
@@ -254,17 +246,13 @@ describe('HomePageViewModel', () => {
 			// Arrange
 			const gamesUnderTest: GameResponseDto[] =
 				gamePlatformIds.length === 1
-					? factory.getGameFactory().buildGameDtoList(5, { platformIds: [gamePlatformIds[0]] })
+					? factory.getGameFactory().buildDtoList(5, { platformIds: [gamePlatformIds[0]] })
 					: [
-							...factory
-								.getGameFactory()
-								.buildGameDtoList(2, { platformIds: [gamePlatformIds[0]] }),
-							...factory
-								.getGameFactory()
-								.buildGameDtoList(2, { platformIds: [gamePlatformIds[1]] }),
-							factory.getGameFactory().buildGameDto({ platformIds: gamePlatformIds }),
+							...factory.getGameFactory().buildDtoList(2, { platformIds: [gamePlatformIds[0]] }),
+							...factory.getGameFactory().buildDtoList(2, { platformIds: [gamePlatformIds[1]] }),
+							factory.getGameFactory().buildDto({ platformIds: gamePlatformIds }),
 						];
-			const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+			const otherGames: GameResponseDto[] = factory.getGameFactory().buildDtoList(20, {
 				platformIds: ['plat1', 'plat2', 'plat3'],
 			});
 			const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
@@ -318,13 +306,13 @@ describe('HomePageViewModel', () => {
 		// Arrange
 		const gamesUnderTest: GameResponseDto[] =
 			gameGenreIds.length === 1
-				? factory.getGameFactory().buildGameDtoList(5, { genreIds: [gameGenreIds[0]] })
+				? factory.getGameFactory().buildDtoList(5, { genreIds: [gameGenreIds[0]] })
 				: [
-						...factory.getGameFactory().buildGameDtoList(2, { genreIds: [gameGenreIds[0]] }),
-						...factory.getGameFactory().buildGameDtoList(2, { genreIds: [gameGenreIds[1]] }),
-						factory.getGameFactory().buildGameDto({ genreIds: gameGenreIds }),
+						...factory.getGameFactory().buildDtoList(2, { genreIds: [gameGenreIds[0]] }),
+						...factory.getGameFactory().buildDtoList(2, { genreIds: [gameGenreIds[1]] }),
+						factory.getGameFactory().buildDto({ genreIds: gameGenreIds }),
 					];
-		const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20, {
+		const otherGames: GameResponseDto[] = factory.getGameFactory().buildDtoList(20, {
 			genreIds: ['genre1', 'genre2', 'genre3'],
 		});
 		const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
@@ -346,10 +334,10 @@ describe('HomePageViewModel', () => {
 	it('returns all games if filtering by installed and not installed', async () => {
 		// Arrange
 		const gamesUnderTest: GameResponseDto[] = [
-			...factory.getGameFactory().buildGameDtoList(5, { isInstalled: true }),
-			...factory.getGameFactory().buildGameDtoList(5, { isInstalled: false }),
+			...factory.getGameFactory().buildDtoList(5, { isInstalled: true }),
+			...factory.getGameFactory().buildDtoList(5, { isInstalled: false }),
 		];
-		const otherGames: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(20);
+		const otherGames: GameResponseDto[] = factory.getGameFactory().buildDtoList(20);
 		const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest, ...otherGames]);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);
 		await gameStore.loadGames();
@@ -365,7 +353,7 @@ describe('HomePageViewModel', () => {
 
 	it('paginates game list', async () => {
 		// Arrange
-		const gamesUnderTest: GameResponseDto[] = factory.getGameFactory().buildGameDtoList(30);
+		const gamesUnderTest: GameResponseDto[] = factory.getGameFactory().buildDtoList(30);
 		const games: GameResponseDto[] = testUtils.shuffleArray([...gamesUnderTest]);
 		const gameIds = games.map((g) => g.Id);
 		fetchClient.httpGetAsync.mockResolvedValueOnce(games);

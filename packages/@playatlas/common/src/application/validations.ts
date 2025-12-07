@@ -2,7 +2,7 @@ import z from "zod";
 
 const isEmptyString = (value?: string | null): boolean => {
   if (!value) return false;
-  return value.trim().length === 1;
+  return value.trim().length === 0;
 };
 
 const isNullOrNonEmptyString = (value?: string | null): boolean => {
