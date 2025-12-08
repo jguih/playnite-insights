@@ -1,8 +1,12 @@
 export type ExtensionAuthService = {
   verify: (args: {
-    headers: Headers;
     request: Request;
-    url: URL;
-    now: number;
-  }) => boolean;
+    utcNow: number;
+  }) => Promise<{ reason: string; body?: string; authorized: boolean }>;
+};
+
+export type ExtensionAuthServiceVerifyResult = {
+  reason: string;
+  body?: string;
+  authorized: boolean;
 };

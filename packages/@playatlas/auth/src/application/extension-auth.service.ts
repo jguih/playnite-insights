@@ -2,6 +2,7 @@ import type {
   LogService,
   SignatureService,
 } from "@playatlas/common/application";
+import { computeBase64HashAsync } from "@playatlas/common/infra";
 import type { ExtensionRegistrationRepository } from "../infra";
 import type { ExtensionAuthService } from "./extension-auth.service.port";
 
@@ -35,12 +36,12 @@ export const makeExtensionAuthService = ({
     return contentHash ? `${base}|${contentHash}` : `${base}`;
   };
 
-  const verify: ExtensionAuthService["verify"] = ({
-    headers,
+  const verify: ExtensionAuthService["verify"] = async ({
     request,
-    url,
-    now,
+    utcNow,
   }) => {
+    const url = new URL(request.url);
+    const headers = request.headers;
     const extensionId = headers.get("X-ExtensionId");
     const signatureBase64 = headers.get("X-Signature");
     const timestamp = headers.get("X-Timestamp");
@@ -55,49 +56,72 @@ export const makeExtensionAuthService = ({
       logService.warning(
         `${requestDescription}: Request rejected for ${extensionDescription} due to missing X-ExtensionId header`
       );
-      return false;
+      return { authorized: false, reason: "missing X-ExtensionId header" };
     }
     if (!signatureBase64) {
       logService.warning(
         `${requestDescription}: Request rejected for ${extensionDescription} due to missing X-Signature header`
       );
-      return false;
+      return { authorized: false, reason: "Missing X-Signature header" };
     }
     if (!timestamp || isNaN(Date.parse(timestamp))) {
       logService.warning(
         `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-Timestamp header`
       );
-      return false;
+      return {
+        authorized: false,
+        reason: "Missing or invalid X-Timestamp header",
+      };
     }
-    if (["POST", "PUT"].includes(request.method) && !contentHash) {
-      logService.warning(
-        `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-ContentHash header`
-      );
-      return false;
+    if (["POST", "PUT"].includes(request.method)) {
+      if (!contentHash) {
+        logService.warning(
+          `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-ContentHash header`
+        );
+        return { authorized: false, reason: "Missing content hash" };
+      }
+      const requestBody = await request.text();
+      const computedHash = await computeBase64HashAsync(requestBody);
+      if (contentHash !== computedHash) {
+        logService.warning(
+          `${requestDescription}: Request rejected for ${extensionDescription} because calculated content hash does not match received one`
+        );
+        return {
+          authorized: false,
+          body: requestBody,
+          reason: "Invalid content hash",
+        };
+      }
     }
     if (!registrationId || isNaN(Number(registrationId))) {
       logService.warning(
         `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-RegistrationId header`
       );
-      return false;
+      return {
+        authorized: false,
+        reason: "Missing or invalid X-RegistrationId header",
+      };
     }
 
     const timestampMs = Date.parse(timestamp);
-    if (timestampMs > now || now - timestampMs >= FIVE_MINUTES_MS) {
+    if (timestampMs > utcNow || utcNow - timestampMs >= FIVE_MINUTES_MS) {
       logService.warning(
         `${requestDescription}: Request rejected for ${extensionDescription} due to expired or invalid timestamp`
       );
-      return false;
+      return { authorized: false, reason: "Expired or invalid timestamp" };
     }
 
     const registration = extensionRegistrationRepository.getById(
       Number(registrationId)
     );
-    if (!registration || registration.isTrusted()) {
+    if (!registration || !registration.isTrusted()) {
       logService.warning(
         `${requestDescription}: Request rejected for ${extensionDescription} due to missing, pending or not trusted registration`
       );
-      return false;
+      return {
+        authorized: false,
+        reason: "Missing, pending or not trusted registration",
+      };
     }
 
     const payload = _getCanonicalString({
@@ -117,13 +141,13 @@ export const makeExtensionAuthService = ({
       logService.error(
         `${requestDescription}: Request rejected for ${extensionDescription} due to invalid signature`
       );
-      return false;
+      return { authorized: false, reason: "Invalid signature" };
     }
 
     logService.info(
       `${requestDescription}: Request authorized for ${extensionDescription}`
     );
-    return true;
+    return { authorized: true, reason: "Authorized" };
   };
 
   return { verify };

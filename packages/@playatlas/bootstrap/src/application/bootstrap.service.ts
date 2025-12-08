@@ -13,6 +13,7 @@ export const bootstrap = async ({
   const logServiceFactory = makeLogServiceFactory({
     getCurrentLogLevel: () => config.getSystemConfig().getLogLevel(),
   });
+  const backendLogService = logServiceFactory.build("SvelteBackend");
 
   const infra = bootstrapInfra({
     logServiceFactory,
@@ -25,10 +26,17 @@ export const bootstrap = async ({
   const baseDeps = { getDb: infra.getDb, logServiceFactory };
 
   const gameLibrary = bootstrapGameLibrary({ ...baseDeps });
+
   const auth = bootstrapAuth({
     ...baseDeps,
     signatureService: infra.getSignatureService(),
   });
 
-  return { config, infra, gameLibrary, auth };
+  return {
+    config,
+    infra,
+    gameLibrary,
+    auth,
+    getLogService: () => backendLogService,
+  };
 };

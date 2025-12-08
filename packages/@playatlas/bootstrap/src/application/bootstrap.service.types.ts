@@ -1,3 +1,4 @@
+import { LogService } from "@playatlas/common/application";
 import { type EnvServiceDeps } from "@playatlas/system/infra";
 import { type PlayAtlasApiAuth } from "./bootstrap.auth";
 import { type PlayAtlasApiConfig } from "./bootstrap.config";
@@ -9,6 +10,7 @@ export type PlayAtlasApi = {
   infra: PlayAtlasApiInfra;
   gameLibrary: PlayAtlasApiGameLibrary;
   auth: PlayAtlasApiAuth;
+  getLogService: () => LogService;
 };
 
 export type BootstrapDeps = {
