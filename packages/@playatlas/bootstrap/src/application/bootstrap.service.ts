@@ -25,7 +25,10 @@ export const bootstrap = async ({
   const baseDeps = { getDb: infra.getDb, logServiceFactory };
 
   const gameLibrary = bootstrapGameLibrary({ ...baseDeps });
-  const auth = bootstrapAuth({ ...baseDeps });
+  const auth = bootstrapAuth({
+    ...baseDeps,
+    signatureService: infra.getSignatureService(),
+  });
 
   return { config, infra, gameLibrary, auth };
 };

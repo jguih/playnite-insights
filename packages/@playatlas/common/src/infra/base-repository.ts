@@ -133,8 +133,9 @@ export const makeBaseRepository = <
           const params = insertColumns.map((col) => model[col]);
           const { lastInsertRowid } = stmt.run(...(params as SQLInputValue[]));
           results.push([entity, model, { lastInsertRowid }]);
+          logService.debug(`Added record ${entity.getId()}`);
         } catch (error) {
-          logService.error(`Failed to persist entity`, error);
+          logService.error(`Failed to persist record`, error);
           continue;
         }
       }
@@ -153,6 +154,7 @@ export const makeBaseRepository = <
       const model = (options.toPersistence ?? mapper.toPersistence)(entity);
       const params = updateColumns.map((col) => model[col]);
       stmt.run(...(params as SQLInputValue[]), entity.getId());
+      logService.debug(`Updated record with id ${entity.getId()}`);
       return model;
     }, `update(${entity.getId()})`);
   };
@@ -168,7 +170,7 @@ export const makeBaseRepository = <
       const models = z.array(modelSchema).parse(result);
       const entities: TEntity[] = [];
       for (const model of models) entities.push(mapper.toDomain(model));
-      logService.debug(`Found ${entities.length} entities`);
+      logService.debug(`Found ${entities.length} records`);
       return entities;
     }, `all()`);
   };
@@ -181,7 +183,10 @@ export const makeBaseRepository = <
     const ids = Array.isArray(id) ? id : [id];
     return run(({ db }) => {
       const stmt = db.prepare(removeSql);
-      for (const id of ids) stmt.run(id);
+      for (const id of ids) {
+        stmt.run(id);
+        logService.debug(`Deleted record with id ${id}`);
+      }
     }, `remove(${String(id)})`);
   };
 
@@ -195,8 +200,10 @@ export const makeBaseRepository = <
       const result = stmt.get(id);
       if (!result) return null;
       const extensionRegistration = modelSchema.parse(result);
-      return mapper.toDomain(extensionRegistration);
-    }, `getByRegistrationId(${id})`);
+      const entity = mapper.toDomain(extensionRegistration);
+      logService.debug(`Found record with id ${entity.getId()}`);
+      return entity;
+    }, `getById(${id})`);
   };
 
   const _upsert: BaseRepositoryPort<
@@ -226,7 +233,7 @@ export const makeBaseRepository = <
             results.push([entity, model, { lastInsertRowid }]);
           });
         } catch (error) {
-          logService.error(`Failed to upsert entity`, error);
+          logService.error(`Failed to add or update record`, error);
           continue;
         }
       }

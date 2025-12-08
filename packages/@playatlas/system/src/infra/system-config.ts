@@ -13,6 +13,7 @@ export type SystemConfig = {
   getTmpDir(): string;
   getLibFilesDir(): string;
   getDbPath(): string;
+  getSecurityDir(): string;
 };
 
 export const makeSystemConfig = ({
@@ -21,6 +22,7 @@ export const makeSystemConfig = ({
   const _data_dir = join(envService.getWorkDir(), "/data");
   const _tmp_dir = join(_data_dir, "/tmp");
   const _lib_files_dir = join(_data_dir, "/files");
+  const _security_dir = join(_data_dir, "/security");
   const _migrations_dir =
     envService.getMigrationsDir() ??
     join(envService.getWorkDir(), "/infra/migrations");
@@ -35,6 +37,7 @@ export const makeSystemConfig = ({
     getLibFilesDir: () => _lib_files_dir,
     getTmpDir: () => _tmp_dir,
     getDbPath: () => _db_path,
+    getSecurityDir: () => _security_dir,
   };
   return Object.freeze(systemConfig);
 };

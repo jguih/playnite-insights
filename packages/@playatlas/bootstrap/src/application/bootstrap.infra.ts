@@ -1,7 +1,9 @@
 import {
   LogServiceFactory,
+  SignatureService,
   type FileSystemService,
 } from "@playatlas/common/application";
+import { makeSignatureService } from "@playatlas/system/application";
 import { InvalidServerConfigurationError } from "@playatlas/system/domain";
 import {
   initDatabase,
@@ -14,6 +16,7 @@ import { DatabaseSync } from "node:sqlite";
 
 export type PlayAtlasApiInfra = Readonly<{
   getFsService: () => FileSystemService;
+  getSignatureService: () => SignatureService;
   getDb: () => DatabaseSync;
   setDb: (db: DatabaseSync) => void;
   /**
@@ -39,6 +42,11 @@ export const bootstrapInfra = ({
 }: BootstrapInfraDeps) => {
   const logService = logServiceFactory.build("Infra");
   const _fs_service = makeFileSystemService();
+  const _signature_service = makeSignatureService({
+    fileSystemService: _fs_service,
+    getSecurityDir: systemConfig.getSecurityDir,
+    logService: logServiceFactory.build("SignatureService"),
+  });
 
   if (envService.getUseInMemoryDb())
     logService.warning("Using in memory database");
@@ -47,6 +55,7 @@ export const bootstrapInfra = ({
 
   const infra: PlayAtlasApiInfra = {
     getFsService: () => _fs_service,
+    getSignatureService: () => _signature_service,
     getDb: () => {
       if (!_db)
         throw new InvalidServerConfigurationError(`Database not initialized`);
@@ -74,6 +83,7 @@ export const bootstrapInfra = ({
         systemConfig.getDataDir(),
         systemConfig.getTmpDir(),
         systemConfig.getLibFilesDir(),
+        systemConfig.getSecurityDir(),
       ];
 
       try {

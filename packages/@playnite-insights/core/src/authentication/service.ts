@@ -28,10 +28,8 @@ export const makeAuthService = ({
     timestamp: string;
     contentHash: string | null;
   }): string => {
-    if (contentHash) {
-      return `${method}|${endpoint}|${extensionId}|${timestamp}|${contentHash}`;
-    }
-    return `${method}|${endpoint}|${extensionId}|${timestamp}`;
+    const base = `${method}|${endpoint}|${extensionId}|${timestamp}`;
+    return contentHash ? `${base}|${contentHash}` : `${base}`;
   };
 
   const verifyExtensionAuth: AuthService["verifyExtensionAuth"] = ({

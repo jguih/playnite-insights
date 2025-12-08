@@ -3,4 +3,5 @@ export type * from "./file-system.service.port";
 export * from "./log-service.constants";
 export type * from "./log-service.port";
 export * from "./log-service.rules";
+export type * from "./signature.service.port";
 export * from "./validations";
