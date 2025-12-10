@@ -25,6 +25,8 @@ export type ExtensionRegistration = BaseEntity<ExtensionRegistrationId> &
     getCreatedAt: () => Date;
     getLastUpdatedAt: () => Date;
     isTrusted: () => boolean;
+    isPending: () => boolean;
+    isRejected: () => boolean;
     approve: () => void;
   }>;
 
@@ -103,6 +105,8 @@ const buildExtensionRegistration = (
     getLastUpdatedAt: () => _lastUpdatedAt,
     validate: _validate,
     isTrusted: () => _status === "trusted",
+    isPending: () => _status === "rejected",
+    isRejected: () => _status === "rejected",
     approve: () => {
       if (_status !== "pending")
         throw new InvalidStateError("Cannot approve non-pending registration");

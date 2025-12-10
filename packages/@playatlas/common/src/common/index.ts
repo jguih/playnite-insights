@@ -1,3 +1,4 @@
+export type * from "./command-handler";
 export * from "./date-utils.schemas";
 export type * from "./domain-filter.types";
 export * from "./query-handler";
