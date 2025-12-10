@@ -51,6 +51,7 @@ export const makeExtensionAuthService = ({
     const extensionDescription = `extension (RegistrationId: ${
       registrationId ?? "unknown"
     }, ExtensionId: ${extensionId ?? "unknown"})`;
+    let requestBody: string | undefined = undefined;
 
     if (!extensionId) {
       logService.warning(
@@ -80,7 +81,7 @@ export const makeExtensionAuthService = ({
         );
         return { authorized: false, reason: "Missing content hash" };
       }
-      const requestBody = await request.text();
+      requestBody = await request.text();
       const computedHash = await computeBase64HashAsync(requestBody);
       if (contentHash !== computedHash) {
         logService.warning(
@@ -147,7 +148,7 @@ export const makeExtensionAuthService = ({
     logService.info(
       `${requestDescription}: Request authorized for ${extensionDescription}`
     );
-    return { authorized: true, reason: "Authorized" };
+    return { authorized: true, body: requestBody, reason: "Authorized" };
   };
 
   return { verify };
