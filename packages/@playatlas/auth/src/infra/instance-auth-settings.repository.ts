@@ -19,7 +19,7 @@ export type InstanceAuthSettingsModel = z.infer<
   typeof instanceAuthSettingsSchema
 >;
 
-export const makeInstanceAuthenticationRepository = ({
+export const makeInstanceAuthSettingsRepository = ({
   getDb,
   logService,
 }: BaseRepositoryDeps): InstanceAuthSettingsRepository => {
@@ -48,5 +48,5 @@ export const makeInstanceAuthenticationRepository = ({
     base._upsert(entity);
   };
 
-  return { ...base.public, upsert };
+  return { ...base.public, upsert, get: () => base.public.getById(1) };
 };

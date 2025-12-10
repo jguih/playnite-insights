@@ -11,6 +11,11 @@ const isNullOrNonEmptyString = (value?: string | null): boolean => {
   return value.trim().length > 0;
 };
 
+const isNullOrEmptyString = (value?: string | null): boolean => {
+  if (!value) return true;
+  return value.trim().length === 0;
+};
+
 export const validation = {
   schemas: {
     nonEmptyString: z
@@ -27,14 +32,18 @@ export const validation = {
   message: {
     isNullOrNonEmptyString: (
       propName: string,
-      value: string | null
+      value?: string | null
     ): string => {
       return `Invalid ${propName}: ${value}. It must be null or a non-empty string`;
     },
-    isEmptyString: (propName: string, value: string | null): string => {
-      return `Invalid ${propName}: ${value}. It must not be an empty string`;
+    isEmptyString: (propName: string): string => {
+      return `Invalid ${propName}. It must not be an empty string`;
+    },
+    isNullOrEmptyString: (propName: string): string => {
+      return `Invalid ${propName}. It must not be null, undefined or an empty string`;
     },
   },
   isEmptyString,
   isNullOrNonEmptyString,
+  isNullOrEmptyString,
 };

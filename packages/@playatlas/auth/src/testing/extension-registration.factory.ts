@@ -4,7 +4,7 @@ import {
   ExtensionRegistration,
   makeExtensionRegistration,
 } from "../domain/extension-registration.entity";
-import { MakeExtensionRegistrationProps } from "../domain/extension-registration.entity.props";
+import { MakeExtensionRegistrationProps } from "../domain/extension-registration.entity.types";
 
 export type ExtensionRegistrationFactory = TestEntityFactory<
   MakeExtensionRegistrationProps,

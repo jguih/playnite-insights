@@ -1,5 +1,10 @@
 import { validation } from "@playatlas/common/application";
-import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
+import {
+  BaseEntity,
+  InvalidArgumentError,
+  InvalidStateError,
+} from "@playatlas/common/domain";
+import { buildInstanceAuthSettingsPropsSchema } from "./instance-auth-settings.entity.schemas";
 import {
   BuildInstanceAuthSettingsProps,
   MakeInstanceAuthSettingsProps,
@@ -10,6 +15,7 @@ export type InstanceAuthSettingsId = 1;
 export type InstanceAuthSettings = BaseEntity<InstanceAuthSettingsId> &
   Readonly<{
     getPasswordHash: () => string;
+    setInstanceCredentials: (props: { hash: string; salt: string }) => void;
     getSalt: () => string;
     getCreatedAt: () => Date;
     getLastUpdatedAt: () => Date;
@@ -18,36 +24,68 @@ export type InstanceAuthSettings = BaseEntity<InstanceAuthSettingsId> &
 const buildInstanceAuthSettings = (
   props: BuildInstanceAuthSettingsProps
 ): InstanceAuthSettings => {
+  const result = buildInstanceAuthSettingsPropsSchema.safeParse(props);
+  if (!result.success)
+    throw new InvalidStateError(
+      `Invalid props passed to entity factory: ${result.error.message}`
+    );
+
   const now = new Date();
-  const _password_hash = props.passwordHash;
-  const _salt = props.salt;
+  let _password_hash = props.passwordHash;
+  let _salt = props.salt;
   const _created_at = props.createdAt ?? now;
-  const _last_updated_at = props.lastUpdatedAt ?? now;
+  let _last_updated_at = props.lastUpdatedAt ?? now;
+
+  const _validate = () => {
+    if (validation.isNullOrEmptyString(_password_hash))
+      throw new InvalidStateError(
+        validation.message.isNullOrEmptyString("PasswordHash")
+      );
+    if (validation.isNullOrEmptyString(_salt))
+      throw new InvalidStateError(
+        validation.message.isNullOrEmptyString("Salt")
+      );
+  };
+
+  _validate();
+
+  const _touch = () => {
+    _last_updated_at = new Date();
+  };
 
   const authSettings: InstanceAuthSettings = {
     getId: () => 1,
     getPasswordHash: () => _password_hash,
+    setInstanceCredentials: ({ hash, salt }) => {
+      if (validation.isNullOrEmptyString(hash))
+        throw new InvalidArgumentError(
+          validation.message.isNullOrEmptyString("hash")
+        );
+      if (validation.isNullOrEmptyString(salt))
+        throw new InvalidArgumentError(
+          validation.message.isNullOrEmptyString("salt")
+        );
+      _password_hash = hash;
+      _salt = salt;
+      _touch();
+      _validate();
+    },
     getSalt: () => _salt,
     getCreatedAt: () => _created_at,
     getLastUpdatedAt: () => _last_updated_at,
-    validate: () => {
-      if (validation.isNullOrNonEmptyString(_password_hash))
-        throw new InvalidStateError("Password Hash must not be empty or null");
-      if (validation.isNullOrNonEmptyString(_salt))
-        throw new InvalidStateError("Salt must not be empty or null");
-    },
+    validate: _validate,
   };
   return Object.freeze(authSettings);
 };
 
 export const makeInstanceAuthSettings = (
   props: MakeInstanceAuthSettingsProps
-) => {
+): InstanceAuthSettings => {
   return buildInstanceAuthSettings(props);
 };
 
 export const rehydrateInstanceAuthSettings = (
   props: RehydrateInstanceAuthSettingsProps
-) => {
+): InstanceAuthSettings => {
   return buildInstanceAuthSettings(props);
 };

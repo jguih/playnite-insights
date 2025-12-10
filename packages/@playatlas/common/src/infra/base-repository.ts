@@ -133,7 +133,7 @@ export const makeBaseRepository = <
           const params = insertColumns.map((col) => model[col]);
           const { lastInsertRowid } = stmt.run(...(params as SQLInputValue[]));
           results.push([entity, model, { lastInsertRowid }]);
-          logService.debug(`Added record with id ${entity.getId()}`);
+          logService.debug(`Added record with id ${lastInsertRowid}`);
         } catch (error) {
           logService.error(`Failed to persist record`, error);
           continue;

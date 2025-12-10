@@ -7,4 +7,6 @@ import {
 export type InstanceAuthSettingsRepository = Omit<
   EntityRepository<InstanceAuthSettingsId, InstanceAuthSettings>,
   "add" | "update" | "exists"
->;
+> & {
+  get: () => InstanceAuthSettings | null;
+};

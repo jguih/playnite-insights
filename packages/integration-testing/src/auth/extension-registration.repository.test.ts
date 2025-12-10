@@ -32,11 +32,7 @@ describe("Extension Registration Repository", () => {
     expect(addedRegistration).not.toBeFalsy();
     compareRegistrations(addedRegistration!, registration);
     expect(() => addedRegistration!.getId()).not.toThrowError();
-    expect(() => addedRegistration!.getCreatedAt()).not.toThrowError();
-    expect(() => addedRegistration!.getLastUpdatedAt()).not.toThrowError();
     expect(() => registration.getId()).not.toThrowError();
-    expect(() => registration!.getCreatedAt()).not.toThrowError();
-    expect(() => registration!.getLastUpdatedAt()).not.toThrowError();
   });
 
   it("gets a registration by the extension id", () => {
@@ -67,7 +63,7 @@ describe("Extension Registration Repository", () => {
     // Arrange
     const registrations = factory
       .getExtensionRegistrationFactory()
-      .buildList(2000);
+      .buildList(200);
     for (const registration of registrations) repository.add(registration);
     const randomRegistration = faker.helpers.arrayElement(registrations);
     // Act

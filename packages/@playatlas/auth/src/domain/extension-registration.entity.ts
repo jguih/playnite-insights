@@ -1,12 +1,12 @@
 import { validation } from "@playatlas/common/application";
 import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
 import { extensionRegistrationStatus } from "./extension-registration.constants";
+import { buildExtensionRegistrationPropsSchema } from "./extension-registration.entity.schemas";
 import {
   BuildExtensionRegistrationProps,
   MakeExtensionRegistrationProps,
-  makeExtensionRegistrationPropsSchema,
   RehydrateExtensionRegistrationProps,
-} from "./extension-registration.entity.props";
+} from "./extension-registration.entity.types";
 
 export type ExtensionRegistrationStatus =
   keyof typeof extensionRegistrationStatus;
@@ -32,7 +32,7 @@ export type ExtensionRegistration = BaseEntity<ExtensionRegistrationId> &
 const buildExtensionRegistration = (
   props: BuildExtensionRegistrationProps
 ): ExtensionRegistration => {
-  const result = makeExtensionRegistrationPropsSchema.safeParse(props);
+  const result = buildExtensionRegistrationPropsSchema.safeParse(props);
   if (!result.success)
     throw new InvalidStateError(
       `Invalid props passed to entity factory: ${result.error.message}`
@@ -66,9 +66,7 @@ const buildExtensionRegistration = (
 
     for (const f of NO_EMPTY_STRING_FIELDS)
       if (validation.isEmptyString(f.extract()))
-        throw new InvalidStateError(
-          validation.message.isEmptyString(f.name, f.extract())
-        );
+        throw new InvalidStateError(validation.message.isEmptyString(f.name));
 
     for (const f of NULL_OR_NON_EMPTY_FIELDS)
       if (!validation.isNullOrNonEmptyString(f.extract()))
