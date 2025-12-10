@@ -23,6 +23,7 @@ export const makePlatform = (props: MakePlatformProps): Platform => {
 
   const platform: Platform = {
     getId: () => _id,
+    getSafeId: () => _id,
     getName: () => _name,
     getSpecificationId: () => _specificationId,
     getIcon: () => _icon,

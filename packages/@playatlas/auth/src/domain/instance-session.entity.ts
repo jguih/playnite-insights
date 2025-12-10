@@ -43,6 +43,7 @@ const buildInstanceSession = (
 
   const session: InstanceSession = {
     getId: () => _session_id,
+    getSafeId: () => "<redacted>",
     getCreatedAt: () => _created_at,
     getLastUsedAt: () => _last_used_at,
     validate: _validate,

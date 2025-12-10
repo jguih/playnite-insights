@@ -62,6 +62,7 @@ export const makeGame = (props: MakeGameProps): Game => {
 
   const game: Game = {
     getId: () => _id,
+    getSafeId: () => _id,
     getName: () => _name,
     getDescription: () => _description,
     getReleaseDate: () => _releaseDate,

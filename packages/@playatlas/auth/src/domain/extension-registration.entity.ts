@@ -15,7 +15,6 @@ export type ExtensionRegistrationExtensionId = string;
 
 export type ExtensionRegistration = BaseEntity<ExtensionRegistrationId> &
   Readonly<{
-    getId: () => ExtensionRegistrationId;
     setId: (value: ExtensionRegistrationId) => void;
     getExtensionId: () => ExtensionRegistrationExtensionId;
     getPublicKey: () => string;
@@ -89,6 +88,7 @@ const buildExtensionRegistration = (
         );
       return _id;
     },
+    getSafeId: () => (_id ? String(_id) : "<not_persisted>"),
     setId: (value) => {
       if (_id) throw new InvalidStateError("Id is already set");
       _id = value;

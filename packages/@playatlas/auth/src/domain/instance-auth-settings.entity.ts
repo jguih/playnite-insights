@@ -55,6 +55,7 @@ const buildInstanceAuthSettings = (
 
   const authSettings: InstanceAuthSettings = {
     getId: () => 1,
+    getSafeId: () => "1",
     getPasswordHash: () => _password_hash,
     setInstanceCredentials: ({ hash, salt }) => {
       if (validation.isNullOrEmptyString(hash))

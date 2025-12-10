@@ -15,6 +15,7 @@ export const makeGenre = (props: MakeGenreProps): Genre => {
 
   const genre: Genre = {
     getId: () => _id,
+    getSafeId: () => _id,
     getName: () => _name,
     validate: () => {},
   };

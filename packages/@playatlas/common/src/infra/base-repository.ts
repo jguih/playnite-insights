@@ -26,6 +26,7 @@ export const makeBaseRepository = <
     updateColumns,
     mapper,
     modelSchema,
+    autoIncrementId = false,
   } = config;
 
   const insertSql = `
@@ -154,9 +155,9 @@ export const makeBaseRepository = <
       const model = (options.toPersistence ?? mapper.toPersistence)(entity);
       const params = updateColumns.map((col) => model[col]);
       stmt.run(...(params as SQLInputValue[]), entity.getId());
-      logService.debug(`Updated record with id ${entity.getId()}`);
+      logService.debug(`Updated record with id ${entity.getSafeId()}`);
       return model;
-    }, `update(${entity.getId()})`);
+    }, `update(${entity.getSafeId()})`);
   };
 
   const all: BaseRepositoryPort<
@@ -201,7 +202,7 @@ export const makeBaseRepository = <
       if (!result) return null;
       const extensionRegistration = modelSchema.parse(result);
       const entity = mapper.toDomain(extensionRegistration);
-      logService.debug(`Found record with id ${entity.getId()}`);
+      logService.debug(`Found record with id ${entity.getSafeId()}`);
       return entity;
     }, `getById(${id})`);
   };
@@ -231,9 +232,8 @@ export const makeBaseRepository = <
               ...(params as SQLInputValue[])
             );
             results.push([entity, model, { lastInsertRowid }]);
-            logService.debug(
-              `Updated or added record with id ${lastInsertRowid}`
-            );
+            const id = autoIncrementId ? lastInsertRowid : entity.getSafeId();
+            logService.debug(`Updated or added record with id ${id}`);
           });
         } catch (error) {
           logService.error(`Failed to add or update record`, error);

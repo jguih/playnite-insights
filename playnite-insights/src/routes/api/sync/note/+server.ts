@@ -1,5 +1,5 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
 import { createHashForObject } from '$lib/server/api/hash';
+import { instanceAuthMiddleware } from '$lib/server/api/middleware/auth.middleware';
 import { ensureSyncId } from '$lib/server/api/synchronization';
 import {
 	createGameNoteCommandSchema,
@@ -13,8 +13,8 @@ import {
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = ({ request, url, locals: { services } }) =>
-	withInstanceAuth(request, url, services, async () => {
+export const GET: RequestHandler = ({ request, url, locals: { services, api } }) =>
+	instanceAuthMiddleware({ request, api }, async () => {
 		await ensureSyncId({ request, url, ...services });
 		const lastSync = url.searchParams.get('lastSync')?.trim();
 		const ifNoneMatch = request.headers.get('if-none-match');
@@ -51,8 +51,8 @@ export const GET: RequestHandler = ({ request, url, locals: { services } }) =>
  * 201: Created
  * 409: Conflict (note already exists)
  */
-export const POST: RequestHandler = async ({ request, url, locals: { services } }) =>
-	withInstanceAuth(request, url, services, async () => {
+export const POST: RequestHandler = async ({ request, url, locals: { services, api } }) =>
+	instanceAuthMiddleware({ request, api }, async () => {
 		await ensureSyncId({ request, url, ...services });
 		const jsonBody = await request.json();
 		const command = createGameNoteCommandSchema.parse(jsonBody);
@@ -75,8 +75,8 @@ export const POST: RequestHandler = async ({ request, url, locals: { services } 
  * 200: Updated
  * 404: Not Found
  */
-export const PUT: RequestHandler = async ({ request, url, locals: { services } }) =>
-	withInstanceAuth(request, url, services, async () => {
+export const PUT: RequestHandler = async ({ request, url, locals: { services, api } }) =>
+	instanceAuthMiddleware({ request, api }, async () => {
 		await ensureSyncId({ request, url, ...services });
 		const jsonBody = await request.json();
 		const command = updateGameNoteCommandSchema.parse(jsonBody);

@@ -17,6 +17,7 @@ export const makeCompletionStatus = (
 
   const completionStatus: CompletionStatus = {
     getId: () => _id,
+    getSafeId: () => _id,
     getName: () => _name,
     validate: () => {},
   };

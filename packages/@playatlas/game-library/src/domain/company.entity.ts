@@ -15,6 +15,7 @@ export const makeCompany = (props: MakeCompanyProps): Company => {
 
   const company: Company = {
     getId: () => _id,
+    getSafeId: () => _id,
     getName: () => _name,
     validate: () => {},
   };

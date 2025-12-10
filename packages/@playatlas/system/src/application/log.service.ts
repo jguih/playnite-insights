@@ -59,11 +59,19 @@ export const makeLogService = (
     console.info(`[${getDateTimeString()}] [INFO] [${source}] ${message}`);
   };
 
+  const getRequestDescription: LogService["getRequestDescription"] = (
+    request
+  ) => {
+    const url = new URL(request.url);
+    return `${request.method} ${url.pathname}`;
+  };
+
   return {
     error: logError,
     warning: logWarning,
     info: logInfo,
     success: logSuccess,
     debug: logDebug,
+    getRequestDescription,
   };
 };

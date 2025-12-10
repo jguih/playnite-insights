@@ -54,6 +54,7 @@ export const makeExtensionRegistrationRepository = ({
     config: {
       tableName: TABLE_NAME,
       idColumn: "Id",
+      autoIncrementId: true,
       insertColumns: COLUMNS.slice(1),
       updateColumns: COLUMNS.filter((c) => c !== "Id" && c !== "CreatedAt"),
       mapper: extensionRegistrationMapper,

@@ -10,6 +10,7 @@ export type BaseRepositoryConfig<TEntity, TPersistence> = {
   updateColumns: (keyof TPersistence)[];
   modelSchema: ZodSchema<TPersistence>;
   mapper: EntityMapper<TEntity, TPersistence>;
+  autoIncrementId?: boolean;
 };
 
 export type BaseRepositoryDeps = {

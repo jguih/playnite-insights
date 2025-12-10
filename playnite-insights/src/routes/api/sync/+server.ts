@@ -1,4 +1,4 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
+import { instanceAuthMiddleware } from '$lib/server/api/middleware/auth.middleware';
 import {
 	clientSyncReconciliationCommandSchema,
 	type ApiErrorResponse,
@@ -19,10 +19,9 @@ import { json, type RequestHandler } from '@sveltejs/kit';
  */
 export const POST: RequestHandler = async ({
 	request,
-	url,
-	locals: { services },
+	locals: { services, api },
 }): Promise<Response> =>
-	withInstanceAuth(request, url, services, async () => {
+	instanceAuthMiddleware({ request, api }, async () => {
 		const syncId = services.synchronizationIdRepository.get();
 		if (!syncId) {
 			const response: ApiErrorResponse = {
