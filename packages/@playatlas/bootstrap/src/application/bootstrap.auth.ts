@@ -1,14 +1,18 @@
 import {
   CryptographyService,
   type ExtensionAuthService,
+  InstanceAuthService,
   makeCryptographyService,
   makeExtensionAuthService,
+  makeInstanceAuthService,
 } from "@playatlas/auth/application";
 import {
   type ExtensionRegistrationRepository,
   InstanceAuthSettingsRepository,
+  InstanceSessionRepository,
   makeExtensionRegistrationRepository,
   makeInstanceAuthSettingsRepository,
+  makeInstanceSessionRepository,
 } from "@playatlas/auth/infra";
 import type {
   LogServiceFactory,
@@ -19,8 +23,10 @@ import type { PlayAtlasApiInfra } from "./bootstrap.infra";
 export type PlayAtlasApiAuth = Readonly<{
   getExtensionRegistrationRepository: () => ExtensionRegistrationRepository;
   getInstanceAuthSettingsRepository: () => InstanceAuthSettingsRepository;
+  getInstanceSessionRepository: () => InstanceSessionRepository;
   getExtensionAuthService: () => ExtensionAuthService;
   getCryptographyService: () => CryptographyService;
+  getInstanceAuthService: () => InstanceAuthService;
 }>;
 
 export type BootstrapAuthDeps = {
@@ -42,20 +48,30 @@ export const bootstrapAuth = ({
     getDb,
     logService: logServiceFactory.build("InstanceAuthSettingsRepository"),
   });
+  const _instance_session_repo = makeInstanceSessionRepository({
+    getDb,
+    logService: logServiceFactory.build("InstanceSessionRepository"),
+  });
   const _extension_auth_service = makeExtensionAuthService({
     logService: logServiceFactory.build("ExtensionAuthService"),
     extensionRegistrationRepository: _extension_registration_repo,
     signatureService,
   });
-  const _cryptography_service = makeCryptographyService({
-    logService: logServiceFactory.build("CryptographyService"),
+  const _cryptography_service = makeCryptographyService();
+  const _instance_auth_service = makeInstanceAuthService({
+    cryptographyService: _cryptography_service,
+    instanceAuthSettingsRepository: _instance_auth_settings_repo,
+    instanceSessionRepository: _instance_session_repo,
+    logService: logServiceFactory.build("InstanceAuthService"),
   });
 
   const authApi: PlayAtlasApiAuth = {
     getExtensionRegistrationRepository: () => _extension_registration_repo,
     getInstanceAuthSettingsRepository: () => _instance_auth_settings_repo,
+    getInstanceSessionRepository: () => _instance_session_repo,
     getExtensionAuthService: () => _extension_auth_service,
     getCryptographyService: () => _cryptography_service,
+    getInstanceAuthService: () => _instance_auth_service,
   };
   return Object.freeze(authApi);
 };

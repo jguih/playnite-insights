@@ -4,6 +4,7 @@ export type LogService = {
   info: (message: string) => void;
   success: (message: string) => void;
   debug: (message: string) => void;
+  getRequestDescription: (request: Request) => string;
 };
 
 export type LogServiceFactory = {

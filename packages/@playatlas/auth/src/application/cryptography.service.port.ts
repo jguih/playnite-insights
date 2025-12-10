@@ -5,4 +5,5 @@ export type CryptographyService = {
     args: { salt: string; hash: string }
   ) => boolean;
   createSessionId: () => string;
+  compareSessionIds: (id1: string, id2: string) => boolean;
 };

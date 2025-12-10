@@ -1,20 +1,14 @@
-import { LogService } from "@playatlas/common/application";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { CryptographyService } from "./cryptography.service.port";
 
-export type CryptographyServiceDeps = {
-  logService: LogService;
-};
+export const makeCryptographyService = (): CryptographyService => {
+  const SESSION_ID_LENGTH = 32;
 
-export const makeCryptographyService = ({
-  logService,
-}: CryptographyServiceDeps): CryptographyService => {
   const hashPassword: CryptographyService["hashPassword"] = async (
     password
   ) => {
     const salt = randomBytes(256);
     const derivedKey = scryptSync(password, salt, 64);
-    logService.debug(`Created password`);
     return { salt: salt.toString("hex"), hash: derivedKey.toString("hex") };
   };
 
@@ -23,16 +17,29 @@ export const makeCryptographyService = ({
     { hash, salt }
   ) => {
     const derivedKey = scryptSync(password, Buffer.from(salt, "hex"), 64);
-    const valid = timingSafeEqual(Buffer.from(hash, "hex"), derivedKey);
-    if (!valid) logService.warning(`Invalid password detected`);
-    else logService.debug(`Password verification successful`);
-    return valid;
+    return timingSafeEqual(Buffer.from(hash, "hex"), derivedKey);
   };
 
   const createSessionId: CryptographyService["createSessionId"] = () => {
-    logService.debug(`Created session id`);
-    return randomBytes(32).toString("hex");
+    return randomBytes(SESSION_ID_LENGTH).toString("hex");
   };
 
-  return { hashPassword, verifyPassword, createSessionId };
+  const compareSessionIds: CryptographyService["compareSessionIds"] = (
+    id1,
+    id2
+  ) => {
+    const buf1 = Buffer.from(id1, "hex");
+    const buf2 = Buffer.from(id2, "hex");
+
+    if (
+      buf1.length !== SESSION_ID_LENGTH ||
+      buf2.length !== SESSION_ID_LENGTH
+    ) {
+      return false;
+    }
+
+    return timingSafeEqual(buf1, buf2);
+  };
+
+  return { hashPassword, verifyPassword, createSessionId, compareSessionIds };
 };
