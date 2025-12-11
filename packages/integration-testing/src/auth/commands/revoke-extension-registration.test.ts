@@ -2,17 +2,18 @@ import { faker } from "@faker-js/faker";
 import { RejectExtensionRegistrationCommand } from "@playatlas/auth/commands";
 import { api, factory } from "../../vitest.setup";
 
-describe("Reject Extension Registration Command Handler", () => {
-  it("rejects a pending extension registration", () => {
+describe("Revoke Extension Registration Command Handler", () => {
+  it("revokes a trusted extension registration", () => {
     // Arrange
     const registration = factory.getExtensionRegistrationFactory().build();
+    registration.approve();
     api.auth.getExtensionRegistrationRepository().add(registration);
     const command: RejectExtensionRegistrationCommand = {
       registrationId: registration.getId(),
     };
     // Act
     const result = api.auth.commands
-      .getRejectExtensionRegistrationCommandHandler()
+      .getRevokeExtensionRegistrationCommandHandler()
       .execute(command);
     const updatedRegistration = api.auth
       .getExtensionRegistrationRepository()
@@ -30,24 +31,23 @@ describe("Reject Extension Registration Command Handler", () => {
     };
     // Act
     const result = api.auth.commands
-      .getRejectExtensionRegistrationCommandHandler()
+      .getRevokeExtensionRegistrationCommandHandler()
       .execute(command);
     // Assert
     expect(result.success).toBe(false);
     expect(result.reason_code === "not_found").toBe(true);
   });
 
-  it("returns false when trying to reject an approved registration", () => {
+  it("returns false when trying to revoke a pending registration", () => {
     // Arrange
     const registration = factory.getExtensionRegistrationFactory().build();
-    registration.approve();
     api.auth.getExtensionRegistrationRepository().add(registration);
     const command: RejectExtensionRegistrationCommand = {
       registrationId: registration.getId(),
     };
     // Act
     const result = api.auth.commands
-      .getRejectExtensionRegistrationCommandHandler()
+      .getRevokeExtensionRegistrationCommandHandler()
       .execute(command);
     const updatedRegistration = api.auth
       .getExtensionRegistrationRepository()
@@ -55,10 +55,10 @@ describe("Reject Extension Registration Command Handler", () => {
     // Assert
     expect(result.success).toBe(false);
     expect(updatedRegistration).toBeTruthy();
-    expect(updatedRegistration?.isRejected()).toBe(false);
+    expect(updatedRegistration?.isPending()).toBe(true);
   });
 
-  it("returns false when trying to a reject an already rejected registration", () => {
+  it("returns false when trying to a revoke an already rejected registration", () => {
     // Arrange
     const registration = factory.getExtensionRegistrationFactory().build();
     registration.reject();
@@ -68,7 +68,7 @@ describe("Reject Extension Registration Command Handler", () => {
     };
     // Act
     const result = api.auth.commands
-      .getRejectExtensionRegistrationCommandHandler()
+      .getRevokeExtensionRegistrationCommandHandler()
       .execute(command);
     const updatedRegistration = api.auth
       .getExtensionRegistrationRepository()

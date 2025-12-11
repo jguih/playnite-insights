@@ -33,6 +33,7 @@ export type ExtensionRegistration = BaseEntity<ExtensionRegistrationId> &
     isRejected: () => boolean;
     approve: () => void;
     reject: () => void;
+    revoke: () => void;
   }>;
 
 const buildExtensionRegistration = (
@@ -124,6 +125,14 @@ const buildExtensionRegistration = (
       if (_status !== "pending")
         throw new InvalidOperationError(
           "Cannot reject non-pending registration"
+        );
+      _status = "rejected";
+      _touch();
+    },
+    revoke: () => {
+      if (_status !== "trusted")
+        throw new InvalidOperationError(
+          "Cannot revoke not trusted registration"
         );
       _status = "rejected";
       _touch();
