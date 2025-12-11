@@ -1,5 +1,9 @@
 import { validation } from "@playatlas/common/application";
-import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
+import {
+  BaseEntity,
+  InvalidOperationError,
+  InvalidStateError,
+} from "@playatlas/common/domain";
 import { extensionRegistrationStatus } from "./extension-registration.constants";
 import { buildExtensionRegistrationPropsSchema } from "./extension-registration.entity.schemas";
 import {
@@ -28,6 +32,7 @@ export type ExtensionRegistration = BaseEntity<ExtensionRegistrationId> &
     isPending: () => boolean;
     isRejected: () => boolean;
     approve: () => void;
+    reject: () => void;
   }>;
 
 const buildExtensionRegistration = (
@@ -105,12 +110,22 @@ const buildExtensionRegistration = (
     getLastUpdatedAt: () => _lastUpdatedAt,
     validate: _validate,
     isTrusted: () => _status === "trusted",
-    isPending: () => _status === "rejected",
+    isPending: () => _status === "pending",
     isRejected: () => _status === "rejected",
     approve: () => {
       if (_status !== "pending")
-        throw new InvalidStateError("Cannot approve non-pending registration");
+        throw new InvalidOperationError(
+          "Cannot approve non-pending registration"
+        );
       _status = "trusted";
+      _touch();
+    },
+    reject: () => {
+      if (_status !== "pending")
+        throw new InvalidOperationError(
+          "Cannot reject non-pending registration"
+        );
+      _status = "rejected";
       _touch();
     },
   };

@@ -13,13 +13,15 @@ export type ApproveExtensionRegistrationServiceResult = {
   reason: string;
 };
 
-export const makeApproveExtensionRegistrationService = ({
-  logService,
-  extensionRegistrationRepository,
-}: ApproveExtensionRegistrationServiceDeps): CommandHandler<
+export type ApproveExtensionRegistrationCommandHandler = CommandHandler<
   ApproveExtensionRegistrationCommand,
   ApproveExtensionRegistrationServiceResult
-> => {
+>;
+
+export const makeApproveExtensionRegistrationHandler = ({
+  logService,
+  extensionRegistrationRepository,
+}: ApproveExtensionRegistrationServiceDeps): ApproveExtensionRegistrationCommandHandler => {
   return {
     execute: (command) => {
       const existing = extensionRegistrationRepository.getById(
@@ -33,12 +35,12 @@ export const makeApproveExtensionRegistrationService = ({
       if (existing.isRejected())
         return {
           success: false,
-          reason: "Can't approve a rejected extension registration",
+          reason: "Cannot approve a rejected extension registration",
         };
       if (existing.isTrusted())
         return {
           success: false,
-          reason: "Can't approve an already approved extension registration",
+          reason: "Cannot approve an already approved extension registration",
         };
       if (!existing.isPending())
         return {

@@ -1,15 +1,19 @@
 import {
-  CryptographyService,
+  type CryptographyService,
   type ExtensionAuthService,
-  InstanceAuthService,
+  type InstanceAuthService,
   makeCryptographyService,
   makeExtensionAuthService,
   makeInstanceAuthService,
 } from "@playatlas/auth/application";
 import {
+  type ApproveExtensionRegistrationCommandHandler,
+  makeApproveExtensionRegistrationHandler,
+} from "@playatlas/auth/commands";
+import {
   type ExtensionRegistrationRepository,
-  InstanceAuthSettingsRepository,
-  InstanceSessionRepository,
+  type InstanceAuthSettingsRepository,
+  type InstanceSessionRepository,
   makeExtensionRegistrationRepository,
   makeInstanceAuthSettingsRepository,
   makeInstanceSessionRepository,
@@ -27,6 +31,9 @@ export type PlayAtlasApiAuth = Readonly<{
   getExtensionAuthService: () => ExtensionAuthService;
   getCryptographyService: () => CryptographyService;
   getInstanceAuthService: () => InstanceAuthService;
+  commands: {
+    getApproveExtensionRegistrationCommandHandler: () => ApproveExtensionRegistrationCommandHandler;
+  };
 }>;
 
 export type BootstrapAuthDeps = {
@@ -64,6 +71,13 @@ export const bootstrapAuth = ({
     instanceSessionRepository: _instance_session_repo,
     logService: logServiceFactory.build("InstanceAuthService"),
   });
+  const _approve_extension_registration_command_handler =
+    makeApproveExtensionRegistrationHandler({
+      logService: logServiceFactory.build(
+        "ApproveExtensionRegistrationCommandHandler"
+      ),
+      extensionRegistrationRepository: _extension_registration_repo,
+    });
 
   const authApi: PlayAtlasApiAuth = {
     getExtensionRegistrationRepository: () => _extension_registration_repo,
@@ -72,6 +86,10 @@ export const bootstrapAuth = ({
     getExtensionAuthService: () => _extension_auth_service,
     getCryptographyService: () => _cryptography_service,
     getInstanceAuthService: () => _instance_auth_service,
+    commands: {
+      getApproveExtensionRegistrationCommandHandler: () =>
+        _approve_extension_registration_command_handler,
+    },
   };
   return Object.freeze(authApi);
 };
