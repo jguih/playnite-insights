@@ -1,14 +1,26 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
-import { ApiError } from '@playnite-insights/lib/client';
+import { instanceAuthMiddleware } from '$lib/server/api/middleware/auth.middleware';
+import { apiResponse, type ApiErrorResponse } from '$lib/server/api/responses';
+import { approveExtensionRegistrationRequestDtoSchema } from '@playatlas/auth/commands';
 import { type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ params, request, url, locals: { services } }) =>
-	withInstanceAuth(request, url, services, async () => {
+export const POST: RequestHandler = async ({ params, request, locals: { api } }) =>
+	instanceAuthMiddleware({ request, api }, async () => {
 		const { registrationId } = params;
-		if (!registrationId || isNaN(Number(registrationId))) {
-			const message = 'Missing or invalid registrationId';
-			throw new ApiError({ error: { code: 'bad_request', message } }, message, 400);
-		}
-		services.extensionRegistrationService.approve(Number(registrationId));
-		return new Response(null, { status: 200 });
+		const { success, data, error } = approveExtensionRegistrationRequestDtoSchema.safeParse({
+			registrationId: Number(registrationId),
+		});
+		if (!success)
+			return apiResponse.error({
+				error: { message: 'Validation error', details: error.issues },
+			});
+
+		const result = api.auth.commands
+			.getApproveExtensionRegistrationCommandHandler()
+			.execute({ registrationId: data.registrationId });
+
+		if (result.success) return apiResponse.success();
+
+		const response: ApiErrorResponse = { error: { message: result.reason } };
+		if (result.reason_code === 'not_found') return apiResponse.error(response, { status: 404 });
+		else return apiResponse.error(response);
 	});

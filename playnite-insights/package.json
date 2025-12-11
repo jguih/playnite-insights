@@ -56,8 +56,10 @@
 		"@playnite-insights/infra": "workspace:*",
 		"@playnite-insights/lib": "workspace:*",
 		"echarts": "^5.6.0",
-		"sharp": "^0.34.3",
-		"zod": "^3.25.74"
+		"sharp": "^0.34.3"
+	},
+	"peerDependencies": {
+		"zod": "*"
 	},
 	"engines": {
 		"node": "^24.3.0",

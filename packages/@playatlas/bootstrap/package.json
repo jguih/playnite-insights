@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "vitest": "^3.2.4",
-    "zod": "^3.25.76",
     "@playatlas/common": "workspace:*",
     "@playatlas/system": "workspace:*",
     "@playatlas/game-session": "workspace:*",
     "@playatlas/game-library": "workspace:*",
     "@playatlas/auth": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "*"
   }
 }

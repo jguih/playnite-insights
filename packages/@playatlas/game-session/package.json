@@ -19,7 +19,9 @@
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
     "vitest": "^3.2.4",
-    "@playatlas/common": "workspace:*",
-    "zod": "^3.25.76"
+    "@playatlas/common": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "*"
   }
 }

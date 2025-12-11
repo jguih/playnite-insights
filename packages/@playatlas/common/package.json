@@ -17,7 +17,9 @@
     "@faker-js/faker": "^9.9.0",
     "vitest": "^3.2.4",
     "@types/busboy": "^1.5.4",
-    "busboy": "^1.6.0",
-    "zod": "^3.25.76"
+    "busboy": "^1.6.0"
+  },
+  "peerDependencies": {
+    "zod": "*"
   }
 }
