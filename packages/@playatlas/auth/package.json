@@ -8,7 +8,8 @@
     "./domain": "./src/domain/index.ts",
     "./infra": "./src/infra/index.ts",
     "./testing": "./src/testing/index.ts",
-    "./commands": "./src/commands/index.ts"
+    "./commands": "./src/commands/index.ts",
+    "./queries": "./src/queries/index.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.14"

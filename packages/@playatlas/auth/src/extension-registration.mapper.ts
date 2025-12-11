@@ -3,6 +3,7 @@ import {
   rehydrateExtensionRegistration,
   type ExtensionRegistration,
 } from "./domain/extension-registration.entity";
+import type { ExtensionRegistrationResponseDto } from "./dtos/extension-registration.response";
 import type { ExtensionRegistrationModel } from "./infra/extension-registration.repository";
 
 export type ExtensionRegistrationMapper = Omit<
@@ -15,6 +16,25 @@ export type ExtensionRegistrationMapper = Omit<
       id?: number;
     }
   ) => ExtensionRegistrationModel;
+  toDto: (entity: ExtensionRegistration) => ExtensionRegistrationResponseDto;
+  toDtoList: (
+    entity: ExtensionRegistration[]
+  ) => ExtensionRegistrationResponseDto[];
+};
+
+const _toDto: ExtensionRegistrationMapper["toDto"] = (entity) => {
+  const dto: ExtensionRegistrationResponseDto = {
+    Id: entity.getId(),
+    ExtensionId: entity.getExtensionId(),
+    ExtensionVersion: entity.getExtensionVersion(),
+    Hostname: entity.getHostname(),
+    Os: entity.getOs(),
+    PublicKey: entity.getPublicKey(),
+    Status: entity.getStatus(),
+    CreatedAt: entity.getCreatedAt().toISOString(),
+    LastUpdatedAt: entity.getLastUpdatedAt().toISOString(),
+  };
+  return dto;
 };
 
 export const extensionRegistrationMapper: ExtensionRegistrationMapper = {
@@ -45,5 +65,11 @@ export const extensionRegistrationMapper: ExtensionRegistrationMapper = {
       LastUpdatedAt: entity.getLastUpdatedAt().toISOString(),
     };
     return model;
+  },
+  toDto: _toDto,
+  toDtoList: (entity) => {
+    const dtos: ExtensionRegistrationResponseDto[] = [];
+    for (const registration of entity) dtos.push(_toDto(registration));
+    return dtos;
   },
 };

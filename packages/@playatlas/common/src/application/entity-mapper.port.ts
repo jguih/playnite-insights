@@ -1,4 +1,4 @@
-export type EntityMapper<E, M> = {
-  toPersistence: (entity: E) => M;
-  toDomain: (model: M) => E;
+export type EntityMapper<TEntity, TModel> = {
+  toPersistence: (entity: TEntity) => TModel;
+  toDomain: (model: TModel) => TEntity;
 };

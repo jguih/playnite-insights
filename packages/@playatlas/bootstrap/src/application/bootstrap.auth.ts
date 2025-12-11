@@ -24,6 +24,10 @@ import {
   makeInstanceAuthSettingsRepository,
   makeInstanceSessionRepository,
 } from "@playatlas/auth/infra";
+import {
+  GetAllExtensionRegistrationsQueryHandler,
+  makeGetAllExtensionRegistrationsQueryHandler,
+} from "@playatlas/auth/queries";
 import type {
   LogServiceFactory,
   SignatureService,
@@ -42,6 +46,9 @@ export type PlayAtlasApiAuth = Readonly<{
     getRejectExtensionRegistrationCommandHandler: () => RejectExtensionRegistrationCommandHandler;
     getRevokeExtensionRegistrationCommandHandler: () => RevokeExtensionRegistrationCommandHandler;
     getRemoveExtensionRegistrationCommandHandler: () => RemoveExtensionRegistrationCommandHandler;
+  };
+  queries: {
+    getGetAllExtensionRegistrationsQueryHandler: () => GetAllExtensionRegistrationsQueryHandler;
   };
 }>;
 
@@ -108,6 +115,10 @@ export const bootstrapAuth = ({
       ),
       extensionRegistrationRepository: _extension_registration_repo,
     });
+  const _get_all_extension_registrations_query_handler =
+    makeGetAllExtensionRegistrationsQueryHandler({
+      extensionRegistrationRepository: _extension_registration_repo,
+    });
 
   const authApi: PlayAtlasApiAuth = {
     getExtensionRegistrationRepository: () => _extension_registration_repo,
@@ -125,6 +136,10 @@ export const bootstrapAuth = ({
         _revoke_extension_registration_command_handler,
       getRemoveExtensionRegistrationCommandHandler: () =>
         _remove_extension_registration_command_handler,
+    },
+    queries: {
+      getGetAllExtensionRegistrationsQueryHandler: () =>
+        _get_all_extension_registrations_query_handler,
     },
   };
   return Object.freeze(authApi);
