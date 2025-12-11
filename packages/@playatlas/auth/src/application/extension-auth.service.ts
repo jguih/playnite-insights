@@ -3,6 +3,7 @@ import type {
   SignatureService,
 } from "@playatlas/common/application";
 import { computeBase64HashAsync } from "@playatlas/common/infra";
+import { timingSafeEqual } from "crypto";
 import type { ExtensionRegistrationRepository } from "../infra";
 import type { ExtensionAuthService } from "./extension-auth.service.port";
 
@@ -42,12 +43,13 @@ export const makeExtensionAuthService = ({
   }) => {
     const url = new URL(request.url);
     const headers = request.headers;
+    const contentType = (headers.get("Content-Type") || "").toLowerCase();
     const extensionId = headers.get("X-ExtensionId");
     const signatureBase64 = headers.get("X-Signature");
     const timestamp = headers.get("X-Timestamp");
     const contentHash = headers.get("X-ContentHash");
     const registrationId = headers.get("X-RegistrationId");
-    const requestDescription = `${request.method} ${url.pathname}`;
+    const requestDescription = logService.getRequestDescription(request);
     const extensionDescription = `extension (RegistrationId: ${
       registrationId ?? "unknown"
     }, ExtensionId: ${extensionId ?? "unknown"})`;
@@ -81,17 +83,21 @@ export const makeExtensionAuthService = ({
         );
         return { authorized: false, reason: "Missing content hash" };
       }
-      requestBody = await request.text();
-      const computedHash = await computeBase64HashAsync(requestBody);
-      if (contentHash !== computedHash) {
-        logService.warning(
-          `${requestDescription}: Request rejected for ${extensionDescription} because calculated content hash does not match received one`
-        );
-        return {
-          authorized: false,
-          body: requestBody,
-          reason: "Invalid content hash",
-        };
+      if (contentType.includes("application/json")) {
+        requestBody = await request.text();
+        const computedHash = await computeBase64HashAsync(requestBody);
+        const contentHashBuffer = Buffer.from(contentHash);
+        const computedHashBuffer = Buffer.from(computedHash);
+        if (!timingSafeEqual(contentHashBuffer, computedHashBuffer)) {
+          logService.warning(
+            `${requestDescription}: Request rejected for ${extensionDescription} because calculated content hash does not match received one`
+          );
+          return {
+            authorized: false,
+            body: requestBody,
+            reason: "Invalid content hash",
+          };
+        }
       }
     }
     if (!registrationId || isNaN(Number(registrationId))) {
