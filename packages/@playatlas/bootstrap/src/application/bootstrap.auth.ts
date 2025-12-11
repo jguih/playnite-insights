@@ -10,8 +10,10 @@ import {
   type ApproveExtensionRegistrationCommandHandler,
   makeApproveExtensionRegistrationHandler,
   makeRejectExtensionRegistrationHandler,
+  makeRemoveExtensionRegistrationHandler,
   makeRevokeExtensionRegistrationHandler,
   RejectExtensionRegistrationCommandHandler,
+  RemoveExtensionRegistrationCommandHandler,
   RevokeExtensionRegistrationCommandHandler,
 } from "@playatlas/auth/commands";
 import {
@@ -39,6 +41,7 @@ export type PlayAtlasApiAuth = Readonly<{
     getApproveExtensionRegistrationCommandHandler: () => ApproveExtensionRegistrationCommandHandler;
     getRejectExtensionRegistrationCommandHandler: () => RejectExtensionRegistrationCommandHandler;
     getRevokeExtensionRegistrationCommandHandler: () => RevokeExtensionRegistrationCommandHandler;
+    getRemoveExtensionRegistrationCommandHandler: () => RemoveExtensionRegistrationCommandHandler;
   };
 }>;
 
@@ -98,6 +101,13 @@ export const bootstrapAuth = ({
       ),
       extensionRegistrationRepository: _extension_registration_repo,
     });
+  const _remove_extension_registration_command_handler =
+    makeRemoveExtensionRegistrationHandler({
+      logService: logServiceFactory.build(
+        "RemoveExtensionRegistrationCommandHandler"
+      ),
+      extensionRegistrationRepository: _extension_registration_repo,
+    });
 
   const authApi: PlayAtlasApiAuth = {
     getExtensionRegistrationRepository: () => _extension_registration_repo,
@@ -113,6 +123,8 @@ export const bootstrapAuth = ({
         _reject_extension_registration_command_handler,
       getRevokeExtensionRegistrationCommandHandler: () =>
         _revoke_extension_registration_command_handler,
+      getRemoveExtensionRegistrationCommandHandler: () =>
+        _remove_extension_registration_command_handler,
     },
   };
   return Object.freeze(authApi);
