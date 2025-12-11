@@ -4,7 +4,6 @@ import type {
 } from '@playatlas/auth/application';
 import type { PlayAtlasApi } from '@playatlas/bootstrap/application';
 import { json } from '@sveltejs/kit';
-import { ZodError } from 'zod/v4';
 import { apiResponse } from '../responses';
 
 export type AuthMiddlewareDeps = {
@@ -25,14 +24,6 @@ export const extensionAuthMiddleware = async (
 	try {
 		return await cb(result);
 	} catch (error) {
-		if (error instanceof ZodError) {
-			api
-				.getLogService()
-				.error(
-					`${requestDescription}: Zod validation error while handling request: ${error.message}`,
-				);
-			return apiResponse.error({ error: { message: error.message } }, { status: 400 });
-		}
 		api.getLogService().error(`${requestDescription}: Error thrown while handling request`, error);
 		return apiResponse.error({ error: { message: 'Internal server error' } }, { status: 500 });
 	}
