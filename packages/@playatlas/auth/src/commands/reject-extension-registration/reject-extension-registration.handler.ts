@@ -1,14 +1,14 @@
-import { LogService } from "@playatlas/common/application";
-import { CommandHandler } from "@playatlas/common/common";
-import { ExtensionRegistrationRepository } from "../../infra/extension-registration.repository.port";
-import { ApproveExtensionRegistrationCommand } from "./approve-extension-registration.command";
+import { type LogService } from "@playatlas/common/application";
+import { type CommandHandler } from "@playatlas/common/common";
+import { type ExtensionRegistrationRepository } from "../../infra/extension-registration.repository.port";
+import { type RejectExtensionRegistrationCommand } from "./reject-extension-registration.command";
 
-export type ApproveExtensionRegistrationServiceDeps = {
+export type RejectExtensionRegistrationServiceDeps = {
   extensionRegistrationRepository: ExtensionRegistrationRepository;
   logService: LogService;
 };
 
-export type ApproveExtensionRegistrationServiceResult =
+export type RejectExtensionRegistrationServiceResult =
   | {
       success: false;
       reason: string;
@@ -20,15 +20,15 @@ export type ApproveExtensionRegistrationServiceResult =
       reason_code: "ok";
     };
 
-export type ApproveExtensionRegistrationCommandHandler = CommandHandler<
-  ApproveExtensionRegistrationCommand,
-  ApproveExtensionRegistrationServiceResult
+export type RejectExtensionRegistrationCommandHandler = CommandHandler<
+  RejectExtensionRegistrationCommand,
+  RejectExtensionRegistrationServiceResult
 >;
 
-export const makeApproveExtensionRegistrationHandler = ({
+export const makeRejectExtensionRegistrationHandler = ({
   logService,
   extensionRegistrationRepository,
-}: ApproveExtensionRegistrationServiceDeps): ApproveExtensionRegistrationCommandHandler => {
+}: RejectExtensionRegistrationServiceDeps): RejectExtensionRegistrationCommandHandler => {
   return {
     execute: (command) => {
       const existing = extensionRegistrationRepository.getById(
@@ -44,13 +44,13 @@ export const makeApproveExtensionRegistrationHandler = ({
         return {
           success: false,
           reason_code: "invalid_operation",
-          reason: "Cannot approve a rejected extension registration",
+          reason: "Cannot reject an already rejected extension registration",
         };
       if (existing.isTrusted())
         return {
           success: false,
           reason_code: "invalid_operation",
-          reason: "Cannot approve an already approved extension registration",
+          reason: "Cannot reject an approved extension registration",
         };
       if (!existing.isPending())
         return {
@@ -58,15 +58,15 @@ export const makeApproveExtensionRegistrationHandler = ({
           reason_code: "invalid_operation",
           reason: "Extension registration is not pending",
         };
-      existing.approve();
+      existing.reject();
       extensionRegistrationRepository.update(existing);
       logService.info(
-        `Approved extension registration (Id: ${existing.getId()}, ExtensionId: ${existing.getExtensionId()})`
+        `Rejected extension registration (Id: ${existing.getId()}, ExtensionId: ${existing.getExtensionId()})`
       );
       return {
         success: true,
         reason_code: "ok",
-        reason: "Approved",
+        reason: "Rejected",
       };
     },
   };

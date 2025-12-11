@@ -9,6 +9,8 @@ import {
 import {
   type ApproveExtensionRegistrationCommandHandler,
   makeApproveExtensionRegistrationHandler,
+  makeRejectExtensionRegistrationHandler,
+  RejectExtensionRegistrationCommandHandler,
 } from "@playatlas/auth/commands";
 import {
   type ExtensionRegistrationRepository,
@@ -33,6 +35,7 @@ export type PlayAtlasApiAuth = Readonly<{
   getInstanceAuthService: () => InstanceAuthService;
   commands: {
     getApproveExtensionRegistrationCommandHandler: () => ApproveExtensionRegistrationCommandHandler;
+    getRejectExtensionRegistrationCommandHandler: () => RejectExtensionRegistrationCommandHandler;
   };
 }>;
 
@@ -78,6 +81,13 @@ export const bootstrapAuth = ({
       ),
       extensionRegistrationRepository: _extension_registration_repo,
     });
+  const _reject_extension_registration_command_handler =
+    makeRejectExtensionRegistrationHandler({
+      logService: logServiceFactory.build(
+        "RejectExtensionRegistrationCommandHandler"
+      ),
+      extensionRegistrationRepository: _extension_registration_repo,
+    });
 
   const authApi: PlayAtlasApiAuth = {
     getExtensionRegistrationRepository: () => _extension_registration_repo,
@@ -89,6 +99,8 @@ export const bootstrapAuth = ({
     commands: {
       getApproveExtensionRegistrationCommandHandler: () =>
         _approve_extension_registration_command_handler,
+      getRejectExtensionRegistrationCommandHandler: () =>
+        _reject_extension_registration_command_handler,
     },
   };
   return Object.freeze(authApi);
