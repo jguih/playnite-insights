@@ -1,7 +1,7 @@
 import z from "zod";
 
-export const getAllGamesQuerySchema = z.object({
+export const getAllGamesRequestDtoSchema = z.object({
   ifNoneMatch: z.string().optional().nullable(),
 });
 
-export type GetAllGamesQuery = z.infer<typeof getAllGamesQuerySchema>;
+export type GetAllGamesRequestDto = z.infer<typeof getAllGamesRequestDtoSchema>;

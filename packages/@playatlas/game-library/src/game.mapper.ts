@@ -1,16 +1,14 @@
 import { type EntityMapper } from "@playatlas/common/application";
 import { MakeGameRelationshipProps } from "./domain";
 import { type Game, makeGame } from "./domain/game.entity";
-import { GameResponseDto } from "./dtos/game.response";
+import { GameResponseDto } from "./dtos/game.response.dto";
 import { type GameModel } from "./infra";
 
-export type GameMapper = EntityMapper<Game, GameModel> & {
+export type GameMapper = EntityMapper<Game, GameModel, GameResponseDto> & {
   toDomain: (
     model: GameModel,
     relationships: MakeGameRelationshipProps
   ) => Game;
-  toDto: (game: Game) => GameResponseDto;
-  toDtoList: (games: Game[]) => GameResponseDto[];
 };
 
 const _toDto = (game: Game): GameResponseDto => {

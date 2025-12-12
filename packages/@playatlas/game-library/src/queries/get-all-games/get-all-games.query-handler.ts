@@ -1,15 +1,15 @@
 import { QueryHandler } from "@playatlas/common/common";
 import { createHashForObject } from "@playatlas/common/infra";
 import { gameMapper } from "../../game.mapper";
+import { GetAllGamesQuery } from "./get-all-games.query";
 import {
   GetAllGamesQueryHandlerDeps,
-  GetAllGamesResult,
+  GetAllGamesQueryResult,
 } from "./get-all-games.query.types";
-import { GetAllGamesQuery } from "./get-all-games.request.dto";
 
 export type GetAllGamesQueryHandler = QueryHandler<
   GetAllGamesQuery,
-  GetAllGamesResult
+  GetAllGamesQueryResult
 >;
 
 export const makeGetAllGamesQueryHandler = ({

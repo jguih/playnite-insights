@@ -1,4 +1,4 @@
-import { withInstanceAuth } from '$lib/server/api/authentication';
+import { instanceAuthMiddleware } from '$lib/server/api/middleware/auth.middleware';
 import {
 	EmptyStrategy,
 	FetchClientStrategyError,
@@ -6,8 +6,8 @@ import {
 } from '@playnite-insights/lib/client';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ request, url, locals: { services } }) =>
-	withInstanceAuth(request, url, services, async () => {
+export const POST: RequestHandler = async ({ request, locals: { services, api } }) =>
+	instanceAuthMiddleware({ request, api }, async () => {
 		try {
 			const jsonBody = await request.json();
 			const result = remoteActionSchema.safeParse(jsonBody);

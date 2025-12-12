@@ -1,11 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { api, factory } from "../../vitest.setup";
 
-let queryHandler = api.gameLibrary.queries.getAllGamesHandler();
+let queryHandler = api.gameLibrary.queries.getGetAllGamesQueryHandler();
 
 describe("Get All Games Query", () => {
   beforeEach(() => {
-    queryHandler = api.gameLibrary.queries.getAllGamesHandler();
+    queryHandler = api.gameLibrary.queries.getGetAllGamesQueryHandler();
   });
 
   it("returns empty games array", () => {
