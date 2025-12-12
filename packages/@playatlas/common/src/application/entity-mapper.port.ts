@@ -1,7 +1,7 @@
-export type EntityMapper<TEntity, TModel, TDto = never> = {
+export type EntityMapper<TEntity, TModel, TDto = undefined> = {
   toPersistence: (entity: TEntity) => TModel;
   toDomain: (model: TModel) => TEntity;
-} & (TDto extends never
+} & (TDto extends undefined
   ? {}
   : {
       toDto: (entity: TEntity) => TDto;

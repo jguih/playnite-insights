@@ -1,8 +1,27 @@
 import { type EntityMapper } from "@playatlas/common/application";
 import { makePlatform, Platform } from "./domain/platform.entity";
+import { PlatformResponseDto } from "./dtos";
 import { PlatformModel } from "./infra/platform.repository";
 
-export const platformMapper: EntityMapper<Platform, PlatformModel> = {
+export type PlatformMapper = EntityMapper<
+  Platform,
+  PlatformModel,
+  PlatformResponseDto
+>;
+
+const _toDto: PlatformMapper["toDto"] = (entity) => {
+  const dto: PlatformResponseDto = {
+    Id: entity.getId(),
+    Background: entity.getBackground(),
+    Cover: entity.getCover(),
+    Icon: entity.getIcon(),
+    Name: entity.getName(),
+    SpecificationId: entity.getSpecificationId(),
+  };
+  return dto;
+};
+
+export const platformMapper: PlatformMapper = {
   toPersistence: (entity) => {
     const model: PlatformModel = {
       Id: entity.getId(),
@@ -24,5 +43,11 @@ export const platformMapper: EntityMapper<Platform, PlatformModel> = {
       icon: model.Icon,
     });
     return entity;
+  },
+  toDto: _toDto,
+  toDtoList: (entities) => {
+    const dtos: PlatformResponseDto[] = [];
+    for (const entity of entities) dtos.push(_toDto(entity));
+    return dtos;
   },
 };
