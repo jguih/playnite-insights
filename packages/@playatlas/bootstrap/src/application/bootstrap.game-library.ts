@@ -14,9 +14,11 @@ import {
 import {
   makeGetAllCompaniesQueryHandler,
   makeGetAllGamesQueryHandler,
+  makeGetAllGenresQueryHandler,
   makeGetAllPlatformQueryHandler,
   type GetAllCompaniesQueryHandler,
   type GetAllGamesQueryHandler,
+  type GetAllGenresQueryHandler,
   type GetAllPlatformsQueryHandler,
 } from "@playatlas/game-library/queries";
 import type { PlayAtlasApiInfra } from "./bootstrap.infra";
@@ -31,6 +33,7 @@ export type PlayAtlasApiGameLibrary = Readonly<{
     getGetAllGamesQueryHandler: () => GetAllGamesQueryHandler;
     getGetAllCompaniesQueryHandler: () => GetAllCompaniesQueryHandler;
     getGetAllPlatformsQueryHandler: () => GetAllPlatformsQueryHandler;
+    getGetAllGenresQueryHandler: () => GetAllGenresQueryHandler;
   };
 }>;
 
@@ -72,6 +75,9 @@ export const bootstrapGameLibrary = ({
   const _query_handler_get_all_platforms = makeGetAllPlatformQueryHandler({
     platformRepository: _platform_repository,
   });
+  const _query_handler_get_all_genres = makeGetAllGenresQueryHandler({
+    genreRepository: _genre_repository,
+  });
 
   const gameLibrary: PlayAtlasApiGameLibrary = {
     getCompanyRepository: () => _company_repository,
@@ -83,6 +89,7 @@ export const bootstrapGameLibrary = ({
       getGetAllGamesQueryHandler: () => _query_handler_get_all_games,
       getGetAllCompaniesQueryHandler: () => _query_handler_get_all_companies,
       getGetAllPlatformsQueryHandler: () => _query_handler_get_all_platforms,
+      getGetAllGenresQueryHandler: () => _query_handler_get_all_genres,
     },
   };
   return Object.freeze(gameLibrary);

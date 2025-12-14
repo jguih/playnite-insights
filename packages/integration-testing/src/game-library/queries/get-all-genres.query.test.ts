@@ -1,48 +1,48 @@
 import { faker } from "@faker-js/faker";
 import { api, factory } from "../../vitest.setup";
 
-describe("Get All Companies Query Handler", () => {
-  it("returns companies array", () => {
+describe("Get All Genres Query Handler", () => {
+  it("returns genres array", () => {
     // Arrange
-    const companies = api.gameLibrary.getCompanyRepository().all();
-    const oneCompany = faker.helpers.arrayElement(companies);
+    const genres = api.gameLibrary.getGenreRepository().all();
+    const oneGenre = faker.helpers.arrayElement(genres);
     // Act
     const result = api.gameLibrary.queries
-      .getGetAllCompaniesQueryHandler()
+      .getGetAllGenresQueryHandler()
       .execute();
     if (result.type !== "ok") throw new Error("Result type must be 'ok'");
-    const oneResult = result.data.find((p) => p.Id === oneCompany.getId());
+    const oneResult = result.data.find((p) => p.Id === oneGenre.getId());
     // Assert
-    expect(result.data.length === companies.length).toBeTruthy();
-    expect(oneCompany.getId()).toBe(oneResult?.Id);
-    expect(oneCompany.getName()).toBe(oneResult?.Name);
+    expect(result.data.length === genres.length).toBeTruthy();
+    expect(oneGenre.getId()).toBe(oneResult?.Id);
+    expect(oneGenre.getName()).toBe(oneResult?.Name);
   });
 
   it("return 'not_modified' when provided a matching etag", () => {
     // Arrange
     // Act
     const firstResult = api.gameLibrary.queries
-      .getGetAllCompaniesQueryHandler()
+      .getGetAllGenresQueryHandler()
       .execute();
     if (firstResult.type !== "ok") throw new Error("Invalid result");
     const secondResult = api.gameLibrary.queries
-      .getGetAllCompaniesQueryHandler()
+      .getGetAllGenresQueryHandler()
       .execute({ ifNoneMatch: firstResult.etag });
     // Assert
     expect(secondResult.type === "not_modified").toBeTruthy();
   });
 
-  it("does not return 'not_modified' when company list changes after first call", () => {
+  it("does not return 'not_modified' when genre list changes after first call", () => {
     // Arrange
-    const newCompany = factory.getCompanyFactory().build();
+    const newGenre = factory.getGenreFactory().build();
     // Act
     const firstResult = api.gameLibrary.queries
-      .getGetAllCompaniesQueryHandler()
+      .getGetAllGenresQueryHandler()
       .execute();
     if (firstResult.type !== "ok") throw new Error("Invalid result");
-    api.gameLibrary.getCompanyRepository().add(newCompany);
+    api.gameLibrary.getGenreRepository().add(newGenre);
     const secondResult = api.gameLibrary.queries
-      .getGetAllCompaniesQueryHandler()
+      .getGetAllGenresQueryHandler()
       .execute({ ifNoneMatch: firstResult.etag });
     // Assert
     expect(secondResult.type === "not_modified").toBeFalsy();
