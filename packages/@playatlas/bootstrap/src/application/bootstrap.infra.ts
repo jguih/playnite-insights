@@ -98,6 +98,15 @@ export const bootstrapInfra = ({
           error
         );
       }
+
+      try {
+        _signature_service.generateAsymmetricKeyPair();
+      } catch (error) {
+        throw new InvalidServerConfigurationError(
+          "Failed to generate asymmetric key pair",
+          error
+        );
+      }
     },
   };
   return Object.freeze(infra);

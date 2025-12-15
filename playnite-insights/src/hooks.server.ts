@@ -20,12 +20,6 @@ export const init: ServerInit = async () => {
 
 	await _services.libraryManifestService.write();
 
-	try {
-		await _services.signatureService.generateKeyPairAsync();
-	} catch (error) {
-		_services.logService.error(`Failed to create asymmetric key pair`, error);
-	}
-
 	const now = new Date();
 	try {
 		const syncId = _services.synchronizationIdRepository.get();
