@@ -9,7 +9,6 @@ import {
 } from "@playnite-insights/lib/client";
 import busboy from "busboy";
 import { createHash } from "crypto";
-import type { IncomingHttpHeaders } from "http";
 import { join } from "path";
 import { type ReadableStream } from "stream/web";
 import {
@@ -227,10 +226,7 @@ export const makePlayniteLibraryImporterService = ({
     async (request, url) => {
       return new Promise(async (resolve, reject) => {
         const requestDescription = `${request.method} ${url.pathname}`;
-        const headers: IncomingHttpHeaders = Object.fromEntries(
-          request.headers as unknown as Iterable<string[]>
-        );
-        const bb = busboy({ headers });
+        const bb = busboy({ headers: Object.fromEntries(request.headers) });
         const stream = streamUtilsService.readableFromWeb(
           request.body! as unknown as ReadableStream
         );

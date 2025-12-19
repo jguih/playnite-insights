@@ -46,6 +46,9 @@
       ],
       "@playatlas/bootstrap": [
         "./packages/@playatlas/bootstrap"
+      ],
+      "@playatlas/playnite-integration": [
+        "./packages/@playatlas/playnite-integration"
       ]
     }
   }

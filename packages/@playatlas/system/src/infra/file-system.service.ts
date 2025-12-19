@@ -15,6 +15,7 @@ export const makeFileSystemService = (): FileSystemService => {
     writeFile: fsAsync.writeFile,
     constants: fsAsync.constants,
     rename: fsAsync.rename,
+    createWriteStream: fs.createWriteStream,
     isDir: (path) => {
       return fs.existsSync(path) && fs.statSync(path).isDirectory();
     },

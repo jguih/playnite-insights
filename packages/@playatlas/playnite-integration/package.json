@@ -1,0 +1,25 @@
+{
+  "name": "@playatlas/playnite-integration",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    "./domain": "./src/domain/index.ts",
+    "./infra": "./src/infra/index.ts",
+    "./application": "./src/application/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.14"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "vitest": "^3.2.4",
+    "@playatlas/common": "workspace:*",
+    "@playatlas/system": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "*",
+    "@types/busboy": "*",
+    "busboy": "*"
+  }
+}
