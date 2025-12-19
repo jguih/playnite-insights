@@ -18,7 +18,8 @@
     "@playatlas/system": "workspace:*",
     "@playatlas/game-session": "workspace:*",
     "@playatlas/game-library": "workspace:*",
-    "@playatlas/auth": "workspace:*"
+    "@playatlas/auth": "workspace:*",
+    "@playatlas/playnite-integration": "workspace:*"
   },
   "peerDependencies": {
     "zod": "*"

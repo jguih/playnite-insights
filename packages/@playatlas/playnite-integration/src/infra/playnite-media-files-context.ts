@@ -1,20 +1,25 @@
-import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
-import { PlayniteMediaFileStreamResult } from "../infra/playnite-media-files-handler.types";
-import { MakePlayniteMediaFilesContextProps } from "./playnite-media-files-context.entity.types";
+import { DisposableAsync } from "@playatlas/common/common";
+import { InvalidStateError } from "@playatlas/common/domain";
+import {
+  MakePlayniteMediaFilesContextDeps,
+  MakePlayniteMediaFilesContextProps,
+} from "./playnite-media-files-context.types";
+import { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
 
 export type PlayniteMediaFilesContextId = string;
-export type PlayniteMediaFilesContext =
-  BaseEntity<PlayniteMediaFilesContextId> & {
-    getGameId: () => string;
-    setGameId: (value: string) => void;
-    getContentHash: () => string;
-    setContentHash: (value: string) => void;
-    getStreamResults: () => PlayniteMediaFileStreamResult[];
-    setStreamResults: (value: PlayniteMediaFileStreamResult[]) => void;
-    getTmpDirPath: () => string;
-  };
+export type PlayniteMediaFilesContext = DisposableAsync & {
+  getGameId: () => string;
+  setGameId: (value: string) => void;
+  getContentHash: () => string;
+  setContentHash: (value: string) => void;
+  getStreamResults: () => PlayniteMediaFileStreamResult[];
+  setStreamResults: (value: PlayniteMediaFileStreamResult[]) => void;
+  getTmpDirPath: () => string;
+  validate: () => void;
+};
 
 export const makePlayniteMediaFilesContext = (
+  { fileSystemService }: MakePlayniteMediaFilesContextDeps,
   props: MakePlayniteMediaFilesContextProps
 ): PlayniteMediaFilesContext => {
   let _game_id: string | null = props.gameId ?? null;
@@ -24,14 +29,6 @@ export const makePlayniteMediaFilesContext = (
   const _tmp_dir_path = props.tmpDirPath;
 
   return {
-    getId: () => {
-      if (!_game_id) throw new InvalidStateError("Game id is not set.");
-      return _game_id;
-    },
-    getSafeId: () => {
-      if (!_game_id) throw new InvalidStateError("Game id is not set.");
-      return _game_id;
-    },
     getGameId: () => {
       if (!_game_id) throw new InvalidStateError("Game id is not set.");
       return _game_id;
@@ -57,5 +54,7 @@ export const makePlayniteMediaFilesContext = (
       if (!_stream_results)
         throw new InvalidStateError("Stream results is not set.");
     },
+    dispose: async () =>
+      fileSystemService.rm(_tmp_dir_path, { recursive: true, force: true }),
   };
 };

@@ -1,6 +1,7 @@
 import { bootstrap } from "@playatlas/bootstrap/application";
 import { bootstrapTest } from "@playatlas/bootstrap/testing";
 import { makeGameFactory } from "@playatlas/game-library/testing";
+import { join } from "path";
 
 export const { api, factory, resetDbToMemory } = bootstrapTest({
   api: await bootstrap({
@@ -12,6 +13,8 @@ export const { api, factory, resetDbToMemory } = bootstrapTest({
     },
   }),
 });
+
+export const fixturesDirPath = join(import.meta.dirname, "/fixtures");
 
 beforeEach(async () => {
   await resetDbToMemory();

@@ -20,6 +20,7 @@
   "peerDependencies": {
     "zod": "*",
     "@types/busboy": "*",
-    "busboy": "*"
+    "busboy": "*",
+    "sharp": "*"
   }
 }

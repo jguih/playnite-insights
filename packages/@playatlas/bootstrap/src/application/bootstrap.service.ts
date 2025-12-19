@@ -3,6 +3,7 @@ import { bootstrapAuth } from "./bootstrap.auth";
 import { bootstrapConfig } from "./bootstrap.config";
 import { bootstrapGameLibrary } from "./bootstrap.game-library";
 import { bootstrapInfra } from "./bootstrap.infra";
+import { bootstrapPlayniteIntegration } from "./bootstrap.playnite-integration";
 import { BootstrapDeps, PlayAtlasApi } from "./bootstrap.service.types";
 
 export const bootstrap = async ({
@@ -32,11 +33,18 @@ export const bootstrap = async ({
     signatureService: infra.getSignatureService(),
   });
 
+  const playniteIntegration = bootstrapPlayniteIntegration({
+    ...baseDeps,
+    fileSystemService: infra.getFsService(),
+    systemConfig: config.getSystemConfig(),
+  });
+
   return {
     config,
     infra,
     gameLibrary,
     auth,
+    playniteIntegration,
     getLogService: () => backendLogService,
   };
 };

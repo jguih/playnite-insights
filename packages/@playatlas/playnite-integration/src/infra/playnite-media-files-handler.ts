@@ -2,12 +2,14 @@ import {
   type FileSystemService,
   type LogService,
 } from "@playatlas/common/application";
+import { InvalidFileTypeError } from "@playatlas/common/domain";
 import { SystemConfig } from "@playatlas/system/infra";
 import busboy from "busboy";
 import { join } from "path";
+import sharp from "sharp";
 import { Readable } from "stream";
 import type { ReadableStream } from "stream/web";
-import { makePlayniteMediaFilesContext } from "../domain/playnite-media-files-context.entity";
+import { makePlayniteMediaFilesContext } from "./playnite-media-files-context";
 import { PlayniteMediaFilesHandler } from "./playnite-media-files-handler.port";
 import { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
 
@@ -31,59 +33,108 @@ export const makePlayniteMediaFilesHandler = ({
       const stream = Readable.fromWeb(
         request.body! as ReadableStream<Uint8Array>
       );
-      const context = makePlayniteMediaFilesContext({ tmpDirPath: tmpDir });
+      const context = makePlayniteMediaFilesContext(
+        { fileSystemService },
+        { tmpDirPath: tmpDir }
+      );
+      let handedOff = false;
 
-      await fileSystemService.mkdir(tmpDir, { recursive: true });
+      try {
+        await fileSystemService.mkdir(tmpDir, { recursive: true });
 
-      const streamPromise = new Promise<void>((resolve) => {
-        const mediaFilesPromises: Promise<PlayniteMediaFileStreamResult>[] = [];
-        let uploadCount: number = 0;
+        await new Promise<void>((resolve, reject) => {
+          const mediaFilesPromises: Promise<PlayniteMediaFileStreamResult>[] =
+            [];
+          let uploadCount: number = 0;
 
-        bb.on("field", async (name, val) => {
-          if (name === "gameId") {
-            context.setGameId(val);
-          }
-          if (name === "contentHash") {
-            context.setContentHash(val);
-          }
-        });
-
-        bb.on("file", async (_, fileStream, { filename }) => {
-          const tmpFilePath = join(tmpDir, filename);
-          const filePromise = new Promise<PlayniteMediaFileStreamResult>(
-            (resolve, reject) => {
-              const writeStream =
-                fileSystemService.createWriteStream(tmpFilePath);
-              writeStream.on("finish", () =>
-                resolve({ filename, filepath: tmpFilePath })
-              );
-              writeStream.on("error", reject);
-              fileStream.pipe(writeStream);
-              fileStream.on("end", () => {
-                uploadCount++;
-              });
+          bb.on("field", async (name, val) => {
+            if (name === "gameId") {
+              context.setGameId(val);
             }
-          );
-          mediaFilesPromises.push(filePromise);
+            if (name === "contentHash") {
+              context.setContentHash(val);
+            }
+          });
+
+          bb.on("file", async (_, fileStream, { filename }) => {
+            const tmpFilePath = join(tmpDir, filename);
+            logService.debug(
+              `${requestDescription}: Saving file ${filename} to ${tmpFilePath}`
+            );
+
+            const filePromise = new Promise<PlayniteMediaFileStreamResult>(
+              (resolve, reject) => {
+                const writeStream =
+                  fileSystemService.createWriteStream(tmpFilePath);
+                writeStream.on("finish", () => {
+                  logService.debug(
+                    `${requestDescription}: File ${tmpFilePath} saved successfully`
+                  );
+                  resolve({ filename, filepath: tmpFilePath });
+                });
+                writeStream.on("error", reject);
+
+                fileStream.pipe(writeStream);
+                fileStream.on("error", reject);
+                fileStream.on("end", () => {
+                  uploadCount++;
+                });
+              }
+            );
+            mediaFilesPromises.push(filePromise);
+          });
+
+          bb.on("finish", async () => {
+            try {
+              const results = await Promise.all(mediaFilesPromises);
+
+              for (const { filepath } of results) {
+                try {
+                  await sharp(filepath).metadata();
+                } catch {
+                  throw new InvalidFileTypeError(
+                    `Uploaded file ${filepath} is not a valid image`
+                  );
+                }
+              }
+
+              context.setStreamResults(results);
+              context.validate();
+              logService.info(
+                `${requestDescription}: Downloaded ${uploadCount} files to temporary location ${tmpDir}`
+              );
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          });
+
+          bb.on("error", reject);
+          stream.on("error", reject);
+
+          stream.pipe(bb);
         });
 
-        bb.on("finish", async () => {
-          const results = await Promise.all(mediaFilesPromises);
-          context.setStreamResults(results);
-          context.validate();
-          logService.info(
-            `${requestDescription}: Downloaded ${uploadCount} files to temporary location ${tmpDir}`
-          );
-          resolve();
-        });
-
-        stream.pipe(bb);
-      });
-
-      await streamPromise;
-
-      return context;
+        handedOff = true;
+        return context;
+      } catch (error) {
+        await context.dispose();
+        throw error;
+      } finally {
+        if (!handedOff) await context.dispose();
+      }
     };
 
-  return { streamMultipartToTempFolder };
+  const withMediaFilesContext: PlayniteMediaFilesHandler["withMediaFilesContext"] =
+    async (request, cb) => {
+      const context = await streamMultipartToTempFolder(request);
+
+      try {
+        return await cb(context);
+      } finally {
+        await context.dispose();
+      }
+    };
+
+  return { streamMultipartToTempFolder, withMediaFilesContext };
 };

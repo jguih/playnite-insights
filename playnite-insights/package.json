@@ -55,11 +55,11 @@
 		"@playnite-insights/core": "workspace:*",
 		"@playnite-insights/infra": "workspace:*",
 		"@playnite-insights/lib": "workspace:*",
-		"echarts": "^5.6.0",
-		"sharp": "^0.34.3"
+		"echarts": "^5.6.0"
 	},
 	"peerDependencies": {
-		"zod": "*"
+		"zod": "*",
+		"sharp": "*"
 	},
 	"engines": {
 		"node": "^24.3.0",

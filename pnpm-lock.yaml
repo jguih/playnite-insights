@@ -15,6 +15,9 @@ importers:
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
+      sharp:
+        specifier: ^0.34.3
+        version: 0.34.3
       zod:
         specifier: ^3.25.74
         version: 3.25.76
@@ -59,6 +62,9 @@ importers:
       '@playatlas/game-session':
         specifier: workspace:*
         version: link:../game-session
+      '@playatlas/playnite-integration':
+        specifier: workspace:*
+        version: link:../playnite-integration
       '@playatlas/system':
         specifier: workspace:*
         version: link:../system
@@ -175,6 +181,9 @@ importers:
       busboy:
         specifier: '*'
         version: 1.6.0
+      sharp:
+        specifier: '*'
+        version: 0.34.3
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
@@ -328,12 +337,21 @@ importers:
       '@playatlas/game-session':
         specifier: workspace:*
         version: link:../@playatlas/game-session
+      '@playatlas/playnite-integration':
+        specifier: workspace:*
+        version: link:../@playatlas/playnite-integration
       '@playatlas/system':
         specifier: workspace:*
         version: link:../@playatlas/system
+      sharp:
+        specifier: '*'
+        version: 0.34.3
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.0.14)(@vitest/browser@3.2.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      zod:
+        specifier: '*'
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^24.0.14
@@ -369,7 +387,7 @@ importers:
         specifier: ^5.6.0
         version: 5.6.0
       sharp:
-        specifier: ^0.34.3
+        specifier: '*'
         version: 0.34.3
       zod:
         specifier: '*'

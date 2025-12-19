@@ -18,3 +18,10 @@ export class InvalidOperationError extends Error {
     this.name = "InvalidOperationError";
   }
 }
+
+export class InvalidFileTypeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidFileTypeError";
+  }
+}

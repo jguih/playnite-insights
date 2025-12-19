@@ -39,7 +39,8 @@
   "dependencies": {
     "zod": "^3.25.74",
     "@types/busboy": "^1.5.4",
-    "busboy": "^1.6.0"
+    "busboy": "^1.6.0",
+    "sharp": "^0.34.3"
   },
   "files": [
     "build",
