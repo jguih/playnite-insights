@@ -172,6 +172,9 @@ importers:
       '@playatlas/common':
         specifier: workspace:*
         version: link:../common
+      '@playatlas/game-library':
+        specifier: workspace:*
+        version: link:../game-library
       '@playatlas/system':
         specifier: workspace:*
         version: link:../system

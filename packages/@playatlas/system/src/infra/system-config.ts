@@ -15,6 +15,7 @@ export type SystemConfig = {
   getLibFilesDir(): string;
   getDbPath(): string;
   getSecurityDir(): string;
+  getLibraryManifestFilePath(): string;
 };
 
 export const makeSystemConfig = ({
@@ -26,6 +27,7 @@ export const makeSystemConfig = ({
   const _tmp_dir = join(_data_dir, "/tmp");
   const _lib_files_dir = join(_data_dir, "/files");
   const _security_dir = join(_data_dir, "/security");
+  const _library_manifest_file_path = join(_data_dir, "/manifest.json");
 
   if (envService.getMigrationsDir())
     logService.warning(
@@ -52,6 +54,7 @@ export const makeSystemConfig = ({
     getTmpDir: () => _tmp_dir,
     getDbPath: () => _db_path,
     getSecurityDir: () => _security_dir,
+    getLibraryManifestFilePath: () => _library_manifest_file_path,
   };
   return Object.freeze(systemConfig);
 };

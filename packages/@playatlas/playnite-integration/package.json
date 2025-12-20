@@ -15,7 +15,8 @@
     "@faker-js/faker": "^9.9.0",
     "vitest": "^3.2.4",
     "@playatlas/common": "workspace:*",
-    "@playatlas/system": "workspace:*"
+    "@playatlas/system": "workspace:*",
+    "@playatlas/game-library": "workspace:*"
   },
   "peerDependencies": {
     "zod": "*",
