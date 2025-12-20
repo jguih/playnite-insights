@@ -1,4 +1,5 @@
-import { PlayniteMediaFilesContext } from "./playnite-media-files-context";
+import type { PlayniteMediaFilesContext } from "./playnite-media-files-context";
+import type { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
 
 export type PlayniteMediaFilesHandler = {
   /**
@@ -13,9 +14,17 @@ export type PlayniteMediaFilesHandler = {
    * Scoped helper that guarantees context disposal.
    * Preferred API for most use cases.
    */
-  withMediaFilesContext: (
+  withMediaFilesContext: <T>(
     request: Request,
-    cb: (context: PlayniteMediaFilesContext) => Promise<void>
-  ) => Promise<void>;
+    cb: (context: PlayniteMediaFilesContext) => Promise<T>
+  ) => Promise<T>;
   verifyIntegrity: (context: PlayniteMediaFilesContext) => Promise<boolean>;
+  /**
+   * Process images using sharp.
+   * @param imageFilePaths Array of image paths for process
+   */
+  processImages: (
+    context: PlayniteMediaFilesContext
+  ) => Promise<PlayniteMediaFileStreamResult[]>;
+  moveToGameFolder: (context: PlayniteMediaFilesContext) => Promise<void>;
 };

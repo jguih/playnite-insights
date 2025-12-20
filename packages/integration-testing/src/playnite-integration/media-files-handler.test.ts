@@ -1,21 +1,33 @@
 import { faker } from "@faker-js/faker";
+import {
+  MEDIA_PRESETS,
+  type ValidFileName,
+} from "@playatlas/playnite-integration/infra";
 import { createHash, Hash } from "crypto";
 import { once } from "events";
 import { createReadStream, openAsBlob } from "fs";
-import { join } from "path";
+import { extname, join } from "path";
+import sharp from "sharp";
 import { api, fixturesDirPath } from "../vitest.setup";
 
 const placeholdersDirPath = join(fixturesDirPath, "/images", "/placeholder");
-const images: Array<{ filename: string; filepath: string }> = [
+const images: Array<{
+  name: ValidFileName;
+  filename: string;
+  filepath: string;
+}> = [
   {
+    name: "background",
     filename: "background.png",
     filepath: join(placeholdersDirPath, "background.png"),
   },
   {
+    name: "cover",
     filename: "cover.png",
     filepath: join(placeholdersDirPath, "cover.png"),
   },
   {
+    name: "icon",
     filename: "icon.png",
     filepath: join(placeholdersDirPath, "icon.png"),
   },
@@ -29,9 +41,9 @@ const buildFormData = async (
   const contentHash = props.contentHash ?? faker.string.uuid();
   formData.set("gameId", gameId);
   formData.set("contentHash", contentHash);
-  for (const { filename, filepath } of images) {
+  for (const { name, filename, filepath } of images) {
     const blob = await openAsBlob(filepath);
-    formData.set(filename, blob, filename);
+    formData.set(name, blob, filename);
   }
   return formData;
 };
@@ -123,5 +135,41 @@ describe("Playnite Media Files Handler", () => {
         // Assert
         expect(isValid).toBe(true);
       });
+  });
+
+  it("optimizes uploaded images", async () => {
+    // Arrange
+    const gameId = faker.string.uuid();
+    const contentHash = faker.string.uuid();
+    const formData = await buildFormData({ gameId, contentHash });
+    const canonicalDigestBase64 = await buildCanonicalHashBase64({
+      gameId,
+      contentHash,
+    });
+    const request = buildRequest(formData);
+    request.headers.set("X-ContentHash", canonicalDigestBase64);
+    const handler = api.playniteIntegration.getPlayniteMediaFilesHandler();
+
+    await handler.withMediaFilesContext(request, async (context) => {
+      // Act
+      const isValid = await handler.verifyIntegrity(context);
+      const optimizedResults = await handler.processImages(context);
+      // Assert
+      expect(isValid).toBe(true);
+      for (const { filepath, name } of optimizedResults) {
+        const preset = MEDIA_PRESETS[name];
+        const stats = await api.infra.getFsService().stat(filepath);
+        const ext = extname(filepath);
+        const metadata = await sharp(filepath).metadata();
+
+        expect(stats.isFile()).toBe(true);
+        expect(filepath).toContain(join(context.getTmpDirPath(), "optimized"));
+        expect(ext).toBe(".webp");
+        expect(metadata.format).toBe("webp");
+        expect(metadata.width).toBeLessThanOrEqual(preset.w);
+        expect(metadata.height).toBeLessThanOrEqual(preset.h);
+      }
+      expect(optimizedResults).toHaveLength(context.getStreamResults().length);
+    });
   });
 });

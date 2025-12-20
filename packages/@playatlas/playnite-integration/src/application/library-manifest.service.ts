@@ -1,5 +1,5 @@
 import { join } from "path";
-import { CONTENT_HASH_FILE_NAME } from "../constants";
+import { CONTENT_HASH_FILE_NAME } from "../infra/playnite-media-files-handler.constants";
 import { LibraryManifest } from "./library-manifest";
 import { libraryManifestSchema } from "./library-manifest.schema";
 import type { LibraryManifestService } from "./library-manifest.service.port";

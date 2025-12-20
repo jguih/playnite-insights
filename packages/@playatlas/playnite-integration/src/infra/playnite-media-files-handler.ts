@@ -7,11 +7,15 @@ import { SystemConfig } from "@playatlas/system/infra";
 import busboy from "busboy";
 import { createHash, Hash, timingSafeEqual } from "crypto";
 import { once } from "events";
-import { join } from "path";
+import { basename, extname, join } from "path";
 import sharp from "sharp";
 import { Readable } from "stream";
 import type { ReadableStream } from "stream/web";
 import { makePlayniteMediaFilesContext } from "./playnite-media-files-context";
+import {
+  isValidFileName,
+  MEDIA_PRESETS,
+} from "./playnite-media-files-handler.constants";
 import { PlayniteMediaFilesHandler } from "./playnite-media-files-handler.port";
 import { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
 
@@ -50,7 +54,6 @@ export const makePlayniteMediaFilesHandler = ({
 
   const streamMultipartToTempFolder: PlayniteMediaFilesHandler["streamMultipartToTempFolder"] =
     async (request) => {
-      const requestDescription = logService.getRequestDescription(request);
       const requestId = crypto.randomUUID();
       const tmpDir = join(getTmpDir(), requestId);
       const bb = busboy({ headers: Object.fromEntries(request.headers) });
@@ -81,21 +84,24 @@ export const makePlayniteMediaFilesHandler = ({
             }
           });
 
-          bb.on("file", async (_, fileStream, { filename }) => {
-            const tmpFilePath = join(tmpDir, filename);
-            logService.debug(
-              `${requestDescription}: Saving file ${filename} to ${tmpFilePath}`
-            );
+          bb.on("file", async (name, fileStream, { filename }) => {
+            if (!isValidFileName(name)) {
+              logService.warning(
+                `Rejecting file ${filename} due to incorrect field name ${name}`
+              );
+              fileStream.resume();
+              return;
+            }
+            const filepath = join(tmpDir, filename);
+            logService.debug(`Saving file ${filename} to ${filepath}`);
 
             const filePromise = new Promise<PlayniteMediaFileStreamResult>(
               (resolve, reject) => {
                 const writeStream =
-                  fileSystemService.createWriteStream(tmpFilePath);
+                  fileSystemService.createWriteStream(filepath);
                 writeStream.on("finish", () => {
-                  logService.debug(
-                    `${requestDescription}: File ${tmpFilePath} saved successfully`
-                  );
-                  resolve({ filename, filepath: tmpFilePath });
+                  logService.debug(`File ${filepath} saved successfully`);
+                  resolve({ name, filename, filepath });
                 });
                 writeStream.on("error", reject);
 
@@ -118,7 +124,7 @@ export const makePlayniteMediaFilesHandler = ({
               context.setStreamResults(results);
               context.validate();
               logService.info(
-                `${requestDescription}: Downloaded ${uploadCount} files to temporary location ${tmpDir}`
+                `Downloaded ${uploadCount} files to temporary location ${tmpDir}`
               );
               resolve();
             } catch (error) {
@@ -189,9 +195,54 @@ export const makePlayniteMediaFilesHandler = ({
     return timingSafeEqual(canonicalDigest, headerDigest);
   };
 
+  const processImages: PlayniteMediaFilesHandler["processImages"] = async (
+    context
+  ) => {
+    const optimizedDir = join(context.getTmpDirPath(), "optimized");
+    await fileSystemService.mkdir(optimizedDir, { recursive: true });
+
+    const results = await Promise.all(
+      context.getStreamResults().map(async ({ name, filepath, filename }) => {
+        const preset = MEDIA_PRESETS[name];
+        const outputFilename = basename(filename, extname(filename)) + ".webp";
+        const outputPath = join(optimizedDir, outputFilename);
+
+        return sharp(filepath, { failOn: "none" })
+          .rotate()
+          .resize({
+            width: preset.w,
+            height: preset.h,
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .webp({
+            quality: preset.q,
+            effort: 4,
+            smartSubsample: true,
+          })
+          .toFile(outputPath)
+          .then(() => {
+            logService.debug(`Optimized image ${outputPath}`);
+            return {
+              name,
+              filename: outputFilename,
+              filepath: outputPath,
+            } as PlayniteMediaFileStreamResult;
+          });
+      })
+    );
+
+    return results;
+  };
+
+  const moveToGameFolder: PlayniteMediaFilesHandler["moveToGameFolder"] =
+    async (context) => {};
+
   return {
     streamMultipartToTempFolder,
     withMediaFilesContext,
     verifyIntegrity,
+    processImages,
+    moveToGameFolder,
   };
 };
