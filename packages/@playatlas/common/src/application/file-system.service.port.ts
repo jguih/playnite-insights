@@ -14,5 +14,6 @@ export type FileSystemService = {
   mkdirSync: typeof fs.mkdirSync;
   rename: typeof fsAsync.rename;
   createWriteStream: typeof fs.createWriteStream;
+  createReadStream: typeof fs.createReadStream;
   isDir: (path: string) => boolean;
 };

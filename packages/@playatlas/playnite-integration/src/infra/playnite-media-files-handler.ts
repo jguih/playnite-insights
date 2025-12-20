@@ -5,6 +5,8 @@ import {
 import { InvalidFileTypeError } from "@playatlas/common/domain";
 import { SystemConfig } from "@playatlas/system/infra";
 import busboy from "busboy";
+import { createHash, Hash, timingSafeEqual } from "crypto";
+import { once } from "events";
 import { join } from "path";
 import sharp from "sharp";
 import { Readable } from "stream";
@@ -24,6 +26,28 @@ export const makePlayniteMediaFilesHandler = ({
   fileSystemService,
   getTmpDir,
 }: PlayniteMediaFilesHandlerDeps): PlayniteMediaFilesHandler => {
+  const _validateImages = async (filepaths: string[]) => {
+    for (const filepath of filepaths) {
+      try {
+        await sharp(filepath).metadata();
+      } catch {
+        throw new InvalidFileTypeError(
+          `Uploaded file ${filepath} is not a valid image`
+        );
+      }
+    }
+  };
+
+  const _streamFileIntoHash = async (hash: Hash, filepath: string) => {
+    const stream = fileSystemService.createReadStream(filepath);
+
+    stream.on("data", (chunk) => {
+      hash.update(chunk);
+    });
+
+    await once(stream, "end");
+  };
+
   const streamMultipartToTempFolder: PlayniteMediaFilesHandler["streamMultipartToTempFolder"] =
     async (request) => {
       const requestDescription = logService.getRequestDescription(request);
@@ -33,11 +57,12 @@ export const makePlayniteMediaFilesHandler = ({
       const stream = Readable.fromWeb(
         request.body! as ReadableStream<Uint8Array>
       );
+      const contentHashHeader = request.headers.get("X-ContentHash");
       const context = makePlayniteMediaFilesContext(
         { fileSystemService },
-        { tmpDirPath: tmpDir }
+        { tmpDirPath: tmpDir, contentHashHeader }
       );
-      let handedOff = false;
+      let handedContext = false;
 
       try {
         await fileSystemService.mkdir(tmpDir, { recursive: true });
@@ -88,15 +113,7 @@ export const makePlayniteMediaFilesHandler = ({
             try {
               const results = await Promise.all(mediaFilesPromises);
 
-              for (const { filepath } of results) {
-                try {
-                  await sharp(filepath).metadata();
-                } catch {
-                  throw new InvalidFileTypeError(
-                    `Uploaded file ${filepath} is not a valid image`
-                  );
-                }
-              }
+              await _validateImages(results.map((r) => r.filepath));
 
               context.setStreamResults(results);
               context.validate();
@@ -115,13 +132,13 @@ export const makePlayniteMediaFilesHandler = ({
           stream.pipe(bb);
         });
 
-        handedOff = true;
+        handedContext = true;
         return context;
       } catch (error) {
         await context.dispose();
         throw error;
       } finally {
-        if (!handedOff) await context.dispose();
+        if (!handedContext) await context.dispose();
       }
     };
 
@@ -136,5 +153,45 @@ export const makePlayniteMediaFilesHandler = ({
       }
     };
 
-  return { streamMultipartToTempFolder, withMediaFilesContext };
+  const verifyIntegrity: PlayniteMediaFilesHandler["verifyIntegrity"] = async (
+    context
+  ) => {
+    context.validate();
+    const SEP = Buffer.from([0]);
+    const canonicalHash = createHash("sha256");
+
+    canonicalHash.update(Buffer.from(context.getGameId(), "utf-8"));
+    canonicalHash.update(SEP);
+    canonicalHash.update(Buffer.from(context.getContentHash(), "utf-8"));
+    canonicalHash.update(SEP);
+
+    const files = [...context.getStreamResults()].sort((a, b) =>
+      a.filename.localeCompare(b.filename, undefined, {
+        sensitivity: "variant",
+      })
+    );
+
+    for (const { filename, filepath } of files) {
+      canonicalHash.update(Buffer.from(filename, "utf-8"));
+      canonicalHash.update(SEP);
+
+      await _streamFileIntoHash(canonicalHash, filepath);
+      canonicalHash.update(SEP);
+    }
+
+    const canonicalDigest = canonicalHash.digest();
+    const headerDigest = Buffer.from(context.getContentHashHeader(), "base64");
+
+    if (canonicalDigest.length !== headerDigest.length) {
+      return false;
+    }
+
+    return timingSafeEqual(canonicalDigest, headerDigest);
+  };
+
+  return {
+    streamMultipartToTempFolder,
+    withMediaFilesContext,
+    verifyIntegrity,
+  };
 };

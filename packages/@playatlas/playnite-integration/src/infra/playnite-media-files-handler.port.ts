@@ -17,4 +17,5 @@ export type PlayniteMediaFilesHandler = {
     request: Request,
     cb: (context: PlayniteMediaFilesContext) => Promise<void>
   ) => Promise<void>;
+  verifyIntegrity: (context: PlayniteMediaFilesContext) => Promise<boolean>;
 };

@@ -7,6 +7,7 @@ export type MakePlayniteMediaFilesContextDeps = {
 
 export type MakePlayniteMediaFilesContextProps = {
   tmpDirPath: string;
+  contentHashHeader: string | null;
   gameId?: string;
   contentHash?: string;
   streamResults?: PlayniteMediaFileStreamResult[];

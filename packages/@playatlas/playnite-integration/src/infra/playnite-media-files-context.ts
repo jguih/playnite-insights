@@ -1,3 +1,4 @@
+import { validation } from "@playatlas/common/application";
 import { DisposableAsync } from "@playatlas/common/common";
 import { InvalidStateError } from "@playatlas/common/domain";
 import {
@@ -12,6 +13,7 @@ export type PlayniteMediaFilesContext = DisposableAsync & {
   setGameId: (value: string) => void;
   getContentHash: () => string;
   setContentHash: (value: string) => void;
+  getContentHashHeader: () => string;
   getStreamResults: () => PlayniteMediaFileStreamResult[];
   setStreamResults: (value: PlayniteMediaFileStreamResult[]) => void;
   getTmpDirPath: () => string;
@@ -27,6 +29,7 @@ export const makePlayniteMediaFilesContext = (
   let _stream_results: PlayniteMediaFileStreamResult[] | null =
     props.streamResults ?? null;
   const _tmp_dir_path = props.tmpDirPath;
+  const _content_hash_header = props.contentHashHeader;
 
   return {
     getGameId: () => {
@@ -40,6 +43,15 @@ export const makePlayniteMediaFilesContext = (
       return _content_hash;
     },
     setContentHash: (value) => (_content_hash = value),
+    getContentHashHeader: () => {
+      if (!_content_hash_header)
+        throw new InvalidStateError("Content hash header is not set.");
+      if (validation.isNullOrEmptyString(_content_hash_header))
+        throw new InvalidStateError(
+          "Content hash header cannot be null or an empty string"
+        );
+      return _content_hash_header;
+    },
     getStreamResults: () => {
       if (!_stream_results)
         throw new InvalidStateError("Stream results is not set.");
