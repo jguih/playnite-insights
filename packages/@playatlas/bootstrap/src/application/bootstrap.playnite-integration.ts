@@ -36,6 +36,7 @@ export const bootstrapPlayniteIntegration = ({
 }: BootstrapPlayniteIntegrationDeps): PlayAtlasApiPlayniteIntegration => {
   const _playnite_media_files_handler = makePlayniteMediaFilesHandler({
     logService: logServiceFactory.build("PlayniteMediaFilesHandler"),
+    logServiceFactory,
     fileSystemService,
     systemConfig,
   });

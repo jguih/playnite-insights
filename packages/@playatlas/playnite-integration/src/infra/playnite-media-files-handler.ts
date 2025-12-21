@@ -1,6 +1,7 @@
 import {
   type FileSystemService,
   type LogService,
+  type LogServiceFactory,
 } from "@playatlas/common/application";
 import {
   InvalidFileTypeError,
@@ -19,17 +20,19 @@ import {
   isValidFileName,
   MEDIA_PRESETS,
 } from "./playnite-media-files-handler.constants";
-import { PlayniteMediaFilesHandler } from "./playnite-media-files-handler.port";
-import { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
+import type { PlayniteMediaFilesHandler } from "./playnite-media-files-handler.port";
+import type { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
 
 export type PlayniteMediaFilesHandlerDeps = {
   fileSystemService: FileSystemService;
   logService: LogService;
+  logServiceFactory: LogServiceFactory;
   systemConfig: SystemConfig;
 };
 
 export const makePlayniteMediaFilesHandler = ({
   logService,
+  logServiceFactory,
   fileSystemService,
   systemConfig,
 }: PlayniteMediaFilesHandlerDeps): PlayniteMediaFilesHandler => {
@@ -57,21 +60,23 @@ export const makePlayniteMediaFilesHandler = ({
 
   const streamMultipartToTempFolder: PlayniteMediaFilesHandler["streamMultipartToTempFolder"] =
     async (request) => {
-      const requestId = crypto.randomUUID();
-      const tmpDir = join(systemConfig.getTmpDir(), requestId);
       const bb = busboy({ headers: Object.fromEntries(request.headers) });
       const stream = Readable.fromWeb(
         request.body! as ReadableStream<Uint8Array>
       );
       const contentHashHeader = request.headers.get("X-ContentHash");
       const context = makePlayniteMediaFilesContext(
-        { fileSystemService },
-        { tmpDirPath: tmpDir, contentHashHeader }
+        {
+          fileSystemService,
+          logService: logServiceFactory.build("PlayniteMediaFilesContext"),
+          systemConfig,
+        },
+        { contentHashHeader }
       );
       let handedContext = false;
 
       try {
-        await fileSystemService.mkdir(tmpDir, { recursive: true });
+        await context.init();
 
         await new Promise<void>((resolve, reject) => {
           const mediaFilesPromises: Promise<PlayniteMediaFileStreamResult>[] =
@@ -95,7 +100,7 @@ export const makePlayniteMediaFilesHandler = ({
               fileStream.resume();
               return;
             }
-            const filepath = join(tmpDir, filename);
+            const filepath = join(context.getTmpDirPath(), filename);
             logService.debug(`Saving file ${filename} to ${filepath}`);
 
             const filePromise = new Promise<PlayniteMediaFileStreamResult>(
@@ -127,7 +132,7 @@ export const makePlayniteMediaFilesHandler = ({
               context.setStreamResults(results);
               context.validate();
               logService.info(
-                `Downloaded ${uploadCount} files to temporary location ${tmpDir}`
+                `Downloaded ${uploadCount} files to temporary location ${context.getTmpDirPath()}`
               );
               resolve();
             } catch (error) {
