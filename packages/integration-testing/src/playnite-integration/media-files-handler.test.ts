@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import {
+  CONTENT_HASH_FILE_NAME,
   MEDIA_PRESETS,
   type ValidMediaFileFieldName,
 } from "@playatlas/playnite-integration/infra";
@@ -96,6 +97,25 @@ const buildCanonicalHashBase64 = async (props: {
 };
 
 describe("Playnite Media Files Handler", () => {
+  beforeEach(async () => {
+    const dir = api.config.getSystemConfig().getLibFilesDir();
+    const entries = await api.infra
+      .getFsService()
+      .readdir(dir, { withFileTypes: true });
+
+    await Promise.all(
+      entries.map((entry) => {
+        api
+          .getLogService()
+          .warning(`Deleting ${join(entry.parentPath, entry.name)}`);
+        return api.infra.getFsService().rm(join(dir, entry.name), {
+          recursive: true,
+          force: true,
+        });
+      })
+    );
+  });
+
   it("streams files to temporary dir", async () => {
     // Arrange
     const formData = await buildFormData();
@@ -214,7 +234,45 @@ describe("Playnite Media Files Handler", () => {
     });
   });
 
-  it("updates game image references", async () => {
+  it("writes content hash file", async () => {
+    // Arrange
+    const gameId = faker.string.uuid();
+    const contentHash = faker.string.uuid();
+    const formData = await buildFormData({ gameId, contentHash });
+    const canonicalDigestBase64 = await buildCanonicalHashBase64({
+      gameId,
+      contentHash,
+    });
+    const request = buildRequest(formData);
+    request.headers.set("X-ContentHash", canonicalDigestBase64);
+    const handler = api.playniteIntegration.getPlayniteMediaFilesHandler();
+    let matchedOnce = false;
+
+    await handler.withMediaFilesContext(request, async (context) => {
+      // Act
+      const isValid = await handler.verifyIntegrity(context);
+      await handler.writeContentHashFileToGameFolder(context);
+      const stats = await api.infra
+        .getFsService()
+        .stat(context.getGameDirPath());
+      const fileEntries = await api.infra
+        .getFsService()
+        .readdir(context.getGameDirPath(), { withFileTypes: true });
+      // Assert
+      expect(isValid).toBe(true);
+      expect(stats.isDirectory()).toBe(true);
+      for (const entry of fileEntries) {
+        expect(entry.isFile()).toBe(true);
+        if (entry.name.match(/contentHash/i)) {
+          expect(entry.name).toBe(CONTENT_HASH_FILE_NAME);
+          matchedOnce = true;
+        }
+      }
+      expect(matchedOnce).toBe(true);
+    });
+  });
+
+  it("synchronizes game images from request", async () => {
     // Arrange
     const game = factory
       .getGameFactory()
@@ -231,6 +289,7 @@ describe("Playnite Media Files Handler", () => {
       gameId,
       contentHash,
     });
+    let wroteContentHash = false;
     const request = buildRequest(formData);
     request.headers.set("X-ContentHash", canonicalDigestBase64);
     const service = api.playniteIntegration.getPlayniteSyncService();
@@ -248,6 +307,10 @@ describe("Playnite Media Files Handler", () => {
       .getFsService()
       .readdir(gameFolder, { withFileTypes: true });
     for (const entry of fileEntries) {
+      if (entry.name.match(/contentHash/i)) {
+        wroteContentHash = true;
+        continue;
+      }
       expect(entry.isFile()).toBe(true);
       const filepath = join(entry.parentPath, entry.name);
       const ext = extname(entry.name);
@@ -258,5 +321,6 @@ describe("Playnite Media Files Handler", () => {
     expect(updatedGame!.getBackgroundImage()).not.toBe(null);
     expect(updatedGame!.getIcon()).not.toBe(null);
     expect(updatedGame!.getCoverImage()).not.toBe(null);
+    expect(wroteContentHash).toBe(true);
   });
 });

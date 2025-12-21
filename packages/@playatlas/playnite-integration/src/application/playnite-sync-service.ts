@@ -32,6 +32,7 @@ export const makePlayniteSyncService = ({
 
           const optimized = await handler.processImages(context);
           await handler.moveProcessedImagesToGameFolder(context);
+          await handler.writeContentHashFileToGameFolder(context);
 
           for (const entry of optimized)
             game.setImageReference({

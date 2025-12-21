@@ -29,4 +29,7 @@ export type PlayniteMediaFilesHandler = {
   moveProcessedImagesToGameFolder: (
     context: PlayniteMediaFilesContext
   ) => Promise<void>;
+  writeContentHashFileToGameFolder: (
+    context: PlayniteMediaFilesContext
+  ) => Promise<void>;
 };

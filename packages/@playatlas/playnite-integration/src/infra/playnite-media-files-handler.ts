@@ -3,10 +3,7 @@ import {
   type LogService,
   type LogServiceFactory,
 } from "@playatlas/common/application";
-import {
-  InvalidFileTypeError,
-  InvalidOperationError,
-} from "@playatlas/common/domain";
+import { InvalidFileTypeError } from "@playatlas/common/domain";
 import type { SystemConfig } from "@playatlas/system/infra";
 import busboy from "busboy";
 import { createHash, Hash, timingSafeEqual } from "crypto";
@@ -17,6 +14,7 @@ import { Readable } from "stream";
 import type { ReadableStream } from "stream/web";
 import { makePlayniteMediaFilesContext } from "./playnite-media-files-context";
 import {
+  CONTENT_HASH_FILE_NAME,
   isValidFileName,
   MEDIA_PRESETS,
 } from "./playnite-media-files-handler.constants";
@@ -209,7 +207,7 @@ export const makePlayniteMediaFilesHandler = ({
   ) => {
     context.validate();
 
-    await fileSystemService.mkdir(context.getOptimizedDirPath(), {
+    await fileSystemService.mkdir(context.getTmpOptimizedDirPath(), {
       recursive: true,
     });
 
@@ -217,7 +215,10 @@ export const makePlayniteMediaFilesHandler = ({
       context.getStreamResults().map(async ({ name, filepath, filename }) => {
         const preset = MEDIA_PRESETS[name];
         const outputFilename = basename(filename, extname(filename)) + ".webp";
-        const outputPath = join(context.getOptimizedDirPath(), outputFilename);
+        const outputPath = join(
+          context.getTmpOptimizedDirPath(),
+          outputFilename
+        );
 
         return sharp(filepath, { failOn: "none" })
           .rotate()
@@ -254,18 +255,25 @@ export const makePlayniteMediaFilesHandler = ({
   const moveProcessedImagesToGameFolder: PlayniteMediaFilesHandler["moveProcessedImagesToGameFolder"] =
     async (context) => {
       context.validate();
-      const gameDir = join(systemConfig.getLibFilesDir(), context.getGameId());
-      try {
-        await fileSystemService.access(context.getOptimizedDirPath());
-      } catch (error) {
-        throw new InvalidOperationError(
-          `Optimized images path does not exist. Make sure the images were already processed.`,
-          error
-        );
-      }
-      await fileSystemService.rename(context.getOptimizedDirPath(), gameDir);
+      await context.ensureGameDir();
+      await fileSystemService.rename(
+        context.getTmpOptimizedDirPath(),
+        context.getGameDirPath()
+      );
       logService.debug(
-        `Moved temporary files at ${context.getOptimizedDirPath()} to game media files location ${gameDir}`
+        `Moved temporary files at ${context.getTmpOptimizedDirPath()} to game media files location ${context.getGameDirPath()}`
+      );
+    };
+
+  const writeContentHashFileToGameFolder: PlayniteMediaFilesHandler["writeContentHashFileToGameFolder"] =
+    async (context) => {
+      context.validate();
+      await context.ensureGameDir();
+      const filepath = join(context.getGameDirPath(), CONTENT_HASH_FILE_NAME);
+      await fileSystemService.writeFile(
+        filepath,
+        context.getContentHash(),
+        "utf-8"
       );
     };
 
@@ -275,5 +283,6 @@ export const makePlayniteMediaFilesHandler = ({
     verifyIntegrity,
     processImages,
     moveProcessedImagesToGameFolder,
+    writeContentHashFileToGameFolder,
   };
 };
