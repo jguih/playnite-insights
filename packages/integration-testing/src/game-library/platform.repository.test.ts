@@ -1,5 +1,5 @@
 import { PlatformRepository } from "@playatlas/game-library/infra";
-import { api, factory } from "../vitest.setup";
+import { api, factory } from "../vitest.global.setup";
 
 let repository: PlatformRepository = api.gameLibrary.getPlatformRepository();
 

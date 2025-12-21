@@ -3,7 +3,7 @@ import {
   InstanceAuthSettings,
   makeInstanceAuthSettings,
 } from "@playatlas/auth/domain";
-import { api } from "../vitest.setup";
+import { api } from "../vitest.global.setup";
 
 describe("Instance Auth Settings Repository", () => {
   it("adds and gets the instance auth settings", async () => {

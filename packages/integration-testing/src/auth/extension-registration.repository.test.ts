@@ -3,7 +3,7 @@ import {
   extensionRegistrationStatus,
   type ExtensionRegistration,
 } from "@playatlas/auth/domain";
-import { api, factory } from "../vitest.setup";
+import { api, factory } from "../vitest.global.setup";
 
 const repository = api.auth.getExtensionRegistrationRepository();
 

@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { api, factory } from "../../vitest.setup";
+import { api, factory } from "../../vitest.global.setup";
 
 let queryHandler = api.gameLibrary.queries.getGetAllGamesQueryHandler();
 

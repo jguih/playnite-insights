@@ -1,5 +1,5 @@
 import type { FileSystemService } from "@playatlas/common/application";
-import { VALID_FILE_NAMES } from "./playnite-media-files-handler.constants";
+import { type GameImageType } from "@playatlas/common/common";
 import type { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.types";
 
 export type MakePlayniteMediaFilesContextDeps = {
@@ -14,4 +14,4 @@ export type MakePlayniteMediaFilesContextProps = {
   streamResults?: PlayniteMediaFileStreamResult[];
 };
 
-export type ValidMediaFileFieldName = (typeof VALID_FILE_NAMES)[number];
+export type ValidMediaFileFieldName = GameImageType;

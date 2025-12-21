@@ -37,6 +37,7 @@ export const bootstrap = async ({
     ...baseDeps,
     fileSystemService: infra.getFsService(),
     systemConfig: config.getSystemConfig(),
+    gameLibrary,
   });
 
   return {

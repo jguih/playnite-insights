@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { api, factory } from "../../vitest.setup";
+import { api, factory } from "../../vitest.global.setup";
 
 describe("Get All Platforms Query Handler", () => {
   it("returns an array of platforms", () => {

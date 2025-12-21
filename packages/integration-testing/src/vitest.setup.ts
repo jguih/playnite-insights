@@ -1,20 +1,5 @@
-import { bootstrap } from "@playatlas/bootstrap/application";
-import { bootstrapTest } from "@playatlas/bootstrap/testing";
 import { makeGameFactory } from "@playatlas/game-library/testing";
-import { join } from "path";
-
-export const { api, factory, resetDbToMemory } = bootstrapTest({
-  api: await bootstrap({
-    env: {
-      PLAYATLAS_LOG_LEVEL: process.env.PLAYATLAS_LOG_LEVEL,
-      PLAYATLAS_MIGRATIONS_DIR: process.env.PLAYATLAS_MIGRATIONS_DIR,
-      PLAYATLAS_USE_IN_MEMORY_DB: process.env.PLAYATLAS_USE_IN_MEMORY_DB,
-      PLAYATLAS_WORK_DIR: process.env.PLAYATLAS_WORK_DIR,
-    },
-  }),
-});
-
-export const fixturesDirPath = join(import.meta.dirname, "/fixtures");
+import { api, factory, resetDbToMemory } from "./vitest.global.setup";
 
 beforeEach(async () => {
   await resetDbToMemory();

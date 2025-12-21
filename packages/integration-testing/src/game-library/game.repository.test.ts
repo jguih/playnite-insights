@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { GameRelationship, type Game } from "@playatlas/game-library/domain";
 import { GameRepository } from "@playatlas/game-library/infra";
-import { api, factory } from "../vitest.setup";
+import { api, factory } from "../vitest.global.setup";
 
 let repository: GameRepository = api.gameLibrary.getGameRepository();
 

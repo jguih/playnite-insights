@@ -5,16 +5,17 @@ import type {
 import type { PlayniteSyncServiceDeps } from "./playnite-sync-service.types";
 
 export const makePlayniteSyncService = ({
-  playniteMediaFilesHandler,
+  playniteMediaFilesHandler: handler,
   gameRepository,
   logService,
+  libraryManifestService,
 }: PlayniteSyncServiceDeps): PlayniteSyncService => {
   const handleMediaFilesSynchronizationRequest: PlayniteSyncService["handleMediaFilesSynchronizationRequest"] =
     async (request) => {
-      return await playniteMediaFilesHandler.withMediaFilesContext(
+      return await handler.withMediaFilesContext(
         request,
         async (context): Promise<PlayniteSynchronizationResult> => {
-          if (!playniteMediaFilesHandler.verifyIntegrity(context))
+          if (!handler.verifyIntegrity(context))
             return {
               success: false,
               reason: "Integrity check validation failed",
@@ -29,13 +30,28 @@ export const makePlayniteSyncService = ({
               success: false,
             };
 
+          const optimized = await handler.processImages(context);
+          await handler.moveProcessedImagesToGameFolder(context);
+
+          for (const entry of optimized)
+            game.setImageReference({
+              name: entry.name,
+              path: { filename: entry.filename },
+            });
+
+          gameRepository.upsert(game);
+
+          await libraryManifestService.write();
+
           return { success: true, reason: "success", reason_code: "success" };
         }
       );
     };
 
   const handleGameLibrarySynchronizationRequest: PlayniteSyncService["handleGameLibrarySynchronizationRequest"] =
-    async () => {};
+    async () => {
+      throw new Error("Not implemented");
+    };
 
   return {
     handleMediaFilesSynchronizationRequest,

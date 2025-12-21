@@ -1,7 +1,7 @@
+import { GAME_IMAGE_TYPE } from "@playatlas/common/common";
 import type { ValidMediaFileFieldName } from "./playnite-media-files-context.types";
 
 export const CONTENT_HASH_FILE_NAME = "contentHash.txt" as const;
-export const VALID_FILE_NAMES = ["background", "icon", "cover"] as const;
 /**
  * Determines quality and maximum dimensions for each image type
  */
@@ -17,5 +17,5 @@ export const MEDIA_PRESETS: Record<
 export const isValidFileName = (
   value?: string
 ): value is ValidMediaFileFieldName => {
-  return VALID_FILE_NAMES.includes(value as ValidMediaFileFieldName);
+  return GAME_IMAGE_TYPE.includes(value as ValidMediaFileFieldName);
 };

@@ -1,5 +1,5 @@
 import { type GenreRepository } from "@playatlas/game-library/infra";
-import { api, factory } from "../vitest.setup";
+import { api, factory } from "../vitest.global.setup";
 
 let repository: GenreRepository = api.gameLibrary.getGenreRepository();
 

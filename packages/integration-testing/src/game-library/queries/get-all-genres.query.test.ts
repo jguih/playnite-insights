@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { api, factory } from "../../vitest.setup";
+import { api, factory } from "../../vitest.global.setup";
 
 describe("Get All Genres Query Handler", () => {
   it("returns genres array", () => {

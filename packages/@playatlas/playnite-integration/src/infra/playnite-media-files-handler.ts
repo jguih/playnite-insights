@@ -254,7 +254,7 @@ export const makePlayniteMediaFilesHandler = ({
         await fileSystemService.access(context.getOptimizedDirPath());
       } catch (error) {
         throw new InvalidOperationError(
-          `Optimized images path does not exist`,
+          `Optimized images path does not exist. Make sure the images were already processed.`,
           error
         );
       }

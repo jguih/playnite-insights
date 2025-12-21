@@ -8,7 +8,7 @@ import { once } from "events";
 import { createReadStream, openAsBlob } from "fs";
 import { extname, join } from "path";
 import sharp from "sharp";
-import { api, fixturesDirPath } from "../vitest.setup";
+import { api, factory, fixturesDirPath } from "../vitest.global.setup";
 
 const placeholdersDirPath = join(fixturesDirPath, "/images", "/placeholder");
 const images: Array<{
@@ -211,13 +211,52 @@ describe("Playnite Media Files Handler", () => {
         expect(ext).toBe(".webp");
         expect(metadata.format).toBe("webp");
       }
-      // Cleanup
-      api
-        .getLogService()
-        .warning(`Deleting folder ${gameFolder} and all of its contents`);
-      await api.infra
-        .getFsService()
-        .rm(gameFolder, { force: true, recursive: true });
     });
+  });
+
+  it("updates game image references", async () => {
+    // Arrange
+    const game = factory
+      .getGameFactory()
+      .build({ backgroundImage: null, icon: null, coverImage: null });
+    api.gameLibrary.getGameRepository().upsert(game);
+    const gameFolder = join(
+      api.config.getSystemConfig().getLibFilesDir(),
+      game.getId()
+    );
+    const gameId = game.getId();
+    const contentHash = game.getContentHash();
+    const formData = await buildFormData({ gameId, contentHash });
+    const canonicalDigestBase64 = await buildCanonicalHashBase64({
+      gameId,
+      contentHash,
+    });
+    const request = buildRequest(formData);
+    request.headers.set("X-ContentHash", canonicalDigestBase64);
+    const service = api.playniteIntegration.getPlayniteSyncService();
+    // Act
+    const result = await service.handleMediaFilesSynchronizationRequest(
+      request
+    );
+    const updatedGame = api.gameLibrary
+      .getGameRepository()
+      .getById(game.getId());
+    // Assert
+    expect(result.success).toBeTruthy();
+    expect(updatedGame).toBeTruthy();
+    const fileEntries = await api.infra
+      .getFsService()
+      .readdir(gameFolder, { withFileTypes: true });
+    for (const entry of fileEntries) {
+      expect(entry.isFile()).toBe(true);
+      const filepath = join(entry.parentPath, entry.name);
+      const ext = extname(entry.name);
+      const metadata = await sharp(filepath).metadata();
+      expect(ext).toBe(".webp");
+      expect(metadata.format).toBe("webp");
+    }
+    expect(updatedGame!.getBackgroundImage()).not.toBe(null);
+    expect(updatedGame!.getIcon()).not.toBe(null);
+    expect(updatedGame!.getCoverImage()).not.toBe(null);
   });
 });

@@ -1,6 +1,7 @@
 import { validation } from "@playatlas/common/application";
 import {
   createRelationship,
+  GameImageType,
   type Relationship,
 } from "@playatlas/common/common";
 import { BaseEntity, InvalidStateError } from "@playatlas/common/domain";
@@ -40,6 +41,10 @@ export type Game = BaseEntity<GameId> &
     getIcon: () => string | null;
     getCompletionStatusId: () => string | null;
     getContentHash: () => string;
+    setImageReference: (props: {
+      name: GameImageType;
+      path: { filename: string };
+    }) => void;
     relationships: GameRelationshipProps;
   }>;
 
@@ -82,6 +87,23 @@ export const makeGame = (props: MakeGameProps): Game => {
       genres: createRelationship(props.genreIds ?? null),
       platforms: createRelationship(props.platformIds ?? null),
       publishers: createRelationship(props.publisherIds ?? null),
+    },
+    setImageReference: ({ name, path }) => {
+      const filepath = `${_id}\\${path.filename}`;
+      switch (name) {
+        case "background": {
+          _backgroundImage = filepath;
+          break;
+        }
+        case "cover": {
+          _coverImage = filepath;
+          break;
+        }
+        case "icon": {
+          _icon = filepath;
+          break;
+        }
+      }
     },
     validate: () => {
       if (_playtime < 0)

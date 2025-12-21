@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { RejectExtensionRegistrationCommand } from "@playatlas/auth/commands";
-import { api, factory } from "../../vitest.setup";
+import { api, factory } from "../../vitest.global.setup";
 
 describe("Revoke Extension Registration Command Handler", () => {
   it("revokes a trusted extension registration", () => {
