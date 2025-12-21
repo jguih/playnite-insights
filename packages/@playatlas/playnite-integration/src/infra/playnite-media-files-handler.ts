@@ -56,6 +56,46 @@ export const makePlayniteMediaFilesHandler = ({
     await once(stream, "end");
   };
 
+  const _deriveIconFromCover = async (
+    coverPath: string,
+    outputPath: string
+  ): Promise<PlayniteMediaFileStreamResult> => {
+    const preset = MEDIA_PRESETS.icon;
+    const image = sharp(coverPath);
+    const metadata = await image.metadata();
+
+    if (!metadata.width || !metadata.height) {
+      throw new Error("Invalid cover image");
+    }
+
+    const side = Math.min(metadata.width, metadata.height);
+
+    const left = Math.floor((metadata.width - side) / 2);
+    const top = Math.floor((metadata.height - side) / 2);
+
+    await image
+      .extract({
+        left,
+        top,
+        width: side,
+        height: side,
+      })
+      .resize(preset.w, preset.h)
+      .webp({
+        quality: preset.q,
+        effort: 4,
+        smartSubsample: true,
+      })
+      .toFile(outputPath);
+
+    logService.debug(`Derived icon image from cover at ${coverPath}`);
+    return {
+      name: "icon",
+      filename: basename(outputPath),
+      filepath: outputPath,
+    };
+  };
+
   const streamMultipartToTempFolder: PlayniteMediaFilesHandler["streamMultipartToTempFolder"] =
     async (request) => {
       const bb = busboy({ headers: Object.fromEntries(request.headers) });
@@ -248,6 +288,16 @@ export const makePlayniteMediaFilesHandler = ({
           });
       })
     );
+
+    const cover = results.find((r) => r.name === "cover");
+    if (!results.find((r) => r.name === "icon") && cover) {
+      const outputPath = join(
+        context.getTmpOptimizedDirPath(),
+        `${crypto.randomUUID()}.webp`
+      );
+      const result = await _deriveIconFromCover(cover.filepath, outputPath);
+      results.push(result);
+    }
 
     return results;
   };

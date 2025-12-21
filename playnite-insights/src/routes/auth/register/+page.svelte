@@ -18,13 +18,6 @@
 	let password: string | null = $state(null);
 	let isLoading: boolean = $state(false);
 
-	locator.instanceManager
-		.isRegistered()
-		.then((registered) => {
-			if (registered) goto('/', { replaceState: true });
-		})
-		.catch(() => {});
-
 	const registerInstance = async () => {
 		if (!password) throw new AppError('Instance password cannot be null');
 		if (!locator.httpClient) throw new HttpClientNotSetError();
@@ -80,7 +73,7 @@
 			/>
 		</label>
 		<SolidButton
-			class={['mt-4 ml-auto block']}
+			class={['ml-auto mt-4 block']}
 			size="lg"
 			type="submit"
 			{isLoading}
