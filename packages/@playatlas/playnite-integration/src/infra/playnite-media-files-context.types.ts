@@ -14,4 +14,4 @@ export type MakePlayniteMediaFilesContextProps = {
   streamResults?: PlayniteMediaFileStreamResult[];
 };
 
-export type ValidFileName = (typeof VALID_FILE_NAMES)[number];
+export type ValidMediaFileFieldName = (typeof VALID_FILE_NAMES)[number];

@@ -1,7 +1,7 @@
-import type { ValidFileName } from "./playnite-media-files-context.types";
+import type { ValidMediaFileFieldName } from "./playnite-media-files-context.types";
 
 export type PlayniteMediaFileStreamResult = {
   filename: string;
   filepath: string;
-  name: ValidFileName;
+  name: ValidMediaFileFieldName;
 };

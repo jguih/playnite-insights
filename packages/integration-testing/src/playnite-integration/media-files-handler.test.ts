@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import {
   MEDIA_PRESETS,
-  type ValidFileName,
+  type ValidMediaFileFieldName,
 } from "@playatlas/playnite-integration/infra";
 import { createHash, Hash } from "crypto";
 import { once } from "events";
@@ -12,7 +12,7 @@ import { api, fixturesDirPath } from "../vitest.setup";
 
 const placeholdersDirPath = join(fixturesDirPath, "/images", "/placeholder");
 const images: Array<{
-  name: ValidFileName;
+  name: ValidMediaFileFieldName;
   filename: string;
   filepath: string;
 }> = [
