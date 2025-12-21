@@ -26,11 +26,11 @@ export const bootstrapPlayniteIntegration = ({
   const _playnite_media_files_handler = makePlayniteMediaFilesHandler({
     logService: logServiceFactory.build("PlayniteMediaFilesHandler"),
     fileSystemService,
-    getTmpDir: systemConfig.getTmpDir,
+    systemConfig,
   });
 
   const playniteIntegrationApi: PlayAtlasApiPlayniteIntegration = {
-    getPlayniteMediaFilesHandler: () => _playnite_media_files_handler
-  }
-  return Object.freeze(playniteIntegrationApi)
+    getPlayniteMediaFilesHandler: () => _playnite_media_files_handler,
+  };
+  return Object.freeze(playniteIntegrationApi);
 };

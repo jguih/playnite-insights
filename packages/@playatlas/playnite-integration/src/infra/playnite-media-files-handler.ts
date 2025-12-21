@@ -2,8 +2,11 @@ import {
   type FileSystemService,
   type LogService,
 } from "@playatlas/common/application";
-import { InvalidFileTypeError } from "@playatlas/common/domain";
-import { SystemConfig } from "@playatlas/system/infra";
+import {
+  InvalidFileTypeError,
+  InvalidOperationError,
+} from "@playatlas/common/domain";
+import type { SystemConfig } from "@playatlas/system/infra";
 import busboy from "busboy";
 import { createHash, Hash, timingSafeEqual } from "crypto";
 import { once } from "events";
@@ -22,13 +25,13 @@ import { PlayniteMediaFileStreamResult } from "./playnite-media-files-handler.ty
 export type PlayniteMediaFilesHandlerDeps = {
   fileSystemService: FileSystemService;
   logService: LogService;
-  getTmpDir: SystemConfig["getTmpDir"];
+  systemConfig: SystemConfig;
 };
 
 export const makePlayniteMediaFilesHandler = ({
   logService,
   fileSystemService,
-  getTmpDir,
+  systemConfig,
 }: PlayniteMediaFilesHandlerDeps): PlayniteMediaFilesHandler => {
   const _validateImages = async (filepaths: string[]) => {
     for (const filepath of filepaths) {
@@ -55,7 +58,7 @@ export const makePlayniteMediaFilesHandler = ({
   const streamMultipartToTempFolder: PlayniteMediaFilesHandler["streamMultipartToTempFolder"] =
     async (request) => {
       const requestId = crypto.randomUUID();
-      const tmpDir = join(getTmpDir(), requestId);
+      const tmpDir = join(systemConfig.getTmpDir(), requestId);
       const bb = busboy({ headers: Object.fromEntries(request.headers) });
       const stream = Readable.fromWeb(
         request.body! as ReadableStream<Uint8Array>
@@ -163,6 +166,7 @@ export const makePlayniteMediaFilesHandler = ({
     context
   ) => {
     context.validate();
+
     const SEP = Buffer.from([0]);
     const canonicalHash = createHash("sha256");
 
@@ -198,14 +202,17 @@ export const makePlayniteMediaFilesHandler = ({
   const processImages: PlayniteMediaFilesHandler["processImages"] = async (
     context
   ) => {
-    const optimizedDir = join(context.getTmpDirPath(), "optimized");
-    await fileSystemService.mkdir(optimizedDir, { recursive: true });
+    context.validate();
+
+    await fileSystemService.mkdir(context.getOptimizedDirPath(), {
+      recursive: true,
+    });
 
     const results = await Promise.all(
       context.getStreamResults().map(async ({ name, filepath, filename }) => {
         const preset = MEDIA_PRESETS[name];
         const outputFilename = basename(filename, extname(filename)) + ".webp";
-        const outputPath = join(optimizedDir, outputFilename);
+        const outputPath = join(context.getOptimizedDirPath(), outputFilename);
 
         return sharp(filepath, { failOn: "none" })
           .rotate()
@@ -222,7 +229,11 @@ export const makePlayniteMediaFilesHandler = ({
           })
           .toFile(outputPath)
           .then(() => {
-            logService.debug(`Optimized image ${outputPath}`);
+            logService.debug(
+              `Optimized image ${outputPath} using preset ${JSON.stringify(
+                preset
+              )}`
+            );
             return {
               name,
               filename: outputFilename,
@@ -235,14 +246,29 @@ export const makePlayniteMediaFilesHandler = ({
     return results;
   };
 
-  const moveToGameFolder: PlayniteMediaFilesHandler["moveToGameFolder"] =
-    async (context) => {};
+  const moveProcessedImagesToGameFolder: PlayniteMediaFilesHandler["moveProcessedImagesToGameFolder"] =
+    async (context) => {
+      context.validate();
+      const gameDir = join(systemConfig.getLibFilesDir(), context.getGameId());
+      try {
+        await fileSystemService.access(context.getOptimizedDirPath());
+      } catch (error) {
+        throw new InvalidOperationError(
+          `Optimized images path does not exist`,
+          error
+        );
+      }
+      await fileSystemService.rename(context.getOptimizedDirPath(), gameDir);
+      logService.debug(
+        `Moved temporary files at ${context.getOptimizedDirPath()} to game media files location ${gameDir}`
+      );
+    };
 
   return {
     streamMultipartToTempFolder,
     withMediaFilesContext,
     verifyIntegrity,
     processImages,
-    moveToGameFolder,
+    moveProcessedImagesToGameFolder,
   };
 };

@@ -26,5 +26,7 @@ export type PlayniteMediaFilesHandler = {
   processImages: (
     context: PlayniteMediaFilesContext
   ) => Promise<PlayniteMediaFileStreamResult[]>;
-  moveToGameFolder: (context: PlayniteMediaFilesContext) => Promise<void>;
+  moveProcessedImagesToGameFolder: (
+    context: PlayniteMediaFilesContext
+  ) => Promise<void>;
 };

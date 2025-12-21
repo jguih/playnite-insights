@@ -1,6 +1,7 @@
 import { validation } from "@playatlas/common/application";
 import { DisposableAsync } from "@playatlas/common/common";
 import { InvalidStateError } from "@playatlas/common/domain";
+import { join } from "path";
 import {
   MakePlayniteMediaFilesContextDeps,
   MakePlayniteMediaFilesContextProps,
@@ -17,6 +18,7 @@ export type PlayniteMediaFilesContext = DisposableAsync & {
   getStreamResults: () => PlayniteMediaFileStreamResult[];
   setStreamResults: (value: PlayniteMediaFileStreamResult[]) => void;
   getTmpDirPath: () => string;
+  getOptimizedDirPath: () => string;
   validate: () => void;
 };
 
@@ -29,26 +31,31 @@ export const makePlayniteMediaFilesContext = (
   let _stream_results: PlayniteMediaFileStreamResult[] | null =
     props.streamResults ?? null;
   const _tmp_dir_path = props.tmpDirPath;
+  const _optimized_dir_path = join(_tmp_dir_path, "/optimized");
   const _content_hash_header = props.contentHashHeader;
 
   return {
     getGameId: () => {
       if (!_game_id) throw new InvalidStateError("Game id is not set.");
+      if (validation.isEmptyString(_game_id))
+        throw new InvalidStateError("Game id cannot be empty");
       return _game_id;
     },
     setGameId: (value) => (_game_id = value),
     getContentHash: () => {
       if (!_content_hash)
         throw new InvalidStateError("Content hash is not set.");
+      if (validation.isEmptyString(_content_hash))
+        throw new InvalidStateError("Content hash cannot be empty");
       return _content_hash;
     },
     setContentHash: (value) => (_content_hash = value),
     getContentHashHeader: () => {
       if (!_content_hash_header)
         throw new InvalidStateError("Content hash header is not set.");
-      if (validation.isNullOrEmptyString(_content_hash_header))
+      if (validation.isEmptyString(_content_hash_header))
         throw new InvalidStateError(
-          "Content hash header cannot be null or an empty string"
+          validation.message.isEmptyString("ContentHashHeader")
         );
       return _content_hash_header;
     },
@@ -59,10 +66,17 @@ export const makePlayniteMediaFilesContext = (
     },
     setStreamResults: (value) => (_stream_results = value),
     getTmpDirPath: () => _tmp_dir_path,
+    getOptimizedDirPath: () => _optimized_dir_path,
     validate: () => {
       if (!_game_id) throw new InvalidStateError("Game id is not set.");
+      if (validation.isEmptyString(_game_id))
+        throw new InvalidStateError(validation.message.isEmptyString("GameId"));
       if (!_content_hash)
         throw new InvalidStateError("Content hash is not set.");
+      if (validation.isEmptyString(_content_hash))
+        throw new InvalidStateError(
+          validation.message.isEmptyString("ContentHash")
+        );
       if (!_stream_results)
         throw new InvalidStateError("Stream results is not set.");
     },
