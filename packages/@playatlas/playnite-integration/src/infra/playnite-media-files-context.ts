@@ -27,7 +27,7 @@ export type PlayniteMediaFilesContext = DisposableAsync & {
   /**
    * Ensures the game directory is created
    */
-  ensureGameDir: () => Promise<void>;
+  ensureGameDir: (args?: { cleanUp?: boolean }) => Promise<void>;
   validate: () => void;
   /**
    * Creates the resources required by this context
@@ -102,15 +102,24 @@ export const makePlayniteMediaFilesContext = (
     getTmpDirPath: () => _tmp_dir_path,
     getTmpOptimizedDirPath: () => _tmp_optimized_dir_path,
     getGameDirPath: _getGameDirPath,
-    ensureGameDir: async () => {
-      try {
-        await fileSystemService.access(_getGameDirPath());
-      } catch {
-        logService.debug(`Created game media folder at ${_getGameDirPath()}`);
-        await fileSystemService.mkdir(_getGameDirPath(), {
+    ensureGameDir: async (args = {}) => {
+      const createGameDir = () =>
+        fileSystemService.mkdir(_getGameDirPath(), {
           recursive: true,
           mode: "0744",
         });
+      try {
+        await fileSystemService.access(_getGameDirPath());
+        if (args.cleanUp) {
+          await fileSystemService.rm(_getGameDirPath(), {
+            force: true,
+            recursive: true,
+          });
+          await createGameDir();
+        }
+      } catch {
+        logService.debug(`Created game media folder at ${_getGameDirPath()}`);
+        await createGameDir();
       }
     },
     validate: () => {

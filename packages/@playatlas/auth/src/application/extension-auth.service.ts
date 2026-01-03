@@ -2,8 +2,7 @@ import type {
   LogService,
   SignatureService,
 } from "@playatlas/common/application";
-import { computeBase64HashAsync } from "@playatlas/common/infra";
-import { timingSafeEqual } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 import type { ExtensionRegistrationRepository } from "../infra";
 import type { ExtensionAuthService } from "./extension-auth.service.port";
 
@@ -18,22 +17,18 @@ export const makeExtensionAuthService = ({
   signatureService,
   extensionRegistrationRepository,
 }: ExtensionAuthServiceDeps): ExtensionAuthService => {
-  const FIVE_MINUTES_MS = 5 * 60 * 1000;
-
   const _getCanonicalString = ({
     method,
     endpoint,
     extensionId,
-    timestamp,
     contentHash,
   }: {
     method: string;
     endpoint: string;
     extensionId: string;
-    timestamp: string;
     contentHash: string | null;
   }): string => {
-    const base = `${method}|${endpoint}|${extensionId}|${timestamp}`;
+    const base = `${method}|${endpoint}|${extensionId}`;
     return contentHash ? `${base}|${contentHash}` : `${base}`;
   };
 
@@ -46,7 +41,6 @@ export const makeExtensionAuthService = ({
     const contentType = (headers.get("Content-Type") || "").toLowerCase();
     const extensionId = headers.get("X-ExtensionId");
     const signatureBase64 = headers.get("X-Signature");
-    const timestamp = headers.get("X-Timestamp");
     const contentHash = headers.get("X-ContentHash");
     const registrationId = headers.get("X-RegistrationId");
     const requestDescription = logService.getRequestDescription(request);
@@ -67,15 +61,6 @@ export const makeExtensionAuthService = ({
       );
       return { authorized: false, reason: "Missing X-Signature header" };
     }
-    if (!timestamp || isNaN(Date.parse(timestamp))) {
-      logService.warning(
-        `${requestDescription}: Request rejected for ${extensionDescription} due to missing or invalid X-Timestamp header`
-      );
-      return {
-        authorized: false,
-        reason: "Missing or invalid X-Timestamp header",
-      };
-    }
     if (["POST", "PUT"].includes(request.method)) {
       if (!contentHash) {
         logService.warning(
@@ -85,10 +70,11 @@ export const makeExtensionAuthService = ({
       }
       if (contentType.includes("application/json")) {
         requestBody = await request.text();
-        const computedHash = await computeBase64HashAsync(requestBody);
-        const contentHashBuffer = Buffer.from(contentHash);
-        const computedHashBuffer = Buffer.from(computedHash);
-        if (!timingSafeEqual(contentHashBuffer, computedHashBuffer)) {
+        const canonicalDigest = createHash("sha256")
+          .update(requestBody, "utf-8")
+          .digest();
+        const headerDigest = Buffer.from(contentHash);
+        if (!timingSafeEqual(headerDigest, canonicalDigest)) {
           logService.warning(
             `${requestDescription}: Request rejected for ${extensionDescription} because calculated content hash does not match received one`
           );
@@ -110,14 +96,6 @@ export const makeExtensionAuthService = ({
       };
     }
 
-    const timestampMs = Date.parse(timestamp);
-    if (timestampMs > utcNow || utcNow - timestampMs >= FIVE_MINUTES_MS) {
-      logService.warning(
-        `${requestDescription}: Request rejected for ${extensionDescription} due to expired or invalid timestamp`
-      );
-      return { authorized: false, reason: "Expired or invalid timestamp" };
-    }
-
     const registration = extensionRegistrationRepository.getById(
       Number(registrationId)
     );
@@ -135,7 +113,6 @@ export const makeExtensionAuthService = ({
       method: request.method,
       endpoint: url.pathname,
       extensionId,
-      timestamp,
       contentHash,
     });
 

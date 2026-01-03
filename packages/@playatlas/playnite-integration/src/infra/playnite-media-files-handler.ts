@@ -133,7 +133,7 @@ export const makePlayniteMediaFilesHandler = ({
           bb.on("file", async (name, fileStream, { filename }) => {
             if (!isValidFileName(name)) {
               logService.warning(
-                `Rejecting file ${filename} due to incorrect field name ${name}`
+                `Rejecting file ${filename} due to incorrect file name ${name}`
               );
               fileStream.resume();
               return;
@@ -305,7 +305,7 @@ export const makePlayniteMediaFilesHandler = ({
   const moveProcessedImagesToGameFolder: PlayniteMediaFilesHandler["moveProcessedImagesToGameFolder"] =
     async (context) => {
       context.validate();
-      await context.ensureGameDir();
+      await context.ensureGameDir({ cleanUp: true });
       await fileSystemService.rename(
         context.getTmpOptimizedDirPath(),
         context.getGameDirPath()
