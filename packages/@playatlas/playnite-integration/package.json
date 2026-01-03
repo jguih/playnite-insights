@@ -6,7 +6,8 @@
   "exports": {
     "./domain": "./src/domain/index.ts",
     "./infra": "./src/infra/index.ts",
-    "./application": "./src/application/index.ts"
+    "./application": "./src/application/index.ts",
+    "./commands": "./src/commands/index.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.14"

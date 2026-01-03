@@ -11,8 +11,4 @@ export type PlayniteSyncService = {
   handleMediaFilesSynchronizationRequest: (
     request: Request
   ) => Promise<PlayniteSynchronizationResult>;
-  /**
-   * Synchronizes game database
-   */
-  handleGameLibrarySynchronizationRequest: () => Promise<PlayniteSynchronizationResult>;
 };

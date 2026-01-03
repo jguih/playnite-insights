@@ -377,6 +377,9 @@ importers:
       '@playatlas/game-library':
         specifier: workspace:*
         version: link:../packages/@playatlas/game-library
+      '@playatlas/playnite-integration':
+        specifier: workspace:*
+        version: link:../packages/@playatlas/playnite-integration
       '@playnite-insights/core':
         specifier: workspace:*
         version: link:../packages/@playnite-insights/core

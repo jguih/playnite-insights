@@ -21,7 +21,10 @@ export const bootstrap = async ({
     envService: config.getEnvService(),
     systemConfig: config.getSystemConfig(),
   });
+
+  backendLogService.info("Initializing environment");
   await infra.initEnvironment();
+  backendLogService.info("Initializing database");
   await infra.initDb();
 
   const baseDeps = { getDb: infra.getDb, logServiceFactory };
@@ -37,7 +40,11 @@ export const bootstrap = async ({
     ...baseDeps,
     fileSystemService: infra.getFsService(),
     systemConfig: config.getSystemConfig(),
-    gameLibrary,
+    gameRepository: gameLibrary.getGameRepository(),
+    companyRepository: gameLibrary.getCompanyRepository(),
+    completionStatusRepository: gameLibrary.getCompletionStatusRepository(),
+    genreRepository: gameLibrary.getGenreRepository(),
+    platformRepository: gameLibrary.getPlatformRepository(),
   });
 
   return {

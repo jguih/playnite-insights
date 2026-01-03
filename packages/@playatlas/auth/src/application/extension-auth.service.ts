@@ -73,7 +73,19 @@ export const makeExtensionAuthService = ({
         const canonicalDigest = createHash("sha256")
           .update(requestBody, "utf-8")
           .digest();
-        const headerDigest = Buffer.from(contentHash);
+        const headerDigest = Buffer.from(contentHash, "base64");
+
+        if (canonicalDigest.length != headerDigest.length) {
+          logService.warning(
+            `${requestDescription}: Request rejected for ${extensionDescription} because calculated content hash does not match length of received one`
+          );
+          return {
+            authorized: false,
+            body: requestBody,
+            reason: "Invalid content hash",
+          };
+        }
+
         if (!timingSafeEqual(headerDigest, canonicalDigest)) {
           logService.warning(
             `${requestDescription}: Request rejected for ${extensionDescription} because calculated content hash does not match received one`

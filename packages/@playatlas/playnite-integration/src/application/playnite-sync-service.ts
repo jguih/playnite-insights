@@ -49,13 +49,7 @@ export const makePlayniteSyncService = ({
       );
     };
 
-  const handleGameLibrarySynchronizationRequest: PlayniteSyncService["handleGameLibrarySynchronizationRequest"] =
-    async () => {
-      throw new Error("Not implemented");
-    };
-
   return {
     handleMediaFilesSynchronizationRequest,
-    handleGameLibrarySynchronizationRequest,
   };
 };

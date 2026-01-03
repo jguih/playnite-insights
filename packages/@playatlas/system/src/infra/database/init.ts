@@ -68,8 +68,6 @@ export const initDatabase = async ({
   fileSystemService,
   migrationsDir,
 }: InitDatabaseDeps) => {
-  logService.info(`Initializing database...`);
-
   try {
     createMigrationsTable(db);
   } catch (error) {
