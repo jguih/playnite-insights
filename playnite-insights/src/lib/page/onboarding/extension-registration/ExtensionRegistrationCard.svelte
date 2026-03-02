@@ -7,8 +7,15 @@
 	import Spinner from "$lib/ui/components/Spinner.svelte";
 	import type { ComponentVariant } from "$lib/ui/components/types";
 	import type { ExtensionRegistrationResponseDto } from "@playatlas/auth/dtos";
+	import { extensionRegistrationAuthorizationAction } from "./extension-registration-card.constants";
+	import type { ExtensionRegistrationAuthorizationAction } from "./extension-registration-card.types";
 
-	const { registration }: { registration: ExtensionRegistrationResponseDto } = $props();
+	type ExtensionRegistrationCardProps = {
+		registration: ExtensionRegistrationResponseDto;
+		onAuthorizationActionAsync: (action: ExtensionRegistrationAuthorizationAction) => Promise<void>;
+	};
+
+	const { registration, onAuthorizationActionAsync }: ExtensionRegistrationCardProps = $props();
 
 	const osName = $derived.by(() => {
 		const os = registration.Os;
@@ -38,25 +45,71 @@
 		return createdAt.toLocaleString();
 	});
 
+	const registrationAuthorizationState: Record<
+		ExtensionRegistrationAuthorizationAction,
+		{ loading: boolean; disabled: boolean }
+	> = $state({
+		trust: { loading: false, disabled: false },
+		reject: { loading: false, disabled: false },
+		revoke: { loading: false, disabled: false },
+	});
+
+	const handleRegistrationAuthorizationAsync = async (
+		action: ExtensionRegistrationAuthorizationAction,
+	) => {
+		if (
+			extensionRegistrationAuthorizationAction.some(
+				(a) => registrationAuthorizationState[a].loading,
+			)
+		)
+			return;
+
+		registrationAuthorizationState[action].loading = true;
+
+		for (const action of extensionRegistrationAuthorizationAction)
+			registrationAuthorizationState[action].disabled = true;
+
+		try {
+			await onAuthorizationActionAsync(action);
+		} finally {
+			registrationAuthorizationState[action].loading = false;
+			extensionRegistrationAuthorizationAction.forEach(
+				(a) => (registrationAuthorizationState[a].disabled = false),
+			);
+		}
+	};
+
 	const actionButtonMeta = {
 		trust: {
 			label: "Trust this PC",
 			variant: "success",
-			action: () => {},
+			action: () => handleRegistrationAuthorizationAsync("trust"),
+			isLoading: () => registrationAuthorizationState.trust.loading,
+			isDisabled: () => registrationAuthorizationState.trust.disabled,
 		},
 		reject: {
 			label: "Reject",
 			variant: "neutral",
-			action: () => {},
+			action: () => handleRegistrationAuthorizationAsync("reject"),
+			isLoading: () => registrationAuthorizationState.reject.loading,
+			isDisabled: () => registrationAuthorizationState.reject.disabled,
 		},
 		revoke: {
 			label: "Revoke",
 			variant: "error",
-			action: () => {},
+			action: () => handleRegistrationAuthorizationAsync("revoke"),
+			isLoading: () => registrationAuthorizationState.revoke.loading,
+			isDisabled: () => registrationAuthorizationState.revoke.disabled,
 		},
 	} as const satisfies Record<
-		string,
-		{ label: string; variant: ComponentVariant; action: () => void }
+		ExtensionRegistrationAuthorizationAction,
+		{
+			label: string;
+			variant: ComponentVariant;
+			action: () => Promise<void>;
+			isLoading: () => boolean;
+			isDisabled: () => boolean;
+		}
 	>;
 
 	type ActionButtonMeta = (typeof actionButtonMeta)[keyof typeof actionButtonMeta];
@@ -140,7 +193,9 @@
 		{#each actionButtons as button (button.label)}
 			<SolidButton
 				variant={button.variant}
-				onclick={button.action}
+				onclick={() => button.action()}
+				state={button.isLoading() ? "loading" : button.isDisabled() ? "disabled" : "default"}
+				disabled={button.isDisabled()}
 			>
 				{button.label}
 			</SolidButton>

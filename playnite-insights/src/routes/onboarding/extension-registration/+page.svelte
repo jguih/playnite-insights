@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+	import { resolve } from "$app/paths";
 	import { getClientApiContext } from "$lib/modules/bootstrap/application";
+	import type { ExtensionRegistrationAuthorizationAction } from "$lib/page/onboarding/extension-registration/extension-registration-card.types";
 	import ExtensionRegistrationCard from "$lib/page/onboarding/extension-registration/ExtensionRegistrationCard.svelte";
 	import { m } from "$lib/paraglide/messages";
 	import Divider from "$lib/ui/components/Divider.svelte";
@@ -19,48 +22,50 @@
 		loading: true,
 	});
 
-	void api()
-		.Auth.ExtensionRegistrationClient.getAllAsync()
-		.then(({ registrations }) => {
-			registrationState.registrations = registrations;
-			// const now = new Date();
-			// registrationState.registrations.push({
-			// 	Id: 123,
-			// 	CreatedAt: now.toISOString(),
-			// 	LastUpdatedAt: now.toISOString(),
-			// 	ExtensionId: "123",
-			// 	ExtensionVersion: "v123",
-			// 	Hostname: "localhost",
-			// 	Os: "Windows",
-			// 	PublicKey: "invalid",
-			// 	Status: "pending",
-			// });
+	const loadRegistrationsAsync = () =>
+		api()
+			.Auth.ExtensionRegistrationClient.getAllAsync()
+			.then(({ registrations }) => {
+				registrationState.registrations = registrations;
+				registrationState.registrations.sort((a, b) => {
+					const aCreatedAt = new Date(a.CreatedAt).getTime();
+					const bCreatedAt = new Date(b.CreatedAt).getTime();
 
-			// registrationState.registrations.push({
-			// 	Id: 124,
-			// 	CreatedAt: now.toISOString(),
-			// 	LastUpdatedAt: now.toISOString(),
-			// 	ExtensionId: "123",
-			// 	ExtensionVersion: "v123",
-			// 	Hostname: "localhost",
-			// 	Os: "Windows",
-			// 	PublicKey: "invalid",
-			// 	Status: "rejected",
-			// });
+					if (aCreatedAt - bCreatedAt !== 0) return bCreatedAt - aCreatedAt;
 
-			registrationState.registrations.sort((a, b) => {
-				const aCreatedAt = new Date(a.CreatedAt).getTime();
-				const bCreatedAt = new Date(b.CreatedAt).getTime();
+					return a.Id - b.Id;
+				});
 
-				if (aCreatedAt - bCreatedAt !== 0) return bCreatedAt - aCreatedAt;
+				registrationState.pendingRegistrations = registrationState.registrations.filter(
+					(r) => r.Status !== "trusted",
+				);
+			})
+			.finally(() => (registrationState.loading = false));
 
-				return a.Id - b.Id;
-			});
-			registrationState.pendingRegistrations = registrationState.registrations.filter(
-				(r) => r.Status === "pending",
-			);
-		})
-		.finally(() => (registrationState.loading = false));
+	void loadRegistrationsAsync();
+
+	const handleRegistrationAuthorizationAsync = async (
+		registrationId: ExtensionRegistrationResponseDto["Id"],
+		action: ExtensionRegistrationAuthorizationAction,
+	) => {
+		switch (action) {
+			case "trust": {
+				const result =
+					await api().Auth.ExtensionAuthorizationService.authorizeAsync(registrationId);
+				if (result.success) return await goto(resolve("/"));
+				break;
+			}
+			case "reject": {
+				await api().Auth.ExtensionAuthorizationService.rejectAsync(registrationId);
+				break;
+			}
+			case "revoke": {
+				await api().Auth.ExtensionAuthorizationService.revokeAsync(registrationId);
+				break;
+			}
+		}
+		await loadRegistrationsAsync();
+	};
 </script>
 
 <AppLayout>
@@ -84,7 +89,11 @@
 					<ul class="space-y-4 overflow-y-auto max-h-[65dvh] w-full p-2">
 						{#each registrationState.pendingRegistrations as registration (registration.Id)}
 							<li>
-								<ExtensionRegistrationCard {registration} />
+								<ExtensionRegistrationCard
+									{registration}
+									onAuthorizationActionAsync={(action) =>
+										handleRegistrationAuthorizationAsync(registration.Id, action)}
+								/>
 							</li>
 						{/each}
 					</ul>

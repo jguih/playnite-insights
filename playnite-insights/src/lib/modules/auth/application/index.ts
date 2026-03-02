@@ -2,6 +2,7 @@ export * from "./auth-flow";
 export * from "./auth-flow.port";
 export * from "./auth-service";
 export type * from "./auth-service.port";
+export * from "./extension-authorization.service";
 export * from "./extension-registration.client";
 export type * from "./session-id.checker.port";
 export * from "./session-id.mapper";

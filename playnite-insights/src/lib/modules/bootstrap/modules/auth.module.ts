@@ -1,9 +1,11 @@
 import {
 	AuthFlow,
 	AuthService,
+	ExtensionAuthorizationService,
 	ExtensionRegistrationClient,
 	type IAuthFlowPort,
 	type IAuthServicePort,
+	type IExtensionAuthorizationServicePort,
 	type IExtensionRegistrationClient,
 	type ISessionIdProviderPort,
 } from "$lib/modules/auth/application";
@@ -23,17 +25,16 @@ export type AuthModuleDeps = {
 
 export class AuthModule implements IAuthModulePort {
 	readonly authService: IAuthServicePort;
-
 	readonly authFlow: IAuthFlowPort;
 
 	readonly extensionRegistrationClient: IExtensionRegistrationClient;
+	readonly extensionAuthorizationService: IExtensionAuthorizationServicePort;
 
 	constructor(private readonly deps: AuthModuleDeps) {
 		const { httpClient, authenticatedHttpClient, clock, logService, eventBus, sessionIdProvider } =
 			deps;
 
 		this.authService = new AuthService({ httpClient });
-
 		this.authFlow = new AuthFlow({
 			authService: this.authService,
 			sessionIdProvider: sessionIdProvider,
@@ -43,6 +44,9 @@ export class AuthModule implements IAuthModulePort {
 		});
 
 		this.extensionRegistrationClient = new ExtensionRegistrationClient({
+			httpClient: authenticatedHttpClient,
+		});
+		this.extensionAuthorizationService = new ExtensionAuthorizationService({
 			httpClient: authenticatedHttpClient,
 		});
 	}

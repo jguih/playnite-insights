@@ -2,7 +2,7 @@ import { ISODateSchema } from "@playatlas/common/common";
 import z from "zod";
 
 export const extensionRegistrationResponseDtoSchema = z.object({
-	Id: z.number(),
+	Id: z.number().brand("ExtensionRegistrationId"),
 	ExtensionId: z.string(),
 	PublicKey: z.string(),
 	Hostname: z.string().nullable(),

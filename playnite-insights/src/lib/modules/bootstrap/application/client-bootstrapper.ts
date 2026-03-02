@@ -74,6 +74,7 @@ export class ClientBootstrapper {
 				Flow: auth.authFlow,
 				hasSession: auth.hasSession,
 				ExtensionRegistrationClient: auth.extensionRegistrationClient,
+				ExtensionAuthorizationService: auth.extensionAuthorizationService,
 			},
 			EventBus: eventBus,
 		};

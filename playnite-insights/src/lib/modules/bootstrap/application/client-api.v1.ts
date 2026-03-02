@@ -1,5 +1,6 @@
 import type {
 	IAuthFlowPort,
+	IExtensionAuthorizationServicePort,
 	IExtensionRegistrationClient,
 	ISessionIdCheckerPort,
 } from "$lib/modules/auth/application";
@@ -77,6 +78,7 @@ export interface ClientApiV1 {
 		Flow: IAuthFlowPort;
 		hasSession: ISessionIdCheckerPort["hasSession"];
 		ExtensionRegistrationClient: IExtensionRegistrationClient;
+		ExtensionAuthorizationService: IExtensionAuthorizationServicePort;
 	};
 	GameSession: {
 		GameSessionReadonlyStore: IGameSessionReadonlyStorePort;
