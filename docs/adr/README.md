@@ -4,7 +4,7 @@
 
 | ADR | Title | Status | Date |
 |-----|------|------|------|
-| [ADR-0001](./0001-mobile-first-ui.md) | Mobile-first constrained layout | Accepted | 2026-03 |
+| [ADR-0001](./0001-mobile-first-ui.md) | Mobile-first constrained layout | Accepted | 2026-03-02 |
 
 ## What this is
 
