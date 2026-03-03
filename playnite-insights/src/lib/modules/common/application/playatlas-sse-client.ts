@@ -2,7 +2,7 @@ import type { ILogServicePort } from "./log-service.port";
 import type { IPlayAtlasEventHubPort } from "./playatlas-event-hub.port";
 import type { IPlayAtlasSSEClientPort } from "./playatlas-sse-client.port";
 
-export type PlayAtlasSSEHandler = (data: unknown, eventId: string | null) => void;
+export type PlayAtlasSSEHandler = (data: unknown, eventId: string) => void;
 
 export type PlayAtlasSSEClientDeps = {
 	handlers?: Map<string, Set<PlayAtlasSSEHandler>>;

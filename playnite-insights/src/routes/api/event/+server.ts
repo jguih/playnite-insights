@@ -8,17 +8,19 @@ export const GET: RequestHandler = async ({ request, locals: { api } }) => {
 	const closeStream = () => {
 		closed = true;
 		clearInterval(interval);
-		api.getLogService().info("Closed exporter event stream");
+		api.getLogService().info("Closed client event stream");
 	};
 
 	const stream = new ReadableStream({
 		start(controller) {
-			api.getLogService().info("Created exporter event stream");
+			api.getLogService().info("Created client event stream");
 
 			const unsubscribe = api.getEventBus().subscribe((event) => {
 				if (closed) return;
 
-				api.getLogService().info(`Broadcasting event (Name: ${event.name}, Id: ${event.id})`);
+				api
+					.getLogService()
+					.info(`Broadcasting event (Name: ${event.name}, Id: ${event.id}) on client event stream`);
 				controller.enqueue(
 					encoder.encode(
 						`id: ${event.id}\n` +
