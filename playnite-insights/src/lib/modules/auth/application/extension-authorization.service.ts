@@ -2,10 +2,12 @@ import { zodJsonParser, type IHttpClientPort } from "$lib/modules/common/applica
 import {
 	approveExtensionRegistrationResponseDtoSchema,
 	rejectExtensionRegistrationResponseDtoSchema,
+	removeExtensionRegistrationResponseDtoSchema,
 	revokeExtensionRegistrationResponseDtoSchema,
 	type ApproveExtensionRegistrationResponseDto,
 	type ExtensionRegistrationResponseDto,
 	type RejectExtensionRegistrationResponseDto,
+	type RemoveExtensionRegistrationResponseDto,
 	type RevokeExtensionRegistrationResponseDto,
 } from "@playatlas/auth/dtos";
 
@@ -19,6 +21,9 @@ export type IExtensionAuthorizationServicePort = {
 	revokeAsync: (
 		registrationId: ExtensionRegistrationResponseDto["Id"],
 	) => Promise<RevokeExtensionRegistrationResponseDto>;
+	removeAsync: (
+		registrationId: ExtensionRegistrationResponseDto["Id"],
+	) => Promise<RemoveExtensionRegistrationResponseDto>;
 };
 
 export type ExtensionAuthorizationServiceDeps = {
@@ -50,5 +55,13 @@ export class ExtensionAuthorizationService implements IExtensionAuthorizationSer
 		});
 
 		return await zodJsonParser(revokeExtensionRegistrationResponseDtoSchema)(response);
+	};
+
+	removeAsync: IExtensionAuthorizationServicePort["removeAsync"] = async (registrationId) => {
+		const response = await this.deps.httpClient.postAsync({
+			endpoint: `/api/extension-registration/${String(registrationId)}/remove`,
+		});
+
+		return await zodJsonParser(removeExtensionRegistrationResponseDtoSchema)(response);
 	};
 }

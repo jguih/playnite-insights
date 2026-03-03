@@ -51,7 +51,12 @@
 			},
 			"registration_requested_at": {
 				"prefix": "Requested "
-			}
+			},
+			"trust_registration_action_label": "Trust this PC",
+			"reject_registration_action_label": "Reject",
+			"revoke_registration_action_label": "Revoke",
+			"remove_registration_action_label": "Delete",
+			"reject_registration_status_explanation": "This request cannot be approved again. Delete it to allow the extension to request access again."
 		}
 	},
 	"duration": {

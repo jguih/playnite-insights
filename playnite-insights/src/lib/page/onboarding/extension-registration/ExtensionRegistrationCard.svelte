@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { normalize } from "$lib/modules/common/common";
 	import { m } from "$lib/paraglide/messages";
+	import LightButton from "$lib/ui/components/buttons/LightButton.svelte";
 	import SolidButton from "$lib/ui/components/buttons/SolidButton.svelte";
 	import SolidChip from "$lib/ui/components/chip/SolidChip.svelte";
 	import Divider from "$lib/ui/components/Divider.svelte";
@@ -52,6 +53,7 @@
 		trust: { loading: false, disabled: false },
 		reject: { loading: false, disabled: false },
 		revoke: { loading: false, disabled: false },
+		remove: { loading: false, disabled: false },
 	});
 
 	const handleRegistrationAuthorizationAsync = async (
@@ -81,30 +83,37 @@
 
 	const actionButtonMeta = {
 		trust: {
-			label: "Trust this PC",
+			label: () => m["onboarding_page.extension_registration.trust_registration_action_label"](),
 			variant: "success",
 			action: () => handleRegistrationAuthorizationAsync("trust"),
 			isLoading: () => registrationAuthorizationState.trust.loading,
 			isDisabled: () => registrationAuthorizationState.trust.disabled,
 		},
 		reject: {
-			label: "Reject",
-			variant: "neutral",
+			label: () => m["onboarding_page.extension_registration.reject_registration_action_label"](),
+			variant: "error",
 			action: () => handleRegistrationAuthorizationAsync("reject"),
 			isLoading: () => registrationAuthorizationState.reject.loading,
 			isDisabled: () => registrationAuthorizationState.reject.disabled,
 		},
 		revoke: {
-			label: "Revoke",
+			label: () => m["onboarding_page.extension_registration.revoke_registration_action_label"](),
 			variant: "error",
 			action: () => handleRegistrationAuthorizationAsync("revoke"),
 			isLoading: () => registrationAuthorizationState.revoke.loading,
 			isDisabled: () => registrationAuthorizationState.revoke.disabled,
 		},
+		remove: {
+			label: () => m["onboarding_page.extension_registration.remove_registration_action_label"](),
+			variant: "neutral",
+			action: () => handleRegistrationAuthorizationAsync("remove"),
+			isLoading: () => registrationAuthorizationState.remove.loading,
+			isDisabled: () => registrationAuthorizationState.remove.disabled,
+		},
 	} as const satisfies Record<
 		ExtensionRegistrationAuthorizationAction,
 		{
-			label: string;
+			label: () => string;
 			variant: ComponentVariant;
 			action: () => Promise<void>;
 			isLoading: () => boolean;
@@ -125,6 +134,10 @@
 			}
 			case "pending": {
 				buttons.push(actionButtonMeta.reject, actionButtonMeta.trust);
+				break;
+			}
+			case "rejected": {
+				buttons.push(actionButtonMeta.remove);
 				break;
 			}
 		}
@@ -165,19 +178,24 @@
 {/snippet}
 
 <div class="bg-background-1 px-4 py-2">
-	<h1>
+	<p>
 		<span class="text-primary-light-active-fg text-lg">{registration.Hostname}</span> •
 		<span class="">{osName}</span>
-	</h1>
+	</p>
 	<p class="font-semibold text-sm text-foreground/80">
 		{m["onboarding_page.extension_registration.registration_requested_at.prefix"]()}
 		{requestedAt}
 	</p>
-	<Divider />
-	<div class="mb-2 mt-2 w-fit mx-auto">
+	<Divider class="mt-2 mb-4" />
+	<div class="mb-2 w-fit mx-auto">
 		{@render statusChip(registration.Status)}
 	</div>
-	<div class="mb-2">
+	{#if registration.Status === "rejected"}
+		<p class="text-foreground/80 text-sm mb-4 text-left">
+			{m["onboarding_page.extension_registration.reject_registration_status_explanation"]()}
+		</p>
+	{/if}
+	<div class="my-4">
 		<p class="font-semibold w-fit mx-auto mb-1">Fingerprint:</p>
 		<p class="px-1 py-0.5 bg-neutral-bg/40 font-mono w-fit mx-auto tracking-widest">
 			{#await fingerprintFromPemAsync(registration.PublicKey)}
@@ -190,15 +208,26 @@
 		</p>
 	</div>
 	<div class="mt-6 flex gap-2 justify-end">
-		{#each actionButtons as button (button.label)}
-			<SolidButton
-				variant={button.variant}
-				onclick={() => button.action()}
-				state={button.isLoading() ? "loading" : button.isDisabled() ? "disabled" : "default"}
-				disabled={button.isDisabled()}
-			>
-				{button.label}
-			</SolidButton>
+		{#each actionButtons as button, i (button.label)}
+			{#if i === actionButtons.length - 1}
+				<SolidButton
+					variant={button.variant}
+					onclick={() => button.action()}
+					state={button.isLoading() ? "loading" : button.isDisabled() ? "disabled" : "default"}
+					disabled={button.isDisabled()}
+				>
+					{button.label()}
+				</SolidButton>
+			{:else}
+				<LightButton
+					variant={button.variant}
+					onclick={() => button.action()}
+					state={button.isLoading() ? "loading" : button.isDisabled() ? "disabled" : "default"}
+					disabled={button.isDisabled()}
+				>
+					{button.label()}
+				</LightButton>
+			{/if}
 		{/each}
 	</div>
 </div>

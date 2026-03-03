@@ -70,6 +70,10 @@
 				await service.revokeAsync(registrationId);
 				break;
 			}
+			case "remove": {
+				await service.removeAsync(registrationId);
+				break;
+			}
 		}
 
 		await loadRegistrationsAsync();
@@ -143,7 +147,7 @@
 			{#if registrationState.loading}
 				<Spinner variant="primary" />
 			{:else if registrationState.pendingRegistrations.length > 0}
-				<p class="text-sm">
+				<p>
 					{m["onboarding_page.extension_registration.make_sure_fingerprint_matches.prefix"]()}
 					<span class="font-semibold">{m.product_extension_name()}</span>.
 				</p>
