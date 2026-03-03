@@ -5,14 +5,15 @@
 	import { setClientApiContext } from "$lib/modules/bootstrap/application/client-api.context";
 	import Main from "$lib/ui/components/Main.svelte";
 	import Spinner from "$lib/ui/components/Spinner.svelte";
+	import { onDestroy, onMount } from "svelte";
 	import "../app.css";
 
 	const { children } = $props();
 	const root = new ClientCompositionRoot();
 	const apiPromise: Promise<ClientApiV1> = root.buildAsync();
 	let loading = $state(true);
-
 	let api: ClientApiV1;
+
 	const getApi = (): ClientApiV1 => api;
 
 	const coordinateAppStartupAsync = async () => {
@@ -40,6 +41,18 @@
 		.finally(() => (loading = false));
 
 	setClientApiContext(getApi);
+
+	onMount(() => {
+		void apiPromise.then(() => {
+			root.playAtlasSSEClient.start();
+		});
+	});
+
+	onDestroy(() => {
+		void apiPromise.then(() => {
+			root.playAtlasSSEClient.stop();
+		});
+	});
 </script>
 
 {#if loading}

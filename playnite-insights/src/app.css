@@ -31,17 +31,17 @@ html {
 	--pl-color-error-900: hsl(355, 85%, 22%);
 	--pl-color-error-950: hsl(355, 85%, 16%);
 
-	--pl-color-warning-50: hsl(42, 100%, 96%);
-	--pl-color-warning-100: hsl(42, 100%, 92%);
-	--pl-color-warning-200: hsl(42, 100%, 85%);
-	--pl-color-warning-300: hsl(42, 100%, 75%);
-	--pl-color-warning-400: hsl(42, 100%, 65%);
-	--pl-color-warning-500: hsl(42, 100%, 55%);
-	--pl-color-warning-600: hsl(42, 100%, 48%);
-	--pl-color-warning-700: hsl(42, 100%, 40%);
-	--pl-color-warning-800: hsl(42, 100%, 32%);
-	--pl-color-warning-900: hsl(42, 100%, 26%);
-	--pl-color-warning-950: hsl(42, 100%, 20%);
+	--pl-color-warning-50: hsl(42, 84%, 96%);
+	--pl-color-warning-100: hsl(42, 84%, 92%);
+	--pl-color-warning-200: hsl(42, 84%, 85%);
+	--pl-color-warning-300: hsl(42, 84%, 75%);
+	--pl-color-warning-400: hsl(42, 84%, 65%);
+	--pl-color-warning-500: hsl(42, 84%, 55%);
+	--pl-color-warning-600: hsl(42, 84%, 48%);
+	--pl-color-warning-700: hsl(42, 84%, 40%);
+	--pl-color-warning-800: hsl(42, 84%, 32%);
+	--pl-color-warning-900: hsl(42, 84%, 26%);
+	--pl-color-warning-950: hsl(42, 84%, 20%);
 
 	--pl-color-success-50: hsl(152, 55%, 96%);
 	--pl-color-success-100: hsl(152, 55%, 92%);

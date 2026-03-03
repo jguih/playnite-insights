@@ -5,9 +5,11 @@ import {
 	EventBus,
 	HttpClient,
 	LogService,
+	PlayAtlasSSEClient,
 	type IClockPort,
 	type IDomainEventBusPort,
 	type ILogServicePort,
+	type IPlayAtlasSSEClientPort,
 } from "$lib/modules/common/application";
 import { PlayAtlasClient } from "$lib/modules/common/application/playatlas-client";
 import { Clock } from "$lib/modules/common/infra";
@@ -43,6 +45,12 @@ export class ClientCompositionRoot {
 	private readonly logService: ILogServicePort = new LogService();
 	private readonly eventBus: IDomainEventBusPort = new EventBus();
 	private readonly clock: IClockPort = new Clock();
+	#playAtlasSSEClient: PlayAtlasSSEClient | null = null;
+
+	get playAtlasSSEClient(): IPlayAtlasSSEClientPort {
+		if (!this.#playAtlasSSEClient) throw new Error("Client composition root was not built!");
+		return this.#playAtlasSSEClient;
+	}
 
 	constructor() {}
 
@@ -139,9 +147,14 @@ export class ClientCompositionRoot {
 		this.startLibrarySync({ auth, synchronization });
 		this.setupDomainEventListeners({ auth, synchronization });
 
+		this.#playAtlasSSEClient = new PlayAtlasSSEClient({
+			logService: this.logService,
+		});
+
 		const bootstrapper = new ClientBootstrapper({
 			modules: { infra, gameLibrary, auth, gameSession, synchronization },
 			eventBus: this.eventBus,
+			playAtlasEventHub: this.#playAtlasSSEClient,
 		});
 		return bootstrapper.bootstrap();
 	};

@@ -1,4 +1,4 @@
-import type { IDomainEventBusPort } from "$lib/modules/common/application";
+import type { IDomainEventBusPort, IPlayAtlasEventHubPort } from "$lib/modules/common/application";
 import type { IClientGameSessionModulePort, ISynchronizationModulePort } from "../modules";
 import type { IAuthModulePort } from "../modules/auth.module.port";
 import type { IClientGameLibraryModulePort } from "../modules/game-library.module.port";
@@ -16,6 +16,7 @@ export type ClientModules = {
 export type ClientBootstrapperDeps = {
 	modules: ClientModules;
 	eventBus: IDomainEventBusPort;
+	playAtlasEventHub: IPlayAtlasEventHubPort;
 };
 
 export class ClientBootstrapper {
@@ -23,8 +24,9 @@ export class ClientBootstrapper {
 
 	bootstrap(): ClientApiV1 {
 		const {
-			eventBus,
 			modules: { auth, gameLibrary, gameSession, synchronization },
+			eventBus,
+			playAtlasEventHub,
 		} = this.deps;
 
 		const api: ClientApiV1 = {
@@ -77,6 +79,7 @@ export class ClientBootstrapper {
 				ExtensionAuthorizationService: auth.extensionAuthorizationService,
 			},
 			EventBus: eventBus,
+			PlayAtlasEventHub: playAtlasEventHub,
 		};
 
 		return Object.freeze(api);

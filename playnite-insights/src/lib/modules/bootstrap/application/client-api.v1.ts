@@ -4,7 +4,7 @@ import type {
 	IExtensionRegistrationClient,
 	ISessionIdCheckerPort,
 } from "$lib/modules/auth/application";
-import type { IDomainEventBusPort } from "$lib/modules/common/application";
+import type { IDomainEventBusPort, IPlayAtlasEventHubPort } from "$lib/modules/common/application";
 import type { IRecommendationEnginePort } from "$lib/modules/game-library/application";
 import type {
 	ICreateGameLibraryCommandHandler,
@@ -84,4 +84,5 @@ export interface ClientApiV1 {
 		GameSessionReadonlyStore: IGameSessionReadonlyStorePort;
 	};
 	EventBus: IDomainEventBusPort;
+	PlayAtlasEventHub: IPlayAtlasEventHubPort;
 }

@@ -12,6 +12,7 @@
 	import Main from "$lib/ui/components/Main.svelte";
 	import Spinner from "$lib/ui/components/Spinner.svelte";
 	import type { ExtensionRegistrationResponseDto } from "@playatlas/auth/dtos";
+	import { onDestroy, onMount } from "svelte";
 
 	const api = getClientApiContext();
 	const registrationState: {
@@ -21,14 +22,23 @@
 	} = $state({
 		registrations: [],
 		pendingRegistrations: [],
-		loading: true,
+		loading: false,
 	});
+	const unsubscribe: Array<() => void> = [];
 
 	const loadRegistrationsAsync = async () => {
+		if (registrationState.loading) return;
+
 		registrationState.loading = true;
 
 		try {
 			const { registrations } = await api().Auth.ExtensionRegistrationClient.getAllAsync();
+
+			const hasTrusted = registrations.some((r) => r.Status === "trusted");
+
+			if (hasTrusted) {
+				return await goto(resolve("/"));
+			}
 
 			registrationState.registrations = registrations;
 			registrationState.registrations.sort((a, b) => {
@@ -78,6 +88,20 @@
 
 		await loadRegistrationsAsync();
 	};
+
+	onMount(() => {
+		const handler = async () => await loadRegistrationsAsync();
+
+		for (const event of ["created", "approved", "revoked", "rejected", "removed"]) {
+			unsubscribe.push(
+				api().PlayAtlasEventHub.subscribe(`extension-registration-${event}`, handler),
+			);
+		}
+	});
+
+	onDestroy(() => {
+		unsubscribe.forEach((fn) => fn());
+	});
 </script>
 
 {#snippet setupGuide(compact: boolean = false)}
