@@ -6,7 +6,7 @@
 |-----|------|------|------|
 | [ADR-0001](./0001-mobile-first-ui.md) | Mobile-first constrained layout | Accepted | 2026-03-02 |
 | [ADR-0002](./0002-extension-registration-and-trust-model.md) | Extension registration and trust model | Accepted | 2026-03-03 |
-| [ADR-0003](./0003-offline-first-session-ingestion.md) | Offline-first game session ingestion and reconciliation model | Accepted | 2026-03-03 |
+| [ADR-0003](./0003-offline-first-game-session-ingestion.md) | Offline-first game session ingestion and reconciliation model | Accepted | 2026-03-03 |
 
 ## What this is
 
