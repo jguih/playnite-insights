@@ -8,7 +8,7 @@ Here's a quick way to install PlayAtlas so you can try it out as soon as possibl
 
     * Can run **Podman** containers
     * Has a reverse-proxy to terminate TLS
-    * Allows TCP connections on port 3000 over LAN
+    * Allows TCP connections on port 443 over LAN
 
 - A personal **Windows** host with **Playnite** installed.
 - A client device (mobile or desktop) with a modern browser (Firefox or Chromium-based).
