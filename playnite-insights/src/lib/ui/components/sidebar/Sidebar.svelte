@@ -45,7 +45,7 @@
 		class={[
 			"absolute bottom-0 left-0 top-0",
 			"h-full max-w-full",
-			"bg-background-1 overflow-y-hidden shadow-default pointer-events-auto",
+			"bg-background-1 overflow-y-hidden shadow-md pointer-events-auto",
 			props.class,
 		]}
 		style:width={`min(${width}%, 28rem)`}

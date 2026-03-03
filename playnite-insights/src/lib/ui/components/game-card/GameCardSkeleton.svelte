@@ -14,7 +14,7 @@
 	{...props}
 	class={[
 		"list-none w-full aspect-[1/1.6]",
-		"bg-background-1 shadow-default",
+		"bg-background-1 shadow-md",
 		"border-3 border-black/10",
 		"animate-pulse",
 		props.class,

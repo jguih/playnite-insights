@@ -5,7 +5,7 @@ html {
 	font-size: clamp(15px, 1.2vw + 15px, 17px);
 }
 
-@theme {
+@theme inline {
 	/* ==== Colors Pallet ==== */
 	--pl-color-primary-50: hsl(198, 100%, 97%);
 	--pl-color-primary-100: hsl(198, 100%, 94%);
@@ -185,6 +185,9 @@ html {
 	--color-error-light-selected-bg: rgba(255, 255, 255, 0.08);
 	--color-error-light-selected-fg: var(--pl-color-error-500);
 	/* ==== ==== */
+
+	--text-heading-1: var(--text-3xl);
+	--text-heading-1--line-height: var(--tw-leading, var(--text-3xl--line-height));
 }
 
 [data-theme="dark"] {
@@ -309,12 +312,4 @@ html {
 
 body {
 	@apply text-foreground bg-background-desktop overflow-hidden;
-}
-
-.transition-colors-default {
-	@apply transition-colors duration-150 ease-out;
-}
-
-.shadow-default {
-	@apply shadow-md;
 }

@@ -45,7 +45,7 @@
 		class={[
 			"absolute left-0 right-0 bottom-0",
 			"w-full",
-			"bg-background-1 overflow-y-hidden shadow-default pointer-events-auto",
+			"bg-background-1 overflow-y-hidden shadow-md pointer-events-auto",
 			props.class,
 		]}
 		style:height={`${height}dvh`}

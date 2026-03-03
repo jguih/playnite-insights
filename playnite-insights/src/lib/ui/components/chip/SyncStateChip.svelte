@@ -58,7 +58,7 @@
 
 <SolidChip
 	{...props}
-	class={["px-1.5! shadow-default", props.class]}
+	class={["px-1.5! shadow-md", props.class]}
 	variant={Status === "synced" ? "success" : Status === "pending" ? "warning" : "error"}
 >
 	<Icon>

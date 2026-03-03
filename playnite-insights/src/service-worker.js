@@ -230,5 +230,7 @@ sw.addEventListener("fetch", async (event) => {
 		return;
 	}
 
+	if (url.pathname.startsWith("/api")) return;
+
 	event.respondWith(staleWhileRevalidate(event.request, CacheKeys.APP));
 });

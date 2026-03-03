@@ -69,7 +69,7 @@
 	<OverlayContainer>
 		<Header
 			class={[
-				"transition-colors-default sticky inset-x-0 top-0 z-20 border-b",
+				"transition-colors duration-150 ease-out sticky inset-x-0 top-0 z-20 border-b",
 				showHeaderTitle
 					? "bg-background-1 shadow border-b-neutral-700/60"
 					: "bg-transparent shadow-none border-b-transparent",

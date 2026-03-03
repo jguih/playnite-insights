@@ -42,6 +42,8 @@
 				"step_4": "Return here to approve the request",
 				"hint": "Once you click Register Extension, a new approval card will appear below."
 			},
+			"not_seeing_your_request_title": "Not seeing your request?",
+			"view_setup_instructions_label": "View setup instructions",
 			"registration_status": {
 				"pending": "Waiting for approval",
 				"rejected": "Rejected",
