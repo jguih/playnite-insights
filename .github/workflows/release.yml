@@ -1,4 +1,4 @@
-name: Create and publish prod Docker image
+name: Create and Publish Svelte App Container Image
 
 on:
   push:

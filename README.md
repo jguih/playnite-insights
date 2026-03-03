@@ -1,5 +1,7 @@
 # PlayAtlas
 
+[![CI – Tests](https://github.com/jguih/playatlas/actions/workflows/pull-request.yml/badge.svg)](https://github.com/jguih/playatlas/actions/workflows/pull-request.yml)
+
 <h3 align="center">
 A self-hosted recommendation engine that turns your <strong>Playnite</strong> library into an intelligent, searchable knowledge base.
 </h3>
@@ -31,7 +33,7 @@ But a different question often goes unanswered:
 
 [**Playnite**](https://playnite.link/) already solves the hardest problem: aggregating and normalizing a user’s distributed game libraries into a single, unified source of truth.
 
-**PlayAtlas** builds on top of that foundation, introducing a deterministic, **multi-dimensional classification engine** that transforms a static library into a structured space of **explainable genre** intensity and structural patterns.
+**PlayAtlas** builds on top of that foundation, introducing a deterministic, **multi-dimensional classification scoring engine** that transforms a static library into a structured space of **explainable genre** intensity and structural patterns.
 
 Instead of recommending what to buy, **PlayAtlas helps users rediscover what they already have**.
 
@@ -43,18 +45,13 @@ PlayAtlas consists of three components operating within the same local network:
 
 - **Playnite Host**  
   The user’s gaming machine running Playnite with the **PlayAtlas Exporter** extension.  
-  The exporter is responsible for locally persisting session state and synchronizing game metadata with the server.
+  The exporter is responsible for **locally persisting session state** and **synchronizing game metadata** with the server.
 
 - **PlayAtlas Server**  
-  A self-hosted web server responsible for:
-  - Maintaining the synchronized game library.
-  - Executing deterministic scoring engines.
-  - Enforcing domain invariants.
-  - Managing exporter registration and trust.
-  - Reconciling session state received from the exporter.
+  A **self-hosted web server** that **maintains** the synchronized game library and game sessions, **classifies** games into explainable genres and **manages** client trust.
 
 - **Web Client**  
-  A browser-based interface accessible from desktop or mobile devices from modern browsers.  
+  A **browser-based interface** accessible from desktop or mobile devices.  
   The client interacts with the server over HTTP and reflects server-authoritative state.
 
 ### Data Flow
@@ -92,16 +89,17 @@ The PlayAtlas server is not directly exposed. It communicates only with the reve
 The PlayAtlas Server is the single source of truth for all persistent domain state.
 
 - **PlayAtlas Exporter**
-    - Local durability of Game Sessions.
+    - Local durability of game sessions.
     - Offline-first ingestion.
     - Enforces single-open-session invariant.
     - Retries synchronization.
 
 - **PlayAtlas Server**
-    - Persists and reconciles Game Sessions long-term.
+    - Persists and reconciles game sessions long-term.
+    - Maintains the synchronized game library.
     - Authoritative domain state.
     - Validates legal state transitions.
-    - Produces classification scores using deterministic scoring engines.
+    - Produces classification scores using deterministic **scoring engines**.
     - Publishes domain events.
 
 - **Web Client**
@@ -109,7 +107,7 @@ The PlayAtlas Server is the single source of truth for all persistent domain sta
     - Does not enforce domain rules.
     - Requires authenticated session.
     - Caches server data for faster processing.
-    - Computes query-time recommendations using server-provided classification vectors (cosine similarity over normalized scores).
+    - **Computes query-time recommendations** using server-provided **classification vectors** (**cosine similarity** over normalized scores).
 
 ### Game Session Ingestion Model
 
@@ -134,7 +132,7 @@ The server stores sessions long-term and validates all state transitions.
 
 Domain events are published by the server using [SSE](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) (Server Sent Events). Both Web and Exporter clients subscribe to the event stream.
 
-- The server is the single publisher of domain events. Clients do not emit events directly to each other.
+- The server is the single publisher of **public** domain events. Clients do not emit events directly to each other.
 - UI updates are driven by server-authoritative state.
 - Exporter may react to server-side changes, for example, to allow changing the local Playnite state.
 
@@ -215,15 +213,77 @@ The server, however, verifies and authorizes the exporter before allowing any in
 
 This creates a simple zero-trust rule inside the LAN: **every client must be explicitly approved**, even inside the local network.
 
+## Consistency & Guarantees Table
+
+A concise table summarizing the core system invariants and behavioral guarantees.
+
+| Concern | Guarantee | Enforced By |
+|----------|------------|--------------|
+| Domain Authority | PlayAtlas Server is the single source of truth for all persistent domain state | Server |
+| Game Session Concurrency | At most one open game session per game | Exporter |
+| Game Session Durability | Game sessions are **persisted locally** before any network interaction | Exporter |
+| Game Session Delivery | At-least-once delivery semantics | Exporter |
+| Game Session Close | Close operations are **idempotent** | Server |
+| Game Session State Transition Validity | Illegal game session transitions are rejected | Server |
+| External Domain Event Publishing | Server is the single publisher of externally visible domain events (SSE). Internal module-level events may exist within each component but are not exposed across boundaries |
+| Client Communication | Clients never communicate directly with each other | Architecture Boundary |
+| Classification Determinism | Scoring engines are deterministic, pure, and side-effect free | Server |
+| Recommendation Determinism | Given identical classification vectors and weights, recommendation ranking is deterministic | Client |
+| Transport Security | All external communication occurs over HTTPS | Reverse Proxy |
+
+## Deployment Model and Constraints
+
+PlayAtlas is designed as a self-hosted LAN application with clear separation between components.
+
+### Non-Goals
+
+The following scenarios are explicitly **out of scope**:
+
+- Direct internet exposure without additional hardening.
+- Running server and exporter on the same machine as the intended long-term deployment model.
+- Internet-facing authentication or multi-tenant security models.
+
+PlayAtlas does not attempt to provide a hardened internet security model. It assumes a trusted LAN boundary and enforces security at the application level through explicit client approval and authentication.
+
+### Architectural Rationale
+
+This deployment constraint ensures:
+
+- Clear transport security boundaries.
+- Reduced attack surface.
+- Explicit trust establishment.
+- Operational simplicity
+
+## Testing Strategy
+
+PlayAtlas follows a layered testing approach designed to protect domain invariants and synchronization guarantees.
+
+Test layers include:
+
+- **Domain Unit Tests**: Validate core invariants (Game Session lifecycle, scoring determinism, transition legality).
+- **Application / Service Tests**: Validate command handlers, reconciliation flows, and authentication boundaries.
+- **Integration Tests**: Validate synchronization flows, classification reconciliation, and module interaction.
+- **Frontend Integration Tests**: Validate client-side synchronization behavior and recommendation computation.
+
+The goal is not just coverage, but **behavioral confidence**. Critical invariants (idempotent close, single-open-session rule, deterministic scoring) are explicitly tested.
+
+Continuous Integration runs the full test suite on every change.
+
 ## Getting Started
 
-TODO: how to install PlayAtlas
+To install PlayAtlas, please visit the official documentation at [Quick Start](https://jguih.github.io/playatlas/overview/quick-start/)
 
 ## Development Setup
 
 ### Local Development Server
 
-To start the local development server, run:
+First, install dependencies with:
+
+```bash
+pnpm install
+```
+
+Then, to start the local development server, run:
 
 ```bash
 pnpm dev
