@@ -41,15 +41,38 @@ It does so without relying on external services, opaque algorithms, or cloud inf
 
 PlayAtlas consists of three components operating within the same local network:
 
-- **Playnite Host**: The user’s gaming machine running Playnite with the **PlayAtlas Exporter** extension.
-- **PlayAtlas Server**: A self-hosted Web server responsible for maintaining your game library from Playnite, classifying games using deterministic and explainable scoring engines, optimizing Playnite media for web view, keeping track of the user's game sessions, and much more.
-- **Web Client**: A browser-based interface accessible from desktop or mobile devices.
+- **Playnite Host**  
+  The user’s gaming machine running Playnite with the **PlayAtlas Exporter** extension.  
+  The exporter is responsible for locally persisting session state and synchronizing game metadata with the server.
 
-The Playnite Exporter extension synchronizes the user's game library with the PlayAtlas web server. Through the Web interface exposed by said server, the user can access their Playnite game library from any browser, anywhere, even when offline.
+- **PlayAtlas Server**  
+  A self-hosted web server responsible for:
+  - Maintaining the synchronized game library
+  - Executing deterministic scoring engines
+  - Enforcing domain invariants
+  - Managing exporter registration and trust
+  - Reconciling session state received from the exporter
+
+- **Web Client**  
+  A browser-based interface accessible from desktop or mobile devices from modern browsers.  
+  The client interacts with the server over HTTP and reflects server-authoritative state.
+
+### Data Flow
+
+The **PlayAtlas Exporter** operates in an **offline-first** manner:
+
+1. Session events are durably persisted locally.
+2. Synchronization with the server occurs opportunistically.
+3. Delivery follows an at-least-once model.
+4. The server validates state transitions and enforces domain rules.
 
 All communication occurs over HTTP within the user’s LAN.
 
 ## Application Architecture
+
+<p align="center">
+<img src="docs/mkdocs/docs/screenshots/diagrams/playatlas-network-diagram.jpg" width="800" title="PlayAtlas Main Screenshot">
+</p>
 
 ### Scoring Engine Architecture
 
@@ -58,6 +81,27 @@ A **score engine** is a modular component responsible for computing classificati
 Each classification (e.g., _Horror_, _RPG_, _Survival_) has its own independent score engine. Engines are versioned, deterministic, and designed to evolve safely over time while preserving historical data.
 
 To learn more about the internals of score engines and how to create new ones, visit [Scoring Engine Architecture](/packages/@playatlas/game-library/src/application/scoring-engine/)
+
+## Architecture Decision Records (ADRs)
+
+PlayAtlas documents significant architectural decisions using ADRs.
+
+These records capture:
+
+- The context and constraints at the time of the decision
+- The trade-offs considered
+- The reasoning behind the chosen approach
+- When and why the decision should be revisited
+
+The goal is to make system boundaries, trust assumptions, and lifecycle rules explicit rather than implicit in code.
+
+### Index
+
+| ADR | Title | Status | Date |
+|-----|------|--------|------|
+| [ADR-0001](./docs/adr/0001-mobile-first-ui.md) | Mobile-first constrained layout | Accepted | 2026-03-02 |
+| [ADR-0002](./docs/adr/0002-extension-registration-and-trust-model.md) | Extension registration and trust model | Accepted | 2026-03-03 |
+| [ADR-0003](./docs/adr/0003-offline-first-session-ingestion.md) | Offline-first session ingestion and reconciliation model | Accepted | 2026-03-03 |
 
 ## Security Model
 
