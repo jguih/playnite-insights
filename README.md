@@ -225,7 +225,7 @@ A concise table summarizing the core system invariants and behavioral guarantees
 | Game Session Delivery | At-least-once delivery semantics | Exporter |
 | Game Session Close | Close operations are **idempotent** | Server |
 | Game Session State Transition Validity | Illegal game session transitions are rejected | Server |
-| External Domain Event Publishing | Server is the single publisher of externally visible domain events (SSE). Internal module-level events may exist within each component but are not exposed across boundaries |
+| External Domain Event Publishing | Server is the single publisher of externally visible domain events (SSE). Internal module-level events may exist within each component but are not exposed across boundaries | Server |
 | Client Communication | Clients never communicate directly with each other | Architecture Boundary |
 | Classification Determinism | Scoring engines are deterministic, pure, and side-effect free | Server |
 | Recommendation Determinism | Given identical classification vectors and weights, recommendation ranking is deterministic | Client |
