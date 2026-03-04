@@ -7,7 +7,7 @@ A self-hosted recommendation engine that turns your <strong>Playnite</strong> li
 </h3>
 
 <p align="center">
-<img src="docs/mkdocs/docs/screenshots/playatlas.jpg" width="800" title="PlayAtlas Main Screenshot">
+<img src="docs/mkdocs/docs/assets/playatlas.jpg" width="800" title="PlayAtlas Main Screenshot">
 </p>
 
 ## Links
@@ -213,7 +213,7 @@ The server, however, verifies and authorizes the exporter before allowing any in
 
 This creates a simple zero-trust rule inside the LAN: **every client must be explicitly approved**, even inside the local network.
 
-## Consistency & Guarantees Table
+## Consistency and Guarantees Table
 
 A concise table summarizing the core system invariants and behavioral guarantees.
 
