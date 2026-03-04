@@ -25,7 +25,9 @@ export const gameClassificationRepositorySchema: IIndexedDbSchema = {
 		const { storeName, index } = gameClassificationRepositoryMeta;
 
 		if (!db.objectStoreNames.contains(storeName)) {
-			const store = db.createObjectStore(storeName, { keyPath: "Id" });
+			const store = db.createObjectStore(storeName, {
+				keyPath: "Id" satisfies keyof GameClassificationModel,
+			});
 			createIndex(store, index.BY_SOURCE_LAST_UPDATED_AT, ["SourceLastUpdatedAtMs", "Id"]);
 			createIndex(store, index.BY_GAME_ID, ["GameId", "SourceLastUpdatedAtMs", "Id"]);
 			createIndex(store, index.BY_CLASSIFICATION_ID, [

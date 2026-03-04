@@ -41,7 +41,9 @@ export type IGameClassificationRepositoryPort = IEntityRepositoryPort<
 	GameClassification,
 	GameClassificationRepositoryFilters
 > & {
-	getLatestByGame: () => Map<GameId, Map<ClassificationId, GameClassification>>;
+	getLatestByGame: (
+		filters?: GameClassificationRepositoryFilters,
+	) => Map<GameId, Map<ClassificationId, GameClassification>>;
 	cleanup: () => void;
 };
 
@@ -122,10 +124,10 @@ export const makeGameClassificationRepository = ({
 		base._update(gameClassification);
 	};
 
-	const getLatestByGame: IGameClassificationRepositoryPort["getLatestByGame"] = () => {
+	const getLatestByGame: IGameClassificationRepositoryPort["getLatestByGame"] = (filters) => {
 		const latest = new Map<GameId, Map<ClassificationId, GameClassification>>();
 
-		for (const gc of base.public.all()) {
+		for (const gc of base.public.all(filters)) {
 			let classificationMap = latest.get(gc.getGameId());
 			if (!classificationMap) {
 				classificationMap = new Map();

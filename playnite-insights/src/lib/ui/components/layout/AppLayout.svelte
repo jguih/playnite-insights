@@ -19,7 +19,7 @@
 <div
 	{...props}
 	class={[
-		"grid h-dvh w-full overflow-hidden",
+		"grid h-dvh max-w-100 mx-auto overflow-hidden",
 		props.header &&
 			props.bottomNav &&
 			"grid-rows-[var(--header-height)_1fr_var(--bottom-nav-height)]",

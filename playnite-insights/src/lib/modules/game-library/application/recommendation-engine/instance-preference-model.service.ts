@@ -1,23 +1,23 @@
 import type { IClockPort } from "$lib/modules/common/application";
+import type { IInstancePreferenceModelInvalidationPort } from "$lib/modules/common/application/recommendation-engine/instance-preference-invalidation.port";
 import { GAME_CLASSIFICATION_DIMENSIONS } from "$lib/modules/common/domain";
 import type { GameSessionReadModel } from "$lib/modules/game-session/application";
-import type { IGameSessionReadonlyStore } from "$lib/modules/game-session/infra";
+import type { IGameSessionReadonlyStorePort } from "$lib/modules/game-session/infra";
 import type { IGameVectorProjectionServicePort } from "./game-vector-projection.service";
 
-export type IInstancePreferenceModelService = {
+export type IInstancePreferenceModelServicePort = IInstancePreferenceModelInvalidationPort & {
 	initializeAsync: () => Promise<void>;
-	getVector: () => Float32Array | null;
-	invalidate: () => void;
+	getVector: () => Float32Array;
 	rebuildAsync: () => Promise<void>;
 };
 
 export type InstancePreferenceModelServiceDeps = {
-	gameSessionReadonlyStore: IGameSessionReadonlyStore;
+	gameSessionReadonlyStore: IGameSessionReadonlyStorePort;
 	gameVectorProjectionService: IGameVectorProjectionServicePort;
 	clock: IClockPort;
 };
 
-export class InstancePreferenceModelService implements IInstancePreferenceModelService {
+export class InstancePreferenceModelService implements IInstancePreferenceModelServicePort {
 	private readonly lambda: number = 0.05;
 	private readonly ONE_DAY_MS: number = 1000 * 60 * 60 * 24;
 	private cache: Float32Array | null = null;
@@ -73,17 +73,21 @@ export class InstancePreferenceModelService implements IInstancePreferenceModelS
 		return instance;
 	};
 
-	initializeAsync: IInstancePreferenceModelService["initializeAsync"] = async () => {
+	initializeAsync: IInstancePreferenceModelServicePort["initializeAsync"] = async () => {
 		this.cache = await this.buildAsync();
 	};
 
-	getVector: IInstancePreferenceModelService["getVector"] = () => {
-		return this.cache ? Float32Array.from(this.cache) : null;
+	getVector: IInstancePreferenceModelServicePort["getVector"] = () => {
+		if (!this.cache)
+			throw new Error(
+				"InstancePreferenceModelService not initialized. Call initializeAsync() before requesting recommendations.",
+			);
+		return Float32Array.from(this.cache);
 	};
 
-	invalidate: IInstancePreferenceModelService["invalidate"] = () => (this.cache = null);
+	invalidate: IInstancePreferenceModelInvalidationPort["invalidate"] = () => (this.cache = null);
 
-	rebuildAsync: IInstancePreferenceModelService["rebuildAsync"] = async () => {
+	rebuildAsync: IInstancePreferenceModelServicePort["rebuildAsync"] = async () => {
 		this.cache = await this.buildAsync();
 	};
 }

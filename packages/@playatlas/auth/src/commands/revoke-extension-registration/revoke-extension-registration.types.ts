@@ -1,5 +1,9 @@
 import type { IDomainEventBusPort, ILogServicePort } from "@playatlas/common/application";
-import type { IExtensionRegistrationRepositoryPort } from "../../infra";
+import type {
+	RevokeExtensionRegistrationFailedReasonCode,
+	RevokeExtensionRegistrationSuccessReasonCode,
+} from "../../domain/value-object/revoke-extension-registration-reason-code";
+import type { IExtensionRegistrationRepositoryPort } from "../../infra/extension-registration.repository.port";
 
 export type RevokeExtensionRegistrationCommandHandlerDeps = {
 	extensionRegistrationRepository: IExtensionRegistrationRepositoryPort;
@@ -11,13 +15,10 @@ export type RevokeExtensionRegistrationCommandResult =
 	| {
 			success: false;
 			reason: string;
-			reason_code:
-				| "not_found"
-				| "cannot_revoke_pending_registration"
-				| "cannot_revoke_non_trusted_registration";
+			reason_code: RevokeExtensionRegistrationFailedReasonCode;
 	  }
 	| {
 			success: true;
 			reason: string;
-			reason_code: "extension_registration_revoked" | "extension_registration_already_rejected";
+			reason_code: RevokeExtensionRegistrationSuccessReasonCode;
 	  };

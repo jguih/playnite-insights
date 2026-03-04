@@ -6,12 +6,14 @@
 	import { fade } from "svelte/transition";
 	import LightButton from "../buttons/LightButton.svelte";
 	import Icon from "../Icon.svelte";
+	import type { ComponentSize } from "../types";
 
 	type DropdownProps = HTMLAttributes<HTMLDivElement> & {
 		label: Snippet;
+		size?: ComponentSize;
 	};
 
-	const { label, ...props }: DropdownProps = $props();
+	const { label, size = "md", ...props }: DropdownProps = $props();
 	let opened = $state(false);
 
 	const toggleOpened = () => (opened = !opened);
@@ -23,6 +25,7 @@
 		justify="start"
 		class={["w-full", props.class]}
 		state={opened ? "selected" : "default"}
+		{size}
 	>
 		<Icon>
 			{#if !opened}

@@ -47,8 +47,9 @@ describe("Auth / Extension Registration", () => {
 		// Act
 		const registerResult = api.auth.commands.getRegisterExtensionCommandHandler().execute(command);
 		const registrationId = registerResult.success ? registerResult.registrationId : null;
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(registrationId).toBeDefined();
@@ -83,13 +84,13 @@ describe("Auth / Extension Registration", () => {
 		const approveResult = api.auth.commands
 			.getApproveExtensionRegistrationCommandHandler()
 			.execute({ registrationId: registrationId! });
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 		const approved = registrations.find((r) => r.Id === registrationId);
 
 		// Assert
 		expect(approved?.Status).toBe("trusted");
-		expect(queryResult.type).not.toBe("not_modified");
 
 		expect(registerResult.success).toBe(true);
 		expect(registerResult.reason_code).toBe("extension_registered");
@@ -113,14 +114,14 @@ describe("Auth / Extension Registration", () => {
 		const rejectResult = api.auth.commands.getRejectExtensionRegistrationCommandHandler().execute({
 			registrationId: ExtensionRegistrationIdParser.fromExternal(faker.number.int()),
 		});
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(rejectResult.success).toBe(false);
 		expect(rejectResult.reason_code).toBe("not_found");
 
-		expect(queryResult.type).toBe("ok");
 		expect(registrations).toHaveLength(0);
 
 		expect(events).toHaveLength(0);
@@ -135,14 +136,14 @@ describe("Auth / Extension Registration", () => {
 			.execute({
 				registrationId: ExtensionRegistrationIdParser.fromExternal(faker.number.int()),
 			});
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(approveResult.success).toBe(false);
 		expect(approveResult.reason_code).toBe("not_found");
 
-		expect(queryResult.type).toBe("ok");
 		expect(registrations).toHaveLength(0);
 
 		expect(events).toHaveLength(0);
@@ -155,14 +156,14 @@ describe("Auth / Extension Registration", () => {
 		const revokeResult = api.auth.commands.getRevokeExtensionRegistrationCommandHandler().execute({
 			registrationId: ExtensionRegistrationIdParser.fromExternal(faker.number.int()),
 		});
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(revokeResult.success).toBe(false);
 		expect(revokeResult.reason_code).toBe("not_found");
 
-		expect(queryResult.type).toBe("ok");
 		expect(registrations).toHaveLength(0);
 
 		expect(events).toHaveLength(0);
@@ -188,8 +189,9 @@ describe("Auth / Extension Registration", () => {
 		const approveResult2 = api.auth.commands
 			.getApproveExtensionRegistrationCommandHandler()
 			.execute(approveCommand);
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(approveResult1.success).toBe(true);
@@ -198,7 +200,6 @@ describe("Auth / Extension Registration", () => {
 		expect(approveResult2.success).toBe(true);
 		expect(approveResult2.reason_code).toBe("extension_registration_already_approved");
 
-		expect(queryResult.type).toBe("ok");
 		expect(registrations).toHaveLength(1);
 		expect(registrations[0].Status).toBe("trusted");
 
@@ -234,8 +235,9 @@ describe("Auth / Extension Registration", () => {
 		const approveResult = api.auth.commands
 			.getApproveExtensionRegistrationCommandHandler()
 			.execute(approveCommand);
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(rejectResult.success).toBe(true);
@@ -244,7 +246,6 @@ describe("Auth / Extension Registration", () => {
 		expect(approveResult.success).toBe(false);
 		expect(approveResult.reason_code).toBe("cannot_approve_rejected_registration");
 
-		expect(queryResult.type).toBe("ok");
 		expect(registrations).toHaveLength(1);
 		expect(registrations[0].Status).toBe("rejected");
 
@@ -280,8 +281,9 @@ describe("Auth / Extension Registration", () => {
 		const revokeResult = api.auth.commands
 			.getRevokeExtensionRegistrationCommandHandler()
 			.execute(revokeCommand);
-		const queryResult = api.auth.queries.getGetAllExtensionRegistrationsQueryHandler().execute();
-		const registrations = queryResult.type === "ok" ? queryResult.data : [];
+		const { registrations } = api.auth.queries
+			.getGetAllExtensionRegistrationsQueryHandler()
+			.execute();
 
 		// Assert
 		expect(approveResult.success).toBe(true);
@@ -290,7 +292,6 @@ describe("Auth / Extension Registration", () => {
 		expect(revokeResult.success).toBe(true);
 		expect(revokeResult.reason_code).toBe("extension_registration_revoked");
 
-		expect(queryResult.type).toBe("ok");
 		expect(registrations).toHaveLength(1);
 		expect(registrations[0].Status).toBe("rejected");
 

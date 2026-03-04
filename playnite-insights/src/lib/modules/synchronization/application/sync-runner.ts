@@ -25,12 +25,21 @@ export class SyncRunner implements ISyncRunnerPort {
 
 		const response = await fetchAsync({ lastCursor });
 
-		if (!response.success) return;
+		if (!response.success)
+			return {
+				success: false,
+				reason_code: "fetch_failed",
+			};
 
 		const entities = response.items.map((i) => map({ dto: i, now }));
 
 		if (entities.length > 0) await persistAsync({ entities });
 
 		syncState.setLastServerSyncCursor(syncTarget, response.nextCursor);
+
+		return {
+			success: true,
+			updatedEntities: entities.length,
+		};
 	};
 }

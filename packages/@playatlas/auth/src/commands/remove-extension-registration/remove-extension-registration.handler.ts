@@ -3,6 +3,10 @@ import {
 	type IDomainEventBusPort,
 	type ILogServicePort,
 } from "@playatlas/common/application";
+import type {
+	RemoveExtensionRegistrationFailedReasonCode,
+	RemoveExtensionRegistrationSuccessReasonCode,
+} from "../../domain/value-object/remove-extension-registration-reason-code";
 import { type IExtensionRegistrationRepositoryPort } from "../../infra/extension-registration.repository.port";
 import { type RemoveExtensionRegistrationCommand } from "./remove-extension-registration.command";
 
@@ -16,12 +20,12 @@ export type RemoveExtensionRegistrationServiceResult =
 	| {
 			success: false;
 			reason: string;
-			reason_code: "not_found" | "invalid_operation";
+			reason_code: RemoveExtensionRegistrationFailedReasonCode;
 	  }
 	| {
 			success: true;
 			reason: string;
-			reason_code: "ok";
+			reason_code: RemoveExtensionRegistrationSuccessReasonCode;
 	  };
 
 export type IRemoveExtensionRegistrationCommandHandlerPort = ICommandHandlerPort<
@@ -60,7 +64,7 @@ export const makeRemoveExtensionRegistrationHandler = ({
 
 			return {
 				success: true,
-				reason_code: "ok",
+				reason_code: "extension-registration-removed",
 				reason: "Removed",
 			};
 		},

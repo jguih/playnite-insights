@@ -1,5 +1,6 @@
 import type {
 	IClockPort,
+	IInstancePreferenceModelInvalidationPort,
 	ILogServicePort,
 	IPlayAtlasClientPort,
 	ISyncRunnerPort,
@@ -11,32 +12,40 @@ import {
 	type ISyncGameSessionsFlowPort,
 } from "$lib/modules/game-session/application";
 import {
-	GameSessionReadonlyStore,
 	GameSessionWriteStore,
-	type IGameSessionReadonlyStore,
+	type IGameSessionReadonlyStorePort,
 	type IGameSessionWriteStorePort,
 } from "$lib/modules/game-session/infra";
 import type { IClientGameSessionModulePort } from "./game-session.module.port";
 
 export type GameSessionModuleDeps = {
+	gameSessionReadonlyStore: IGameSessionReadonlyStorePort;
 	dbSignal: IDBDatabase;
 	clock: IClockPort;
 	logService: ILogServicePort;
 	playAtlasClient: IPlayAtlasClientPort;
 	syncRunner: ISyncRunnerPort;
+	instancePreferenceModelInvalidation: IInstancePreferenceModelInvalidationPort;
 };
 
 export class GameSessionModule implements IClientGameSessionModulePort {
 	readonly gameSessionMapper: IGameSessionReadModelMapperPort;
-	readonly gameSessionReadonlyStore: IGameSessionReadonlyStore;
+	readonly gameSessionReadonlyStore: IGameSessionReadonlyStorePort;
 	readonly gameSessionWriteStore: IGameSessionWriteStorePort;
 	readonly syncGameSessionsFlow: ISyncGameSessionsFlowPort;
 
 	constructor(private readonly deps: GameSessionModuleDeps) {
-		const { dbSignal, clock, playAtlasClient, syncRunner } = deps;
+		const {
+			dbSignal,
+			clock,
+			playAtlasClient,
+			syncRunner,
+			instancePreferenceModelInvalidation,
+			gameSessionReadonlyStore,
+		} = deps;
 
 		this.gameSessionMapper = new GameSessionReadModelMapper({ clock });
-		this.gameSessionReadonlyStore = new GameSessionReadonlyStore({ dbSignal });
+		this.gameSessionReadonlyStore = gameSessionReadonlyStore;
 		this.gameSessionWriteStore = new GameSessionWriteStore({
 			dbSignal,
 			gameSessionMapper: this.gameSessionMapper,
@@ -46,6 +55,7 @@ export class GameSessionModule implements IClientGameSessionModulePort {
 			gameSessionsWriteStore: this.gameSessionWriteStore,
 			playAtlasClient,
 			syncRunner,
+			instancePreferenceModelInvalidation,
 		});
 	}
 }

@@ -1,15 +1,14 @@
-import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
 import type {
+	ISyncFlowPort,
 	ISyncRunnerPort,
 	SyncRunnerFetchResult,
-} from "$lib/modules/common/application/sync-runner.port";
+} from "$lib/modules/common/application";
+import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
 import type { CompletionStatusResponseDto } from "@playatlas/game-library/dtos";
 import type { ISyncCompletionStatusesCommandHandlerPort } from "../commands";
 import type { ICompletionStatusMapperPort } from "./completion-status.mapper.port";
 
-export interface ISyncCompletionStatusesFlowPort {
-	executeAsync: () => Promise<void>;
-}
+export type ISyncCompletionStatusesFlowPort = ISyncFlowPort;
 
 export type SyncCompletionStatusesFlowDeps = {
 	playAtlasClient: IPlayAtlasClientPort;
@@ -42,7 +41,7 @@ export class SyncCompletionStatusesFlow implements ISyncCompletionStatusesFlowPo
 	executeAsync: ISyncCompletionStatusesFlowPort["executeAsync"] = async () => {
 		const { completionStatusMapper, syncCompletionStatusesCommandHandler, syncRunner } = this.deps;
 
-		await syncRunner.runAsync({
+		return await syncRunner.runAsync({
 			syncTarget: "completionStatuses",
 			fetchAsync: this.fetchAsync,
 			mapDtoToEntity: ({ dto, now }) => completionStatusMapper.fromDto(dto, now),

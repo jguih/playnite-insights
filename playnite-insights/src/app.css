@@ -5,7 +5,7 @@ html {
 	font-size: clamp(15px, 1.2vw + 15px, 17px);
 }
 
-@theme {
+@theme inline {
 	/* ==== Colors Pallet ==== */
 	--pl-color-primary-50: hsl(198, 100%, 97%);
 	--pl-color-primary-100: hsl(198, 100%, 94%);
@@ -19,29 +19,29 @@ html {
 	--pl-color-primary-900: hsl(198, 100%, 26%);
 	--pl-color-primary-950: hsl(198, 100%, 18%);
 
-	--pl-color-error-50: hsl(355, 100%, 97%);
-	--pl-color-error-100: hsl(355, 100%, 94%);
-	--pl-color-error-200: hsl(355, 100%, 88%);
-	--pl-color-error-300: hsl(355, 100%, 78%);
-	--pl-color-error-400: hsl(355, 100%, 70%);
-	--pl-color-error-500: hsl(355, 100%, 64%);
-	--pl-color-error-600: hsl(355, 100%, 54%);
-	--pl-color-error-700: hsl(355, 100%, 46%);
-	--pl-color-error-800: hsl(355, 100%, 38%);
-	--pl-color-error-900: hsl(355, 100%, 30%);
-	--pl-color-error-950: hsl(355, 100%, 22%);
+	--pl-color-error-50: hsl(355, 85%, 94%);
+	--pl-color-error-100: hsl(355, 85%, 88%);
+	--pl-color-error-200: hsl(355, 85%, 80%);
+	--pl-color-error-300: hsl(355, 85%, 70%);
+	--pl-color-error-400: hsl(355, 85%, 60%);
+	--pl-color-error-500: hsl(355, 85%, 52%);
+	--pl-color-error-600: hsl(355, 85%, 44%);
+	--pl-color-error-700: hsl(355, 85%, 36%);
+	--pl-color-error-800: hsl(355, 85%, 28%);
+	--pl-color-error-900: hsl(355, 85%, 22%);
+	--pl-color-error-950: hsl(355, 85%, 16%);
 
-	--pl-color-warning-50: hsl(42, 100%, 96%);
-	--pl-color-warning-100: hsl(42, 100%, 92%);
-	--pl-color-warning-200: hsl(42, 100%, 85%);
-	--pl-color-warning-300: hsl(42, 100%, 75%);
-	--pl-color-warning-400: hsl(42, 100%, 65%);
-	--pl-color-warning-500: hsl(42, 100%, 55%);
-	--pl-color-warning-600: hsl(42, 100%, 48%);
-	--pl-color-warning-700: hsl(42, 100%, 40%);
-	--pl-color-warning-800: hsl(42, 100%, 32%);
-	--pl-color-warning-900: hsl(42, 100%, 26%);
-	--pl-color-warning-950: hsl(42, 100%, 20%);
+	--pl-color-warning-50: hsl(42, 84%, 96%);
+	--pl-color-warning-100: hsl(42, 84%, 92%);
+	--pl-color-warning-200: hsl(42, 84%, 85%);
+	--pl-color-warning-300: hsl(42, 84%, 75%);
+	--pl-color-warning-400: hsl(42, 84%, 65%);
+	--pl-color-warning-500: hsl(42, 84%, 55%);
+	--pl-color-warning-600: hsl(42, 84%, 48%);
+	--pl-color-warning-700: hsl(42, 84%, 40%);
+	--pl-color-warning-800: hsl(42, 84%, 32%);
+	--pl-color-warning-900: hsl(42, 84%, 26%);
+	--pl-color-warning-950: hsl(42, 84%, 20%);
 
 	--pl-color-success-50: hsl(152, 55%, 96%);
 	--pl-color-success-100: hsl(152, 55%, 92%);
@@ -55,6 +55,7 @@ html {
 	--pl-color-success-900: hsl(152, 55%, 24%);
 	--pl-color-success-950: hsl(152, 55%, 18%);
 
+	--pl-color-background-desktop: hsl(228, 48%, 2%);
 	--pl-color-background: hsl(228, 48%, 10%);
 	--pl-color-background-1: hsl(228, 48%, 15%);
 	--pl-color-background-2: hsl(228, 48%, 18%);
@@ -67,6 +68,7 @@ html {
 	/* ==== ==== */
 
 	/* ==== Semantic Tokens ==== */
+	--color-background-desktop: var(--pl-color-background-desktop);
 	--color-background: var(--pl-color-background);
 	--color-background-1: var(--pl-color-background-1);
 	--color-background-2: var(--pl-color-background-2);
@@ -183,6 +185,9 @@ html {
 	--color-error-light-selected-bg: rgba(255, 255, 255, 0.08);
 	--color-error-light-selected-fg: var(--pl-color-error-500);
 	/* ==== ==== */
+
+	--text-heading-1: var(--text-3xl);
+	--text-heading-1--line-height: var(--tw-leading, var(--text-3xl--line-height));
 }
 
 [data-theme="dark"] {
@@ -306,13 +311,5 @@ html {
 }
 
 body {
-	@apply text-foreground bg-background overflow-hidden;
-}
-
-.transition-colors-default {
-	@apply transition-colors duration-150 ease-out;
-}
-
-.shadow-default {
-	@apply shadow-md;
+	@apply text-foreground bg-background-desktop overflow-hidden;
 }

@@ -1,15 +1,14 @@
-import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
 import type {
+	ISyncFlowPort,
 	ISyncRunnerPort,
 	SyncRunnerFetchResult,
-} from "$lib/modules/common/application/sync-runner.port";
+} from "$lib/modules/common/application";
+import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
 import type { GenreResponseDto } from "@playatlas/game-library/dtos";
 import type { ISyncGenresCommandHandlerPort } from "../commands";
 import type { IGenreMapperPort } from "./genre.mapper.port";
 
-export interface ISyncGenresFlowPort {
-	executeAsync: () => Promise<void>;
-}
+export type ISyncGenresFlowPort = ISyncFlowPort;
 
 export type SyncGenresFlowDeps = {
 	playAtlasClient: IPlayAtlasClientPort;
@@ -42,7 +41,7 @@ export class SyncGenresFlow implements ISyncGenresFlowPort {
 	executeAsync: ISyncGenresFlowPort["executeAsync"] = async () => {
 		const { syncRunner, genreMapper, syncGenresCommandHandler } = this.deps;
 
-		await syncRunner.runAsync({
+		return await syncRunner.runAsync({
 			syncTarget: "genres",
 			fetchAsync: this.fetchAsync,
 			mapDtoToEntity: ({ dto, now }) => genreMapper.fromDto(dto, now),

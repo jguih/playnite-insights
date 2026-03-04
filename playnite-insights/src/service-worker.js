@@ -129,7 +129,6 @@ function shouldCache(response) {
  * @param {string} cacheName
  * @param {UpdateMessage} updateMessage
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function staleWhileRevalidate(request, cacheName, updateMessage = { type: "UNKNOWN" }) {
 	const cache = await caches.open(cacheName);
 	const cachedResponse = await cache.match(request);
@@ -185,41 +184,11 @@ async function networkFirst(request, cacheName) {
 
 /**
  *
- * @param {string} pathname
- * @param {string} cacheName
- * @param {Request} request
- */
-async function shellRouteStrategy(pathname, cacheName, request) {
-	const cache = await caches.open(cacheName);
-	try {
-		const networkResponse = await fetch(request);
-		if (!(networkResponse instanceof Response)) {
-			throw new Error("Invalid response from fetch");
-		}
-		if (shouldCache(networkResponse)) {
-			void cache.put(pathname, networkResponse.clone());
-		}
-		return networkResponse;
-	} catch {
-		const cachedResponse = await cache.match(pathname);
-		if (cachedResponse) {
-			return cachedResponse;
-		}
-		return new Response("Service Unavailable", { status: 503 });
-	}
-}
-
-/**
- *
  * @param {Request} request
  */
 async function handleImageRequest(request) {
 	try {
-		const response = await fetch(request);
-		if (!response.ok) {
-			throw new Error("Image fetch failed");
-		}
-		return response;
+		return await fetch(request);
 	} catch {
 		if (request.url.includes("/cover")) {
 			return fetch("/placeholder/cover.png");
@@ -243,10 +212,6 @@ sw.addEventListener("fetch", async (event) => {
 
 	const url = new URL(event.request.url);
 
-	if (url.pathname.endsWith("manifest.webmanifest")) {
-		return;
-	}
-
 	// Always return cached assets
 	if (ASSETS.includes(url.pathname)) {
 		const serveCachedAssets = async () => {
@@ -259,22 +224,13 @@ sw.addEventListener("fetch", async (event) => {
 		return;
 	}
 
-	if (shellRoutes.includes(url.pathname)) {
-		event.respondWith(shellRouteStrategy(url.pathname, CacheKeys.APP, event.request));
-		return;
-	}
-
 	// Handle images
 	if (event.request.destination === "image" && event.request.url.includes("/api/assets/image/")) {
 		event.respondWith(handleImageRequest(event.request));
 		return;
 	}
 
-	// Network first for everything that is not from api
-	if (!url.pathname.startsWith("/api")) {
-		event.respondWith(networkFirst(event.request, CacheKeys.APP));
-		return;
-	}
+	if (url.pathname.startsWith("/api")) return;
 
-	return;
+	event.respondWith(staleWhileRevalidate(event.request, CacheKeys.APP));
 });

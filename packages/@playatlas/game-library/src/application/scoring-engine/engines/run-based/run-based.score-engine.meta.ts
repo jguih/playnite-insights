@@ -9,7 +9,7 @@ import {
 import type { ScoreEngineClassificationTierThresholdPolicy } from "../../policy/classification-tier-threshold.policy";
 import type { ScoreEngineEvidenceGroupsMeta, ScoreEngineVersion } from "../../score-engine.types";
 
-export const RUN_BASED_ENGINE_VERSION = "v1.0.34" as const satisfies ScoreEngineVersion;
+export const RUN_BASED_ENGINE_VERSION = "v1.0.35" as const satisfies ScoreEngineVersion;
 
 export const RUN_BASED_ENGINE_EVIDENCE_GROUPS = [
 	"run_based_identity",

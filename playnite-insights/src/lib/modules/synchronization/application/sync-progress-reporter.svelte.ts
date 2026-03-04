@@ -33,7 +33,7 @@ export class SyncProgressReporter implements ISyncProgressReporterPort {
 				this.#runningTimeout = setTimeout(() => {
 					this.progressSignal.running = true;
 					this.progressSignal.activeFlow = null;
-				}, 300);
+				}, 500);
 				break;
 			case "sync-finished":
 				if (this.#runningTimeout) clearTimeout(this.#runningTimeout);

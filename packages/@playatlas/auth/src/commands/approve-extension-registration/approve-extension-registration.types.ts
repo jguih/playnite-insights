@@ -1,4 +1,8 @@
 import type { IDomainEventBusPort, ILogServicePort } from "@playatlas/common/application";
+import type {
+	ApproveExtensionRegistrationFailedReasonCode,
+	ApproveExtensionRegistrationSuccessReasonCode,
+} from "../../domain";
 import type { IExtensionRegistrationRepositoryPort } from "../../infra";
 
 export type ApproveExtensionRegistrationServiceDeps = {
@@ -11,13 +15,10 @@ export type ApproveExtensionRegistrationCommandResult =
 	| {
 			success: false;
 			reason: string;
-			reason_code:
-				| "not_found"
-				| "cannot_approve_rejected_registration"
-				| "cannot_approve_non_pending_registration";
+			reason_code: ApproveExtensionRegistrationFailedReasonCode;
 	  }
 	| {
 			success: true;
 			reason: string;
-			reason_code: "extension_registration_approved" | "extension_registration_already_approved";
+			reason_code: ApproveExtensionRegistrationSuccessReasonCode;
 	  };

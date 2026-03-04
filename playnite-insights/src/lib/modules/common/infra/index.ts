@@ -2,6 +2,7 @@ export * from "./client-entity.repository";
 export type * from "./client-entity.repository.port";
 export type * from "./client-entity.repository.types";
 export * from "./client-entity.repository.utils";
+export * from "./client-storage-manager";
 export * from "./clock";
 export * from "./date-time-handler";
 export type * from "./date-time-handler.port";

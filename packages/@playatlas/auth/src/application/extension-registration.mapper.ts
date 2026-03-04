@@ -1,7 +1,7 @@
 import type { EntityMapper } from "@playatlas/common/application";
 import { ExtensionRegistrationIdParser } from "@playatlas/common/domain";
 import { type ExtensionRegistration } from "../domain/extension-registration.entity";
-import type { ExtensionRegistrationResponseDto } from "../dtos/extension-registration.response";
+import type { ExtensionRegistrationResponseDto } from "../dtos/extension-registration.response.dto";
 import type { ExtensionRegistrationModel } from "../infra/extension-registration.repository";
 import type { IExtensionRegistrationFactoryPort } from "./extension-registration.factory";
 

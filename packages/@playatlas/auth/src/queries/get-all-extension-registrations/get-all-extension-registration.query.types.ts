@@ -1,5 +1,5 @@
 import type { IExtensionRegistrationMapperPort } from "../../application";
-import type { ExtensionRegistrationResponseDto } from "../../dtos/extension-registration.response";
+import type { GetExtensionRegistrationsResponseDto } from "../../dtos/extension-registration.response.dto";
 import type { IExtensionRegistrationRepositoryPort } from "../../infra/extension-registration.repository.port";
 
 export type GetAllExtensionRegistrationsQueryHandlerDeps = {
@@ -7,6 +7,4 @@ export type GetAllExtensionRegistrationsQueryHandlerDeps = {
 	extensionRegistrationMapper: IExtensionRegistrationMapperPort;
 };
 
-export type GetAllExtensionRegistrationsResult =
-	| { type: "not_modified" }
-	| { type: "ok"; data: ExtensionRegistrationResponseDto[]; etag: string };
+export type GetAllExtensionRegistrationsResult = GetExtensionRegistrationsResponseDto;

@@ -122,4 +122,8 @@ export class AuthFlow implements IAuthFlowPort {
 			throw error;
 		}
 	};
+
+	checkHealthAsync: IAuthFlowPort["checkHealthAsync"] = async () => {
+		return await this.deps.authService.checkHealthAsync();
+	};
 }

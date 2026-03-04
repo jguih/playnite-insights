@@ -1,5 +1,7 @@
 import type { IDomainEventBusPort } from "$lib/modules/common/application";
+import type { IClientStorageManagerPort } from "$lib/modules/common/infra";
 import type {
+	IInstancePreferenceModelServicePort,
 	ISyncCompaniesFlowPort,
 	ISyncCompletionStatusesFlowPort,
 	ISyncGameClassificationsFlowPort,
@@ -27,6 +29,8 @@ export type SynchronizationModuleDeps = {
 	syncGameSessionsFlow: ISyncGameSessionsFlowPort;
 	clock: IClockPort;
 	eventBus: IDomainEventBusPort;
+	instancePreferenceModelService: IInstancePreferenceModelServicePort;
+	storageManager: IClientStorageManagerPort;
 };
 
 export class SynchronizationModule implements ISynchronizationModulePort {
@@ -46,6 +50,8 @@ export class SynchronizationModule implements ISynchronizationModulePort {
 			syncGenresFlow: this.deps.syncGenresFlow,
 			syncPlatformsFlow: this.deps.syncPlatformsFlow,
 			syncGameSessionsFlow: this.deps.syncGameSessionsFlow,
+			instancePreferenceModelService: this.deps.instancePreferenceModelService,
+			storageManager: this.deps.storageManager,
 		});
 	}
 }

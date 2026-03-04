@@ -2,6 +2,13 @@
 	import { resolve } from "$app/paths";
 	import { getClientApiContext } from "$lib/modules/bootstrap/application";
 	import { GameIdParser } from "$lib/modules/common/domain";
+	import { GameAggregateStore, GameViewModel } from "$lib/page/game/gameId";
+	import ActionButtonContainer from "$lib/page/game/gameId/components/ActionButtonContainer.svelte";
+	import ActionButtonLabel from "$lib/page/game/gameId/components/ActionButtonLabel.svelte";
+	import CompletionStatusButton from "$lib/page/game/gameId/components/CompletionStatusButton.svelte";
+	import GameDetailSkeleton from "$lib/page/game/gameId/components/GameDetailSkeleton.svelte";
+	import GameInfoSection from "$lib/page/game/gameId/components/GameInfoSection.svelte";
+	import GenreBreakdown from "$lib/page/game/gameId/components/genre-breakdown/GenreBreakdown.svelte";
 	import LightButton from "$lib/ui/components/buttons/LightButton.svelte";
 	import SolidButton from "$lib/ui/components/buttons/SolidButton.svelte";
 	import SolidChip from "$lib/ui/components/chip/SolidChip.svelte";
@@ -9,20 +16,14 @@
 	import Header from "$lib/ui/components/header/Header.svelte";
 	import Icon from "$lib/ui/components/Icon.svelte";
 	import AppLayout from "$lib/ui/components/layout/AppLayout.svelte";
+	import AppOverlayLayout from "$lib/ui/components/layout/AppOverlayLayout.svelte";
+	import OverlayContainer from "$lib/ui/components/layout/OverlayContainer.svelte";
 	import Main from "$lib/ui/components/Main.svelte";
-	import { GameAssets, PlaytimeFormatter } from "$lib/ui/utils";
+	import { DurationFormatter, GameAssets } from "$lib/ui/utils";
 	import { ArrowLeftIcon, ClockIcon, NotebookPenIcon } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
 	import { cubicInOut } from "svelte/easing";
 	import { fade } from "svelte/transition";
-	import ActionButtonContainer from "./page/components/ActionButtonContainer.svelte";
-	import ActionButtonLabel from "./page/components/ActionButtonLabel.svelte";
-	import CompletionStatusButton from "./page/components/CompletionStatusButton.svelte";
-	import GameDetailSkeleton from "./page/components/GameDetailSkeleton.svelte";
-	import GameInfoSection from "./page/components/GameInfoSection.svelte";
-	import GenreBreakdown from "./page/components/genre-breakdown/GenreBreakdown.svelte";
-	import { GameAggregateStore } from "./page/game-aggregate-store.svelte";
-	import { GameViewModel } from "./page/game-view-model.svelte";
 
 	const { params } = $props();
 	const getGameId = () => GameIdParser.fromTrusted(params.gameId);
@@ -64,35 +65,39 @@
 	$inspect(store.latestGameClassifications?.get("SURVIVAL"));
 </script>
 
-<Header
-	class={[
-		"transition-colors-default fixed inset-x-0 top-0 z-20 border-b",
-		showHeaderTitle
-			? "bg-background-1 shadow border-b-neutral-700/60"
-			: "bg-transparent shadow-none border-b-transparent",
-	]}
->
-	<div class="absolute inset-x-0 top-0 h-16 bg-linear-to-b from-black/60 to-transparent"></div>
-	<div class="relative mr-auto w-fit pointer-events-auto flex items-center gap-1">
-		<LightButton
-			variant="neutral"
-			iconOnly
-			onclick={() => history.back()}
+<AppOverlayLayout>
+	<OverlayContainer>
+		<Header
+			class={[
+				"transition-colors duration-150 ease-out sticky inset-x-0 top-0 z-20 border-b",
+				showHeaderTitle
+					? "bg-background-1 shadow border-b-neutral-700/60"
+					: "bg-transparent shadow-none border-b-transparent",
+			]}
 		>
-			<Icon>
-				<ArrowLeftIcon />
-			</Icon>
-		</LightButton>
-		{#if showHeaderTitle}
-			<p
-				class={["font-semibold leading-tight text-lg truncate max-w-[70dvw]"]}
-				transition:fade={{ duration: 150, easing: cubicInOut }}
-			>
-				{store.game?.Playnite?.Name}
-			</p>
-		{/if}
-	</div>
-</Header>
+			<div class="absolute inset-x-0 top-0 h-16 bg-linear-to-b from-black/60 to-transparent"></div>
+			<div class="relative mr-auto w-fit pointer-events-auto flex items-center gap-1">
+				<LightButton
+					variant="neutral"
+					iconOnly
+					onclick={() => history.back()}
+				>
+					<Icon>
+						<ArrowLeftIcon />
+					</Icon>
+				</LightButton>
+				{#if showHeaderTitle}
+					<p
+						class={["font-semibold leading-tight text-lg truncate max-w-[70dvw]"]}
+						transition:fade={{ duration: 150, easing: cubicInOut }}
+					>
+						{store.game?.Playnite?.Name}
+					</p>
+				{/if}
+			</div>
+		</Header>
+	</OverlayContainer>
+</AppOverlayLayout>
 
 <AppLayout>
 	<Main class="p-0!">
@@ -149,10 +154,12 @@
 						</div>
 
 						<div
-							class="pb-2"
+							class="pb-2 overflow-hidden"
 							bind:this={heroTitleEl}
 						>
-							<h1 class="text-2xl font-semibold leading-tight drop-shadow-md mb-2 wrap-break-word">
+							<h1
+								class="text-2xl font-semibold leading-tight drop-shadow-md mb-2 flex-1 min-w-0 whitespace-normal wrap-anywhere"
+							>
 								{store.game.Playnite?.Name}
 							</h1>
 
@@ -257,7 +264,7 @@
 						)}
 						{@render detailSection(
 							"Playtime",
-							PlaytimeFormatter.toHoursMinutesSeconds(store.game.Playnite?.Playtime ?? 0),
+							DurationFormatter.toHoursMinutesSeconds(store.game.Playnite?.Playtime ?? 0),
 						)}
 					</GameInfoSection>
 

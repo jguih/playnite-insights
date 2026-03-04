@@ -3,24 +3,26 @@
 	import { getClientApiContext } from "$lib/modules/bootstrap/application/client-api.context";
 	import type { CreateGameLibraryFilterCommand } from "$lib/modules/game-library/commands";
 	import type { GameLibraryFilter } from "$lib/modules/game-library/domain";
+	import {
+		GameLibraryFiltersSidebar,
+		GameLibraryPager,
+		GameLibrarySearch,
+		SyncProgressViewModel,
+		gameLibraryPageScrollState,
+	} from "$lib/page/game/library";
 	import LightButton from "$lib/ui/components/buttons/LightButton.svelte";
 	import GameCard from "$lib/ui/components/game-card/GameCard.svelte";
 	import GameCardSkeleton from "$lib/ui/components/game-card/GameCardSkeleton.svelte";
 	import Header from "$lib/ui/components/header/Header.svelte";
 	import Icon from "$lib/ui/components/Icon.svelte";
 	import AppLayout from "$lib/ui/components/layout/AppLayout.svelte";
+	import AppOverlayLayout from "$lib/ui/components/layout/AppOverlayLayout.svelte";
 	import Main from "$lib/ui/components/Main.svelte";
 	import Sidebar from "$lib/ui/components/sidebar/Sidebar.svelte";
 	import Spinner from "$lib/ui/components/Spinner.svelte";
 	import { ArrowLeftIcon, ListFilter, SearchIcon } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
-	import SearchBottomSheet from "./page/components/SearchBottomSheet.svelte";
-	import { GameLibraryFiltersSidebar } from "./page/game-library-filters-sidebar";
-	import { GameLibraryPager } from "./page/game-library-pager.svelte";
-	import { type GameLibraryPagerState } from "./page/game-library-pager.types";
-	import { gameLibraryPageScrollState } from "./page/game-library-scroll-position.svelte";
-	import { GameLibrarySearch } from "./page/game-library-search.svelte";
-	import { SyncProgressViewModel } from "./page/sync-progress.view-model";
+	import SearchBottomSheet from "../../../lib/page/game/library/components/SearchBottomSheet.svelte";
 
 	const api = getClientApiContext();
 	const pager = new GameLibraryPager({ api });
@@ -31,21 +33,33 @@
 	let sentinel = $state<HTMLDivElement | undefined>(undefined);
 	let main = $state<HTMLElement | undefined>(undefined);
 
-	const commitSearchAsync = async () => {
-		const state = $state.snapshot(pager.pagerStateSignal) as unknown as GameLibraryPagerState;
+	const commitSearchAsync = async (close = true) => {
+		const searchSignalSnapshot = search.getSignalSnapshot();
 
-		pager.setQuery({ mode: "query", filters: { search: state.query.filters.search } });
-		await pager.loadMoreAsync();
+		if (close) search.close();
+
+		if (pager.pagerStateSignal.query.filters.search !== search.searchSignal) {
+			pager.setQuery({ mode: "query", filters: { search: searchSignalSnapshot } });
+			await pager.loadMoreAsync();
+		}
+
+		const pagerSignalSnapshot = pager.getSignalSnapshot();
 
 		const command: CreateGameLibraryFilterCommand = {
 			query: {
-				filter: state.query.filters,
-				sort: state.mode === "query" ? state.query.sort : { type: "recentlyUpdated" },
+				filter: pagerSignalSnapshot.query.filters,
+				sort:
+					pagerSignalSnapshot.mode === "query"
+						? pagerSignalSnapshot.query.sort
+						: { type: "recentlyUpdated" },
 			},
 		};
 
-		await api().GameLibrary.Command.CreateGameLibraryFilter.executeAsync(command);
-		await loadLibraryFiltersAsync();
+		void api()
+			.GameLibrary.Command.CreateGameLibraryFilter.executeAsync(command)
+			.then(() => {
+				void loadLibraryFiltersAsync();
+			});
 	};
 
 	const loadLibraryFiltersAsync = async () => {
@@ -105,25 +119,28 @@
 	});
 </script>
 
-{#if filters.shouldOpen}
-	<Sidebar onClose={filters.close} />
-{/if}
+<AppOverlayLayout>
+	{#if filters.shouldOpen}
+		<Sidebar onClose={filters.close} />
+	{/if}
 
-{#if search.shouldOpen}
-	<SearchBottomSheet
-		onClose={() => {
-			void commitSearchAsync();
-			search.close();
-		}}
-		bind:value={pager.pagerStateSignal.query.filters.search}
-		libraryFilterItems={libraryFilterItems.items}
-		onApplyFilterItem={async (item) => {
-			pager.setQuery({ mode: "query", filters: { search: item.Query.filter?.search } });
-			search.close();
-			await pager.loadMoreAsync();
-		}}
-	/>
-{/if}
+	{#if search.shouldOpen}
+		<SearchBottomSheet
+			onClose={() => {
+				void commitSearchAsync();
+			}}
+			onDestroy={() => {
+				void commitSearchAsync(false);
+			}}
+			bind:value={search.searchSignal}
+			libraryFilterItems={libraryFilterItems.items}
+			onApplyFilterItem={async (item) => {
+				search.searchSignal = item.Query.filter?.search;
+				void commitSearchAsync();
+			}}
+		/>
+	{/if}
+</AppOverlayLayout>
 
 <AppLayout>
 	{#snippet header()}

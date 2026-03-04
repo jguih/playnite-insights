@@ -1,6 +1,6 @@
 import type { GameId } from "$lib/modules/common/domain";
-import type { IGameVectorProjectionServicePort } from "./game-vector-projection.service";
-import type { IInstancePreferenceModelService } from "./instance-preference-model.service";
+import type { IGameRecommendationRecordProjectionServicePort } from "./game-recommendation-record-projection.service";
+import type { IInstancePreferenceModelServicePort } from "./instance-preference-model.service";
 import type {
 	RecommendationEngineFilter,
 	RecommendationEngineFilterProps,
@@ -9,6 +9,7 @@ import type {
 export type RankedGame = {
 	gameId: GameId;
 	similarity: number;
+	searchName?: string;
 };
 
 export type IRecommendationEnginePort = {
@@ -18,8 +19,8 @@ export type IRecommendationEnginePort = {
 };
 
 export type RecommendationEngineDeps = {
-	gameVectorProjectionService: IGameVectorProjectionServicePort;
-	instancePreferenceModelService: IInstancePreferenceModelService;
+	instancePreferenceModelService: IInstancePreferenceModelServicePort;
+	gameRecommendationRecordProjectionService: IGameRecommendationRecordProjectionServicePort;
 };
 
 export class RecommendationEngine implements IRecommendationEnginePort {
@@ -39,28 +40,25 @@ export class RecommendationEngine implements IRecommendationEnginePort {
 		return dot;
 	};
 
-	recommendForInstanceAsync: IRecommendationEnginePort["recommendForInstanceAsync"] = async (
-		props = {},
-	) => {
-		const { filters } = props;
+	private recommendForVectorAsync = (props: {
+		vector: Float32Array;
+		filters?: RecommendationEngineFilter[];
+	}): RankedGame[] => {
+		const { filters, vector } = props;
 		const applyFilters = this.combineFilters(...(filters ?? []));
-		const instanceVector = this.deps.instancePreferenceModelService.getVector();
 		const results: RankedGame[] = [];
 
-		if (!instanceVector) {
-			throw new Error(
-				"InstancePreferenceModelService not initialized. Call initializeAsync() before requesting recommendations.",
-			);
-		}
+		this.deps.gameRecommendationRecordProjectionService.forEach((record) => {
+			if (!applyFilters({ record })) return;
+			if (record.Vector.length !== vector.length) return;
+			if (record.GameMagnitude === 0) return;
 
-		this.deps.gameVectorProjectionService.forEach((gameId, vector) => {
-			if (!applyFilters({ gameId, vector })) return;
-
-			const sim = this.cosine(instanceVector, vector);
+			const sim = this.cosine(vector, record.Vector) * record.GameMagnitude;
 
 			results.push({
-				gameId,
+				gameId: record.GameId,
 				similarity: sim,
+				searchName: record.SearchName,
 			});
 		});
 
@@ -71,5 +69,12 @@ export class RecommendationEngine implements IRecommendationEnginePort {
 		});
 
 		return results;
+	};
+
+	recommendForInstanceAsync: IRecommendationEnginePort["recommendForInstanceAsync"] = async (
+		props = {},
+	) => {
+		const instanceVector = this.deps.instancePreferenceModelService.getVector();
+		return this.recommendForVectorAsync({ vector: instanceVector, filters: props.filters });
 	};
 }

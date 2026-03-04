@@ -45,7 +45,7 @@ export class GameMapper implements IGameMapperPort {
 					}
 				: null,
 
-			SearchName: null,
+			SearchName: dto.Playnite?.Name ? normalize(dto.Playnite.Name) : null,
 			CompletionStatusId: dto.CompletionStatusId
 				? CompletionStatusIdParser.fromTrusted(dto.CompletionStatusId)
 				: null,
@@ -135,7 +135,11 @@ export class GameMapper implements IGameMapperPort {
 					}
 				: null,
 
-			SearchName: entity.Playnite?.Name ? normalize(entity.Playnite.Name) : null,
+			SearchName: entity.SearchName
+				? entity.SearchName
+				: entity.Playnite?.Name
+					? normalize(entity.Playnite.Name)
+					: null,
 			CompletionStatusId: entity.CompletionStatusId,
 			ContentHash: entity.ContentHash,
 			Developers: entity.Developers,

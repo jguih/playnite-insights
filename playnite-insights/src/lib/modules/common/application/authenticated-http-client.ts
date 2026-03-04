@@ -16,15 +16,15 @@ export class AuthenticatedHttpClient implements IHttpClientPort {
 		this.sessionIdProvider = sessionIdProvider;
 	}
 
-	private getAuthorizationHeaderAsync = async () => {
-		const sessionId = await this.sessionIdProvider.getAsync();
+	private getAuthorizationHeader = () => {
+		const sessionId = this.sessionIdProvider.get();
 		if (sessionId) {
 			return { Authorization: `Bearer ${sessionId}` };
 		}
 	};
 
 	getAsync: IHttpClientPort["getAsync"] = async (props, extra = {}) => {
-		const authHeader = await this.getAuthorizationHeaderAsync();
+		const authHeader = this.getAuthorizationHeader();
 		const response = await this.inner.getAsync(props, {
 			...extra,
 			headers: { ...extra.headers, ...authHeader },
@@ -34,7 +34,7 @@ export class AuthenticatedHttpClient implements IHttpClientPort {
 	};
 
 	postAsync: IHttpClientPort["postAsync"] = async (props, extra = {}) => {
-		const authHeader = await this.getAuthorizationHeaderAsync();
+		const authHeader = this.getAuthorizationHeader();
 		const response = await this.inner.postAsync(props, {
 			...extra,
 			headers: { ...extra.headers, ...authHeader },
@@ -44,7 +44,7 @@ export class AuthenticatedHttpClient implements IHttpClientPort {
 	};
 
 	putAsync: IHttpClientPort["putAsync"] = async (props, extra = {}) => {
-		const authHeader = await this.getAuthorizationHeaderAsync();
+		const authHeader = this.getAuthorizationHeader();
 		const response = await this.inner.putAsync(props, {
 			...extra,
 			headers: { ...extra.headers, ...authHeader },
@@ -54,7 +54,7 @@ export class AuthenticatedHttpClient implements IHttpClientPort {
 	};
 
 	deleteAsync: IHttpClientPort["deleteAsync"] = async (props, extra = {}) => {
-		const authHeader = await this.getAuthorizationHeaderAsync();
+		const authHeader = this.getAuthorizationHeader();
 		const response = await this.inner.deleteAsync(props, {
 			...extra,
 			headers: { ...extra.headers, ...authHeader },

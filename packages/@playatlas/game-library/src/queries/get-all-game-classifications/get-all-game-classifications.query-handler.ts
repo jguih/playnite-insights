@@ -32,7 +32,12 @@ export const makeGetAllGameClassificationsQueryHandler = ({
 					}
 				: undefined;
 
-			const gameClassifications = gameClassificationRepository.all(filters);
+			const gameClassifications = gameClassificationRepository
+				.getLatestByGame(filters)
+				.values()
+				.toArray()
+				.map((gc) => gc.values().toArray())
+				.flat();
 
 			if (lastCursor) {
 				const elapsedMs = clock.now().getTime() - lastCursor.lastUpdatedAt.getTime();

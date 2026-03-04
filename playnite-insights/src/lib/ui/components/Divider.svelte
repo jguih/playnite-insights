@@ -6,5 +6,5 @@
 
 <hr
 	{...props}
-	class={["border-background-2 my-1", props.class]}
+	class={["border-white/10 my-1", props.class]}
 />

@@ -54,6 +54,29 @@ export class GameClassificationRepository
 		});
 	}
 
+	override syncAsync: IGameClassificationRepositoryPort["syncAsync"] = async (entity) => {
+		const entities = Array.isArray(entity) ? entity : [entity];
+		if (entities.length === 0) return;
+
+		await this.runTransaction([this.storeName], "readwrite", async ({ tx }) => {
+			const store = tx.objectStore(this.storeName);
+
+			const existingRecords = await this.runRequest<GameClassificationModel[]>(store.getAll());
+			const existingRecordsMap = new Map(existingRecords.map((r) => [r.GameId, r]));
+
+			for (const entity of entities) {
+				const existing = existingRecordsMap.get(entity.GameId);
+
+				if (existing && existing.ClassificationId === entity.ClassificationId) {
+					await this.runRequest(store.delete(existing.Id));
+				}
+
+				const model = this.mapper.toPersistence(entity);
+				await this.runRequest(store.put(model));
+			}
+		});
+	};
+
 	getByGameIdAsync: IGameClassificationRepositoryPort["getByGameIdAsync"] = async (gameId) => {
 		return await this.runTransaction([this.storeName], "readonly", async ({ tx }) => {
 			const store = tx.objectStore(this.storeName);

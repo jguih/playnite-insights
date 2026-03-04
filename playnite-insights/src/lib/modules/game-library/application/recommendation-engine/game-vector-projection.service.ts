@@ -1,23 +1,25 @@
-import {
-	GAME_CLASSIFICATION_DIMENSIONS,
-	GAME_CLASSIFICATION_INDEX,
-	type GameId,
-} from "$lib/modules/common/domain";
-import type { GameClassification } from "../../domain/scoring-engine/game-classification.entity";
+import { RecommendationEngineVectorUtils } from "$lib/modules/common/application";
+import { GAME_CLASSIFICATION_INDEX, type GameId } from "$lib/modules/common/domain";
 import type {
 	GameVectorReadModel,
 	IGameVectorReadonlyStore,
 } from "../../infra/recommendation-engine/game-vector.readonly-store";
 
-export type GameVectorProjection = Map<GameId, Float32Array>;
+type GameVectorProjectionRecord = {
+	vector: Float32Array;
+	magnitude: number;
+};
+
+export type GameVectorProjection = Map<GameId, GameVectorProjectionRecord>;
 
 export type IGameVectorProjectionServicePort = {
 	initializeAsync: () => Promise<void>;
 	getVector: (gameId: GameId) => Float32Array | null;
-	forEach: (callback: (gameId: GameId, vector: Float32Array) => void) => void;
+	getMagnitude: (gameId: GameId) => number | null;
+	forEach: (callback: (gameId: GameId, record: GameVectorProjectionRecord) => void) => void;
 	invalidate: () => void;
 	rebuildAsync: () => Promise<void>;
-	rebuildFromClassifications: (gameClassifications: GameClassification[]) => Promise<void>;
+	rebuildForGamesAsync: (gameIds: GameId[]) => Promise<void>;
 };
 
 export type GameVectorProjectionServiceDeps = {
@@ -28,6 +30,13 @@ export class GameVectorProjectionService implements IGameVectorProjectionService
 	private cache: GameVectorProjection | null = null;
 
 	constructor(private readonly deps: GameVectorProjectionServiceDeps) {}
+
+	normalizeVector = (v: Float32Array) => {
+		const mag = RecommendationEngineVectorUtils.magnitude(v);
+		if (mag === 0) return v;
+		for (let i = 0; i < v.length; i++) v[i] /= mag;
+		return v;
+	};
 
 	private buildAsync = async (gameId?: GameId | GameId[]) => {
 		let rows: GameVectorReadModel[];
@@ -41,21 +50,30 @@ export class GameVectorProjectionService implements IGameVectorProjectionService
 			rows = await this.deps.gameVectorReadonlyStore.getAllAsync();
 		}
 
-		const map: GameVectorProjection = new Map();
+		const projectionMap: GameVectorProjection = new Map();
+		const vectorMap = new Map<GameId, Float32Array>();
 
 		for (const row of rows) {
-			let vec = map.get(row.GameId);
+			let vec = vectorMap.get(row.GameId);
 
 			if (!vec) {
-				vec = new Float32Array(GAME_CLASSIFICATION_DIMENSIONS);
-				map.set(row.GameId, vec);
+				vec = RecommendationEngineVectorUtils.createEmptyVector();
+				vectorMap.set(row.GameId, vec);
 			}
 
 			const index = GAME_CLASSIFICATION_INDEX[row.ClassificationId];
 			vec[index] = row.NormalizedScore;
 		}
 
-		return map;
+		for (const [gameId, vector] of vectorMap) {
+			const magnitude = RecommendationEngineVectorUtils.magnitude(vector);
+
+			this.normalizeVector(vector);
+
+			projectionMap.set(gameId, { magnitude, vector });
+		}
+
+		return projectionMap;
 	};
 
 	initializeAsync: IGameVectorProjectionServicePort["initializeAsync"] = async () => {
@@ -63,14 +81,20 @@ export class GameVectorProjectionService implements IGameVectorProjectionService
 	};
 
 	getVector: IGameVectorProjectionServicePort["getVector"] = (gameId) => {
-		return this.cache?.get(gameId) ?? null;
+		if (!this.cache) throw new Error("Projection not initialized");
+		return this.cache.get(gameId)?.vector ?? null;
+	};
+
+	getMagnitude: IGameVectorProjectionServicePort["getMagnitude"] = (gameId) => {
+		if (!this.cache) throw new Error("Projection not initialized");
+		return this.cache.get(gameId)?.magnitude ?? null;
 	};
 
 	forEach: IGameVectorProjectionServicePort["forEach"] = (callback) => {
 		if (!this.cache) return;
 
-		for (const [gameId, vector] of this.cache) {
-			callback(gameId, vector);
+		for (const [gameId, record] of this.cache) {
+			callback(gameId, record);
 		}
 	};
 
@@ -80,16 +104,20 @@ export class GameVectorProjectionService implements IGameVectorProjectionService
 		this.cache = await this.buildAsync();
 	};
 
-	rebuildFromClassifications: IGameVectorProjectionServicePort["rebuildFromClassifications"] =
-		async (gameClassifications) => {
-			if (gameClassifications.length === 0) return;
+	rebuildForGamesAsync: IGameVectorProjectionServicePort["rebuildForGamesAsync"] = async (
+		gameIds,
+	) => {
+		if (gameIds.length === 0) return;
 
-			const gameIds: GameId[] = gameClassifications.map((gc) => gc.GameId);
-			const newVectors = await this.buildAsync(gameIds);
+		const cache: GameVectorProjection = new Map();
 
-			for (const gameId of gameIds) {
-				const newVector = newVectors.get(gameId);
-				if (newVector) this.cache?.set(gameId, newVector);
-			}
-		};
+		const newVectors = await this.buildAsync(gameIds.values().toArray());
+
+		for (const gameId of gameIds) {
+			const newVector = newVectors.get(gameId);
+			if (newVector) cache.set(gameId, newVector);
+		}
+
+		this.cache = cache;
+	};
 }

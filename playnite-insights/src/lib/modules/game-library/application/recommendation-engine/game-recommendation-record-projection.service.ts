@@ -1,5 +1,4 @@
 import type { GameId } from "@playatlas/common/domain";
-import type { GameClassification } from "../../domain/scoring-engine/game-classification.entity";
 import type {
 	GameRecommendationRecordReadModel,
 	IGameRecommendationRecordReadonlyStore,
@@ -13,7 +12,7 @@ export type IGameRecommendationRecordProjectionServicePort = {
 	forEach: (callback: (record: GameRecommendationRecordReadModel) => void) => void;
 	invalidate: () => void;
 	rebuildAsync: () => Promise<void>;
-	rebuildFromClassifications: (gameClassifications: GameClassification[]) => Promise<void>;
+	rebuildForGamesAsync: (gameIds: GameId[]) => Promise<void>;
 };
 
 export type GameRecommendationRecordProjectionServiceDeps = {
@@ -44,7 +43,8 @@ export class GameRecommendationRecordProjectionService implements IGameRecommend
 	};
 
 	getRecord: IGameRecommendationRecordProjectionServicePort["getRecord"] = (gameId) => {
-		return this.cache?.get(gameId) ?? null;
+		if (!this.cache) throw new Error("Projection not initialized");
+		return this.cache.get(gameId) ?? null;
 	};
 
 	forEach: IGameRecommendationRecordProjectionServicePort["forEach"] = (callback) => {
@@ -62,11 +62,10 @@ export class GameRecommendationRecordProjectionService implements IGameRecommend
 		this.cache = await this.buildAsync();
 	};
 
-	rebuildFromClassifications: IGameRecommendationRecordProjectionServicePort["rebuildFromClassifications"] =
-		async (gameClassifications) => {
-			if (gameClassifications.length === 0) return;
+	rebuildForGamesAsync: IGameRecommendationRecordProjectionServicePort["rebuildForGamesAsync"] =
+		async (gameIds) => {
+			if (gameIds.length === 0) return;
 
-			const gameIds: GameId[] = gameClassifications.map((gc) => gc.GameId);
 			const newRecords = await this.buildAsync(gameIds);
 
 			for (const gameId of gameIds) {

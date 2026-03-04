@@ -9,7 +9,7 @@ import {
 import type { ScoreEngineClassificationTierThresholdPolicy } from "../../policy/classification-tier-threshold.policy";
 import type { ScoreEngineEvidenceGroupsMeta, ScoreEngineVersion } from "../../score-engine.types";
 
-export const HORROR_ENGINE_VERSION = "v1.0.29" as const satisfies ScoreEngineVersion;
+export const HORROR_ENGINE_VERSION = "v1.0.30" as const satisfies ScoreEngineVersion;
 
 export const HORROR_ENGINE_EVIDENCE_GROUPS = [
 	"horror_identity",

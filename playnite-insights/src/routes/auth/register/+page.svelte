@@ -48,7 +48,7 @@
 		onsubmit={handleSubmit}
 	>
 		<label
-			class="text-3xl"
+			class="text-heading-1"
 			for="instance-password"
 		>
 			{m["register_page.title.prefix"]()}

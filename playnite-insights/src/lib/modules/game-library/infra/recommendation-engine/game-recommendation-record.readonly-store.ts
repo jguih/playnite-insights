@@ -5,6 +5,7 @@ import { gameRecommendationRecordStoreMeta as meta } from "./game-recommendation
 export type GameRecommendationRecordReadModel = Readonly<{
 	GameId: GameId;
 	Vector: Float32Array;
+	GameMagnitude: number;
 	IsHidden?: boolean;
 	SearchName?: string;
 }>;
@@ -39,7 +40,7 @@ export class GameRecommendationRecordReadonlyStore
 		return await this.runTransaction([meta.storeName], "readonly", async ({ tx }) => {
 			const store = tx.objectStore(meta.storeName);
 			const model = await this.runRequest<GameRecommendationRecordReadModel | undefined>(
-				store.get(gameId),
+				store.get([gameId]),
 			);
 			return model ?? null;
 		});
@@ -57,7 +58,7 @@ export class GameRecommendationRecordReadonlyStore
 
 			for (const gameId of gameIds) {
 				const model = await this.runRequest<GameRecommendationRecordReadModel | undefined>(
-					store.get(gameId),
+					store.get([gameId]),
 				);
 				if (model) models.push(model);
 			}

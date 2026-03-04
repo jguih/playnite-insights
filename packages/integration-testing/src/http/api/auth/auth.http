@@ -36,3 +36,9 @@ Content-Type: {{contentType}}
 Authorization: {{authorization}}
 
 ###
+
+### Check instance health
+GET {{protocol}}://{{host}}/api/health
+Content-Type: {{contentType}}
+
+###

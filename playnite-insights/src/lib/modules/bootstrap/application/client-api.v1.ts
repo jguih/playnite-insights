@@ -1,5 +1,10 @@
-import type { IAuthFlowPort } from "$lib/modules/auth/application";
-import type { IDomainEventBusPort } from "$lib/modules/common/application";
+import type {
+	IAuthFlowPort,
+	IExtensionAuthorizationServicePort,
+	IExtensionRegistrationClient,
+	ISessionIdCheckerPort,
+} from "$lib/modules/auth/application";
+import type { IDomainEventBusPort, IPlayAtlasEventHubPort } from "$lib/modules/common/application";
 import type { IRecommendationEnginePort } from "$lib/modules/game-library/application";
 import type {
 	ICreateGameLibraryCommandHandler,
@@ -24,7 +29,7 @@ import type {
 	IGetLatestGameClassificationByGameIdQueryHandler,
 	IGetPlatformsByIdsQueryHandlerPort,
 } from "$lib/modules/game-library/queries";
-import type { IGameSessionReadonlyStore } from "$lib/modules/game-session/infra";
+import type { IGameSessionReadonlyStorePort } from "$lib/modules/game-session/infra";
 import type {
 	IPlayAtlasSyncManagerPort,
 	ISyncProgressReporterPort,
@@ -71,9 +76,13 @@ export interface ClientApiV1 {
 	};
 	Auth: {
 		Flow: IAuthFlowPort;
+		hasSession: ISessionIdCheckerPort["hasSession"];
+		ExtensionRegistrationClient: IExtensionRegistrationClient;
+		ExtensionAuthorizationService: IExtensionAuthorizationServicePort;
 	};
 	GameSession: {
-		GameSessionReadonlyStore: IGameSessionReadonlyStore;
+		GameSessionReadonlyStore: IGameSessionReadonlyStorePort;
 	};
 	EventBus: IDomainEventBusPort;
+	PlayAtlasEventHub: IPlayAtlasEventHubPort;
 }

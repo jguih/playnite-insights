@@ -96,7 +96,7 @@ export class GetGamesQueryHandler implements IGetGamesQueryHandlerPort {
 				cursor: query.cursor,
 				direction: query.sort.direction,
 				scanSourceAsync: this.recentScanSource,
-				filters: this.deps.filterBuilder.createNameFilter(query.filter.search),
+				filters: [this.deps.filterBuilder.createNameFilter(query.filter.search)],
 			});
 		}
 

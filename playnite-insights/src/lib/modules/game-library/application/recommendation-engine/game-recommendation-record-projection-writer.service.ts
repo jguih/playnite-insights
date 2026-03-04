@@ -1,3 +1,4 @@
+import { RecommendationEngineVectorUtils } from "$lib/modules/common/application";
 import type { Game } from "../../domain/game.entity";
 import type { GameClassification } from "../../domain/scoring-engine/game-classification.entity";
 import type {
@@ -30,16 +31,19 @@ export class GameRecommendationRecordProjectionWriter implements IGameRecommenda
 				const record =
 					await this.deps.gameRecommendationRecordReadonlyStore.getByGameIdAsync(gameId);
 				const vector = this.deps.gameVectorProjectionService.getVector(gameId);
+				const magnitude = this.deps.gameVectorProjectionService.getMagnitude(gameId) ?? 0;
 
 				if (vector && record)
 					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
 						...record,
 						Vector: vector,
+						GameMagnitude: magnitude,
 					});
 				else if (vector) {
 					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
 						GameId: gameId,
 						Vector: vector,
+						GameMagnitude: magnitude,
 					});
 				}
 			}
@@ -53,18 +57,21 @@ export class GameRecommendationRecordProjectionWriter implements IGameRecommenda
 				const record =
 					await this.deps.gameRecommendationRecordReadonlyStore.getByGameIdAsync(gameId);
 				const vector = this.deps.gameVectorProjectionService.getVector(gameId);
+				const magnitude = this.deps.gameVectorProjectionService.getMagnitude(gameId) ?? 0;
 
-				if (vector && record)
+				if (record)
 					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
 						...record,
-						Vector: vector,
+						Vector: vector ?? RecommendationEngineVectorUtils.createEmptyVector(),
+						GameMagnitude: magnitude,
 						IsHidden: game.Playnite?.Hidden,
 						SearchName: game.SearchName ?? undefined,
 					});
-				else if (vector) {
+				else {
 					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
 						GameId: gameId,
-						Vector: vector,
+						Vector: vector ?? RecommendationEngineVectorUtils.createEmptyVector(),
+						GameMagnitude: magnitude,
 						IsHidden: game.Playnite?.Hidden,
 						SearchName: game.SearchName ?? undefined,
 					});

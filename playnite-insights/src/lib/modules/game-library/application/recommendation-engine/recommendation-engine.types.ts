@@ -1,5 +1,5 @@
-import type { GameId } from "$lib/modules/common/domain";
+import type { GameRecommendationRecordReadModel } from "../../infra";
 
-export type RecommendationEngineFilterProps = { gameId: GameId; vector: Float32Array };
+export type RecommendationEngineFilterProps = { record: GameRecommendationRecordReadModel };
 
 export type RecommendationEngineFilter = (props: RecommendationEngineFilterProps) => boolean;

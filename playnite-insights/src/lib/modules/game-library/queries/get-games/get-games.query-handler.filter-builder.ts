@@ -4,6 +4,7 @@ import type { GameFilter } from "./get-games.query-handler.types";
 export type IGetGamesQueryHandlerFilterBuilderPort = {
 	createNameFilter: (search?: string) => GameFilter;
 	createNotDeletedFilter: () => GameFilter;
+	createNotHiddenFilter: () => GameFilter;
 };
 
 export class GetGamesQueryHandlerFilterBuilder implements IGetGamesQueryHandlerFilterBuilderPort {
@@ -26,6 +27,12 @@ export class GetGamesQueryHandlerFilterBuilder implements IGetGamesQueryHandlerF
 		return (game) => {
 			if (game.DeletedAt) return false;
 			return true;
+		};
+	};
+
+	createNotHiddenFilter = (): GameFilter => {
+		return (game) => {
+			return game.Playnite?.Hidden === false;
 		};
 	};
 }

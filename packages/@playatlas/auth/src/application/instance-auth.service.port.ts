@@ -34,4 +34,5 @@ export type IInstanceAuthServicePort = {
 	verify: (args: { request: Request }) => InstanceAuthServiceVerifyResult;
 	registerAsync: (props: { password: string }) => Promise<RegisterResult>;
 	loginAsync: (props: { password: string }) => Promise<LoginResult>;
+	isInstanceRegistered: () => boolean;
 };

@@ -156,5 +156,10 @@ export const makeInstanceAuthService = ({
 		};
 	};
 
-	return { verify, registerAsync, loginAsync };
+	const isInstanceRegistered: IInstanceAuthServicePort["isInstanceRegistered"] = () => {
+		const existing = instanceAuthSettingsRepository.get();
+		return existing !== null;
+	};
+
+	return { verify, registerAsync, loginAsync, isInstanceRegistered };
 };

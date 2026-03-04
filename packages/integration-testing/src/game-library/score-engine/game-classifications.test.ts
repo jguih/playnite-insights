@@ -101,7 +101,7 @@ describe("Game Library / Score Engine Game Classifications", () => {
 		expect(firstHorrorResults).toHaveLength(1);
 		expect(firstHorrorResults.at(-1)?.Score).toBe(10);
 
-		expect(secondHorrorResults).toHaveLength(2);
+		expect(secondHorrorResults).toHaveLength(1);
 		expect(secondHorrorResults.at(-1)?.Score).toBe(100);
 	});
 });

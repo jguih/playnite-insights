@@ -9,13 +9,18 @@ export const gameRecommendationRecordStoreMeta = {
 export type GameRecommendationRecordStoreIndex =
 	(typeof gameRecommendationRecordStoreMeta.index)[keyof typeof gameRecommendationRecordStoreMeta.index];
 
+export type GameRecommendationRecordStoreKey = (keyof GameRecommendationRecordReadModel)[];
+
+export const gameRecommendationRecordStoreKeyPath = [
+	"GameId",
+] as const satisfies GameRecommendationRecordStoreKey;
+
 export const gameRecommendationRecordStoreSchema: IIndexedDbSchema = {
 	define: ({ db }) => {
 		const { storeName } = gameRecommendationRecordStoreMeta;
 
 		if (!db.objectStoreNames.contains(storeName)) {
-			const keyPath: (keyof GameRecommendationRecordReadModel)[] = ["GameId"];
-			db.createObjectStore(storeName, { keyPath });
+			db.createObjectStore(storeName, { keyPath: gameRecommendationRecordStoreKeyPath });
 		}
 	},
 };

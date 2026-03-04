@@ -9,6 +9,11 @@
 <div
 	{...props}
 	role="presentation"
-	class={["fixed right-0 top-0 z-40 h-full w-full max-w-full bg-black opacity-50", props.class]}
+	class={[
+		"absolute right-0 top-0",
+		"h-full w-full max-w-full",
+		"bg-black opacity-50 pointer-events-auto",
+		props.class,
+	]}
 	transition:fade={{ duration: 150, easing: cubicOut }}
 ></div>

@@ -41,9 +41,17 @@ export class GameVectorReadonlyStore
 		return await this.runTransaction([this.meta.storeName], "readonly", async ({ tx }) => {
 			const store = tx.objectStore(this.meta.storeName);
 
-			for (const gameId of gameIds) {
-				const models = await this.runRequest<GameVectorReadModel[]>(store.getAll(gameId));
-				classificationsMap.set(gameId, models);
+			const models = await this.runRequest<GameVectorReadModel[]>(store.getAll());
+
+			for (const model of models) {
+				if (gameIds.includes(model.GameId)) {
+					let vectors = classificationsMap.get(model.GameId);
+					if (!vectors) {
+						vectors = [];
+						classificationsMap.set(model.GameId, vectors);
+					}
+					vectors.push(model);
+				}
 			}
 
 			return classificationsMap;

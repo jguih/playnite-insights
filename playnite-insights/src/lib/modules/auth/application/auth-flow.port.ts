@@ -1,3 +1,5 @@
+import type { ServerHealthCheckResponseDto } from "@playatlas/common/dtos";
+
 export type AuthFlowLoginResult =
 	| {
 			success: true;
@@ -27,4 +29,5 @@ export type AuthFlowRegisterResult =
 export interface IAuthFlowPort {
 	loginAsync: (props: { password: string }) => Promise<AuthFlowLoginResult>;
 	registerAsync: (props: { password: string }) => Promise<AuthFlowRegisterResult>;
+	checkHealthAsync: () => Promise<ServerHealthCheckResponseDto | null>;
 }

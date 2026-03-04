@@ -1,3 +1,1 @@
-export type GetAllExtensionRegistrationQuery = {
-	ifNoneMatch?: string | null;
-};
+export type GetAllExtensionRegistrationQuery = void;

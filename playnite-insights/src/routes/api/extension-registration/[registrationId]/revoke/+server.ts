@@ -1,13 +1,14 @@
 import { instanceAuthMiddleware } from "$lib/server/api/middleware/auth.middleware";
-import { apiResponse, type ApiErrorResponse } from "$lib/server/api/responses";
 import {
 	makeRevokeExtensionRegistrationCommand,
 	revokeExtensionRegistrationRequestDtoSchema,
 } from "@playatlas/auth/commands";
-import { type RequestHandler } from "@sveltejs/kit";
+import type { RevokeExtensionRegistrationResponseDto } from "@playatlas/auth/dtos";
+import { json, type RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ params, request, locals: { api } }) =>
 	instanceAuthMiddleware({ request, api }, async () => {
+		const requestDescription = api.getLogService().getRequestDescription(request);
 		const { registrationId } = params;
 		const { success, data, error } = revokeExtensionRegistrationRequestDtoSchema.safeParse({
 			registrationId: Number(registrationId),
@@ -17,12 +18,16 @@ export const POST: RequestHandler = async ({ params, request, locals: { api } })
 			api
 				.getLogService()
 				.error(
-					`${api.getLogService().getRequestDescription(request)}: Validation error while handling request`,
+					`${requestDescription}: Validation error while handling request`,
 					error.issues.slice(0, 10),
 				);
-			return apiResponse.error({
-				error: { message: "Validation error", details: error.issues },
-			});
+
+			return json({
+				success: false,
+				reason_code: "validation_error",
+				reason: error.message,
+				details: error.issues,
+			} satisfies RevokeExtensionRegistrationResponseDto);
 		}
 
 		const command = makeRevokeExtensionRegistrationCommand(data);
@@ -31,9 +36,20 @@ export const POST: RequestHandler = async ({ params, request, locals: { api } })
 			.getRevokeExtensionRegistrationCommandHandler()
 			.execute(command);
 
-		if (result.success) return apiResponse.success();
+		if (result.success) {
+			return json({
+				success: true,
+				reason_code: result.reason_code,
+				reason: result.reason,
+			} satisfies RevokeExtensionRegistrationResponseDto);
+		}
 
-		const response: ApiErrorResponse = { error: { message: result.reason } };
-		if (result.reason_code === "not_found") return apiResponse.error(response, { status: 404 });
-		else return apiResponse.error(response);
+		return json(
+			{
+				success: false,
+				reason_code: result.reason_code,
+				reason: result.reason,
+			} satisfies RevokeExtensionRegistrationResponseDto,
+			{ status: result.reason_code === "not_found" ? 404 : 400 },
+		);
 	});

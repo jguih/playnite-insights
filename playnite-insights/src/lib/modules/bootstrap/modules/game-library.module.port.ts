@@ -6,7 +6,6 @@ import type {
 	IGameMapperPort,
 	IGenreMapperPort,
 	IPlatformMapperPort,
-	IRecommendationEnginePort,
 	ISyncCompaniesFlowPort,
 	ISyncCompletionStatusesFlowPort,
 	ISyncGameClassificationsFlowPort,
@@ -47,6 +46,7 @@ import type {
 	IGetLatestGameClassificationByGameIdQueryHandler,
 	IGetPlatformsByIdsQueryHandlerPort,
 } from "$lib/modules/game-library/queries";
+import type { IRecommendationEngineModulePort } from "./recommendation-engine.module.port";
 
 export interface IClientGameLibraryModulePort {
 	get gameMapper(): IGameMapperPort;
@@ -96,7 +96,7 @@ export interface IClientGameLibraryModulePort {
 	get syncGameClassificationsCommandHandler(): ISyncGameClassificationsCommandHandlerPort;
 	get syncGameClassificationsFlow(): ISyncGameClassificationsFlowPort;
 
-	get recommendationEngine(): IRecommendationEnginePort;
+	get recommendationEngineModule(): IRecommendationEngineModulePort;
 
 	initializeAsync: () => Promise<void>;
 }

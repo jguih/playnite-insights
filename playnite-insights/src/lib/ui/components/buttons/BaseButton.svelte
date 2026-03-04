@@ -34,7 +34,7 @@
 			size === "lg" && "h-12 gap-2.5 px-5 text-lg",
 		],
 		"relative inline-flex cursor-pointer select-none items-center whitespace-nowrap",
-		"transition-colors-default",
+		"transition-colors duration-150 ease-out",
 		"outline-none focus-visible:ring-2 focus-visible:ring-offset-0",
 		rounded && "rounded-full",
 		"hover:shadow-sm active:shadow-none",

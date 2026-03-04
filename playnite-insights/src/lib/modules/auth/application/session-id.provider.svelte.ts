@@ -9,38 +9,35 @@ export type SessionIdProviderDeps = {
 };
 
 export class SessionIdProvider implements ISessionIdProviderPort {
-	private readonly sessionIdRepository: ISessionIdRepositoryPort;
-	private readonly clock: IClockPort;
-	private sessionIdSignal: SessionId | null;
+	private sessionIdSignal: SessionId | undefined | null = $state(undefined);
 
-	constructor({ sessionIdRepository, clock }: SessionIdProviderDeps) {
-		this.sessionIdRepository = sessionIdRepository;
-		this.clock = clock;
-		this.sessionIdSignal = $state(null);
+	constructor(private readonly deps: SessionIdProviderDeps) {}
+
+	get(): SessionId | null {
+		if (this.sessionIdSignal === undefined) throw new Error("SessionId not loaded");
+
+		return this.sessionIdSignal;
 	}
 
-	async getAsync(): Promise<SessionId | null> {
-		if (this.sessionIdSignal) return this.sessionIdSignal;
-
-		const aggregate = await this.sessionIdRepository.getAsync();
-		return aggregate ? aggregate.Id : null;
-	}
+	hasSession: ISessionIdProviderPort["hasSession"] = () => {
+		return this.get() !== null;
+	};
 
 	async setAsync(sessionId: SessionId): Promise<void> {
-		const now = this.clock.now();
+		const now = this.deps.clock.now();
 
 		const sessionIdAggregate: SessionIdAggregate = {
 			Id: sessionId,
 			SourceLastUpdatedAt: now,
 		};
 
-		await this.sessionIdRepository.setAsync(sessionIdAggregate);
+		await this.deps.sessionIdRepository.setAsync(sessionIdAggregate);
 
 		this.sessionIdSignal = sessionId;
 	}
 
 	async loadFromDbAsync(): Promise<void> {
-		const aggregate = await this.sessionIdRepository.getAsync();
-		if (aggregate) this.sessionIdSignal = aggregate.Id;
+		const aggregate = await this.deps.sessionIdRepository.getAsync();
+		this.sessionIdSignal = aggregate?.Id ?? null;
 	}
 }

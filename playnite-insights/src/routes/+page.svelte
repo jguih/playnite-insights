@@ -2,6 +2,13 @@
 	import { goto } from "$app/navigation";
 	import { resolve } from "$app/paths";
 	import { getClientApiContext } from "$lib/modules/bootstrap/application";
+	import {
+		GameLibraryPager,
+		GameLibrarySearch,
+		SyncProgressViewModel,
+	} from "$lib/page/game/library";
+	import { HomePageStore } from "$lib/page/home";
+	import HomePageHero from "$lib/page/home/components/HomePageHero.svelte";
 	import BottomNav from "$lib/ui/components/BottomNav.svelte";
 	import LightButton from "$lib/ui/components/buttons/LightButton.svelte";
 	import Header from "$lib/ui/components/header/Header.svelte";
@@ -11,11 +18,6 @@
 	import Spinner from "$lib/ui/components/Spinner.svelte";
 	import { HomeIcon, LayoutDashboardIcon, SearchIcon, SettingsIcon } from "@lucide/svelte";
 	import { onMount } from "svelte";
-	import { GameLibraryPager } from "./game/library/page/game-library-pager.svelte";
-	import { GameLibrarySearch } from "./game/library/page/game-library-search.svelte";
-	import { SyncProgressViewModel } from "./game/library/page/sync-progress.view-model";
-	import HomePageHero from "./page/components/HomePageHero.svelte";
-	import { HomePageStore } from "./page/home-page-game-store.svelte";
 
 	const api = getClientApiContext();
 	const pager = new GameLibraryPager({ api });
@@ -52,9 +54,10 @@
 				<div class="flex flex-nowrap">
 					<LightButton
 						variant="neutral"
-						iconOnly={!pager.pagerStateSignal.query.filters.search}
+						iconOnly
 						class="flex items-center gap-1 px-2!"
 						onclick={() => {
+							pager.setQuery({ mode: "ranked" });
 							void goto(resolve("/game/library")).then(() => search.open());
 						}}
 					>

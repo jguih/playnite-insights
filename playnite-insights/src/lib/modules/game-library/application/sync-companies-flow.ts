@@ -1,15 +1,14 @@
-import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
-import type { CompanyResponseDto } from "@playatlas/game-library/dtos";
 import type {
+	ISyncFlowPort,
 	ISyncRunnerPort,
 	SyncRunnerFetchResult,
-} from "../../common/application/sync-runner.port";
+} from "$lib/modules/common/application";
+import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
+import type { CompanyResponseDto } from "@playatlas/game-library/dtos";
 import type { ISyncCompaniesCommandHandlerPort } from "../commands";
 import type { ICompanyMapperPort } from "./company.mapper.port";
 
-export type ISyncCompaniesFlowPort = {
-	executeAsync: () => Promise<void>;
-};
+export type ISyncCompaniesFlowPort = ISyncFlowPort;
 
 export type SyncCompaniesFlowDeps = {
 	playAtlasClient: IPlayAtlasClientPort;
@@ -42,7 +41,7 @@ export class SyncCompaniesFlow implements ISyncCompaniesFlowPort {
 	executeAsync: ISyncCompaniesFlowPort["executeAsync"] = async () => {
 		const { companyMapper, syncCompaniesCommandHandler, syncRunner } = this.deps;
 
-		await syncRunner.runAsync({
+		return await syncRunner.runAsync({
 			syncTarget: "companies",
 			fetchAsync: this.fetchAsync,
 			mapDtoToEntity: ({ dto, now }) => companyMapper.fromDto(dto, now),
