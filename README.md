@@ -68,7 +68,7 @@ All external communication occurs over HTTPS via a reverse proxy. Internal commu
 ## Application Architecture
 
 <p align="center">
-<img src="docs/mkdocs/docs/screenshots/diagrams/playatlas-network-diagram.jpg" width="800" title="PlayAtlas Main Screenshot">
+<img src="docs/mkdocs/docs/assets/diagrams/playatlas-network-diagram.jpg" width="800" title="PlayAtlas Main Screenshot">
 </p>
 
 > **Figure 1**: PlayAtlas Architecture Diagram
@@ -112,7 +112,7 @@ The PlayAtlas Server is the single source of truth for all persistent domain sta
 ### Game Session Ingestion Model
 
 <p align="center">
-<img src="docs/mkdocs/docs/screenshots/diagrams/playatlas-game-session-state-machine.jpg" width="800" title="PlayAtlas Main Screenshot">
+<img src="docs/mkdocs/docs/assets/diagrams/playatlas-game-session-state-machine.jpg" width="800" title="PlayAtlas Main Screenshot">
 </p>
 
 > **Figure 2**: Game Session State Machine Diagram
