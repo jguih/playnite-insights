@@ -5,7 +5,7 @@ A self-hosted recommendation engine that turns your <strong>Playnite</strong> li
 </h3>
 
 <p align="center">
-<img src="screenshots/playatlas.jpg" width="800" title="PlayAtlas Main Screenshot">
+<img src="assets/playatlas.jpg" width="800" title="PlayAtlas Main Screenshot">
 </p>
 
 !!! info
