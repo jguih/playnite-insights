@@ -284,7 +284,11 @@ export const makeGameRepository = ({
 
 	const getManifestData: IGameRepositoryPort["getManifestData"] = () => {
 		return base.run(({ db }) => {
-			const query = `SELECT PlayniteId as Id, ContentHash FROM ${TABLE_NAME}`;
+			const query = `
+				SELECT PlayniteId as Id, ContentHash 
+				FROM ${TABLE_NAME}
+				WHERE DeletedAt IS NULL;
+			`;
 			const stmt = db.prepare(query);
 			const result = stmt.all();
 
