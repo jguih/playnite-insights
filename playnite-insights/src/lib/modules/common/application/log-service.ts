@@ -1,19 +1,19 @@
 import type { ILogServicePort } from "./log-service.port";
 
 export class LogService implements ILogServicePort {
-	error = (message: string, error?: unknown) => {
-		console.error(`${message}`, error);
+	error: ILogServicePort["error"] = (message, error, extra) => {
+		console.error(`${message}`, error, extra);
 	};
-	warning = (message: string) => {
-		console.warn(message);
+	warning: ILogServicePort["warning"] = (message, extra) => {
+		console.warn(message, extra);
 	};
-	info = (message: string) => {
-		console.info(message);
+	info: ILogServicePort["info"] = (message, extra) => {
+		console.info(message, extra);
 	};
-	success = (message: string) => {
-		console.info(message);
+	success: ILogServicePort["success"] = (message, extra) => {
+		console.info(message, extra);
 	};
-	debug = (message: string) => {
-		console.debug(message);
+	debug: ILogServicePort["debug"] = (message, extra) => {
+		console.debug(message, extra);
 	};
 }

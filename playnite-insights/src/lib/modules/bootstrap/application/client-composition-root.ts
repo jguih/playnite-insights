@@ -115,6 +115,7 @@ export class ClientCompositionRoot {
 			clock: this.clock,
 			syncRunner,
 			gameSessionReadonlyStore: gameSessionReadonlyStore,
+			logService: this.logService,
 		});
 		await gameLibrary.initializeAsync();
 

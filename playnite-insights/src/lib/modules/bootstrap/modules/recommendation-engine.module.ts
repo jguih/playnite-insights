@@ -1,4 +1,4 @@
-import type { IClockPort } from "$lib/modules/common/application";
+import type { IClockPort, ILogServicePort } from "$lib/modules/common/application";
 import {
 	GameRecommendationRecordProjectionService,
 	GameRecommendationRecordProjectionWriter,
@@ -26,6 +26,7 @@ export type RecommendationEngineModulePortDeps = {
 	dbSignal: IDBDatabase;
 	clock: IClockPort;
 	gameSessionReadonlyStore: IGameSessionReadonlyStorePort;
+	logService: ILogServicePort;
 };
 
 export class RecommendationEngineModule implements IRecommendationEngineModulePort {
@@ -37,7 +38,7 @@ export class RecommendationEngineModule implements IRecommendationEngineModulePo
 	readonly recommendationEngine: IRecommendationEnginePort;
 
 	constructor(private readonly deps: RecommendationEngineModulePortDeps) {
-		const { dbSignal, clock, gameSessionReadonlyStore } = deps;
+		const { dbSignal, clock, gameSessionReadonlyStore, logService } = deps;
 
 		const gameVectorReadonlyStore = new GameVectorReadonlyStore({ dbSignal });
 		const gameVectorWriteStore = new GameVectorWriteStore({ dbSignal });
@@ -64,6 +65,7 @@ export class RecommendationEngineModule implements IRecommendationEngineModulePo
 			clock,
 			gameSessionReadonlyStore,
 			gameVectorProjectionService: this.gameVectorProjectionService,
+			logService,
 		});
 		this.recommendationEngine = new RecommendationEngine({
 			instancePreferenceModelService: this.instancePreferenceModelService,

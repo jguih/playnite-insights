@@ -1,4 +1,8 @@
-import type { IClockPort } from "$lib/modules/common/application";
+import {
+	RecommendationEngineVectorUtils,
+	type IClockPort,
+	type ILogServicePort,
+} from "$lib/modules/common/application";
 import type { IInstancePreferenceModelInvalidationPort } from "$lib/modules/common/application/recommendation-engine/instance-preference-invalidation.port";
 import { GAME_CLASSIFICATION_DIMENSIONS } from "$lib/modules/common/domain";
 import type { GameSessionReadModel } from "$lib/modules/game-session/application";
@@ -15,6 +19,7 @@ export type InstancePreferenceModelServiceDeps = {
 	gameSessionReadonlyStore: IGameSessionReadonlyStorePort;
 	gameVectorProjectionService: IGameVectorProjectionServicePort;
 	clock: IClockPort;
+	logService: ILogServicePort;
 };
 
 export class InstancePreferenceModelService implements IInstancePreferenceModelServicePort {
@@ -25,13 +30,19 @@ export class InstancePreferenceModelService implements IInstancePreferenceModelS
 	constructor(private readonly deps: InstancePreferenceModelServiceDeps) {}
 
 	private sessionWeight = (session: GameSessionReadModel, now: number): number => {
-		if (!session.Duration) return 0;
+		let duration = session.Duration;
 
-		const days = (now - session.EndTime!.getTime()) / this.ONE_DAY_MS;
+		if (!duration && session.StartTime) {
+			duration = now - session.StartTime.getTime();
+		}
 
+		if (!duration) return 0;
+
+		const end = session.EndTime ? session.EndTime.getTime() : now;
+		const days = (now - end) / this.ONE_DAY_MS;
 		const decay = Math.exp(-this.lambda * days);
 
-		return session.Duration * decay;
+		return duration * decay;
 	};
 
 	private normalize = (v: Float32Array) => {
@@ -50,25 +61,41 @@ export class InstancePreferenceModelService implements IInstancePreferenceModelS
 	};
 
 	private buildAsync = async () => {
-		const instance = new Float32Array(GAME_CLASSIFICATION_DIMENSIONS);
+		const instance = RecommendationEngineVectorUtils.createEmptyVector();
 		const now = this.deps.clock.now();
 		const sessions = await this.deps.gameSessionReadonlyStore.getAllAsync();
+		let usedSessions = 0;
 
 		for (const session of sessions) {
-			if (!session.EndTime) continue;
-
 			const vec = this.deps.gameVectorProjectionService.getVector(session.GameId);
 			if (!vec) continue;
 
 			const w = this.sessionWeight(session, now.getTime());
 			if (w === 0) continue;
 
+			usedSessions++;
+
 			for (let i = 0; i < GAME_CLASSIFICATION_DIMENSIONS; i++) {
 				instance[i] += vec[i] * w;
 			}
 		}
 
+		this.deps.logService.debug(
+			`available game sessions: ${sessions.length}, used game sessions: ${usedSessions}`,
+		);
+
+		if (usedSessions === 0) {
+			this.deps.logService.warning("instance vector build produced no data");
+			return this.cache ?? instance;
+		}
+
 		this.normalize(instance);
+
+		const mag = RecommendationEngineVectorUtils.magnitude(instance);
+
+		if (mag === 0) this.deps.logService.warning("instance vector magnitude is 0");
+
+		this.deps.logService.debug("built instance preference vector", instance);
 
 		return instance;
 	};

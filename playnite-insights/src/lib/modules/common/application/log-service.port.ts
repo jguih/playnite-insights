@@ -1,7 +1,7 @@
 export interface ILogServicePort {
-	error: (message: string, error?: unknown) => void;
-	warning: (message: string) => void;
-	info: (message: string) => void;
-	success: (message: string) => void;
-	debug: (message: string) => void;
+	error: (message: string, error?: unknown, ...extra: unknown[]) => void;
+	warning: (message: string, ...extra: unknown[]) => void;
+	info: (message: string, ...extra: unknown[]) => void;
+	success: (message: string, ...extra: unknown[]) => void;
+	debug: (message: string, ...extra: unknown[]) => void;
 }

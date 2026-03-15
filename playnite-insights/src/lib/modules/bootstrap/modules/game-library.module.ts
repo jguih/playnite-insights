@@ -164,11 +164,13 @@ export class ClientGameLibraryModule implements IClientGameLibraryModulePort {
 		clock,
 		syncRunner,
 		gameSessionReadonlyStore,
+		logService,
 	}: ClientGameLibraryModuleDeps) {
 		this.recommendationEngineModule = new RecommendationEngineModule({
 			dbSignal,
 			gameSessionReadonlyStore: gameSessionReadonlyStore,
-			clock: clock,
+			clock,
+			logService,
 		});
 
 		this.gameMapper = new GameMapper({ clock });

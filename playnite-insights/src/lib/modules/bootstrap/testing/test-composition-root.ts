@@ -6,6 +6,7 @@ import {
 	type IDomainEventBusPort,
 	type IHttpClientPort,
 	type ILogServicePort,
+	type IPlayAtlasEventHubPort,
 } from "$lib/modules/common/application";
 import {
 	companyRepositorySchema,
@@ -59,6 +60,10 @@ export class TestCompositionRoot {
 			putAsync: vi.fn(),
 			deleteAsync: vi.fn(),
 		} satisfies IHttpClientPort,
+		playAtlasEventHub: {
+			subscribe: vi.fn(),
+			unsubscribe: vi.fn(),
+		} satisfies IPlayAtlasEventHubPort,
 	};
 
 	readonly factories = {
@@ -131,6 +136,7 @@ export class TestCompositionRoot {
 			clock: this.clock,
 			syncRunner,
 			gameSessionReadonlyStore: gameSessionReadonlyStore,
+			logService: this.mocks.logService,
 		});
 		await gameLibrary.initializeAsync();
 
@@ -163,6 +169,7 @@ export class TestCompositionRoot {
 		const bootstrapper = new ClientBootstrapper({
 			modules: { infra, gameLibrary, auth, gameSession, synchronization },
 			eventBus: this.eventBus,
+			playAtlasEventHub: this.mocks.playAtlasEventHub,
 		});
 		return bootstrapper.bootstrap();
 	};
