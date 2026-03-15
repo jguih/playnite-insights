@@ -1,0 +1,951 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../../features/cross-device-sync/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Quick Start - PlayAtlas Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-start" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PlayAtlas Docs" class="md-header__button md-logo" aria-label="PlayAtlas Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PlayAtlas Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quick Start
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PlayAtlas Docs" class="md-nav__button md-logo" aria-label="PlayAtlas Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PlayAtlas Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PlayAtlas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-setup-https" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Setup HTTPS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Setup HTTPS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#caddy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caddy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-start-the-playatlas-server-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Start the PlayAtlas Server Container
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-setup-an-instance-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Setup an Instance Password
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-setup-playatlas-exporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Setup PlayAtlas Exporter
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Setup PlayAtlas Exporter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-41-install-playatlas-exporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.1: Install PlayAtlas Exporter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-42-pair-the-exporter-with-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.2: Pair the Exporter with the Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#try-the-web-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Try the Web App
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/cross-device-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Syncing Across Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Administration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/reverse-proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse Proxy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-setup-https" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Setup HTTPS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Setup HTTPS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#caddy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caddy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-start-the-playatlas-server-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Start the PlayAtlas Server Container
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-setup-an-instance-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Setup an Instance Password
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-setup-playatlas-exporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Setup PlayAtlas Exporter
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Setup PlayAtlas Exporter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-41-install-playatlas-exporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.1: Install PlayAtlas Exporter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-42-pair-the-exporter-with-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4.2: Pair the Exporter with the Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#try-the-web-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Try the Web App
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="quick-start">Quick Start</h1>
+<p>Here's a quick way to install PlayAtlas so you can try it out as soon as possible.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>
+<p>A dedicated <strong>Linux</strong> host that:</p>
+<ul>
+<li>Can run <strong>Podman</strong> containers</li>
+<li>Has a reverse-proxy to terminate TLS</li>
+<li>Allows TCP connections on port 443 over LAN</li>
+</ul>
+</li>
+<li>
+<p>A personal <strong>Windows</strong> host with <strong>Playnite</strong> installed.</p>
+</li>
+<li>A client device (mobile or desktop) with a modern browser (Firefox or Chromium-based).</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>PlayAtlas</strong> is a distributed solution <strong>requiring a dedicated Linux host that can run containerized self-hosted services</strong>. <strong>Installing PlayAtlas directly on your Windows Playnite host is not supported nor recommended</strong>. Other ways of installing PlayAtlas not mentioned in this documentation are not supported.</p>
+</div>
+<h2 id="step-1-setup-https">Step 1: Setup HTTPS</h2>
+<p>When PlayAtlas is accessed from another device on your LAN, <strong>HTTPS is required</strong>.</p>
+<p>Modern browsers restrict certain APIs (including Web Crypto APIs used by PlayAtlas) to secure contexts. Accessing the application via plain HTTP on a LAN IP (e.g., <code>http://192.168.x.x</code>) will cause runtime errors.</p>
+<p>The recommended approach is to use a <strong>reverse-proxy</strong>.</p>
+<p>Any reverse-proxy may be used, as long as it can reach the PlayAtlas server Podman container.</p>
+<p>If deploying a reverse-proxy for the first time, a <strong>common container network may be required</strong>. One can be crated by running:</p>
+<pre><code class="language-bash">podman network create services
+</code></pre>
+<blockquote>
+<p><code>services</code> is the network name and can be any name.</p>
+</blockquote>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The rest of this guide shows instruction on how to setup <strong>Caddy</strong>, assumes a common Podman network named <strong>services</strong> and the PlayAtlas reachable address to be <strong>playatlas.local</strong>. If using a different reverse-proxy, the steps will be similar, but for specific details not covered here, please visit its official documentation. Common reverse-proxies and links to their respective official docs:
+<a href="https://nginx.org/en/">Nginx</a> • <a href="https://doc.traefik.io/traefik/">Traefik</a> • <a href="https://docs.pangolin.net/">Pangolin</a></p>
+</div>
+<h3 id="caddy">Caddy</h3>
+<p>To deploy Caddy, run:</p>
+<pre><code class="language-bash">podman run -d \
+  --name caddy-server \
+  --network=services \
+  -v $(pwd)/caddy-config/Caddyfile:/etc/caddy/Caddyfile \
+  -p 80:80 \
+  -p 443:443 \
+  docker.io/caddy
+</code></pre>
+<p>Below is a minimal <code>Caddyfile</code> example you can use, adapt as needed:</p>
+<pre><code class="language-caddyfile">playatlas.local {
+  reverse_proxy playatlas:3000
+}
+</code></pre>
+<h2 id="step-2-start-the-playatlas-server-container">Step 2: Start the PlayAtlas Server Container</h2>
+<p>To deploy PlayAtlas, run:</p>
+<pre><code class="language-bash">podman run -d \
+  --name playatlas \
+  --network=services \
+  -v playatlas-data:/app/data \
+  -e TZ=America/Sao_Paulo \
+  -e PLAYATLAS_LOG_LEVEL=0 \
+  docker.io/library/playatlas
+</code></pre>
+<dl>
+<dt><code>Important: Explicit Interface Binding</code></dt>
+<dd>
+<p><strong>Do not expose PlayAtlas</strong> using <code>-p 3000:3000</code> without specifying an address.
+Doing so will bind the service to all network interfaces (<code>0.0.0.0</code> on IPv4 and <code>::</code> on IPv6), potentially exposing it beyond your intended trust boundary.</p>
+<p><strong>PlayAtlas is designed to operate within a controlled LAN environment</strong> and may allow remote extension-triggered operations on your Playnite host. Binding explicitly ensures you maintain that boundary.</p>
+</dd>
+</dl>
+<h2 id="step-3-setup-an-instance-password">Step 3: Setup an Instance Password</h2>
+<p>Navigate to <a href="https://playatlas.local">https://playatlas.local</a> on any modern browser. The following page should be shown:</p>
+<p><img src="../../assets/playatlas-auth-register-page.png" width="300" title="PlayAtlas Register Page Screenshot"></p>
+<p>After setting up your instance password, you'll be redirected to the login page, simply <strong>enter the instance password set in the previous step</strong>:</p>
+<p><img src="../../assets/playatlas-auth-login-page.png" width="300" title="PlayAtlas Login Page Screenshot"></p>
+<h2 id="step-4-setup-playatlas-exporter">Step 4: Setup PlayAtlas Exporter</h2>
+<h3 id="step-41-install-playatlas-exporter">Step 4.1: Install PlayAtlas Exporter</h3>
+<p>Install the latest <strong>PlayAtlas Exporter</strong> extension version on <a href="https://github.com/jguih/PlayniteInsightsExporter">Github</a>.</p>
+<h3 id="step-42-pair-the-exporter-with-the-server">Step 4.2: Pair the Exporter with the Server</h3>
+<p>Go back to PlayAtlas, it should automatically send you to the following page:</p>
+<p><img src="../../assets/playatlas-onboarding-extension-registration-page.png" width="300" title="PlayAtlas Onboarding Extension Registration Page Screenshot"></p>
+<p>After requesting a registration from the Exporter, the UI should automatically update, displaying the created registration:</p>
+<p><img src="../../assets/playatlas-onboarding-extension-registration-page-2.png" width="300" title="PlayAtlas Onboarding Extension Registration Page Screenshot"></p>
+<p><strong>If the fingerprint matches</strong>, trust the Exporter by clicking on "Trust this PC".</p>
+<h2 id="try-the-web-app">Try the Web App</h2>
+<p>After following the setup, you already landed on the home page:</p>
+<p><img src="../../assets/playatlas-home-page.png" width="300" title="PlayAtlas Home Page Screenshot"></p>
+<p>No extra setup is required, PlayAtlas will stay fully synchronized with your Playnite library, enjoy.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

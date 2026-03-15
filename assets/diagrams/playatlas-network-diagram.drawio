@@ -1,0 +1,77 @@
+<mxfile host="drawio.jguihomeserver.com.br" modified="2026-03-03T16:50:37.666Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101 Firefox/148.0" etag="QXwFj8KG4b0qnubnOhXk" version="24.6.4" type="device">
+  <diagram name="Page-1" id="TexhMgQjRLufAtOeIecZ">
+    <mxGraphModel dx="1070" dy="647" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="J-aJt-CAo_GKB-aRSjDF-23" target="J-aJt-CAo_GKB-aRSjDF-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="240" />
+              <mxPoint x="420" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-31" value="HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="J-aJt-CAo_GKB-aRSjDF-30">
+          <mxGeometry x="0.1074" y="-1" relative="1" as="geometry">
+            <mxPoint y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-23" value="Client Network" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="160" width="280" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-26" value="Client Web Browser" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#00188D;shape=mxgraph.mscae.enterprise.server_generic" vertex="1" parent="J-aJt-CAo_GKB-aRSjDF-23">
+          <mxGeometry x="70" y="50" width="24" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-29" value="Playnite + PlayAtlas Exporter" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#00188D;shape=mxgraph.mscae.enterprise.server_generic" vertex="1" parent="J-aJt-CAo_GKB-aRSjDF-23">
+          <mxGeometry x="168" y="130" width="24" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="J-aJt-CAo_GKB-aRSjDF-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450" y="299.66666666666663" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-33" value="SSE over HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="J-aJt-CAo_GKB-aRSjDF-32">
+          <mxGeometry x="-0.122" y="2" relative="1" as="geometry">
+            <mxPoint x="7" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-1" value="Container Network" style="swimlane;whiteSpace=wrap;html=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="290" height="239.55" as="geometry" />
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="J-aJt-CAo_GKB-aRSjDF-1" source="J-aJt-CAo_GKB-aRSjDF-15" target="J-aJt-CAo_GKB-aRSjDF-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="140" />
+              <mxPoint x="210" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-25" value="Publishes SSE" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="J-aJt-CAo_GKB-aRSjDF-24">
+          <mxGeometry x="-0.2609" y="-2" relative="1" as="geometry">
+            <mxPoint x="13" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-15" value="PlayAtlas Server" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#00188D;shape=mxgraph.mscae.enterprise.web_server" vertex="1" parent="J-aJt-CAo_GKB-aRSjDF-1">
+          <mxGeometry x="50" y="87.27" width="45" height="59.21" as="geometry" />
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-12" value="Reverse Proxy&lt;br&gt;(TLS Termination)" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#00188D;shape=mxgraph.mscae.enterprise.web_server" vertex="1" parent="J-aJt-CAo_GKB-aRSjDF-1">
+          <mxGeometry x="213" y="92.28000000000003" width="45" height="59.21" as="geometry" />
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" edge="1" parent="J-aJt-CAo_GKB-aRSjDF-1" source="J-aJt-CAo_GKB-aRSjDF-15" target="J-aJt-CAo_GKB-aRSjDF-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="190" y="110" />
+              <mxPoint x="190" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J-aJt-CAo_GKB-aRSjDF-20" value="HTTP" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="J-aJt-CAo_GKB-aRSjDF-18">
+          <mxGeometry x="-0.1446" y="3" relative="1" as="geometry">
+            <mxPoint x="8" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
