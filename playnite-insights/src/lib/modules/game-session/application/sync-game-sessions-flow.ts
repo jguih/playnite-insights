@@ -1,10 +1,11 @@
 import type {
-	IInstancePreferenceModelInvalidationPort,
 	IPlayAtlasClientPort,
+	IProjectionInvalidatorPort,
 	ISyncFlowPort,
 	ISyncRunnerPort,
 	SyncRunnerFetchResult,
 } from "$lib/modules/common/application";
+import type { GameSessionInput } from "$lib/modules/common/common";
 import type { GameSessionResponseDto } from "@playatlas/game-session/dtos";
 import type { IGameSessionWriteStorePort } from "../infra/game-session.write-store";
 import type { IGameSessionReadModelMapperPort } from "./game-session.read-model";
@@ -16,7 +17,7 @@ export type SyncGameSessionsFlowDeps = {
 	gameSessionsWriteStore: IGameSessionWriteStorePort;
 	gameSessionMapper: IGameSessionReadModelMapperPort;
 	syncRunner: ISyncRunnerPort;
-	instancePreferenceModelInvalidation: IInstancePreferenceModelInvalidationPort;
+	projectionInvalidator: IProjectionInvalidatorPort;
 };
 
 export class SyncGameSessionsFlow implements ISyncGameSessionsFlowPort {
@@ -41,20 +42,22 @@ export class SyncGameSessionsFlow implements ISyncGameSessionsFlowPort {
 	};
 
 	executeAsync: ISyncGameSessionsFlowPort["executeAsync"] = async () => {
-		const {
-			syncRunner,
-			gameSessionMapper,
-			gameSessionsWriteStore,
-			instancePreferenceModelInvalidation,
-		} = this.deps;
+		const { syncRunner, gameSessionMapper, gameSessionsWriteStore, projectionInvalidator } =
+			this.deps;
 
 		return await syncRunner.runAsync({
 			syncTarget: "gameSessions",
 			fetchAsync: this.fetchAsync,
 			mapDtoToEntity: ({ dto, now }) => gameSessionMapper.fromDto(dto, now),
-			persistAsync: async ({ entities }) => {
-				await gameSessionsWriteStore.upsertAsync({ gameSessionDto: entities });
-				instancePreferenceModelInvalidation.invalidate();
+			persistAsync: async ({ entities: gameSessions }) => {
+				await gameSessionsWriteStore.upsertAsync({ gameSessionDto: gameSessions });
+
+				const sessionInputs: GameSessionInput[] = gameSessions.map((s) => ({
+					gameId: s.GameId,
+					sessionId: s.Id,
+				}));
+
+				projectionInvalidator.invalidate({ source: "gameSessions", inputs: sessionInputs });
 			},
 		});
 	};

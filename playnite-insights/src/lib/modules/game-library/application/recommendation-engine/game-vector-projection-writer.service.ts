@@ -1,10 +1,10 @@
+import type { GameVectorProjectionInput } from "$lib/modules/common/common";
 import type { GameId } from "$lib/modules/common/domain";
 import type { ClassificationId } from "@playatlas/common/domain";
-import type { GameClassification } from "../../domain/scoring-engine/game-classification.entity";
 import type { IGameVectorWriteStore } from "../../infra/recommendation-engine/game-vector.write-store";
 
 export type IGameVectorProjectionWriterPort = {
-	projectAsync(props: { gameClassifications: GameClassification[] }): Promise<void>;
+	projectAsync(props: { gameVectorInputs: GameVectorProjectionInput[] }): Promise<void>;
 };
 
 export type GameVectorProjectionWriterDeps = {
@@ -14,26 +14,24 @@ export type GameVectorProjectionWriterDeps = {
 export class GameVectorProjectionWriter implements IGameVectorProjectionWriterPort {
 	constructor(private readonly deps: GameVectorProjectionWriterDeps) {}
 
-	projectAsync: IGameVectorProjectionWriterPort["projectAsync"] = async ({
-		gameClassifications,
-	}) => {
-		if (gameClassifications.length === 0) return;
+	projectAsync: IGameVectorProjectionWriterPort["projectAsync"] = async ({ gameVectorInputs }) => {
+		if (gameVectorInputs.length === 0) return;
 
 		const normalizedScoresPerGame = new Map<GameId, Map<ClassificationId, number>>();
-		const toDelete: GameClassification[] = [];
+		const toDelete: GameVectorProjectionInput[] = [];
 
-		for (const gameClassification of gameClassifications) {
-			if (gameClassification.DeletedAt) {
-				toDelete.push(gameClassification);
+		for (const gameVectorInput of gameVectorInputs) {
+			if (gameVectorInput.isGameDeleted) {
+				toDelete.push(gameVectorInput);
 				continue;
 			}
 
-			let normalizedScores = normalizedScoresPerGame.get(gameClassification.GameId);
+			let normalizedScores = normalizedScoresPerGame.get(gameVectorInput.gameId);
 			if (!normalizedScores) {
 				normalizedScores = new Map();
-				normalizedScoresPerGame.set(gameClassification.GameId, normalizedScores);
+				normalizedScoresPerGame.set(gameVectorInput.gameId, normalizedScores);
 			}
-			normalizedScores.set(gameClassification.ClassificationId, gameClassification.NormalizedScore);
+			normalizedScores.set(gameVectorInput.classificationId, gameVectorInput.normalizedScore);
 		}
 
 		for (const [gameId, normalizedScoreMap] of normalizedScoresPerGame) {
@@ -46,10 +44,10 @@ export class GameVectorProjectionWriter implements IGameVectorProjectionWriterPo
 			}
 		}
 
-		for (const { GameId, ClassificationId } of toDelete) {
+		for (const { gameId, classificationId } of toDelete) {
 			await this.deps.gameVectorWriteStore.deleteAsync({
-				gameId: GameId,
-				classificationId: ClassificationId,
+				gameId,
+				classificationId,
 			});
 		}
 	};

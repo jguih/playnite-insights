@@ -1,18 +1,13 @@
 import type {
-	IInstancePreferenceModelInvalidationPort,
+	IPlayAtlasClientPort,
+	IProjectionInvalidatorPort,
 	ISyncFlowPort,
 	ISyncRunnerPort,
 	SyncRunnerFetchResult,
 } from "$lib/modules/common/application";
-import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
+import type { GameVectorProjectionInput } from "$lib/modules/common/common";
 import type { GameClassificationResponseDto } from "@playatlas/game-library/dtos";
 import type { ISyncGameClassificationsCommandHandlerPort } from "../commands/sync-game-classifications/sync-game-classifications.command-handler";
-import type {
-	IGameRecommendationRecordProjectionServicePort,
-	IGameRecommendationRecordProjectionWriterPort,
-	IGameVectorProjectionServicePort,
-} from "./recommendation-engine";
-import type { IGameVectorProjectionWriterPort } from "./recommendation-engine/game-vector-projection-writer.service";
 import type { IGameClassificationMapperPort } from "./scoring-engine/game-classification.mapper.port";
 
 export type ISyncGameClassificationsFlowPort = ISyncFlowPort;
@@ -22,11 +17,7 @@ export type SyncGameClassificationsFlowDeps = {
 	syncGameClassificationsCommandHandler: ISyncGameClassificationsCommandHandlerPort;
 	gameClassificationMapper: IGameClassificationMapperPort;
 	syncRunner: ISyncRunnerPort;
-	gameVectorProjectionWriter: IGameVectorProjectionWriterPort;
-	gameVectorProjectionService: IGameVectorProjectionServicePort;
-	instancePreferenceModelInvalidation: IInstancePreferenceModelInvalidationPort;
-	gameRecommendationRecordProjectionWriter: IGameRecommendationRecordProjectionWriterPort;
-	gameRecommendationRecordProjectionService: IGameRecommendationRecordProjectionServicePort;
+	projectionInvalidator: IProjectionInvalidatorPort;
 };
 
 export class SyncGameClassificationsFlow implements ISyncGameClassificationsFlowPort {
@@ -55,11 +46,7 @@ export class SyncGameClassificationsFlow implements ISyncGameClassificationsFlow
 			syncRunner,
 			gameClassificationMapper,
 			syncGameClassificationsCommandHandler,
-			gameVectorProjectionWriter,
-			gameVectorProjectionService,
-			instancePreferenceModelInvalidation,
-			gameRecommendationRecordProjectionService,
-			gameRecommendationRecordProjectionWriter,
+			projectionInvalidator,
 		} = this.deps;
 
 		return await syncRunner.runAsync({
@@ -69,17 +56,16 @@ export class SyncGameClassificationsFlow implements ISyncGameClassificationsFlow
 			persistAsync: async ({ entities: gameClassifications }) => {
 				await syncGameClassificationsCommandHandler.executeAsync({ gameClassifications });
 
-				const gameIds = new Set(gameClassifications.map((gc) => gc.GameId)).values().toArray();
+				const projectionInputs: GameVectorProjectionInput[] = gameClassifications.map((gc) => ({
+					gameId: gc.GameId,
+					classificationId: gc.ClassificationId,
+					normalizedScore: gc.NormalizedScore,
+				}));
 
-				await gameVectorProjectionWriter.projectAsync({ gameClassifications });
-				await gameVectorProjectionService.rebuildForGamesAsync(gameIds);
-
-				instancePreferenceModelInvalidation.invalidate();
-
-				await gameRecommendationRecordProjectionWriter.projectFromGameClassificationAsync({
-					gameClassifications,
+				projectionInvalidator.invalidate({
+					source: "gameClassifications",
+					inputs: projectionInputs,
 				});
-				await gameRecommendationRecordProjectionService.rebuildForGamesAsync(gameIds);
 			},
 		});
 	};

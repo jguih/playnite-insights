@@ -8,6 +8,7 @@ export type GameRecommendationRecordReadModel = Readonly<{
 	GameMagnitude: number;
 	IsHidden?: boolean;
 	SearchName?: string;
+	IsDeleted?: boolean;
 }>;
 
 export type IGameRecommendationRecordReadonlyStore = {

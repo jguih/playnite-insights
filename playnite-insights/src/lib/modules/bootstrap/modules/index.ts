@@ -1,5 +1,4 @@
-export * from "./game-library.module";
-export type * from "./game-library.module.port";
+export * from "./game-library";
 export * from "./game-session.module";
 export type * from "./game-session.module.port";
 export type * from "./infra.module.port";

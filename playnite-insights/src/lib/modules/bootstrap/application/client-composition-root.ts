@@ -25,6 +25,7 @@ import {
 	platformRepositorySchema,
 } from "$lib/modules/game-library/infra";
 import { GameSessionReadonlyStore, gameSessionStoreSchema } from "$lib/modules/game-session/infra";
+import { ProjectionReconciler } from "$lib/modules/synchronization/application/projection-reconciler";
 import { SyncRunner } from "$lib/modules/synchronization/application/sync-runner";
 import {
 	ClientGameLibraryModule,
@@ -38,6 +39,7 @@ import {
 } from "../modules";
 import { AuthModule } from "../modules/auth.module";
 import type { IAuthModulePort } from "../modules/auth.module.port";
+import { RecommendationEngineModuleCompositor } from "../modules/game-library/composition";
 import type { ClientApiV1 } from "./client-api.v1";
 import { ClientBootstrapper } from "./client-bootstrapper";
 
@@ -83,6 +85,7 @@ export class ClientCompositionRoot {
 			sessionIdRepository,
 			clock: this.clock,
 		});
+		const gameSessionReadonlyStore = new GameSessionReadonlyStore({ dbSignal: infra.dbSignal });
 
 		const authHttpClient = new HttpClient({ url: window.origin });
 		const authAuthenticatedHttpClient = new AuthenticatedHttpClient({
@@ -107,15 +110,39 @@ export class ClientCompositionRoot {
 		const playAtlasClient = new PlayAtlasClient({ httpClient: playAtlasHttpClient });
 		const syncRunner = new SyncRunner({ clock: this.clock, syncState: infra.playAtlasSyncState });
 
-		const gameSessionReadonlyStore = new GameSessionReadonlyStore({ dbSignal: infra.dbSignal });
+		const recommendationEngineParts = RecommendationEngineModuleCompositor.buildParts({
+			dbSignal: infra.dbSignal,
+			clock: this.clock,
+			gameSessionReadonlyStore,
+			logService: this.logService,
+		});
+
+		const {
+			gameRecommendationRecordProjectionService,
+			gameRecommendationRecordProjectionWriter,
+			gameVectorProjectionService,
+			gameVectorProjectionWriter,
+			instancePreferenceModelInvalidation,
+			instancePreferenceModelService,
+		} = recommendationEngineParts;
+
+		const projectionReconciler = new ProjectionReconciler({
+			gameRecommendationRecordProjectionService,
+			gameRecommendationRecordProjectionWriter,
+			gameVectorProjectionService,
+			gameVectorProjectionWriter,
+			instancePreferenceModelInvalidation,
+		});
 
 		const gameLibrary: IClientGameLibraryModulePort = new ClientGameLibraryModule({
 			dbSignal: infra.dbSignal,
 			playAtlasClient,
 			clock: this.clock,
 			syncRunner,
-			gameSessionReadonlyStore: gameSessionReadonlyStore,
-			logService: this.logService,
+			projectionInvalidator: projectionReconciler,
+			gameRecommendationRecordProjectionService,
+			gameVectorProjectionService,
+			instancePreferenceModelService,
 		});
 		await gameLibrary.initializeAsync();
 
@@ -126,8 +153,7 @@ export class ClientCompositionRoot {
 			playAtlasClient,
 			syncRunner,
 			gameSessionReadonlyStore,
-			instancePreferenceModelInvalidation:
-				gameLibrary.recommendationEngineModule.instancePreferenceModelService,
+			instancePreferenceModelInvalidation: recommendationEngineParts.instancePreferenceModelService,
 		});
 
 		const synchronization = new SynchronizationModule({
@@ -140,8 +166,7 @@ export class ClientCompositionRoot {
 			syncGenresFlow: gameLibrary.syncGenresFlow,
 			syncPlatformsFlow: gameLibrary.syncPlatformsFlow,
 			syncGameSessionsFlow: gameSession.syncGameSessionsFlow,
-			instancePreferenceModelService:
-				gameLibrary.recommendationEngineModule.instancePreferenceModelService,
+			instancePreferenceModelService: recommendationEngineParts.instancePreferenceModelService,
 			storageManager: infra.storageManager,
 		});
 

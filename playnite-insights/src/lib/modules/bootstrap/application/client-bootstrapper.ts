@@ -1,7 +1,7 @@
 import type { IDomainEventBusPort, IPlayAtlasEventHubPort } from "$lib/modules/common/application";
 import type { IClientGameSessionModulePort, ISynchronizationModulePort } from "../modules";
 import type { IAuthModulePort } from "../modules/auth.module.port";
-import type { IClientGameLibraryModulePort } from "../modules/game-library.module.port";
+import type { IClientGameLibraryModulePort } from "../modules/game-library/game-library.module.port";
 import type { IClientInfraModulePort } from "../modules/infra.module.port";
 import type { ClientApiV1 } from "./client-api.v1";
 

@@ -108,16 +108,12 @@ export class GameVectorProjectionService implements IGameVectorProjectionService
 		gameIds,
 	) => {
 		if (gameIds.length === 0) return;
+		if (!this.cache) throw new Error("Projection not initialized");
 
-		const cache: GameVectorProjection = new Map();
+		const newProjections = await this.buildAsync(gameIds.values().toArray());
 
-		const newVectors = await this.buildAsync(gameIds.values().toArray());
-
-		for (const gameId of gameIds) {
-			const newVector = newVectors.get(gameId);
-			if (newVector) cache.set(gameId, newVector);
+		for (const [gameId, projection] of newProjections) {
+			this.cache.set(gameId, projection);
 		}
-
-		this.cache = cache;
 	};
 }

@@ -1,3 +1,4 @@
+import type { IProjectionInvalidatorPort } from "$lib/modules/common/application";
 import type { IClockPort } from "$lib/modules/common/application/clock.port";
 import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
 import { type ISyncRunnerPort } from "$lib/modules/common/application/sync-runner.port";
@@ -103,6 +104,7 @@ export type ClientGameLibraryModuleDeps = {
 	playAtlasClient: IPlayAtlasClientPort;
 	clock: IClockPort;
 	syncRunner: ISyncRunnerPort;
+	projectionInvalidator: IProjectionInvalidatorPort;
 } & RecommendationEngineModulePortDeps;
 
 export class ClientGameLibraryModule implements IClientGameLibraryModulePort {
@@ -163,14 +165,15 @@ export class ClientGameLibraryModule implements IClientGameLibraryModulePort {
 		playAtlasClient,
 		clock,
 		syncRunner,
-		gameSessionReadonlyStore,
-		logService,
+		gameVectorProjectionService,
+		gameRecommendationRecordProjectionService,
+		instancePreferenceModelService,
+		projectionInvalidator,
 	}: ClientGameLibraryModuleDeps) {
 		this.recommendationEngineModule = new RecommendationEngineModule({
-			dbSignal,
-			gameSessionReadonlyStore: gameSessionReadonlyStore,
-			clock,
-			logService,
+			gameRecommendationRecordProjectionService,
+			gameVectorProjectionService,
+			instancePreferenceModelService,
 		});
 
 		this.gameMapper = new GameMapper({ clock });
@@ -186,7 +189,7 @@ export class ClientGameLibraryModule implements IClientGameLibraryModulePort {
 		this.getGamesRankedQueryHandler = new GetGamesRankedQueryHandler({
 			gameRepository: this.gameRepository,
 			recommendationEngine: this.recommendationEngineModule.recommendationEngine,
-			gameVectorProjectionService: this.recommendationEngineModule.gameVectorProjectionService,
+			gameVectorProjectionService,
 		});
 		this.syncGamesCommandHandler = new SyncGamesCommandHandler({
 			gameRepository: this.gameRepository,
@@ -196,10 +199,7 @@ export class ClientGameLibraryModule implements IClientGameLibraryModulePort {
 			playAtlasClient,
 			syncGamesCommandHandler: this.syncGamesCommandHandler,
 			syncRunner,
-			gameRecommendationRecordProjectionWriter:
-				this.recommendationEngineModule.gameRecommendationRecordProjectionWriter,
-			gameRecommendationRecordProjectionService:
-				this.recommendationEngineModule.gameRecommendationRecordProjectionService,
+			projectionInvalidator,
 		});
 
 		this.genreMapper = new GenreMapper({ clock });
@@ -296,14 +296,7 @@ export class ClientGameLibraryModule implements IClientGameLibraryModulePort {
 			playAtlasClient,
 			syncGameClassificationsCommandHandler: this.syncGameClassificationsCommandHandler,
 			syncRunner,
-			gameVectorProjectionWriter: this.recommendationEngineModule.gameVectorProjectionWriter,
-			gameVectorProjectionService: this.recommendationEngineModule.gameVectorProjectionService,
-			instancePreferenceModelInvalidation:
-				this.recommendationEngineModule.instancePreferenceModelService,
-			gameRecommendationRecordProjectionService:
-				this.recommendationEngineModule.gameRecommendationRecordProjectionService,
-			gameRecommendationRecordProjectionWriter:
-				this.recommendationEngineModule.gameRecommendationRecordProjectionWriter,
+			projectionInvalidator,
 		});
 		// #endregion
 

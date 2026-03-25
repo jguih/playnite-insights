@@ -39,8 +39,8 @@ import {
 } from "../modules";
 import { AuthModule } from "../modules/auth.module";
 import type { IAuthModulePort } from "../modules/auth.module.port";
-import { ClientGameLibraryModule } from "../modules/game-library.module";
-import type { IClientGameLibraryModulePort } from "../modules/game-library.module.port";
+import { ClientGameLibraryModule } from "../modules/game-library/game-library.module";
+import type { IClientGameLibraryModulePort } from "../modules/game-library/game-library.module.port";
 import type { IClientInfraModulePort } from "../modules/infra.module.port";
 import { ClientInfraModule } from "../modules/infra.module.svelte";
 import { TestClock, type ITestClockPort } from "./test-clock";

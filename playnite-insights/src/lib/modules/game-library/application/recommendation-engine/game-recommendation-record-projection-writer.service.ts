@@ -1,17 +1,17 @@
 import { RecommendationEngineVectorUtils } from "$lib/modules/common/application";
-import type { Game } from "../../domain/game.entity";
-import type { GameClassification } from "../../domain/scoring-engine/game-classification.entity";
+import type { GameRecommendationRecordProjectionInput } from "$lib/modules/common/common";
+import type { GameId } from "$lib/modules/common/domain";
 import type {
+	GameRecommendationRecordReadModel,
 	IGameRecommendationRecordReadonlyStore,
 	IGameRecommendationRecordWriteStore,
 } from "../../infra";
 import type { IGameVectorProjectionServicePort } from "./game-vector-projection.service";
 
 export type IGameRecommendationRecordProjectionWriterPort = {
-	projectFromGameClassificationAsync: (props: {
-		gameClassifications: GameClassification[];
-	}) => Promise<void>;
-	projectFromGameAsync: (props: { games: Game[] }) => Promise<void>;
+	projectAsync(props: {
+		recommendationRecordInputs: GameRecommendationRecordProjectionInput[];
+	}): Promise<void>;
 };
 
 export type GameRecommendationRecordProjectionWriterDeps = {
@@ -23,59 +23,32 @@ export type GameRecommendationRecordProjectionWriterDeps = {
 export class GameRecommendationRecordProjectionWriter implements IGameRecommendationRecordProjectionWriterPort {
 	constructor(private readonly deps: GameRecommendationRecordProjectionWriterDeps) {}
 
-	projectFromGameClassificationAsync: IGameRecommendationRecordProjectionWriterPort["projectFromGameClassificationAsync"] =
-		async ({ gameClassifications }) => {
-			const gameIds = new Set(gameClassifications.map((gc) => gc.GameId));
+	projectAsync: IGameRecommendationRecordProjectionWriterPort["projectAsync"] = async ({
+		recommendationRecordInputs,
+	}) => {
+		if (recommendationRecordInputs.length === 0) return;
 
-			for (const gameId of gameIds) {
-				const record =
-					await this.deps.gameRecommendationRecordReadonlyStore.getByGameIdAsync(gameId);
-				const vector = this.deps.gameVectorProjectionService.getVector(gameId);
-				const magnitude = this.deps.gameVectorProjectionService.getMagnitude(gameId) ?? 0;
+		const records = new Map<GameId, GameRecommendationRecordReadModel>();
 
-				if (vector && record)
-					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
-						...record,
-						Vector: vector,
-						GameMagnitude: magnitude,
-					});
-				else if (vector) {
-					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
-						GameId: gameId,
-						Vector: vector,
-						GameMagnitude: magnitude,
-					});
-				}
-			}
-		};
+		for (const recommendationRecordInput of recommendationRecordInputs) {
+			const gameId = recommendationRecordInput.gameId;
+			const vector =
+				this.deps.gameVectorProjectionService.getVector(gameId) ??
+				RecommendationEngineVectorUtils.createEmptyVector();
+			const magnitude = this.deps.gameVectorProjectionService.getMagnitude(gameId) ?? 0;
 
-	projectFromGameAsync: IGameRecommendationRecordProjectionWriterPort["projectFromGameAsync"] =
-		async ({ games }) => {
-			const gamesMap = new Map(games.map((g) => [g.Id, g]));
+			records.set(recommendationRecordInput.gameId, {
+				GameId: gameId,
+				GameMagnitude: magnitude,
+				Vector: vector,
+				IsDeleted: recommendationRecordInput.isDeleted,
+				IsHidden: recommendationRecordInput.isHidden,
+				SearchName: recommendationRecordInput.searchName,
+			});
+		}
 
-			for (const [gameId, game] of gamesMap) {
-				const record =
-					await this.deps.gameRecommendationRecordReadonlyStore.getByGameIdAsync(gameId);
-				const vector = this.deps.gameVectorProjectionService.getVector(gameId);
-				const magnitude = this.deps.gameVectorProjectionService.getMagnitude(gameId) ?? 0;
-
-				if (record)
-					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
-						...record,
-						Vector: vector ?? RecommendationEngineVectorUtils.createEmptyVector(),
-						GameMagnitude: magnitude,
-						IsHidden: game.Playnite?.Hidden,
-						SearchName: game.SearchName ?? undefined,
-					});
-				else {
-					await this.deps.gameRecommendationRecordWriteStore.upsertAsync({
-						GameId: gameId,
-						Vector: vector ?? RecommendationEngineVectorUtils.createEmptyVector(),
-						GameMagnitude: magnitude,
-						IsHidden: game.Playnite?.Hidden,
-						SearchName: game.SearchName ?? undefined,
-					});
-				}
-			}
-		};
+		for (const [, record] of records) {
+			await this.deps.gameRecommendationRecordWriteStore.upsertAsync(record);
+		}
+	};
 }

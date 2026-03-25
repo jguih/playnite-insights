@@ -1,16 +1,14 @@
 import type {
+	IProjectionInvalidatorPort,
 	ISyncFlowPort,
 	ISyncRunnerPort,
 	SyncRunnerFetchResult,
 } from "$lib/modules/common/application";
 import type { IPlayAtlasClientPort } from "$lib/modules/common/application/playatlas-client.port";
+import type { GameRecommendationRecordProjectionInput } from "$lib/modules/common/common";
 import type { GameResponseDto } from "@playatlas/game-library/dtos";
 import type { ISyncGamesCommandHandlerPort } from "../commands/sync-games/sync-games.command-handler";
 import type { IGameMapperPort } from "./game.mapper.port";
-import type {
-	IGameRecommendationRecordProjectionServicePort,
-	IGameRecommendationRecordProjectionWriterPort,
-} from "./recommendation-engine";
 
 export type ISyncGamesFlowPort = ISyncFlowPort;
 
@@ -19,8 +17,7 @@ export type SyncGameLibraryServiceDeps = {
 	syncGamesCommandHandler: ISyncGamesCommandHandlerPort;
 	gameMapper: IGameMapperPort;
 	syncRunner: ISyncRunnerPort;
-	gameRecommendationRecordProjectionWriter: IGameRecommendationRecordProjectionWriterPort;
-	gameRecommendationRecordProjectionService: IGameRecommendationRecordProjectionServicePort;
+	projectionInvalidator: IProjectionInvalidatorPort;
 };
 
 export class SyncGamesFlow implements ISyncGamesFlowPort {
@@ -45,13 +42,7 @@ export class SyncGamesFlow implements ISyncGamesFlowPort {
 	};
 
 	executeAsync: ISyncGamesFlowPort["executeAsync"] = async () => {
-		const {
-			syncRunner,
-			gameMapper,
-			syncGamesCommandHandler,
-			gameRecommendationRecordProjectionWriter,
-			gameRecommendationRecordProjectionService,
-		} = this.deps;
+		const { syncRunner, gameMapper, syncGamesCommandHandler, projectionInvalidator } = this.deps;
 
 		return await syncRunner.runAsync({
 			syncTarget: "games",
@@ -60,10 +51,16 @@ export class SyncGamesFlow implements ISyncGamesFlowPort {
 			persistAsync: async ({ entities: games }) => {
 				await syncGamesCommandHandler.executeAsync({ games });
 
-				const gameIds = new Set(games.map((g) => g.Id)).values().toArray();
+				const recommendationRecordInputs: GameRecommendationRecordProjectionInput[] = games.map(
+					(g) => ({
+						gameId: g.Id,
+						isDeleted: g.DeletedAt !== null,
+						isHidden: g.Playnite?.Hidden,
+						searchName: g.SearchName ?? undefined,
+					}),
+				);
 
-				await gameRecommendationRecordProjectionWriter.projectFromGameAsync({ games });
-				await gameRecommendationRecordProjectionService.rebuildForGamesAsync(gameIds);
+				projectionInvalidator.invalidate({ source: "games", inputs: recommendationRecordInputs });
 			},
 		});
 	};

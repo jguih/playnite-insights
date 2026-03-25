@@ -19,3 +19,4 @@ export * from "./recommendation-engine";
 export type * from "./sync-flow.port";
 export * from "./sync-runner.port";
 export type * from "./sync-runner.types";
+export * from "./synchronization";
