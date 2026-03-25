@@ -13,6 +13,7 @@ export type IGameRecommendationRecordProjectionServicePort = {
 	invalidate: () => void;
 	rebuildAsync: () => Promise<void>;
 	rebuildForGamesAsync: (gameIds: GameId[]) => Promise<void>;
+	size: number;
 };
 
 export type GameRecommendationRecordProjectionServiceDeps = {
@@ -41,6 +42,10 @@ export class GameRecommendationRecordProjectionService implements IGameRecommend
 	initializeAsync: IGameRecommendationRecordProjectionServicePort["initializeAsync"] = async () => {
 		this.cache = await this.buildAsync();
 	};
+
+	get size() {
+		return this.cache?.size ?? 0;
+	}
 
 	getRecord: IGameRecommendationRecordProjectionServicePort["getRecord"] = (gameId) => {
 		if (!this.cache) throw new Error("Projection not initialized");

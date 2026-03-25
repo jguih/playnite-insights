@@ -34,9 +34,6 @@
 
 		return () => unsubscribe();
 	});
-
-	// eslint-disable-next-line svelte/no-inspect
-	$inspect(store.storeSignal);
 </script>
 
 <AppLayout>

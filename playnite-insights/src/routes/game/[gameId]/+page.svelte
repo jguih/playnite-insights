@@ -60,9 +60,9 @@
 		return () => observer.disconnect();
 	});
 
-	$inspect(store.latestGameClassifications?.get("HORROR"));
-	$inspect(store.latestGameClassifications?.get("RUN-BASED"));
-	$inspect(store.latestGameClassifications?.get("SURVIVAL"));
+	// $inspect(store.latestGameClassifications?.get("HORROR"));
+	// $inspect(store.latestGameClassifications?.get("RUN-BASED"));
+	// $inspect(store.latestGameClassifications?.get("SURVIVAL"));
 </script>
 
 <AppOverlayLayout>

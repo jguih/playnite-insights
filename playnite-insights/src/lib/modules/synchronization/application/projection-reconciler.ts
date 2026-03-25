@@ -1,5 +1,6 @@
 import type {
 	IInstancePreferenceModelInvalidationPort,
+	ILogServicePort,
 	IProjectionInvalidatorPort,
 } from "$lib/modules/common/application";
 import { GameVectorProjectionInputIdParser } from "$lib/modules/common/common";
@@ -22,6 +23,7 @@ export type ProjectionReconcilerDeps = {
 	instancePreferenceModelInvalidation: IInstancePreferenceModelInvalidationPort;
 	gameRecommendationRecordProjectionWriter: IGameRecommendationRecordProjectionWriterPort;
 	gameRecommendationRecordProjectionService: IGameRecommendationRecordProjectionServicePort;
+	logService: ILogServicePort;
 };
 
 const defaultContext = (): ProjectionReconcilerContext => ({
@@ -112,12 +114,19 @@ export class ProjectionReconciler
 		for (const id of gameIds) {
 			this.context.gameIds.add(id);
 		}
+
+		this.deps.logService.debug(`Invalidated source ${source}`, this.context);
 	};
 
 	reconcileAsync: IProjectionCoordinatorPort["reconcileAsync"] = async () => {
 		const { context, dirtySources } = this.drain();
 
-		if (dirtySources.size === 0) return;
+		this.deps.logService.info(`Initializing projection reconciliation`, context, dirtySources);
+
+		if (dirtySources.size === 0) {
+			this.deps.logService.info(`Projection reconciliation finished, no dirty sources processed`);
+			return;
+		}
 
 		const needsGameVectors = dirtySources.has("gameClassifications");
 		const needsGameRecommendationRecords =
@@ -125,26 +134,47 @@ export class ProjectionReconciler
 		const needsInstancePreferences = needsGameVectors || dirtySources.has("gameSessions");
 
 		if (needsGameVectors) {
+			const cacheSizeBefore = this.deps.gameVectorProjectionService.size;
 			await this.deps.gameVectorProjectionWriter.projectAsync({
 				gameVectorInputs: context.gameVectorInputs,
 			});
+			this.deps.logService.debug(
+				`Projected ${context.gameVectorInputs.length} game vectors`,
+				context.gameVectorInputs,
+			);
 			await this.deps.gameVectorProjectionService.rebuildForGamesAsync(context.gameIds);
-		}
-
-		if (needsGameRecommendationRecords && context.recommendationRecordInputs.length > 0) {
-			await this.deps.gameRecommendationRecordProjectionWriter.projectAsync({
-				recommendationRecordInputs: context.recommendationRecordInputs,
+			const cacheSizeAfter = this.deps.gameVectorProjectionService.size;
+			this.deps.logService.debug(`Rebuilt game vector projections cache`, {
+				cacheSizeBefore,
+				cacheSizeAfter,
 			});
 		}
 
 		if (needsGameRecommendationRecords) {
+			const cacheSizeBefore = this.deps.gameRecommendationRecordProjectionService.size;
+			await this.deps.gameRecommendationRecordProjectionWriter.projectAsync({
+				recommendationRecordInputs: context.recommendationRecordInputs,
+			});
+			this.deps.logService.debug(
+				`Projected ${context.recommendationRecordInputs.length} game recommendation records`,
+			);
 			await this.deps.gameRecommendationRecordProjectionService.rebuildForGamesAsync(
 				context.gameIds,
 			);
+			const cacheSizeAfter = this.deps.gameRecommendationRecordProjectionService.size;
+			this.deps.logService.debug(`Rebuilt game recommendation records projections cache`, {
+				cacheSizeBefore,
+				cacheSizeAfter,
+			});
 		}
 
 		if (needsInstancePreferences) {
 			this.deps.instancePreferenceModelInvalidation.invalidate();
+			this.deps.logService.debug(`Invalidated instance preference model cache`);
 		}
+
+		this.deps.logService.info(
+			`Projection reconciliation finished, processed ${dirtySources.size} sources`,
+		);
 	};
 }

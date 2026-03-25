@@ -8,6 +8,8 @@ export * from "./http-client";
 export type * from "./http-client.port";
 export type * from "./http-client.types";
 export * from "./log-service";
+export * from "./log-service.factory";
+export type * from "./log-service.factory.port";
 export type * from "./log-service.port";
 export type * from "./play-atlas-sync-state.port";
 export * from "./playatlas-client";

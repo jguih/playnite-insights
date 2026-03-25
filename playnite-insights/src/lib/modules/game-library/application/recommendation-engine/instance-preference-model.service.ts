@@ -13,6 +13,7 @@ export type IInstancePreferenceModelServicePort = IInstancePreferenceModelInvali
 	initializeAsync: () => Promise<void>;
 	getVector: () => Float32Array;
 	rebuildAsync: () => Promise<void>;
+	isInvalid: () => boolean;
 };
 
 export type InstancePreferenceModelServiceDeps = {
@@ -117,4 +118,6 @@ export class InstancePreferenceModelService implements IInstancePreferenceModelS
 	rebuildAsync: IInstancePreferenceModelServicePort["rebuildAsync"] = async () => {
 		this.cache = await this.buildAsync();
 	};
+
+	isInvalid: IInstancePreferenceModelServicePort["isInvalid"] = () => this.cache === null;
 }

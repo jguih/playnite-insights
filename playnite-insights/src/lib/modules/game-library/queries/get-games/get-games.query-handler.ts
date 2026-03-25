@@ -34,6 +34,7 @@ export class GetGamesQueryHandler implements IGetGamesQueryHandlerPort {
 		const filters = Array.isArray(params.filters) ? params.filters : [params.filters];
 		const filter = this.combineFilters(
 			this.deps.filterBuilder.createNotDeletedFilter(),
+			this.deps.filterBuilder.createNotHiddenFilter(),
 			...filters,
 		);
 		let cursor = params.cursor ?? null;
