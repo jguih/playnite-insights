@@ -62,7 +62,7 @@ export class GetGamesRankedQueryHandler implements IGetGamesRankedQueryHandlerPo
 
 		const rankedGames: ExpandedGame[] = [...games.values()].map((g) => ({
 			...g,
-			Synergy: rankedMap.get(g.Id) ?? 0,
+			Similarity: rankedMap.get(g.Id) ?? 0,
 		}));
 
 		return { games: rankedGames, nextKey };

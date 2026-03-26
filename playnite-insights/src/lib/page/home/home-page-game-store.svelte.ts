@@ -1,5 +1,4 @@
 import type { ClientApiGetter } from "$lib/modules/bootstrap/application";
-import { SvelteMap } from "svelte/reactivity";
 import type { HomePageGameReadModel } from "./home-page-game-model";
 import type { HomePageSection } from "./home-page-section-key";
 
@@ -17,10 +16,10 @@ export class HomePageStore {
 
 	constructor(private readonly deps: HomePageStoreDeps) {}
 
-	private async withLoading(
+	private withLoading = async (
 		section: keyof HomePageStoreState,
 		fn: () => Promise<void>,
-	): Promise<void> {
+	): Promise<void> => {
 		if (this.storeSignal[section].loading) return;
 
 		this.storeSignal[section].loading = true;
@@ -29,30 +28,22 @@ export class HomePageStore {
 		} finally {
 			this.storeSignal[section].loading = false;
 		}
-	}
+	};
 
 	private loadHeroItemsAsync = async () => {
 		return this.withLoading("hero", async () => {
-			const ranked = await this.deps
+			const { games } = await this.deps
 				.api()
-				.GameLibrary.RecommendationEngine.Engine.recommendForInstanceAsync();
-			const gameIds = ranked.slice(0, 6).map((r) => r.gameId);
-			const rankedMap = new SvelteMap(ranked.map((r) => [r.gameId, r.similarity]));
+				.GameLibrary.Query.GetGamesRanked.executeAsync({ limit: 6 });
 
-			const { games } = await this.deps.api().GameLibrary.Query.GetGamesByIds.executeAsync({
-				gameIds,
-			});
+			const homePageModels: HomePageGameReadModel[] = games.map((game) => ({
+				Id: game.Id,
+				Name: game.Playnite?.Name ?? "Unknown",
+				CoverImageFilePath: game.Playnite?.CoverImagePath,
+				Similarity: game.Similarity,
+			}));
 
-			const rankedGames = games
-				.map((game) => ({
-					Id: game.Id,
-					Name: game.Playnite?.Name ?? "Unknown",
-					CoverImageFilePath: game.Playnite?.CoverImagePath,
-					Similarity: rankedMap.get(game.Id) ?? 0,
-				}))
-				.sort((a, b) => b.Similarity - a.Similarity);
-
-			this.storeSignal.hero.items = rankedGames;
+			this.storeSignal.hero.items = homePageModels;
 		});
 	};
 

@@ -1,7 +1,7 @@
 import type { Game } from "../../domain/game.entity";
 
 export type ExpandedGame = Game & {
-	Synergy: number;
+	Similarity: number;
 };
 
 export type GetGamesRankedQueryResult = {
