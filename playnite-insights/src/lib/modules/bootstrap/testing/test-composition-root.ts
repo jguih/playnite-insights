@@ -1,10 +1,13 @@
 import { SessionIdMapper, SessionIdProvider } from "$lib/modules/auth/application";
 import { SessionIdRepository, sessionIdRepositorySchema } from "$lib/modules/auth/infra";
 import {
+	AuthenticatedHttpClient,
 	EventBus,
+	LogServiceFactory,
 	PlayAtlasClient,
 	type IDomainEventBusPort,
 	type IHttpClientPort,
+	type ILogServiceFactory,
 	type ILogServicePort,
 	type IPlayAtlasEventHubPort,
 } from "$lib/modules/common/application";
@@ -29,6 +32,7 @@ import {
 	PlatformFactory,
 } from "$lib/modules/game-library/testing";
 import { GameSessionReadonlyStore, gameSessionStoreSchema } from "$lib/modules/game-session/infra";
+import { ProjectionReconciler } from "$lib/modules/synchronization/application/projection-reconciler";
 import { SyncRunner } from "$lib/modules/synchronization/application/sync-runner";
 import { type ClientApiV1 } from "../application/client-api.v1";
 import { ClientBootstrapper } from "../application/client-bootstrapper";
@@ -39,6 +43,7 @@ import {
 } from "../modules";
 import { AuthModule } from "../modules/auth.module";
 import type { IAuthModulePort } from "../modules/auth.module.port";
+import { RecommendationEngineModuleCompositor } from "../modules/game-library/composition";
 import { ClientGameLibraryModule } from "../modules/game-library/game-library.module";
 import type { IClientGameLibraryModulePort } from "../modules/game-library/game-library.module.port";
 import type { IClientInfraModulePort } from "../modules/infra.module.port";
@@ -76,17 +81,21 @@ export class TestCompositionRoot {
 		gameClassification: new GameClassificationFactory(),
 	};
 
+	private readonly logServiceFactory: ILogServiceFactory;
 	readonly clock: ITestClockPort;
-
 	private readonly eventBus: IDomainEventBusPort = new EventBus();
 
 	constructor() {
+		this.eventBus = new EventBus();
 		this.clock = new TestClock();
+		this.logServiceFactory = new LogServiceFactory({ clock: this.clock });
 	}
 
 	buildAsync = async (): Promise<ClientApiV1> => {
+		const buildLogger = (context: string) => this.logServiceFactory.build(context);
+
 		const infra: IClientInfraModulePort = new ClientInfraModule({
-			logService: this.mocks.logService,
+			logService: buildLogger("Infra"),
 			schemas: [
 				gameRepositorySchema,
 				genreRepositorySchema,
@@ -114,41 +123,76 @@ export class TestCompositionRoot {
 			clock: this.clock,
 		});
 
-		const auth: IAuthModulePort = new AuthModule({
+		const authHttpClient = this.mocks.httpClient;
+		const authAuthenticatedHttpClient = new AuthenticatedHttpClient({
 			httpClient: this.mocks.httpClient,
-			authenticatedHttpClient: this.mocks.httpClient,
+			sessionIdProvider,
+		});
+		const auth: IAuthModulePort = new AuthModule({
+			httpClient: authHttpClient,
+			authenticatedHttpClient: authAuthenticatedHttpClient,
 			dbSignal: infra.dbSignal,
 			clock: this.clock,
-			logService: this.mocks.logService,
+			logService: buildLogger("AuthModule"),
 			eventBus: this.eventBus,
 			sessionIdProvider,
 		});
 		await auth.initializeAsync();
 
-		const playAtlasClient = new PlayAtlasClient({ httpClient: this.mocks.httpClient });
-		const syncRunner = new SyncRunner({ clock: this.clock, syncState: infra.playAtlasSyncState });
-
 		const gameSessionReadonlyStore = new GameSessionReadonlyStore({ dbSignal: infra.dbSignal });
+
+		const recommendationEngineParts = RecommendationEngineModuleCompositor.buildParts({
+			dbSignal: infra.dbSignal,
+			clock: this.clock,
+			gameSessionReadonlyStore,
+			logService: buildLogger("RecommendationEngineModuleCompositor"),
+		});
+
+		const {
+			gameRecommendationRecordProjectionService,
+			gameRecommendationRecordProjectionWriter,
+			gameVectorProjectionService,
+			gameVectorProjectionWriter,
+			instancePreferenceModelInvalidation,
+			instancePreferenceModelService,
+		} = recommendationEngineParts;
+
+		const projectionReconciler = new ProjectionReconciler({
+			gameRecommendationRecordProjectionService,
+			gameRecommendationRecordProjectionWriter,
+			gameVectorProjectionService,
+			gameVectorProjectionWriter,
+			instancePreferenceModelInvalidation,
+			logService: buildLogger("ProjectionReconciler"),
+		});
+
+		const playAtlasHttpClient = new AuthenticatedHttpClient({
+			httpClient: this.mocks.httpClient,
+			sessionIdProvider,
+		});
+		const playAtlasClient = new PlayAtlasClient({ httpClient: playAtlasHttpClient });
+		const syncRunner = new SyncRunner({ clock: this.clock, syncState: infra.playAtlasSyncState });
 
 		const gameLibrary: IClientGameLibraryModulePort = new ClientGameLibraryModule({
 			dbSignal: infra.dbSignal,
 			playAtlasClient,
 			clock: this.clock,
 			syncRunner,
-			gameSessionReadonlyStore: gameSessionReadonlyStore,
-			logService: this.mocks.logService,
+			projectionInvalidator: projectionReconciler,
+			gameRecommendationRecordProjectionService,
+			gameVectorProjectionService,
+			instancePreferenceModelService,
 		});
 		await gameLibrary.initializeAsync();
 
 		const gameSession: IClientGameSessionModulePort = new GameSessionModule({
 			clock: this.clock,
 			dbSignal: infra.dbSignal,
-			logService: this.mocks.logService,
+			logService: buildLogger("GameSessionModule"),
 			playAtlasClient,
 			syncRunner,
 			gameSessionReadonlyStore,
-			instancePreferenceModelInvalidation:
-				gameLibrary.recommendationEngineModule.instancePreferenceModelService,
+			projectionInvalidator: projectionReconciler,
 		});
 
 		const synchronization = new SynchronizationModule({
@@ -161,9 +205,9 @@ export class TestCompositionRoot {
 			syncGenresFlow: gameLibrary.syncGenresFlow,
 			syncPlatformsFlow: gameLibrary.syncPlatformsFlow,
 			syncGameSessionsFlow: gameSession.syncGameSessionsFlow,
-			instancePreferenceModelService:
-				gameLibrary.recommendationEngineModule.instancePreferenceModelService,
+			instancePreferenceModelService,
 			storageManager: infra.storageManager,
+			projectionCoordinator: projectionReconciler,
 		});
 
 		const bootstrapper = new ClientBootstrapper({
