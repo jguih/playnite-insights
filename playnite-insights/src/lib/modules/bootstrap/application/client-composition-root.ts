@@ -162,7 +162,7 @@ export class ClientCompositionRoot {
 			playAtlasClient,
 			syncRunner,
 			gameSessionReadonlyStore,
-			instancePreferenceModelInvalidation,
+			projectionInvalidator: projectionReconciler,
 		});
 
 		const synchronization = new SynchronizationModule({

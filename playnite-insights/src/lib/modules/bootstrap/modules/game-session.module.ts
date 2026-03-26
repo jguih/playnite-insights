@@ -1,8 +1,8 @@
 import type {
 	IClockPort,
-	IInstancePreferenceModelInvalidationPort,
 	ILogServicePort,
 	IPlayAtlasClientPort,
+	IProjectionInvalidatorPort,
 	ISyncRunnerPort,
 } from "$lib/modules/common/application";
 import {
@@ -25,7 +25,7 @@ export type GameSessionModuleDeps = {
 	logService: ILogServicePort;
 	playAtlasClient: IPlayAtlasClientPort;
 	syncRunner: ISyncRunnerPort;
-	instancePreferenceModelInvalidation: IInstancePreferenceModelInvalidationPort;
+	projectionInvalidator: IProjectionInvalidatorPort;
 };
 
 export class GameSessionModule implements IClientGameSessionModulePort {
@@ -40,8 +40,8 @@ export class GameSessionModule implements IClientGameSessionModulePort {
 			clock,
 			playAtlasClient,
 			syncRunner,
-			instancePreferenceModelInvalidation,
 			gameSessionReadonlyStore,
+			projectionInvalidator,
 		} = deps;
 
 		this.gameSessionMapper = new GameSessionReadModelMapper({ clock });
@@ -55,7 +55,7 @@ export class GameSessionModule implements IClientGameSessionModulePort {
 			gameSessionsWriteStore: this.gameSessionWriteStore,
 			playAtlasClient,
 			syncRunner,
-			instancePreferenceModelInvalidation,
+			projectionInvalidator,
 		});
 	}
 }
