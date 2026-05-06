@@ -1,5 +1,9 @@
 # Recommendation Ranking Penalties
 
+## Status
+
+🔍 Exploratory
+
 ## Context
 The recommendation engine currently relies primarily on vector similarity between a target vector and candidate game vectors. This is strong for relevance, but incomplete for ranking.
 
@@ -81,12 +85,12 @@ computeRecommendationScore(similarity, game): number
 
 1. Add `recommendation-ranking.policy.ts`.
 2. Implement modifiers for:
-   - completed
-n   - hidden
+  - completed
+  - hidden
 3. In `recommendation-engine.ts`:
-   - compute similarity
-   - compute modifier
-   - compute final score
+  - compute similarity
+  - compute modifier
+  - compute final score
 4. Sort by final score.
 
 ### Phase 2 - Explainability
@@ -112,7 +116,7 @@ reasons: ['completed_penalty']
 Add optional boosts/penalties for:
 
 - favorite
-n- backlog category
+- backlog category
 - recently played
 - very high playtime fatigue
 - manually ignored games
