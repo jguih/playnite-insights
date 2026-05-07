@@ -1,4 +1,4 @@
-# Server - Job Queue
+# [Server] - Job Queue
 
 ## Status
 
@@ -148,7 +148,7 @@ Each job type must have a registered payload schema.
 
 A schema registry is responsible for resolving the correct schema for a given job type.
 
-## Job Status Lifecycle
+### Job Status Lifecycle
 
 A job may be in one of the following states:
 
@@ -180,6 +180,12 @@ Claiming a job should:
 - increment attempt counter
 
 The operation must prevent multiple workers from claiming the same job.
+
+Eligible jobs should be claimed ordered by:
+
+1. priority descending
+2. run time ascending
+3. creation time ascending
 
 ### Retry Behavior
 
@@ -235,9 +241,6 @@ Important behavioral guarantees to validate:
 
 ## Open Questions
 
-- how should expired processing locks be reclaimed?
-- should workers actively heartbeat while processing long-running jobs?
-- should retry delay strategy become configurable?
 - should failed jobs support manual replay?
 - should job execution metrics be persisted for observability?
 
@@ -246,11 +249,7 @@ Important behavioral guarantees to validate:
 The following items are intentionally out of scope for the initial implementation:
 
 - payload schema versioning
-- distributed workers across multiple server instances
 - priority queues
 - cancellation support
 - backup processing jobs
-- advanced scheduling primitives
-- dead-letter queue support
 - persistent execution metrics
-

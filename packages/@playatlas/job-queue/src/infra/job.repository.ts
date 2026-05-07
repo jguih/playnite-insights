@@ -110,7 +110,7 @@ export const makeJobRepository = ({
 							LockedAt IS NULL
 							OR LockedAt <= ?
 						)
-					ORDER BY Priority DESC, CreatedAt ASC
+					ORDER BY Priority DESC, RunAt ASC, CreatedAt ASC
 					LIMIT 1
 				)
 				AND Status = ?;
