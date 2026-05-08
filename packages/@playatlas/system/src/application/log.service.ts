@@ -28,13 +28,15 @@ export const makeLogService = (
 		return value;
 	};
 
-	const logError = (message: string, error?: unknown): void => {
+	const logError = (message: string, error?: unknown, details?: unknown): void => {
 		if (getCurrentLogLevel() > logLevel.error) {
 			return;
 		}
 		const baseMessage = `[${getDateTimeString()}] [ERROR] [${source}] ${message}`;
 		const errorMessage = JSON.stringify(error, replacer);
-		if (error) console.error(baseMessage, `${errorMessage}`);
+		if (error && details)
+			console.error(baseMessage, `${errorMessage}`, `${JSON.stringify(details, replacer)}`);
+		else if (error) console.error(baseMessage, `${errorMessage}`);
 		else console.error(baseMessage);
 	};
 

@@ -34,7 +34,7 @@
 ## Phase 5 - Validation
 
 - [x] job domain entity **automated unit tests**
-- [!] job lifecycle **automated integration tests**
+- [ ] job lifecycle **automated integration tests**
   - [x] claiming a job
   - [x] fails to claim when no job exists
   - [x] fails to claim a job before it's scheduled run time

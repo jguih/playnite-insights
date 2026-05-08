@@ -1,5 +1,5 @@
 export type ILogServicePort = {
-	error: (message: string, error?: unknown) => void;
+	error: (message: string, error?: unknown, details?: unknown) => void;
 	warning: (message: string, details?: unknown) => void;
 	info: (message: string, details?: unknown) => void;
 	success: (message: string, details?: unknown) => void;
