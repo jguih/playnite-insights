@@ -39,6 +39,14 @@ Instead of recommending what to buy, **PlayAtlas helps users rediscover what the
 
 It does so without relying on external services, opaque algorithms, or cloud infrastructure.
 
+## AI Use Disclosure
+
+AI tools were used during the development of PlayAtlas primarily for research, documentation structuring, architectural review discussions, and implementation planning.
+
+All generated content is reviewed, validated, refined, and ultimately approved manually before becoming part of the project. AI-generated output is treated as an assistive tool rather than an authoritative source.
+
+For more information about the workflow and guidelines used during development, see [AI Use Guidelines](AI_USE_GUIDELINES.md).
+
 ## System Overview
 
 PlayAtlas consists of three components operating within the same local network:

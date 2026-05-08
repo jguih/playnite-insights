@@ -9,13 +9,13 @@
 - [x] create job table migration
 - [x] create job repository
 - [x] create atomic claim query
-- [ ] create payload schema registry
+- [x] create job definition (payload schema + handler) registry
 
 ## Phase 2 - Worker Runtime
 
 - [ ] implement worker loop
 - [ ] implement payload validation
-- [ ] implement retry scheduling
+- [x] implement retry scheduling
 - [ ] implement lock expiration recovery
 
 ## Phase 3 - Transactional Event Dispatch
