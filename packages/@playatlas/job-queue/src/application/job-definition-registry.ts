@@ -5,6 +5,11 @@ export type JobDefinitionRegistryDeps = {
 	jobDefinitions: JobDefinition<unknown>[];
 };
 
+/**
+ * Creates an instance of {@link IJobDefinitionRegistry}.
+ *
+ * @see {@link IJobDefinitionRegistry}
+ */
 export const makeJobDefinitionRegistry = ({
 	jobDefinitions,
 }: JobDefinitionRegistryDeps): IJobDefinitionRegistry => {

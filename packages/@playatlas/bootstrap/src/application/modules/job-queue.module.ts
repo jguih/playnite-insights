@@ -1,6 +1,12 @@
 import type { ILogServiceFactoryPort } from "@playatlas/common/application";
 import type { DbGetter, IClockPort } from "@playatlas/common/infra";
-import { makeJobFactory, makeJobMapper } from "@playatlas/job-queue/application";
+import {
+	makeJobDefinitionRegistry,
+	makeJobFactory,
+	makeJobMapper,
+	makeJobProcessor,
+	type JobDefinitionRegistryDeps,
+} from "@playatlas/job-queue/application";
 import {
 	makeClaimNextJobCommandHandler,
 	makeEnqueueJobCommandHandler,
@@ -12,12 +18,14 @@ export type IJobQueueModuleDeps = {
 	logServiceFactory: ILogServiceFactoryPort;
 	clock: IClockPort;
 	getDb: DbGetter;
+	jobDefinitions: JobDefinitionRegistryDeps["jobDefinitions"];
 };
 
 export const makeJobQueueModule = ({
 	logServiceFactory,
 	clock,
 	getDb,
+	jobDefinitions,
 }: IJobQueueModuleDeps): IJobQueueModulePort => {
 	const buildLog = (ctx: string) => logServiceFactory.build(ctx);
 
@@ -32,10 +40,21 @@ export const makeJobQueueModule = ({
 	const enqueueJobCommandHandler = makeEnqueueJobCommandHandler({ jobFactory, jobRepository });
 	const claimNextJobCommandHandler = makeClaimNextJobCommandHandler({ jobRepository });
 
+	const jobDefinitionRegistry = makeJobDefinitionRegistry({ jobDefinitions });
+	const jobProcessor = makeJobProcessor({
+		claimNextJobCommandHandler,
+		clock,
+		jobDefinitionRegistry,
+		jobRepository,
+		logService: buildLog("JobProcessor"),
+	});
+
 	const api: IJobQueueModulePort = {
 		getJobFactory: () => jobFactory,
 		getJobMapper: () => jobMapper,
 		getJobRepository: () => jobRepository,
+		getJobDefinitionRegistry: () => jobDefinitionRegistry,
+		getJobProcessor: () => jobProcessor,
 		commands: {
 			getEnqueueJobCommandHandler: () => enqueueJobCommandHandler,
 			getClaimNextJobCommandHandler: () => claimNextJobCommandHandler,

@@ -90,7 +90,7 @@ export const makeAppCompositionRoot = ({ env }: AppCompositionRootDeps): AppRoot
 			gameRepository: gameLibrary.getGameRepository(),
 		});
 
-		const jobQueue = makeJobQueueModule({ ...baseDeps });
+		const jobQueue = makeJobQueueModule({ ...baseDeps, jobDefinitions: [] });
 
 		return bootstrapV1({
 			backendLogService: logService,

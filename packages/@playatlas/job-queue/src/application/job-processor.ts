@@ -15,6 +15,11 @@ export type JobProcessorDeps = {
 	jobRepository: IJobRepositoryPort;
 };
 
+/**
+ * Creates an instance of {@link IJobProcessorPort}.
+ *
+ * @see {@link IJobProcessorPort}
+ */
 export const makeJobProcessor = ({
 	claimNextJobCommandHandler,
 	clock,
@@ -116,7 +121,7 @@ export const makeJobProcessor = ({
 				};
 			}
 
-			logService.success(`Job failed`, _build_job_description(job));
+			logService.error(`Job failed`, _build_job_description(job));
 
 			_fail_job(job, "handler failed to process job");
 
