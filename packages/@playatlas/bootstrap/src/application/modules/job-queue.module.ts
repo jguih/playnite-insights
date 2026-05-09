@@ -14,7 +14,7 @@ import {
 import { makeJobRepository } from "@playatlas/job-queue/infra";
 import type { IJobQueueModulePort } from "./job-queue.module.port";
 
-export type IJobQueueModuleDeps = {
+export type JobQueueModuleDeps = {
 	logServiceFactory: ILogServiceFactoryPort;
 	clock: IClockPort;
 	getDb: DbGetter;
@@ -26,7 +26,7 @@ export const makeJobQueueModule = ({
 	clock,
 	getDb,
 	jobDefinitions,
-}: IJobQueueModuleDeps): IJobQueueModulePort => {
+}: JobQueueModuleDeps): IJobQueueModulePort => {
 	const buildLog = (ctx: string) => logServiceFactory.build(ctx);
 
 	const jobFactory = makeJobFactory({ clock });

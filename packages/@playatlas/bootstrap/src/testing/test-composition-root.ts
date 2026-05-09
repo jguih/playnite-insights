@@ -2,7 +2,7 @@ import { makeEventBus } from "@playatlas/common/application";
 import type { AppEnvironmentVariables } from "@playatlas/common/infra";
 import { makeTestHorrorScoreEngine } from "@playatlas/game-library/testing";
 import { makeLogServiceFactory } from "@playatlas/system/application";
-import { bootstrapV1, type PlayAtlasApiV1 } from "../application";
+import { bootstrapV1 } from "../application";
 import {
 	makeAuthModule,
 	makeGameLibraryModule,
@@ -16,18 +16,23 @@ import { makeSeedDataModule } from "./modules/seed-data.module";
 import { makeTestFactoryModule } from "./modules/test-factory.module";
 import { bootstrapTestApiV1 } from "./test-bootstrap.service";
 import { makeTestClock } from "./test-clock";
+import type {
+	TestCompositionRootBuildDeps,
+	TestCompositionRootBuildResult,
+} from "./test-composition-root.types";
 import type { TestDoubleServices } from "./test.api.types";
-import type { PlayAtlasTestApiV1 } from "./test.api.v1";
 
 export type TestCompositionRootDeps = {
 	env: AppEnvironmentVariables;
 };
 
-export type ITestRootPort = {
-	buildAsync: () => Promise<{ api: PlayAtlasApiV1; testApi: PlayAtlasTestApiV1 }>;
+export type ITestCompositionRootPort = {
+	buildAsync: (deps: TestCompositionRootBuildDeps) => Promise<TestCompositionRootBuildResult>;
 };
 
-export const makeTestCompositionRoot = ({ env }: TestCompositionRootDeps): ITestRootPort => {
+export const makeTestCompositionRoot = ({
+	env,
+}: TestCompositionRootDeps): ITestCompositionRootPort => {
 	const _build_base_deps = () => {
 		const system = makeSystemModule({ env });
 
@@ -53,7 +58,7 @@ export const makeTestCompositionRoot = ({ env }: TestCompositionRootDeps): ITest
 		};
 	};
 
-	const buildAsync: ITestRootPort["buildAsync"] = async () => {
+	const buildAsync: ITestCompositionRootPort["buildAsync"] = async ({ jobDefinitions }) => {
 		const { clock, eventBus, logService, logServiceFactory, system } = _build_base_deps();
 		const testDoubleServices = _build_test_double_services();
 
@@ -111,7 +116,7 @@ export const makeTestCompositionRoot = ({ env }: TestCompositionRootDeps): ITest
 			gameRepository: gameLibrary.getGameRepository(),
 		});
 
-		const jobQueue = makeJobQueueModule({ ...baseDeps });
+		const jobQueue = makeJobQueueModule({ ...baseDeps, jobDefinitions });
 
 		const seedData = makeSeedDataModule({ gameLibrary });
 

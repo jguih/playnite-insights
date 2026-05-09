@@ -7,6 +7,6 @@ import type { JobHandlerResult } from "./job-handler.types";
  * specific job type and are invoked by the Job Processor after
  * payload validation succeeds.
  */
-export type IJobHandler<TPayload> = {
+export type IJobHandlerPort<TPayload> = {
 	handle: (payload: TPayload) => JobHandlerResult;
 };

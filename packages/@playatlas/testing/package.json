@@ -4,7 +4,8 @@
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
-		"./testing": "./src/testing/index.ts"
+		"./testing": "./src/testing/index.ts",
+		"./application": "./src/application/index.ts"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",
@@ -12,6 +13,8 @@
 		"vitest": "catalog:"
 	},
 	"dependencies": {
-		"@playatlas/common": "workspace:*"
+		"@playatlas/common": "workspace:*",
+		"@playatlas/job-queue": "workspace:*",
+		"zod": "catalog:"
 	}
 }

@@ -354,6 +354,12 @@ importers:
       '@playatlas/common':
         specifier: workspace:*
         version: link:../common
+      '@playatlas/job-queue':
+        specifier: workspace:*
+        version: link:../job-queue
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -488,6 +494,9 @@ importers:
       '@playatlas/system':
         specifier: workspace:*
         version: link:../@playatlas/system
+      '@playatlas/testing':
+        specifier: workspace:*
+        version: link:../@playatlas/testing
       sharp:
         specifier: 'catalog:'
         version: 0.34.5

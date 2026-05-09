@@ -1,6 +1,6 @@
 import type { JobType } from "@playatlas/common/domain";
 import type z from "zod";
-import type { IJobHandler } from "./job-handler.port";
+import type { IJobHandlerPort } from "./job-handler.port";
 
 /**
  * Defines how a job type should be processed.
@@ -15,5 +15,5 @@ import type { IJobHandler } from "./job-handler.port";
 export type JobDefinition<TPayload> = {
 	type: JobType;
 	schema: z.ZodType<TPayload>;
-	handler: IJobHandler<TPayload>;
+	handler: IJobHandlerPort<TPayload>;
 };
