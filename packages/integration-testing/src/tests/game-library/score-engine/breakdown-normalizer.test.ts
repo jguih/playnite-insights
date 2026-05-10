@@ -1,3 +1,4 @@
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import type { HorrorEvidenceGroup, ScoreBreakdown } from "@playatlas/game-library/application";
 import {
 	LATEST_SCORE_BREAKDOWN_SCHEMA_VERSION,
@@ -5,14 +6,26 @@ import {
 	scoreBreakdownSchemaV1_0_0,
 	type CanonicalScoreBreakdown,
 } from "@playatlas/game-library/dtos";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import z from "zod";
-import { testApi } from "../../../vitest.global.setup";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../../lib/environments";
 
 const envelopeJson = (version: string, payload: unknown) =>
 	JSON.stringify({ breakdownSchemaVersion: version, payload });
 
 describe("Game Library /  Score Engine Breakdown Normalizer", () => {
+	let env: TestEnvironment;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ testApi } = env);
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	it("returns normalized breakdown for valid payload", () => {
 		// Arrange
 		const rawBreakdown: ScoreBreakdown<HorrorEvidenceGroup> = {

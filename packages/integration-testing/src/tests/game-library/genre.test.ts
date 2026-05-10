@@ -1,9 +1,24 @@
 import { faker } from "@faker-js/faker";
-import { describe, expect, it } from "vitest";
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 import { isCursorAfter } from "../../test.lib";
-import { api, testApi } from "../../vitest.global.setup";
 
 describe("Game Library / Genre", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	it("persists a new genre", () => {
 		// Arrange
 		const genre = testApi.factory.getGenreFactory().build();

@@ -1,10 +1,25 @@
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import { DEFAULT_CLASSIFICATIONS } from "@playatlas/game-library/commands";
 import type { MakeClassificationProps } from "@playatlas/game-library/domain";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../../lib/environments";
 import { isCursorAfter, isCursorEqual } from "../../../test.lib";
-import { api, testApi } from "../../../vitest.global.setup";
 
 describe("Game Library Synchronization / Classifications", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	it("Sync cursor invariant: correctly returns updated items across distinct timestamps", async () => {
 		// Arrange
 		testApi.getClock().setCurrent(new Date("2026-01-01T00:00:00Z"));

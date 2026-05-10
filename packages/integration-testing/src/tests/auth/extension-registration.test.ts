@@ -7,37 +7,45 @@ import type {
 } from "@playatlas/auth/commands";
 import type { ExtensionRegistration } from "@playatlas/auth/domain";
 import type { ExtensionRegistrationResponseDto } from "@playatlas/auth/dtos";
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import type { DomainEvent } from "@playatlas/common/application";
 import { ExtensionRegistrationIdParser } from "@playatlas/common/domain";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 import { recordDomainEvents } from "../../test.lib";
-import { api, testApi } from "../../vitest.global.setup";
-
-const buildRegisterCommand = (): {
-	registration: ExtensionRegistration;
-	command: RegisterExtensionCommand;
-} => {
-	const registration = testApi.factory.getExtensionRegistrationFactory().build();
-	const command: RegisterExtensionCommand = {
-		extensionId: registration.getExtensionId(),
-		publicKey: registration.getPublicKey(),
-		extensionVersion: registration.getExtensionVersion(),
-		hostname: registration.getHostname(),
-		os: registration.getOs(),
-	};
-	return { registration, command };
-};
 
 describe("Auth / Extension Registration", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
 	let unsubscribe: () => void;
 	let events: DomainEvent[];
 
-	beforeEach(() => {
-		({ events, unsubscribe } = recordDomainEvents());
+	const buildRegisterCommand = (): {
+		registration: ExtensionRegistration;
+		command: RegisterExtensionCommand;
+	} => {
+		const registration = testApi.factory.getExtensionRegistrationFactory().build();
+		const command: RegisterExtensionCommand = {
+			extensionId: registration.getExtensionId(),
+			publicKey: registration.getPublicKey(),
+			extensionVersion: registration.getExtensionVersion(),
+			hostname: registration.getHostname(),
+			os: registration.getOs(),
+		};
+		return { registration, command };
+	};
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+		({ events, unsubscribe } = recordDomainEvents(api));
 	});
 
-	afterEach(() => {
+	afterEach(async () => {
 		unsubscribe();
+		await env.disposeAsync();
 	});
 
 	it("register an extension", () => {

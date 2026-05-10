@@ -1,8 +1,23 @@
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import type { CompanyResponseDto } from "@playatlas/game-library/dtos";
-import { describe, expect, it } from "vitest";
-import { api, testApi } from "../../vitest.global.setup";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 
 describe("Game Library / Company", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	it("persists a company", () => {
 		// Arrange
 		const company = testApi.factory.getCompanyFactory().build();

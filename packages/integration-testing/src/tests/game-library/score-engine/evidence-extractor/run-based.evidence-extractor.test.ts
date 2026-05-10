@@ -1,9 +1,19 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { testApi } from "../../../../vitest.global.setup";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../../../lib/environments";
 
 describe.skip("Run Based Score Engine / Evidence Extractor", () => {
-	beforeEach(() => {
+	let env: TestEnvironment;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ testApi } = env);
 		testApi.seed.seedGameRelationships(testApi.data.getGameRelationshipOptions());
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
 	});
 
 	// Used for manual output inspection (for now)

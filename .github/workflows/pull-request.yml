@@ -37,7 +37,6 @@ jobs:
 
       - name: Run unit and integration tests
         env:
-          PLAYATLAS_DATA_DIR: /tmp/playatlas
           PLAYATLAS_MIGRATIONS_DIR: ${{ github.workspace }}/packages/@playatlas/system/src/infra/database/migrations
           PLAYATLAS_LOG_LEVEL: 3
           PLAYATLAS_USE_IN_MEMORY_DB: true

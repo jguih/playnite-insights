@@ -1,8 +1,25 @@
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import type { PlatformResponseDto } from "@playatlas/game-library/dtos";
-import { describe, expect, it } from "vitest";
-import { api, testApi } from "../../vitest.global.setup";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 
 describe("Game Library / Platform", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+		testApi.seed.seedGameRelationships(testApi.data.getGameRelationshipOptions());
+		testApi.seed.seedDefaultClassifications();
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	it("persists a new platform", () => {
 		// Arrange
 		const platformName = "test-platform#12" as const;

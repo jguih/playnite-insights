@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
 	test: {
 		globals: true,
+		maxWorkers: "50%",
+		fileParallelism: true,
 		reporters: ["default", ["junit", { outputFile: "../../test-results/integration-junit.xml" }]],
 		projects: [
 			{

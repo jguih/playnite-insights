@@ -25,8 +25,6 @@ export type PlayAtlasTestApiV1 = {
 	};
 	factory: ITestFactoryModulePort;
 	seed: ISeedDataModulePort;
-	cleanup: () => Promise<void>;
-	resetDbAsync: () => Promise<void>;
 	data: {
 		getGameRelationshipOptions: () => GameRelationshipOptions;
 	};

@@ -1,3 +1,5 @@
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import { CLASSIFICATION_IDS } from "@playatlas/common/domain";
 import type { ScoreEngineVersion } from "@playatlas/game-library/application";
 import {
@@ -5,10 +7,24 @@ import {
 	type SyncGamesRequestDto,
 	type SyncGamesRequestDtoItem,
 } from "@playatlas/playnite-integration/commands";
-import { beforeEach, describe, expect, it } from "vitest";
-import { api, testApi } from "../../../vitest.global.setup";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../../lib/environments";
 
 describe("Game Library / Score Engine Game Classifications", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+		testApi.seed.seedDefaultClassifications();
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	const syncGamesAsync = async (props: { items?: SyncGamesRequestDtoItem[] } = {}) => {
 		const { items } = props;
 		const sampleSize = items ? items.length : 2000;
@@ -31,10 +47,6 @@ describe("Game Library / Score Engine Game Classifications", () => {
 
 		return { commandResult, queryResult };
 	};
-
-	beforeEach(() => {
-		testApi.seed.seedDefaultClassifications();
-	});
 
 	it("creates one classification per game per engine", async () => {
 		// Arrange

@@ -1,9 +1,24 @@
 import { faker } from "@faker-js/faker";
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import { PlayniteCompletionStatusIdParser } from "@playatlas/common/domain";
-import { describe, expect, it } from "vitest";
-import { api, testApi } from "../../../vitest.global.setup";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../../lib/environments";
 
 describe("Game Library Synchronization / Completion Status", () => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
+	});
+
 	it("Sync cursor invariant: correctly returns updated items across distinct timestamps", async () => {
 		// Arrange
 		testApi.getClock().setCurrent(new Date("2026-01-01T00:00:00Z"));

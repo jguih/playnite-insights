@@ -1,13 +1,25 @@
 import { faker } from "@faker-js/faker";
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
+import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import { GameIdParser, PlayniteGameIdParser } from "@playatlas/common/domain";
 import { makeSyncGamesCommand } from "@playatlas/playnite-integration/commands";
-import { beforeEach, describe, expect, it } from "vitest";
-import { api, testApi } from "../../vitest.global.setup";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 
 describe("Game Library / Game", { timeout: 20_000 }, () => {
-	beforeEach(() => {
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
+	let testApi: PlayAtlasTestApiV1;
+
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api, testApi } = env);
 		testApi.seed.seedGameRelationships(testApi.data.getGameRelationshipOptions());
 		testApi.seed.seedDefaultClassifications();
+	});
+
+	afterEach(async () => {
+		await env.disposeAsync();
 	});
 
 	it("persists games", () => {

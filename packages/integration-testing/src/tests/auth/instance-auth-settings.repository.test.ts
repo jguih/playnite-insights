@@ -1,9 +1,10 @@
 import { faker } from "@faker-js/faker";
 import type { InstanceSessionId } from "@playatlas/auth/domain";
+import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
 import type { DomainEvent } from "@playatlas/common/application";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 import { recordDomainEvents } from "../../test.lib";
-import { api } from "../../vitest.global.setup";
 
 const buildRequest = (sessionId: InstanceSessionId): Request => {
 	const request = new Request("https://playatlas-test.com/api/games", {
@@ -16,13 +17,18 @@ const buildRequest = (sessionId: InstanceSessionId): Request => {
 describe("Auth / Instance authentication lifecycle", () => {
 	let unsubscribe: () => void;
 	let events: DomainEvent[];
+	let env: TestEnvironment;
+	let api: PlayAtlasApiV1;
 
-	beforeEach(() => {
-		({ events, unsubscribe } = recordDomainEvents());
+	beforeEach(async () => {
+		env = await makeTestEnvironmentAsync();
+		({ api } = env);
+		({ events, unsubscribe } = recordDomainEvents(api));
 	});
 
-	afterEach(() => {
+	afterEach(async () => {
 		unsubscribe();
+		await env.disposeAsync();
 	});
 
 	it("does not register instance more than once", async () => {
