@@ -6,6 +6,10 @@ import {
 	scoreBreakdownSchemaV1_0_0,
 	type CanonicalScoreBreakdown,
 } from "@playatlas/game-library/dtos";
+import {
+	makeTestHorrorScoreEngine,
+	type ITestHorrorScoreEnginePort,
+} from "@playatlas/game-library/testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import z from "zod";
 import { makeTestEnvironmentAsync, type TestEnvironment } from "../../../lib/environments";
@@ -16,9 +20,11 @@ const envelopeJson = (version: string, payload: unknown) =>
 describe("Game Library /  Score Engine Breakdown Normalizer", () => {
 	let env: TestEnvironment;
 	let testApi: PlayAtlasTestApiV1;
+	let horrorEngine: ITestHorrorScoreEnginePort;
 
 	beforeEach(async () => {
-		env = await makeTestEnvironmentAsync();
+		horrorEngine = makeTestHorrorScoreEngine();
+		env = await makeTestEnvironmentAsync({ testDoubles: { scoreEngine: { horrorEngine } } });
 		({ testApi } = env);
 	});
 
@@ -38,9 +44,7 @@ describe("Game Library /  Score Engine Breakdown Normalizer", () => {
 			normalizedTotal: 0,
 			tier: "none",
 		};
-		const breakdown = testApi.gameLibrary.scoreEngine
-			.getHorrorScoreEngine()
-			.serializeBreakdown(rawBreakdown);
+		const breakdown = horrorEngine.serializeBreakdown(rawBreakdown);
 
 		// Act
 		const result = testApi.gameLibrary.scoreEngine

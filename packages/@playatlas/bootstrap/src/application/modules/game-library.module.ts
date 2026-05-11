@@ -31,7 +31,7 @@ import {
 	makeSurvivalScoreEngine,
 	makeTagFactory,
 	makeTagMapper,
-	type EnginesMap,
+	type IHorrorScoreEnginePort,
 } from "@playatlas/game-library/application";
 import { makeApplyDefaultClassificationsCommandHandler } from "@playatlas/game-library/commands";
 import {
@@ -64,18 +64,15 @@ import {
 } from "@playatlas/game-library/queries";
 import type { IGameLibraryModulePort } from "./game-library.module.port";
 
-export type GameLibraryModuleScoreEngineDeps = {
-	scoreEngine?: {
-		engineOverride?: Partial<EnginesMap>;
-	};
-};
-
-export type GameLibraryModuleDeps = GameLibraryModuleScoreEngineDeps & {
+export type GameLibraryModuleDeps = {
 	getDb: DbGetter;
 	logServiceFactory: ILogServiceFactoryPort;
 	fileSystemService: IFileSystemServicePort;
 	systemConfig: ISystemConfigPort;
 	clock: IClockPort;
+	scoreEngine?: {
+		horrorEngine?: IHorrorScoreEnginePort;
+	};
 };
 
 type GameLibraryScoreModuleDeps = GameLibraryModuleDeps & {
@@ -101,7 +98,7 @@ const makeGameLibraryScoreEngineModule = ({
 	const horrorEvidenceExtractor = makeHorrorEvidenceExtractor({ scoreEngineDSL });
 	const horrorScoringPolicy = makeHorrorScoringPolicy();
 	const horrorScoreEngine =
-		scoreEngine?.engineOverride?.HORROR ??
+		scoreEngine?.horrorEngine ??
 		makeHorrorScoreEngine({
 			horrorEvidenceExtractor,
 			horrorScoringPolicy,
@@ -109,10 +106,12 @@ const makeGameLibraryScoreEngineModule = ({
 
 	const runBasedEvidenceExtractor = makeRunBasedEvidenceExtractor({ scoreEngineDSL });
 	const runBasedScoringPolicy = makeRunBasedScoringPolicy();
-	const runBasedScoreEngine =
-		scoreEngine?.engineOverride?.["RUN-BASED"] ??
-		makeRunBasedScoreEngine({ runBasedEvidenceExtractor, runBasedScoringPolicy });
-	const survivalScoreEngine = scoreEngine?.engineOverride?.SURVIVAL ?? makeSurvivalScoreEngine();
+	const runBasedScoreEngine = makeRunBasedScoreEngine({
+		runBasedEvidenceExtractor,
+		runBasedScoringPolicy,
+	});
+
+	const survivalScoreEngine = makeSurvivalScoreEngine();
 
 	const scoreEngineRegistry = makeScoreEngineRegistry({
 		horrorScoreEngine,
@@ -196,6 +195,7 @@ const makeGameLibraryScoreEngineModule = ({
 
 		engines: {
 			getRunBasedScoreEngine: () => runBasedScoreEngine,
+			getHorrorScoreEngine: () => horrorScoreEngine,
 		},
 
 		getClassificationMapper: () => classificationMapper,

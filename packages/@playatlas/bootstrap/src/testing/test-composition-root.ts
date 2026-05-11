@@ -1,17 +1,12 @@
 import { makeEventBus } from "@playatlas/common/application";
 import type { AppEnvironmentVariables } from "@playatlas/common/infra";
-import { makeTestHorrorScoreEngine } from "@playatlas/game-library/testing";
 import { makeLogServiceFactory } from "@playatlas/system/application";
 import { bootstrapV1 } from "../application";
-import {
-	makeAuthModule,
-	makeGameLibraryModule,
-	makeJobQueueModule,
-	makeSystemModule,
-} from "../application/modules";
+import { makeAuthModule, makeJobQueueModule, makeSystemModule } from "../application/modules";
 import { makeGameSessionModule } from "../application/modules/game-session.module";
 import { makeInfraModule } from "../application/modules/infra.module";
 import { makePlayniteIntegrationModule } from "../application/modules/playnite-integration.module";
+import { makeTestGameLibraryModule } from "./modules";
 import { makeSeedDataModule } from "./modules/seed-data.module";
 import { makeTestFactoryModule } from "./modules/test-factory.module";
 import { bootstrapTestApiV1 } from "./test-bootstrap.service";
@@ -20,7 +15,6 @@ import type {
 	TestCompositionRootBuildDeps,
 	TestCompositionRootBuildResult,
 } from "./test-composition-root.types";
-import type { TestDoubleServices } from "./test.api.types";
 
 export type TestCompositionRootDeps = {
 	env: AppEnvironmentVariables;
@@ -50,17 +44,11 @@ export const makeTestCompositionRoot = ({
 		return { system, logServiceFactory, logService, eventBus, clock };
 	};
 
-	const _build_test_double_services = (): TestDoubleServices => {
-		const testHorrorScoreEngine = makeTestHorrorScoreEngine();
-
-		return {
-			gameLibrary: { scoreEngine: { horror: testHorrorScoreEngine } },
-		};
-	};
-
-	const buildAsync: ITestCompositionRootPort["buildAsync"] = async ({ jobDefinitions }) => {
+	const buildAsync: ITestCompositionRootPort["buildAsync"] = async ({
+		jobDefinitions,
+		testDoubles,
+	}) => {
 		const { clock, eventBus, logService, logServiceFactory, system } = _build_base_deps();
-		const testDoubleServices = _build_test_double_services();
 
 		const infra = makeInfraModule({
 			logServiceFactory,
@@ -72,15 +60,11 @@ export const makeTestCompositionRoot = ({
 
 		const baseDeps = { getDb: infra.getDb, logServiceFactory, eventBus, clock };
 
-		const gameLibrary = makeGameLibraryModule({
+		const gameLibrary = makeTestGameLibraryModule({
 			...baseDeps,
 			fileSystemService: infra.getFsService(),
 			systemConfig: system.getSystemConfig(),
-			scoreEngine: {
-				engineOverride: {
-					HORROR: testDoubleServices.gameLibrary.scoreEngine.horror,
-				},
-			},
+			horrorEngine: testDoubles?.scoreEngine?.horrorEngine,
 		});
 
 		const auth = makeAuthModule({
@@ -141,9 +125,9 @@ export const makeTestCompositionRoot = ({
 				gameLibrary,
 				seedData,
 				testFactory,
+				jobQueue,
 			},
 			clock,
-			testDoubleServices,
 		});
 
 		return { api, testApi };

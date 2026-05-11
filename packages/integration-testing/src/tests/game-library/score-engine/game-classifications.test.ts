@@ -3,6 +3,10 @@ import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import { CLASSIFICATION_IDS } from "@playatlas/common/domain";
 import type { ScoreEngineVersion } from "@playatlas/game-library/application";
 import {
+	makeTestHorrorScoreEngine,
+	type ITestHorrorScoreEnginePort,
+} from "@playatlas/game-library/testing";
+import {
 	makeSyncGamesCommand,
 	type SyncGamesRequestDto,
 	type SyncGamesRequestDtoItem,
@@ -14,9 +18,11 @@ describe("Game Library / Score Engine Game Classifications", () => {
 	let env: TestEnvironment;
 	let api: PlayAtlasApiV1;
 	let testApi: PlayAtlasTestApiV1;
+	let horrorEngine: ITestHorrorScoreEnginePort;
 
 	beforeEach(async () => {
-		env = await makeTestEnvironmentAsync();
+		horrorEngine = makeTestHorrorScoreEngine();
+		env = await makeTestEnvironmentAsync({ testDoubles: { scoreEngine: { horrorEngine } } });
 		({ api, testApi } = env);
 		testApi.seed.seedDefaultClassifications();
 	});
@@ -86,7 +92,6 @@ describe("Game Library / Score Engine Game Classifications", () => {
 		const engineV1: ScoreEngineVersion = "v1.0.0";
 		const engineV2: ScoreEngineVersion = "v2.0.0";
 		const syncItems = testApi.factory.getSyncGameRequestDtoFactory().buildList(1);
-		const horrorEngine = testApi.gameLibrary.scoreEngine.getHorrorScoreEngine();
 
 		horrorEngine.setVersion(engineV1);
 		horrorEngine.setScore(10);

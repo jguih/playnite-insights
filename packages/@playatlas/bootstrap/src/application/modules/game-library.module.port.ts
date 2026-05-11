@@ -14,6 +14,7 @@ import type {
 	IGameMapperPort,
 	IGenreFactoryPort,
 	IGenreMapperPort,
+	IHorrorScoreEnginePort,
 	IPlatformFactoryPort,
 	IPlatformMapperPort,
 	IRunBasedEvidenceExtractorPort,
@@ -102,6 +103,7 @@ export type IGameLibraryModulePort = Readonly<{
 
 		engines: {
 			getRunBasedScoreEngine: () => IRunBasedScoreEngine;
+			getHorrorScoreEngine: () => IHorrorScoreEnginePort;
 		};
 
 		getClassificationMapper: () => IClassificationMapperPort;

@@ -5,7 +5,6 @@ import type {
 	Platform,
 	Tag,
 } from "@playatlas/game-library/domain";
-import type { ITestHorrorScoreEnginePort } from "@playatlas/game-library/testing";
 
 export type GameRelationshipOptions = {
 	completionStatusList: CompletionStatus[];
@@ -13,12 +12,4 @@ export type GameRelationshipOptions = {
 	genreList: Genre[];
 	platformList: Platform[];
 	tagList: Tag[];
-};
-
-export type TestDoubleServices = {
-	gameLibrary: {
-		scoreEngine: {
-			horror: ITestHorrorScoreEnginePort;
-		};
-	};
 };

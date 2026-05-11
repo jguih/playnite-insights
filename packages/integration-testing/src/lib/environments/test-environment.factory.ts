@@ -1,15 +1,19 @@
-import { makeTestCompositionRoot } from "@playatlas/bootstrap/testing";
-import type { JobDefinition } from "@playatlas/job-queue/application";
+import {
+	makeTestCompositionRoot,
+	type TestCompositionRootBuildDeps,
+} from "@playatlas/bootstrap/testing";
 import { rm } from "fs/promises";
 import { createTempDataDirAsync } from "../infra/create-tmp-dir";
 import type { TestEnvironment } from "./test-environment.type";
 
 export type TestEnvironmentDeps = {
-	jobDefinitions?: JobDefinition[];
+	jobDefinitions?: TestCompositionRootBuildDeps["jobDefinitions"];
+	testDoubles?: TestCompositionRootBuildDeps["testDoubles"];
 };
 
 export const makeTestEnvironmentAsync = async ({
 	jobDefinitions,
+	testDoubles,
 }: TestEnvironmentDeps = {}): Promise<TestEnvironment> => {
 	const _data_dir = process.env.PLAYATLAS_DATA_DIR ?? (await createTempDataDirAsync());
 	const _job_definitions = jobDefinitions ?? [];
@@ -23,7 +27,7 @@ export const makeTestEnvironmentAsync = async ({
 		},
 	});
 
-	const { api, testApi } = await root.buildAsync({ jobDefinitions: _job_definitions });
+	const { api, testApi } = await root.buildAsync({ jobDefinitions: _job_definitions, testDoubles });
 
 	const _dispose_async: TestEnvironment["disposeAsync"] = async () => {
 		api.getLogService().warning(`Deleting integration test data dir at ${_data_dir}`);

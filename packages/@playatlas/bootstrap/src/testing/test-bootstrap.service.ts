@@ -1,9 +1,9 @@
 import type { IDomainEventBusPort, ILogServicePort } from "@playatlas/common/application";
+import type { IJobQueueModulePort } from "../application/modules";
 import type { IGameLibraryModulePort } from "../application/modules/game-library.module.port";
 import type { ISeedDataModulePort } from "./modules/seed-data.module.port";
 import type { ITestFactoryModulePort } from "./modules/test-factory.module";
 import type { TestClock } from "./test-clock";
-import type { TestDoubleServices } from "./test.api.types";
 import type { PlayAtlasTestApiV1 } from "./test.api.v1";
 
 export type BootstrapTestApiDeps = {
@@ -11,17 +11,16 @@ export type BootstrapTestApiDeps = {
 		gameLibrary: IGameLibraryModulePort;
 		testFactory: ITestFactoryModulePort;
 		seedData: ISeedDataModulePort;
+		jobQueue: IJobQueueModulePort;
 	};
 	backendLogService: ILogServicePort;
 	eventBus: IDomainEventBusPort;
 	clock: TestClock;
-	testDoubleServices: TestDoubleServices;
 };
 
 export const bootstrapTestApiV1 = ({
-	modules: { testFactory, gameLibrary, seedData },
+	modules: { testFactory, gameLibrary, seedData, jobQueue },
 	clock,
-	testDoubleServices,
 }: BootstrapTestApiDeps): PlayAtlasTestApiV1 => {
 	const api: PlayAtlasTestApiV1 = {
 		factory: testFactory,
@@ -32,7 +31,6 @@ export const bootstrapTestApiV1 = ({
 					gameLibrary.scoreEngine.commands.getApplyDefaultClassificationsCommandHandler,
 			},
 			scoreEngine: {
-				getHorrorScoreEngine: () => testDoubleServices.gameLibrary.scoreEngine.horror,
 				getScoreBreakdownNormalizer: gameLibrary.scoreEngine.getScoreBreakdownNormalizer,
 				evidenceExtractors: {
 					getRunBasedEvidenceExtractor:
@@ -44,6 +42,9 @@ export const bootstrapTestApiV1 = ({
 			getGameRelationshipOptions: testFactory.getGameRelationshipOptions,
 		},
 		seed: seedData,
+		jobQueue: {
+			processNext: jobQueue.getJobProcessor().processNext,
+		},
 	};
 
 	return Object.freeze(api);
