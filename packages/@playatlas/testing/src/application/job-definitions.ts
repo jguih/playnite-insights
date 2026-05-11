@@ -6,21 +6,16 @@ const testSchema = z.object({
 	test: z.literal(true),
 });
 
-type TestPayload = z.infer<typeof testSchema>;
-
-export const makeTestJobDefinition = (): {
-	handler: IJobHandlerPort<TestPayload>;
-	definition: JobDefinition<TestPayload>;
-} => {
-	const handler: IJobHandlerPort<TestPayload> = {
+export const makeTestJobDefinition = () => {
+	const handler = {
 		handle: vi.fn(),
-	};
+	} satisfies IJobHandlerPort;
 
-	const definition: JobDefinition<TestPayload> = {
+	const definition = {
 		type: "game-library-sync",
 		handler,
 		schema: testSchema,
-	};
+	} satisfies JobDefinition;
 
 	return { handler, definition };
 };

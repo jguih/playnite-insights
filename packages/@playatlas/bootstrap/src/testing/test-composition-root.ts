@@ -139,8 +139,6 @@ export const makeTestCompositionRoot = ({
 			eventBus,
 			modules: {
 				gameLibrary,
-				infra,
-				system,
 				seedData,
 				testFactory,
 			},

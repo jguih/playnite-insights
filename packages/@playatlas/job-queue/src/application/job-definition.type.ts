@@ -12,7 +12,7 @@ import type { IJobHandlerPort } from "./job-handler.port";
  * Definitions are registered in the Job Definition Registry and
  * resolved by the Job Processor during execution.
  */
-export type JobDefinition<TPayload> = {
+export type JobDefinition<TPayload = unknown> = {
 	type: JobType;
 	schema: z.ZodType<TPayload>;
 	handler: IJobHandlerPort<TPayload>;

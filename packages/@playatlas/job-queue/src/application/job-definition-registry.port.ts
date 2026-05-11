@@ -9,5 +9,5 @@ import type { JobDefinition } from "./job-definition.type";
  * queued jobs.
  */
 export type IJobDefinitionRegistry = {
-	get: (type: JobType) => JobDefinition<unknown> | null;
+	get: (type: JobType) => JobDefinition | null;
 };

@@ -1,8 +1,9 @@
+import type { JobType } from "@playatlas/common/domain";
 import type { IJobDefinitionRegistry } from "./job-definition-registry.port";
 import type { JobDefinition } from "./job-definition.type";
 
 export type JobDefinitionRegistryDeps = {
-	jobDefinitions: JobDefinition<unknown>[];
+	jobDefinitions: JobDefinition[];
 };
 
 /**
@@ -13,7 +14,7 @@ export type JobDefinitionRegistryDeps = {
 export const makeJobDefinitionRegistry = ({
 	jobDefinitions,
 }: JobDefinitionRegistryDeps): IJobDefinitionRegistry => {
-	const definitionsByType = new Map();
+	const definitionsByType = new Map<JobType, JobDefinition>();
 
 	for (const definition of jobDefinitions) {
 		if (definitionsByType.has(definition.type)) {
