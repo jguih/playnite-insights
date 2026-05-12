@@ -126,23 +126,19 @@ Instead, it transforms exploratory knowledge into durable structure.
 Example prompt pattern:
 
 ```text
-I want to design a job queue feature for PlayAtlas and wrote the note below with my thoughts:
+REQUEST:
+Draft a Engineering Note for PlayAtlas based on the raw input below.
 
----
+CONSTRAINTS:
+- do not consider the formatting or structure on the raw input
+
+RAW INPUT:
 [Server] - Job Queue
-
-Implement a job queue for background processing to allow faster server responses.
-
-- Initially, jobs will be used for games and media files sync
-- Operations like score engine computation and image processing will be done in the background through a job
+Implement background processing for image resizing and game sync.
+- Must use SQLite for persistence.
+- Exponential backoff on retries.
+- Workers must be idempotent.
 (...)
----
-
-Write a engineering note based on the above information. Use the engineering_note_guidelines.md attached as a reference for the note's structure.
-
-Preserve the constraints and invariants.
-
-Feel free to make adjustments in wording to clarify intent.
 ```
 
 ### Phase 3 - Refinement and Validation
@@ -170,16 +166,13 @@ Typical refinement prompts are much more concrete and architecture-specific than
 Example:
 
 ```text
-The server remains authoritative and jobs are delivered at-least-once.
+In certain scenarios, a job may be stuck in 'processing' state indefinitely, for example when the server restarts while a handler is processing a job.
 
-The worker may crash while processing a synchronization task.
+Review the proposed design and identify:
 
-Review this design and identify:
-- where duplicate execution could happen
-- what must remain idempotent
-- what recovery behavior is under-specified
-- whether ownership boundaries are leaking
-- what invariants should be explicitly documented
+- other scenarios where this same issue could happen
+- propose possible solutions without using an arbitrary stale lock time
+- consider PlayAtlas as a single process application with a single job worker
 ```
 
 This phase often results in:
@@ -211,55 +204,14 @@ Without explicit guidelines, output quality becomes less predictable.
 
 The most effective prompts usually contain:
 
-```md
-### Context
-
-What system or subsystem is involved.
-
-### Existing Behavior
-
-How the current implementation behaves.
-
-### Problem
-
-What friction, risk, or limitation exists.
-
-### Constraints
-
-Things that must remain true.
-
-### Desired Outcome
-
-The intended behavioral result.
-
-### Questions
-
-Specific areas requiring analysis or refinement.
-```
+- **Context**: what system or subsystem is involved
+- **Existing Behavior**: how the current implementation behaves
+- **Problem**: what friction, risk, or limitation exists
+- **Constraints**: things that must remain true
+- **Desired Outcome**: the intended behavioral result
+- **Questions**: specific areas requiring analysis or refinement
 
 Ideally, you want to cover all those topics during Phase 1.
-
-Example:
-
-```text
-Current system behavior:
-- sessions are persisted locally
-- delivery is at-least-once
-
-Problem:
-- retry handling is becoming difficult
-
-Constraints:
-- workers must remain stateless
-- operations must remain idempotent
-- server remains authoritative
-
-Desired outcome:
-- retries survive restart
-- duplicate processing remains safe
-
-Use the engineering note guidelines to structure this.
-```
 
 ## What AI Is Best Used For
 

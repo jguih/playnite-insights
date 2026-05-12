@@ -14,9 +14,10 @@ const makeTestRunnerEnvAsync = async () => {
 describe("Job Runner", async () => {
 	it("enqueues and claims job", async () => {
 		// Arrange
-		const { disposeAsync } = await makeTestRunnerEnvAsync();
+		const { disposeAsync, testApi } = await makeTestRunnerEnvAsync();
 
 		// Act
+		testApi.jobQueue.processNext();
 
 		// Assert
 		expect(true).toBe(true);

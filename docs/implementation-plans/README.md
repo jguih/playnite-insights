@@ -35,25 +35,8 @@ Example:
 ```md
 # Job Queue Implementation Plan
 
-## References
+## Reference
 
-- Engineering Note: [[Server] - Job Queue](../engineering-notes/confirmed/job_queue.md)
+Use the following existing implementation plans for reference:
 
-## Phase 1 - Persistence
-
-- [x] create job table migration
-- [x] create job repository
-- [x] create atomic claim query
-- [ ] create payload schema registry
-
-## Phase 2 - Worker Runtime
-
-- [ ] implement worker loop
-- [ ] implement payload validation
-- [ ] implement retry scheduling
-- [ ] implement lock expiration recovery
-
-(...)
-```
-
-Keep it simple!
+- [Job Queue Implementation Plan](./job-queue-implementation-plan.md)

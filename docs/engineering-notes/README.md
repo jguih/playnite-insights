@@ -1,175 +1,53 @@
-# Engineering Notes
+# Engineering Note Guidelines
 
-This folder contains implementation plans, architectural notes, refactor proposals, and technical decisions that are more tactical than ADRs.
+This folder contains engineering notes for features or bug fixes. Each document here aims to aid the developer by documenting a plan for solving complex problems.
 
 ## Purpose
 
-Use Engineering Notes for:
+Engineering notes are tactical, execution-oriented documents used to define implementation plans, refactor paths, or technical investigations. They serve as the technical blueprint for a specific change within PlayAtlas.
 
-- feature implementation plans
-- refactor execution plans
-- performance investigations
-- operational runbooks
-- technical debt tracking
-- migration checklists
-- experiments and spikes
+## When to use
 
-Use ADRs for strategic architecture decisions with long-term impact.
+Use an engineering note when a task requires technical coordination or design clarity before implementation begins. While ADRs handle strategic architectural decisions, engineering notes focus on the "how" of a specific feature or refactor.
 
-## Suggested File Naming
+## Content Expectations
 
-```text
-short-topic.md
-```
+The core of every note is the transition from current state to the proposed solution:
+- existing behavior: describe exactly how the system functions today, identifying the specific limitations or pain points being addressed
+- desired outcome: define the specific behavior, state transitions, or guarantees that will exist after implementation
 
-Example:
+Technical depth is preferred and achieved through structured narrative that describes concrete system behavior.
 
-```text
-recommendation-ranking-penalties.md
-```
+## File Naming Convention
 
-## Recommended Structure
+When creating a new note, use the following file name pattern `<short-topic>.md`, for example `job-queue.md`
 
-```md
-# Title
+## Suggested Structure
 
-## Status
+### Title
 
-- 🔍 Exploratory
-- ✅ Confirmed
-- 🚧 In Progress
-- ❌ Abandoned
-- ⌛ Superseded
+The note's title should be a main heading `#` and follow the pattern `[Environment] - Feature`, for example `[Server] - Job Queue`. Environment must be one of: `Server` or `Client`.
 
-## Summary
+### Sections (`##`)
 
-Short explanation of:
+- **Status**: define the current phase of the document; must be one of: Exploratory, Confirmed, In Progress, Abandoned or Superseded
+- **Summary**: describe the change and the expected outcome in 1-2 concise paragraphs focusing on concrete behavior
+- **Motivation**: describe the problem or opportunity being addressed
+- **Existing Behavior**: describe exactly how the system functions today, identifying the specific limitations or pain points being addressed
+- **Desired Outcome**: define the specific behavior, state transitions, or guarantees that will exist after implementation
+- **Constraints**: identify specific technical or domain constraints and invariants
+- **Alternatives**: briefly describe rejected options and the reasoning for not selecting them; make sure to list benefits and drawbacks of each alternative considered
+- **Proposed Design**: provide a technical execution plan and narrative prose for the implementation flow
+- **Validation**: list specific unit or integration test cases along with manual verification steps
+- **Open Questions**: document unresolved items that require further decision-making
+- **Follow-ups**: track out of scope items, future improvements, or technical debt
 
-- what is changing
-- why it matters
-- expected outcome
+### Constraints
 
-## Motivation
+Every engineering note must be created as a markdown file and be maintained in this repository.
 
-Why this note exists.
+## Reference
 
-Examples:
+Use the following existing notes for reference:
 
-- operational issue
-- scalability concern
-- implementation friction
-- upcoming feature dependency
-- architectural inconsistency
-
-## Existing Behavior
-
-Relevant parts of the current system behavior.
-
-Focus on:
-
-- important flows
-- ownership boundaries
-- invariants
-- known limitations
-
-## Desired Outcome
-
-Describe the intended end state.
-
-Prefer concrete behavioral outcomes.
-
-Examples:
-
-- jobs survive restart
-- retries are safe
-- synchronization latency is reduced
-
-## Constraints and Invariants
-
-Things that must remain true.
-
-Examples:
-
-- server remains source of truth
-- delivery remains at-least-once
-- workers remain stateless
-- operations remain idempotent
-
-## Alternatives Considered
-
-### Alternative A
-
-Description, benefits, drawbacks.
-
-### Alternative B
-
-Description, benefits, drawbacks.
-
-Document:
-
-- why an option was rejected
-- trade-offs
-- unknowns
-- operational impact
-
-Keep this lightweight.
-
-## Proposed Design
-
-Describe the proposed implementation.
-
-This section is intentionally flexible.
-
-It may include:
-
-- execution flow
-- persistence strategy
-- data model
-- APIs
-- concurrency model
-- retry behavior
-- migration notes
-
-Use whatever structure best communicates the design.
-
-## Validation Strategy
-
-How the proposal will be validated.
-
-Examples:
-
-- integration tests
-- restart recovery tests
-- stress testing
-- observability metrics
-- manual verification
-
-## Open Questions
-
-Unresolved concerns or uncertainties.
-
-## Follow-ups
-
-Future improvements intentionally excluded from scope.
-```
-
-## Writing Conventions
-
-For consistency across engineering notes:
-
-- bullet lists should use lower-case entries unless grammatically required otherwise
-- bullet list items should not end with periods
-- headings should remain concise and descriptive
-- prefer short explanatory paragraphs over large prose blocks
-- prefer concrete behavioral language over abstract architectural terminology
-
-## Relationship With Existing Docs
-
-- `docs/adr/` = durable decisions
-- `docs/engineering-notes/` = execution-oriented notes
-- `docs/mkdocs/` = product/user-facing documentation
-
-## Notes From Prior Discussions
-
-Keep these notes pragmatic and lightweight. Prefer documents that help future execution instead of theoretical overdesign.
-
+- [[Server] - Job Queue](./confirmed/job-queue.md)
