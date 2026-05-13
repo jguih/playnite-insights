@@ -163,7 +163,9 @@ A job is considered locked when:
 - worker id is assigned
 - locked timestamp is not null
 
-Processing locks must expire after 15 minutes to avoid permanent deadlocks caused by worker crashes.
+**Processing locks must expire after 15 minutes to avoid permanent deadlocks caused by worker crashes**.
+
+Statuses `failed` and `done` are final and the job cannot be processed again.
 
 ### Claiming Strategy
 
@@ -201,6 +203,24 @@ If a job execution fails:
 
 Retry scheduling behavior does not need to implement a formal exponential backoff algorithm initially, but retry delay should increase as attempts increase.
 
+### Startup Recovery
+
+At server's startup, any job in the `processing` state is automatically orphaned, since their handler was interrupted mid processing.
+
+At boot time, the system must transition any job in the `processing` state back to `queued`. This can be accomplished by running the following query once at start up:
+
+```sql
+UPDATE job
+SET
+  Status = 'queued',
+  LockedAt = NULL,
+  WorkerId = NULL,
+  LastUpdatedAt = DATETIME('now')
+WHERE Status = 'processing';
+```
+
+This ensures that no job is left in a permanent locked state after a server restart.
+
 ### Worker Behavior
 
 Workers are responsible for:
@@ -226,6 +246,7 @@ Validation should include:
 - integration tests for atomic claiming
 - retry behavior tests
 - restart recovery tests
+  - verify that processing jobs are re-queued on server restart or recovery
 - lock expiration tests
 - payload validation tests
 - scheduled execution tests

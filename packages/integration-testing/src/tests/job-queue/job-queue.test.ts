@@ -2,6 +2,7 @@ import type { PlayAtlasApiV1 } from "@playatlas/bootstrap/application";
 import type { PlayAtlasTestApiV1 } from "@playatlas/bootstrap/testing";
 import { JobStatus, MINUTE_MS, WorkerIdParser } from "@playatlas/common/domain";
 import type { EnqueueJobCommand } from "@playatlas/job-queue/commands";
+import { JOB_QUEUE_LOCK_TIMEOUT_MS } from "@playatlas/job-queue/domain";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { makeTestEnvironmentAsync, type TestEnvironment } from "../../lib/environments";
 
@@ -186,4 +187,41 @@ describe("Job Queue", () => {
 		expect(claim2.job).not.toBe(null);
 		expect(claim2.job?.getStatus()).toBe(JobStatus.processing);
 	});
+
+	it.each([
+		{ time_to_advance_ms: JOB_QUEUE_LOCK_TIMEOUT_MS + MINUTE_MS },
+		{ time_to_advance_ms: JOB_QUEUE_LOCK_TIMEOUT_MS },
+	])(
+		"reclaims a job with an expired lock after $time_to_advance_ms ms",
+		({ time_to_advance_ms }) => {
+			// Arrange
+			const command = createEnqueueJobCommand();
+			const worker1Id = WorkerIdParser.fromTrusted(crypto.randomUUID());
+			const worker2Id = WorkerIdParser.fromTrusted(crypto.randomUUID());
+			const startTime = testApi.getClock().now();
+
+			// 1. enqueue and claim with worker 1 to set status to 'processing'
+			api.jobQueue.commands.getEnqueueJobCommandHandler().execute(command);
+			api.jobQueue.commands
+				.getClaimNextJobCommandHandler()
+				.execute({ now: startTime, workerId: worker1Id });
+
+			// 2. advance clock past the 15-minute timeout (e.g., 20 minutes)
+			// note: ensure this exceeds your JOB_QUEUE_LOCK_TIMEOUT_MS constant
+			testApi.getClock().advance(time_to_advance_ms);
+
+			// Act
+			// 3. try to claim the same job with worker 2
+			const { success, job } = api.jobQueue.commands
+				.getClaimNextJobCommandHandler()
+				.execute({ now: testApi.getClock().now(), workerId: worker2Id });
+
+			// Assert
+			expect(success).toBe(true);
+			expect(job).not.toBe(null);
+			expect(job?.getWorkerId()).toBe(worker2Id);
+			expect(job?.getAttempts()).toBe(2);
+			expect(job?.getStatus()).toBe(JobStatus.processing);
+		},
+	);
 });

@@ -103,29 +103,34 @@ export const makeJobRepository = ({
 					SELECT Id
 					FROM job
 					WHERE
-						Status = ?
+						(
+							Status = ?
+							OR (Status = ? AND LockedAt <= ?) 
+						)
 						AND RunAt <= ?
 						AND DeletedAt IS NULL
-						AND (
-							LockedAt IS NULL
-							OR LockedAt <= ?
-						)
 					ORDER BY Priority DESC, RunAt ASC, CreatedAt ASC
 					LIMIT 1
 				)
-				AND Status = ?;
+				AND (
+					Status = ?
+					OR (Status = ? AND LockedAt <= ?) 
+				);
 			`;
 
 			const stmt = db.prepare(query);
 			const result = stmt.run(
 				JobStatus.processing,
-				nowString,
-				workerId,
-				nowString,
+				nowString, // LockedAt
+				workerId, // WorkerId
+				nowString, // LastUpdatedAt
 				JobStatus.queued,
-				nowString,
+				JobStatus.processing,
 				staleCutoff,
+				nowString,
 				JobStatus.queued,
+				JobStatus.processing,
+				staleCutoff,
 			);
 
 			if (result.changes === 0) {

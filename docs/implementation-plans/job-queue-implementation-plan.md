@@ -2,30 +2,38 @@
 
 ## References
 
-- Engineering Note: [[Server] - Job Queue](../engineering-notes/confirmed/job_queue.md)
+- engineering note: [[server] - job queue](../engineering-notes/confirmed/job_queue.md)
 
-## Core Queue Infrastructure
-
-### Persistence
+## Infrastructure & Worker Logic
 
 - [x] create job table migration
 - [x] create job repository
 - [x] create atomic claim query
 - [x] create job definition (payload schema + handler) registry
-
-### Processing
-
-- [ ] implement payload validation
+- [x] implement payload validation
 - [x] implement retry scheduling
 - [ ] implement worker loop
-- [ ] implement lock expiration recovery
+- [x] implement lock expiration recovery
+- [ ] implement recovery of orphaned jobs
+- [ ] include orphaned job recovery during composition root build
 
-### Processing Validation
+## Event Reliability & Transactional Dispatch
+
+- [ ] implement generic domain event buffer
+- [ ] dispatch events after commit
+- [ ] add domain event buffer to game-library uow
+- [ ] migrate sync flow to deferred events
+
+## Game Library Migration
+
+- [ ] move rescoring to jobs
+- [ ] move manifest generation to jobs
+
+## Automated Verification
+
+### Domain & Lifecycle
 
 - [x] job domain entity automated unit tests
-
-#### Job Lifecycle Automated Integration Tests
-
 - [x] claiming a job
 - [x] fails to claim when no job exists
 - [x] fails to claim a job before it's scheduled run time
@@ -37,47 +45,20 @@
 - [x] claims jobs ordered by run time when priority matches
 - [ ] marks job as completed after successful execution
 - [ ] stores failure reason after failed execution
-- [ ] schedules retry after failed execution
+- [x] schedules retry after failed execution
 - [ ] marks job as failed after max attempts reached
 
-## Transactional Event Dispatch
-
-### Domain Event Buffering
-
-- [ ] implement generic domain event buffer
-- [ ] dispatch events after commit
-- [ ] add domain event buffer to game-library uow
-- [ ] migrate sync flow to deferred events
-
-### Validation
+### Operational Reliability
 
 - [ ] dispatches domain events after successful transaction commit
 - [ ] does not dispatch domain events after rollback
 - [ ] preserves event ordering within transaction
-
-## Operational Reliability
-
-### Worker Recovery
-
-- [ ] implement lock expiration recovery
-- [ ] allows expired processing lock to be reclaimed
-- [ ] restart recovery test
-
-### Retry Safety
-
+- [x] allows expired processing lock to be reclaimed
+- [ ] restart recovery test (verify orphaned jobs are reset)
 - [x] failed job retry test
 
-## Game Sync Migration
+### Migration Quality
 
-### Async Derived Processing
-
-- [ ] move rescoring to jobs
-- [ ] move manifest generation to jobs
-- [ ] add orchestration subscribers
-
-### Migration Validation
-
-- [ ] synchronization request latency reduced
 - [ ] rescoring remains idempotent
 - [ ] manifest generation survives retry execution
 - [ ] duplicate job execution remains safe

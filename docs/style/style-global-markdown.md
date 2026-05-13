@@ -4,7 +4,6 @@
 
 For consistency across all markdown documents:
 
-- bullet lists should use lower-case entries unless grammatically required otherwise
 - bullet list items should not end with periods
 - headings should remain concise and descriptive
 - heading must start with upper case letter
